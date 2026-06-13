@@ -1,6 +1,6 @@
 // Initialize Supabase Client Connection
-const SUPABASE_URL = "https://your-project-id.supabase.co"; 
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; 
+const SUPABASE_URL = "https://your-project-id.supabase.co"; // <-- Ensure this matches your project URL exactly
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // <-- Ensure this matches your anon public key exactly
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── STAFF ACCOUNTS ───────────────────────────────────────
@@ -57,8 +57,25 @@ async function fetchProfessionalDatabase() {
   }
 
   proDB = data; // Put the cloud records straight into your app's existing array
-  renderPro();  // Run your existing function to draw the list onto the screen
+  renderPro();  // Run your fixed engine to draw the list onto the screen
 }
+
+// Fetch your refunds and logistics data from Supabase
+async function fetchRefundsDatabase() {
+  const { data, error } = await supabase
+    .from('refunds_logistics')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("Error loading logistics data:", error.message);
+    return;
+  }
+
+  lbDB = data; // Put the cloud records straight into your app's existing logistics array
+  renderLB();  // Run your fixed engine to draw the logistics list on screen
+}
+
 let nextProId = 38, nextLbId = 99;
 let proPage = 1, lbPage = 1;
 let editingProId = null, editingLbId = null;
@@ -155,25 +172,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ─── STORAGE ──────────────────────────────────────────────
 function loadData() {
+  // Fire live asynchronous cloud fetching processes immediately to hydrate state
+  fetchProfessionalDatabase();
+  fetchRefundsDatabase();
+
   try {
-    const pro  = localStorage.getItem(SK_PRO);
-    const lb   = localStorage.getItem(SK_LB);
     const ids  = localStorage.getItem(SK_IDS);
     const docs = localStorage.getItem(SK_DOCS);
     const tl   = localStorage.getItem(SK_TL);
     const stp  = localStorage.getItem(SK_STAGES_PRO);
     const stl  = localStorage.getItem(SK_STAGES_LB);
-    proDB = pro  ? JSON.parse(pro)  : JSON.parse(JSON.stringify(PRO_SEED));
-    lbDB  = lb   ? JSON.parse(lb)   : JSON.parse(JSON.stringify(LB_SEED));
     if (ids)  { const p = JSON.parse(ids); nextProId = p.pro; nextLbId = p.lb; }
     if (docs) allDocs = JSON.parse(docs);
     if (tl)   allTimelines = JSON.parse(tl);
     if (stp)  proStages = JSON.parse(stp);
     if (stl)  lbStages  = JSON.parse(stl);
-    if (!pro) persist();
   } catch(e) {
-    proDB = JSON.parse(JSON.stringify(PRO_SEED));
-    lbDB  = JSON.parse(JSON.stringify(LB_SEED));
+    console.warn("Local storage config hydration warning:", e);
   }
   rebuildStageFilters();
   renderDash();
@@ -181,8 +196,6 @@ function loadData() {
 
 function persist() {
   try {
-    localStorage.setItem(SK_PRO,  JSON.stringify(proDB));
-    localStorage.setItem(SK_LB,   JSON.stringify(lbDB));
     localStorage.setItem(SK_IDS,  JSON.stringify({ pro: nextProId, lb: nextLbId }));
     localStorage.setItem(SK_DOCS, JSON.stringify(allDocs));
     localStorage.setItem(SK_TL,   JSON.stringify(allTimelines));
@@ -200,7 +213,7 @@ function scheduleSave() {
 
 function setSaveStatus(s) {
   const el  = document.getElementById('save-status');
-  const txt = document.getElementById('save-text');
+  if (!el) return;
   el.className = 'save-status';
   if (s === 'saved')  { el.classList.add('saved');  el.innerHTML = '✓ <span id="save-text">Saved</span>'; }
   if (s === 'saving') { el.classList.add('saving'); el.innerHTML = '↻ <span id="save-text">Saving…</span>'; }
@@ -277,16 +290,19 @@ function getRefundStatus(r) {
   return paid >= r.toRefund ? 'complete' : 'incomplete';
 }
 
+// Fixed fields parsing to accept matching database payload keys safely
 function isInProcess_Pro(r) {
-  return ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL'].includes(r.stage);
+  const currentStage = r.stage || r.file_status;
+  return ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL'].includes(currentStage);
 }
 
 function isInProcess_LB(r) {
-  return r.ppStatus !== 'HAD PP' && (r.travelStatus === 'NOT YET') &&
+  return r.ppStatus !== 'HAD PP' && (r.travelStatus === 'NOT YET' || r.travel_status === 'NOT YET') &&
          (r.ppStatus === 'APPLIED' || r.ppStatus === 'PUSHED' || r.ppStatus === 'NOT APPLIED');
 }
 
 function stageBadge(s) {
+  if (!s) return '<span class="badge b-na">—</span>';
   const map = {
     'PENDING OFFER LETTER': 'b-pol',
     'PENDING MOL':          'b-mol',
@@ -298,6 +314,7 @@ function stageBadge(s) {
 }
 
 function travelBadge(s) {
+  if (!s) return '<span class="badge b-na">—</span>';
   const map = { 'TRAVELLED':'b-travelled','NOT YET':'b-notyet','NOT TRAVELLED':'b-nottravelled' };
   return `<span class="badge ${map[s]||'b-na'}">${s}</span>`;
 }
@@ -315,26 +332,22 @@ function docCount(type, id) {
 
 // ─── STAGES MANAGEMENT ────────────────────────────────────
 function rebuildStageFilters() {
-  // Pro stage filter
   const psf = document.getElementById('pro-stage-f');
   if (psf) {
     psf.innerHTML = '<option value="">All stages</option>' +
       proStages.map(s => `<option value="${s}">${s}</option>`).join('');
   }
-  // Pro form stage select
   const pfs = document.getElementById('pf-stage');
   if (pfs) {
     const cur = pfs.value;
     pfs.innerHTML = proStages.map(s => `<option value="${s}">${s}</option>`).join('');
     if (cur) pfs.value = cur;
   }
-  // LB travel filter
   const ltf = document.getElementById('lb-travel-f');
   if (ltf) {
     ltf.innerHTML = '<option value="">All travel statuses</option>' +
       lbStages.map(s => `<option value="${s}">${s}</option>`).join('');
   }
-  // LB form travel select
   const lft = document.getElementById('lf-travel');
   if (lft) {
     const cur = lft.value;
@@ -349,7 +362,7 @@ function openAddStageModal(type) {
   const val = name.trim().toUpperCase();
   if (type === 'pro') {
     if (proStages.includes(val)) { showToast('Stage already exists', 'error'); return; }
-    proStages.splice(proStages.length - 1, 0, val); // insert before TRAVELLED
+    proStages.splice(proStages.length - 1, 0, val);
   } else {
     if (lbStages.includes(val)) { showToast('Status already exists', 'error'); return; }
     lbStages.push(val);
@@ -387,112 +400,134 @@ function switchModalTab(modal, tab, btn) {
 
 // ─── DASHBOARD ────────────────────────────────────────────
 function renderDash() {
-  // Alerts
   const alerts = [];
   const STUCK_DAYS = 60;
   const OVERDUE_DAYS = 30;
 
   proDB.forEach(r => {
+    const rName = r.candidate_name || r.name;
+    const rStage = r.file_status || r.stage;
     if (isInProcess_Pro(r)) {
       const lastDate = r.visa || r.mol || r.ol || r.interview || r.submitted;
       const days = daysSince(lastDate);
       if (days && days > STUCK_DAYS) {
-        alerts.push({ level:'red', name:r.name, msg:`Stuck at "${r.stage}" for ${days} days` });
+        alerts.push({ level:'red', name:rName, msg:`Stuck at "${rStage}" for ${days} days` });
       }
     }
   });
   lbDB.forEach(r => {
+    const rName = r.client_name || r.name;
+    const rTravel = r.travel_status || r.travelStatus;
     const rs = getRefundStatus(r);
-    if (rs === 'incomplete' && r.travelStatus === 'TRAVELLED') {
+    if (rs === 'incomplete' && rTravel === 'TRAVELLED') {
       const lastPay = r.r1Date || r.travelDate;
       const days = daysSince(lastPay);
       if (days && days > OVERDUE_DAYS) {
-        const bal = (Number(r.toRefund)||0) - ((Number(r.r1Amt)||0)+(Number(r.r2Amt)||0));
-        alerts.push({ level:'amber', name:r.name, msg:`Refund overdue by ${days} days — $${bal} still owed` });
+        const totalRefundAmt = r.amount_paid || r.toRefund;
+        const bal = (Number(totalRefundAmt)||0) - ((Number(r.r1Amt)||0)+(Number(r.r2Amt)||0));
+        alerts.push({ level:'amber', name:rName, msg:`Refund overdue by ${days} days — $${bal} still owed` });
       }
     }
   });
 
   const alertsEl = document.getElementById('dash-alerts');
-  if (alerts.length) {
-    alertsEl.innerHTML = `<div class="alerts-card">
-      <h3>⚠️ Alerts (${alerts.length})</h3>
-      ${alerts.slice(0,10).map(a => `<div class="alert-row">
-        <div class="alert-dot ${a.level}"></div>
-        <div><div class="alert-name">${a.name}</div><div class="alert-msg">${a.msg}</div></div>
-      </div>`).join('')}
-    </div>`;
-  } else {
-    alertsEl.innerHTML = `<div class="alerts-card">
-      <h3>✅ Alerts</h3>
-      <div class="no-alerts">No issues — everything is on track!</div>
-    </div>`;
+  if (alertsEl) {
+    if (alerts.length) {
+      alertsEl.innerHTML = `<div class="alerts-card">
+        <h3>⚠️ Alerts (${alerts.length})</h3>
+        ${alerts.slice(0,10).map(a => `<div class="alert-row">
+          <div class="alert-dot ${a.level}"></div>
+          <div><div class="alert-name">${a.name}</div><div class="alert-msg">${a.msg}</div></div>
+        </div>`).join('')}
+      </div>`;
+    } else {
+      alertsEl.innerHTML = `<div class="alerts-card">
+        <h3>✅ Alerts</h3>
+        <div class="no-alerts">No issues — everything is on track!</div>
+      </div>`;
+    }
   }
 
   // Pro summary
   const proInProcess = proDB.filter(isInProcess_Pro).length;
-  const proTravelled = proDB.filter(r => r.stage === 'TRAVELLED').length;
+  const proTravelled = proDB.filter(r => (r.file_status || r.stage) === 'TRAVELLED').length;
   let totalComm = 0, totalPaid = 0;
   proDB.forEach(r => { if(r.commission) totalComm += Number(r.commission); if(r.paid) totalPaid += Number(r.paid); });
-  document.getElementById('dash-pro-card').innerHTML = `
-    <h3>💼 Professional Jobs</h3>
-    <div class="dash-stage-row"><span class="dash-stage-label">Total candidates</span><span class="dash-stage-count">${proDB.length}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">In process <span style="font-size:11px;color:var(--text-3)">(OL → MOL → Visa)</span></span><span class="dash-stage-count" style="color:var(--amber)">${proInProcess}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">Travelled</span><span class="dash-stage-count" style="color:var(--green)">${proTravelled}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">Commission billed</span><span class="dash-stage-count">KES ${totalComm.toLocaleString()}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">Outstanding</span><span class="dash-stage-count" style="color:var(--amber)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>`;
+  
+  const proCard = document.getElementById('dash-pro-card');
+  if (proCard) {
+    proCard.innerHTML = `
+      <h3>💼 Professional Jobs</h3>
+      <div class="dash-stage-row"><span class="dash-stage-label">Total candidates</span><span class="dash-stage-count">${proDB.length}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">In process <span style="font-size:11px;color:var(--text-3)">(OL → MOL → Visa)</span></span><span class="dash-stage-count" style="color:var(--amber)">${proInProcess}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">Travelled</span><span class="dash-stage-count" style="color:var(--green)">${proTravelled}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">Commission billed</span><span class="dash-stage-count">KES ${totalComm.toLocaleString()}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">Outstanding</span><span class="dash-stage-count" style="color:var(--amber)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>`;
+  }
 
-  // LB summary — only TRAVELLED count toward refund balance
-  const lbTravelled    = lbDB.filter(r => r.travelStatus === 'TRAVELLED').length;
+  // LB summary
+  const lbTravelled    = lbDB.filter(r => (r.travel_status || r.travelStatus) === 'TRAVELLED').length;
   const lbInProcess    = lbDB.filter(isInProcess_LB).length;
   const lbIncomplete   = lbDB.filter(r => getRefundStatus(r) === 'incomplete').length;
   let lbOwed = 0, lbPaid = 0;
   lbDB.forEach(r => {
-    if (r.travelStatus === 'TRAVELLED' && r.ppStatus !== 'HAD PP' &&
-        (r.notes||'').trim().toUpperCase() !== 'RETURNED') {
-      lbOwed += Number(r.toRefund) || 0;
+    const rTravel = r.travel_status || r.travelStatus;
+    if (rTravel === 'TRAVELLED' && r.ppStatus !== 'HAD PP' && (r.notes||'').trim().toUpperCase() !== 'RETURNED') {
+      lbOwed += Number(r.amount_paid || r.toRefund) || 0;
       lbPaid += (Number(r.r1Amt)||0) + (Number(r.r2Amt)||0);
     }
   });
-  document.getElementById('dash-lb-card').innerHTML = `
-    <h3>🏠 LB Jobs</h3>
-    <div class="dash-stage-row"><span class="dash-stage-label">Total candidates</span><span class="dash-stage-count">${lbDB.length}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">In process <span style="font-size:11px;color:var(--text-3)">(passport applied, not yet travelled)</span></span><span class="dash-stage-count" style="color:var(--amber)">${lbInProcess}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">Travelled</span><span class="dash-stage-count" style="color:var(--green)">${lbTravelled}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">Refund balance owed</span><span class="dash-stage-count" style="color:var(--amber)">$${lbOwed - lbPaid}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">Incomplete refunds</span><span class="dash-stage-count" style="color:var(--red)">${lbIncomplete}</span></div>`;
+  
+  const lbCard = document.getElementById('dash-lb-card');
+  if (lbCard) {
+    lbCard.innerHTML = `
+      <h3>🏠 LB Jobs</h3>
+      <div class="dash-stage-row"><span class="dash-stage-label">Total candidates</span><span class="dash-stage-count">${lbDB.length}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">In process <span style="font-size:11px;color:var(--text-3)">(passport applied, not yet travelled)</span></span><span class="dash-stage-count" style="color:var(--amber)">${lbInProcess}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">Travelled</span><span class="dash-stage-count" style="color:var(--green)">${lbTravelled}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">Refund balance owed</span><span class="dash-stage-count" style="color:var(--amber)">$${lbOwed - lbPaid}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">Incomplete refunds</span><span class="dash-stage-count" style="color:var(--red)">${lbIncomplete}</span></div>`;
+  }
 
   // Pro stage breakdown
   const stageCounts = {};
-  proStages.forEach(s => stageCounts[s] = proDB.filter(r => r.stage === s).length);
+  proStages.forEach(s => stageCounts[s] = proDB.filter(r => (r.file_status || r.stage) === s).length);
   const maxStage = Math.max(...Object.values(stageCounts), 1);
-  document.getElementById('dash-pro-stages').innerHTML = `
-    <h3>💼 Professional — Stage Breakdown</h3>
-    ${proStages.map(s => `
-      <div class="dash-stage-row" style="flex-direction:column;align-items:flex-start;gap:4px">
-        <div style="display:flex;justify-content:space-between;width:100%">
-          <span class="dash-stage-label">${s}</span>
-          <span class="dash-stage-count">${stageCounts[s]||0}</span>
-        </div>
-        <div class="dash-stage-bar" style="width:100%">
-          <div class="dash-stage-fill" style="width:${Math.round(((stageCounts[s]||0)/maxStage)*100)}%"></div>
-        </div>
-      </div>`).join('')}`;
+  
+  const proStagesEl = document.getElementById('dash-pro-stages');
+  if (proStagesEl) {
+    proStagesEl.innerHTML = `
+      <h3>💼 Professional — Stage Breakdown</h3>
+      ${proStages.map(s => `
+        <div class="dash-stage-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+          <div style="display:flex;justify-content:space-between;width:100%">
+            <span class="dash-stage-label">${s}</span>
+            <span class="dash-stage-count">${stageCounts[s]||0}</span>
+          </div>
+          <div class="dash-stage-bar" style="width:100%">
+            <div class="dash-stage-fill" style="width:${Math.round(((stageCounts[s]||0)/maxStage)*100)}%"></div>
+          </div>
+        </div>`).join('')}`;
+  }
 
   // LB refund breakdown
   const lbComplete   = lbDB.filter(r => getRefundStatus(r) === 'complete').length;
   const lbReturned   = lbDB.filter(r => getRefundStatus(r) === 'RETURNED').length;
   const lbNA         = lbDB.filter(r => getRefundStatus(r) === 'N/A').length;
-  const lbNotYet     = lbDB.filter(r => r.travelStatus === 'NOT YET').length;
-  const lbNotTrav    = lbDB.filter(r => r.travelStatus === 'NOT TRAVELLED').length;
-  document.getElementById('dash-lb-refunds').innerHTML = `
-    <h3>🏠 LB Jobs — Refund Overview</h3>
-    <div class="dash-stage-row"><span class="dash-stage-label">✅ Refund complete</span><span class="dash-stage-count" style="color:var(--green)">${lbComplete}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">⏳ Refund incomplete</span><span class="dash-stage-count" style="color:var(--amber)">${lbIncomplete}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">↩️ Returned</span><span class="dash-stage-count" style="color:var(--red)">${lbReturned}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">N/A (HAD PP)</span><span class="dash-stage-count">${lbNA}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">🕐 Not yet travelled</span><span class="dash-stage-count" style="color:var(--blue)">${lbNotYet}</span></div>
-    <div class="dash-stage-row"><span class="dash-stage-label">❌ Did not travel</span><span class="dash-stage-count">${lbNotTrav}</span></div>`;
+  const lbNotYet     = lbDB.filter(r => (r.travel_status || r.travelStatus) === 'NOT YET').length;
+  const lbNotTrav    = lbDB.filter(r => (r.travel_status || r.travelStatus) === 'NOT TRAVELLED').length;
+  
+  const lbRefundsEl = document.getElementById('dash-lb-refunds');
+  if (lbRefundsEl) {
+    lbRefundsEl.innerHTML = `
+      <h3>🏠 LB Jobs — Refund Overview</h3>
+      <div class="dash-stage-row"><span class="dash-stage-label">✅ Refund complete</span><span class="dash-stage-count" style="color:var(--green)">${lbComplete}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">⏳ Refund incomplete</span><span class="dash-stage-count" style="color:var(--amber)">${lbIncomplete}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">↩️ Returned</span><span class="dash-stage-count" style="color:var(--red)">${lbReturned}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">N/A (HAD PP)</span><span class="dash-stage-count">${lbNA}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">🕐 Not yet travelled</span><span class="dash-stage-count" style="color:var(--blue)">${lbNotYet}</span></div>
+      <div class="dash-stage-row"><span class="dash-stage-label">❌ Did not travel</span><span class="dash-stage-count">${lbNotTrav}</span></div>`;
+  }
 }
 
 // ─── PROFESSIONAL ─────────────────────────────────────────
@@ -501,8 +536,10 @@ function getFilteredPro() {
   const stage = document.getElementById('pro-stage-f').value;
   const comp  = document.getElementById('pro-company-f').value;
   return proDB.filter(r => {
-    const text = `${r.name} ${r.pp} ${r.company||''} ${r.position||''}`.toLowerCase();
-    return (!q||text.includes(q)) && (!stage||r.stage===stage) && (!comp||r.company===comp);
+    const name = r.candidate_name || r.name;
+    const currentStage = r.file_status || r.stage;
+    const text = `${name} ${r.passport_number || r.pp || ''} ${r.company||''} ${r.position||''}`.toLowerCase();
+    return (!q||text.includes(q)) && (!stage||currentStage===stage) && (!comp||r.company===comp);
   });
 }
 
@@ -510,24 +547,32 @@ function renderPro() {
   let totalComm=0, totalPaid=0;
   proDB.forEach(r=>{if(r.commission)totalComm+=Number(r.commission);if(r.paid)totalPaid+=Number(r.paid);});
   const inProcess = proDB.filter(isInProcess_Pro).length;
-  const travelled = proDB.filter(r=>r.stage==='TRAVELLED').length;
-  document.getElementById('pro-metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${proDB.length}</div></div>
-    <div class="metric"><div class="metric-label">In process</div><div class="metric-val amber">${inProcess}</div></div>
-    <div class="metric"><div class="metric-label">Travelled</div><div class="metric-val green">${travelled}</div></div>
-    <div class="metric"><div class="metric-label">Commission billed</div><div class="metric-val sm">KES ${totalComm.toLocaleString()}</div></div>
-    <div class="metric"><div class="metric-label">Outstanding</div><div class="metric-val sm amber">KES ${(totalComm-totalPaid).toLocaleString()}</div></div>`;
+  const travelled = proDB.filter(r=>(r.file_status || r.stage)==='TRAVELLED').length;
+  
+  const metricsEl = document.getElementById('pro-metrics');
+  if (metricsEl) {
+    metricsEl.innerHTML=`
+      <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${proDB.length}</div></div>
+      <div class="metric"><div class="metric-label">In process</div><div class="metric-val amber">${inProcess}</div></div>
+      <div class="metric"><div class="metric-label">Travelled</div><div class="metric-val green">${travelled}</div></div>
+      <div class="metric"><div class="metric-label">Commission billed</div><div class="metric-val sm">KES ${totalComm.toLocaleString()}</div></div>
+      <div class="metric"><div class="metric-label">Outstanding</div><div class="metric-val sm amber">KES ${(totalComm-totalPaid).toLocaleString()}</div></div>`;
+  }
 
   const companies=[...new Set(proDB.map(r=>r.company).filter(Boolean))].sort();
   const sel=document.getElementById('pro-company-f');
-  const cur=sel.value;
-  sel.innerHTML='<option value="">All companies</option>'+companies.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
+  if (sel) {
+    const cur=sel.value;
+    sel.innerHTML='<option value="">All companies</option>'+companies.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
+  }
 
   const data=getFilteredPro();
   const totalPages=Math.max(1,Math.ceil(data.length/PER_PAGE));
   if(proPage>totalPages)proPage=1;
   const slice=data.slice((proPage-1)*PER_PAGE,proPage*PER_PAGE);
   const tbody=document.getElementById('pro-tbody');
+  if(!tbody) return;
+  
   if(!slice.length){
     tbody.innerHTML=`<tr><td colspan="13"><div class="empty">No candidates match your search</div></td></tr>`;
   } else {
@@ -539,19 +584,21 @@ function renderPro() {
       const dc=docCount('pro',r.id);
       const days=isInProcess_Pro(r)?daysSince(r.visa||r.mol||r.ol||r.submitted):null;
       const stuckFlag=(days&&days>60)?`<span title="Stuck ${days} days" style="color:var(--red);margin-left:4px">⚠</span>`:'';
+      const name = r.candidate_name || r.name;
+      const stage = r.file_status || r.stage;
       return `<tr>
         <td>${(proPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell">${r.name}${stuckFlag}</td>
-        <td>${r.pp||'—'}</td>
+        <td class="name-cell">${name}${stuckFlag}</td>
+        <td>${r.passport_number || r.pp || '—'}</td>
         <td>${r.phone||'—'}</td>
         <td>${r.position||'—'}</td>
         <td>${r.company||'—'}</td>
         <td>${r.country||'—'}</td>
-        <td>${stageBadge(r.stage)}</td>
+        <td>${stageBadge(stage)}</td>
         <td>${comm}</td>
         <td>${paid}</td>
         <td class="${bal&&bal>0?'balance-owed':''}">${balTxt}</td>
-        <td><button class="action-btn docs" onclick="openDocs('pro',${r.id},'${r.name}')" title="Documents">📎${dc>0?` <span style="font-size:10px">${dc}</span>`:''}</button></td>
+        <td><button class="action-btn docs" onclick="openDocs('pro',${r.id},'${name.replace(/'/g, "\\'")}')" title="Documents">📎${dc>0?` <span style="font-size:10px">${dc}</span>`:''}</button></td>
         <td style="white-space:nowrap">
           <button class="action-btn" onclick="editPro(${r.id})" title="Edit">✏️</button>
           <button class="action-btn del" onclick="deletePro(${r.id})" title="Delete">🗑</button>
@@ -576,14 +623,16 @@ function openProForm(id) {
 function editPro(id) {
   const r=proDB.find(x=>x.id===id); if(!r)return;
   editingProId=id;
-  document.getElementById('pro-modal-title').textContent='Edit candidate — '+r.name;
-  document.getElementById('pf-name').value=r.name;
-  document.getElementById('pf-pp').value=r.pp||'';
+  const name = r.candidate_name || r.name;
+  const stage = r.file_status || r.stage;
+  document.getElementById('pro-modal-title').textContent='Edit candidate — '+ name;
+  document.getElementById('pf-name').value=name;
+  document.getElementById('pf-pp').value=r.passport_number || r.pp || '';
   document.getElementById('pf-phone').value=r.phone||'';
   document.getElementById('pf-position').value=r.position||'';
   document.getElementById('pf-company').value=r.company||'';
   document.getElementById('pf-country').value=r.country||'';
-  document.getElementById('pf-stage').value=r.stage;
+  document.getElementById('pf-stage').value=stage;
   document.getElementById('pf-comm').value=r.commission||'';
   document.getElementById('pf-paid').value=r.paid||'';
   document.getElementById('pf-submitted').value=toInput(r.submitted);
@@ -597,54 +646,45 @@ function editPro(id) {
   document.getElementById('pro-modal').classList.add('open');
 }
 
-function savePro() {
-  const name=document.getElementById('pf-name').value.trim();
-  if(!name){showToast('Full name is required.','error');return;}
-  const oldRec=editingProId?proDB.find(x=>x.id===editingProId):null;
+// Rewritten async write to commit edits or creates dynamically right to Supabase cloud
+async function savePro() {
+  const nameInput=document.getElementById('pf-name').value.trim();
+  if(!nameInput){showToast('Full name is required.','error');return;}
   const newStage=document.getElementById('pf-stage').value;
-  const rec={
-    id:editingProId||nextProId++,
-    name:name.toUpperCase(),
-    pp:document.getElementById('pf-pp').value.trim().toUpperCase(),
-    phone:document.getElementById('pf-phone').value.trim(),
-    position:document.getElementById('pf-position').value.trim().toUpperCase(),
-    company:document.getElementById('pf-company').value.trim().toUpperCase(),
-    country:document.getElementById('pf-country').value.trim(),
-    stage:newStage,
-    submitted:document.getElementById('pf-submitted').value,
-    interview:document.getElementById('pf-interview').value,
-    ol:document.getElementById('pf-ol').value,
-    mol:document.getElementById('pf-mol').value,
-    visa:document.getElementById('pf-visa').value,
-    travel:document.getElementById('pf-travel').value,
-    commission:document.getElementById('pf-comm').value?Number(document.getElementById('pf-comm').value):'',
-    paid:document.getElementById('pf-paid').value?Number(document.getElementById('pf-paid').value):'',
+  
+  const payload = {
+    candidate_name: nameInput.toUpperCase(),
+    passport_number: document.getElementById('pf-pp').value.trim().toUpperCase(),
+    job_category: document.getElementById('pf-position').value.trim().toUpperCase(),
+    country_destination: document.getElementById('pf-country').value.trim().toUpperCase(),
+    file_status: newStage,
+    notes: `Phone: ${document.getElementById('pf-phone').value.trim()} | Company: ${document.getElementById('pf-company').value.trim()}`,
+    assigned_staff: currentUser ? currentUser.name : 'System'
   };
+
   if(editingProId){
-    const i=proDB.findIndex(x=>x.id===editingProId);proDB[i]=rec;
-    const action=oldRec&&oldRec.stage!==newStage
-      ?`Stage changed: "${oldRec.stage}" → "${newStage}"`
-      :'Details updated';
-    addTimeline('pro',rec.id,action);
-    showToast('Candidate updated ✓','success');
+    const { error } = await supabase.from('professionals').update(payload).eq('id', editingProId);
+    if (error) return showToast('Cloud sync failed: ' + error.message, 'error');
+    addTimeline('pro', editingProId, `Updated via cloud — Stage: ${newStage}`);
+    showToast('Candidate synchronized to cloud ✓','success');
   } else {
-    proDB.push(rec);
-    addTimeline('pro',rec.id,`Candidate added — Stage: ${newStage}`);
-    showToast('Candidate added ✓','success');
+    const { error } = await supabase.from('professionals').insert([payload]);
+    if (error) return showToast('Cloud save failed: ' + error.message, 'error');
+    showToast('New candidate deployed to cloud ✓','success');
   }
+  
   closeModal('pro-modal');
-  scheduleSave();
-  renderPro();
+  fetchProfessionalDatabase();
   renderDash();
 }
 
-function deletePro(id) {
-  const r=proDB.find(x=>x.id===id);
-  if(!confirm(`Delete ${r?r.name:'this candidate'}? This cannot be undone.`))return;
-  proDB=proDB.filter(x=>x.id!==id);
-  scheduleSave();
-  showToast('Candidate deleted','success');
-  renderPro();renderDash();
+async function deletePro(id) {
+  if(!confirm(`Delete this candidate from cloud? This action is permanent.`))return;
+  const { error } = await supabase.from('professionals').delete().eq('id', id);
+  if (error) return showToast('Could not delete from cloud: ' + error.message, 'error');
+  showToast('Candidate deleted from cloud','success');
+  fetchProfessionalDatabase();
+  renderDash();
 }
 
 // ─── LB ───────────────────────────────────────────────────
@@ -653,58 +693,70 @@ function getFilteredLB() {
   const travel=document.getElementById('lb-travel-f').value;
   const refund=document.getElementById('lb-refund-f').value;
   return lbDB.filter(r=>{
-    const text=`${r.name} ${r.phone||''}`.toLowerCase();
+    const name = r.client_name || r.name;
+    const text=`${name} ${r.phone||''}`.toLowerCase();
     const rs=getRefundStatus(r);
-    return (!q||text.includes(q))&&(!travel||r.travelStatus===travel)&&(!refund||rs===refund);
+    const rTravel = r.travel_status || r.travelStatus;
+    return (!q||text.includes(q))&&(!travel||rTravel===travel)&&(!refund||rs===refund);
   });
 }
 
 function renderLB() {
-  const travelled=lbDB.filter(r=>r.travelStatus==='TRAVELLED').length;
+  const travelled=lbDB.filter(r=> (r.travel_status || r.travelStatus) === 'TRAVELLED').length;
   const inProcess=lbDB.filter(isInProcess_LB).length;
   const incomplete=lbDB.filter(r=>getRefundStatus(r)==='incomplete').length;
   let lbOwed=0,lbPaid=0;
   lbDB.forEach(r=>{
-    if(r.travelStatus==='TRAVELLED'&&r.ppStatus!=='HAD PP'&&(r.notes||'').trim().toUpperCase()!=='RETURNED'){
-      lbOwed+=Number(r.toRefund)||0;
+    const rTravel = r.travel_status || r.travelStatus;
+    if(rTravel==='TRAVELLED'&&r.ppStatus!=='HAD PP'&&(r.notes||'').trim().toUpperCase()!=='RETURNED'){
+      lbOwed+=Number(r.amount_paid || r.toRefund)||0;
       lbPaid+=(Number(r.r1Amt)||0)+(Number(r.r2Amt)||0);
     }
   });
-  document.getElementById('lb-metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${lbDB.length}</div></div>
-    <div class="metric"><div class="metric-label">In process</div><div class="metric-val amber">${inProcess}</div></div>
-    <div class="metric"><div class="metric-label">Travelled</div><div class="metric-val green">${travelled}</div></div>
-    <div class="metric"><div class="metric-label">Refund balance</div><div class="metric-val sm amber">$${lbOwed-lbPaid}</div></div>
-    <div class="metric"><div class="metric-label">Incomplete refunds</div><div class="metric-val red">${incomplete}</div></div>`;
+  
+  const metricsEl = document.getElementById('lb-metrics');
+  if (metricsEl) {
+    metricsEl.innerHTML=`
+      <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${lbDB.length}</div></div>
+      <div class="metric"><div class="metric-label">In process</div><div class="metric-val amber">${inProcess}</div></div>
+      <div class="metric"><div class="metric-label">Travelled</div><div class="metric-val green">${travelled}</div></div>
+      <div class="metric"><div class="metric-label">Refund balance</div><div class="metric-val sm amber">$${lbOwed-lbPaid}</div></div>
+      <div class="metric"><div class="metric-label">Incomplete refunds</div><div class="metric-val red">${incomplete}</div></div>`;
+  }
 
   const data=getFilteredLB();
   const totalPages=Math.max(1,Math.ceil(data.length/PER_PAGE));
   if(lbPage>totalPages)lbPage=1;
   const slice=data.slice((lbPage-1)*PER_PAGE,lbPage*PER_PAGE);
   const tbody=document.getElementById('lb-tbody');
+  if(!tbody) return;
+  
   if(!slice.length){
     tbody.innerHTML=`<tr><td colspan="12"><div class="empty">No candidates match your search</div></td></tr>`;
   } else {
     tbody.innerHTML=slice.map((r,i)=>{
       const rs=getRefundStatus(r);
       const paid=(Number(r.r1Amt)||0)+(Number(r.r2Amt)||0);
-      const bal=(rs==='N/A'||rs==='RETURNED')?'—':'$'+(Number(r.toRefund)-paid);
-      const toR=rs==='N/A'?'—':'$'+(r.toRefund||0);
+      const totalRefundAmt = r.amount_paid || r.toRefund;
+      const bal=(rs==='N/A'||rs==='RETURNED')?'—':'$'+(Number(totalRefundAmt)-paid);
+      const toR=rs==='N/A'?'—':'$'+(totalRefundAmt||0);
       const paidDisp=rs==='N/A'?'—':'$'+paid;
       const dc=docCount('lb',r.id);
-      const overdue=(rs==='incomplete'&&r.travelStatus==='TRAVELLED'&&daysSince(r.r1Date||r.travelDate)>30);
+      const name = r.client_name || r.name;
+      const rTravel = r.travel_status || r.travelStatus;
+      const overdue=(rs==='incomplete'&&rTravel==='TRAVELLED'&&daysSince(r.r1Date||r.travelDate)>30);
       return `<tr>
         <td>${(lbPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell">${r.name}${overdue?'<span title="Refund overdue" style="color:var(--red);margin-left:4px">⚠</span>':''}</td>
+        <td class="name-cell">${name}${overdue?'<span title="Refund overdue" style="color:var(--red);margin-left:4px">⚠</span>':''}</td>
         <td>${r.phone||'—'}</td>
-        <td>${r.ppStatus}</td>
-        <td>${travelBadge(r.travelStatus)}</td>
+        <td>${r.ppStatus || 'APPLIED'}</td>
+        <td>${travelBadge(rTravel)}</td>
         <td>${fmtDate(r.travelDate)}</td>
         <td>${toR}</td>
         <td>${paidDisp}</td>
         <td class="${rs==='incomplete'?'balance-owed':''}">${bal}</td>
         <td>${refundBadge(rs)}</td>
-        <td><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${r.name}')" title="Documents">📎${dc>0?` <span style="font-size:10px">${dc}</span>`:''}</button></td>
+        <td><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${name.replace(/'/g, "\\'")}')" title="Documents">📎${dc>0?` <span style="font-size:10px">${dc}</span>`:''}</button></td>
         <td style="white-space:nowrap">
           <button class="action-btn" onclick="editLB(${r.id})" title="Edit">✏️</button>
           <button class="action-btn del" onclick="deleteLB(${r.id})" title="Delete">🗑</button>
@@ -729,67 +781,64 @@ function openLBForm() {
 function editLB(id) {
   const r=lbDB.find(x=>x.id===id);if(!r)return;
   editingLbId=id;
-  document.getElementById('lb-modal-title').textContent='Edit — '+r.name;
-  document.getElementById('lf-name').value=r.name;
+  const name = r.client_name || r.name;
+  const rTravel = r.travel_status || r.travelStatus;
+  document.getElementById('lb-modal-title').textContent='Edit — '+ name;
+  document.getElementById('lf-name').value=name;
   document.getElementById('lf-phone').value=r.phone||'';
-  document.getElementById('lf-pp').value=r.ppStatus;
-  document.getElementById('lf-travel').value=r.travelStatus;
+  document.getElementById('lf-pp').value=r.ppStatus || 'APPLIED';
+  document.getElementById('lf-travel').value=rTravel;
   document.getElementById('lf-tdate').value=toInput(r.travelDate);
-  document.getElementById('lf-torefund').value=r.toRefund||'';
+  document.getElementById('lf-torefund').value=r.amount_paid || r.toRefund || '';
   document.getElementById('lf-r1date').value=toInput(r.r1Date);
   document.getElementById('lf-r1amt').value=r.r1Amt||'';
   document.getElementById('lf-r2date').value=toInput(r.r2Date);
   document.getElementById('lf-r2amt').value=r.r2Amt||'';
-  document.getElementById('lf-notes').value=r.notes||'';
+  document.getElementById('lf-notes').value=r.remarks || r.notes || '';
   document.getElementById('lb-form-timeline').innerHTML=renderTimeline('lb',id);
   switchModalTab('lb','details',document.querySelector('#lb-modal .modal-tab'));
   document.getElementById('lb-modal').classList.add('open');
 }
 
-function saveLB() {
-  const name=document.getElementById('lf-name').value.trim();
-  if(!name){showToast('Full name is required.','error');return;}
-  const oldRec=editingLbId?lbDB.find(x=>x.id===editingLbId):null;
+// Rewritten async write to commit edits or creates dynamically right to Supabase logistics tables
+async function saveLB() {
+  const nameInput=document.getElementById('lf-name').value.trim();
+  if(!nameInput){showToast('Full name is required.','error');return;}
   const ppStatus=document.getElementById('lf-pp').value;
   const isHadPP=ppStatus==='HAD PP';
   const newTravel=document.getElementById('lf-travel').value;
-  const rec={
-    id:editingLbId||nextLbId++,
-    name:name.toUpperCase(),
-    phone:document.getElementById('lf-phone').value.trim(),
-    ppStatus,
-    travelStatus:newTravel,
-    travelDate:document.getElementById('lf-tdate').value,
-    toRefund:isHadPP?0:(Number(document.getElementById('lf-torefund').value)||0),
-    r1Date:document.getElementById('lf-r1date').value,
-    r1Amt:isHadPP?0:(Number(document.getElementById('lf-r1amt').value)||0),
-    r2Date:document.getElementById('lf-r2date').value,
-    r2Amt:isHadPP?0:(Number(document.getElementById('lf-r2amt').value)||0),
-    notes:document.getElementById('lf-notes').value.trim(),
+  
+  const payload = {
+    client_name: nameInput.toUpperCase(),
+    amount_paid: isHadPP ? 0 : (Number(document.getElementById('lf-torefund').value) || 0),
+    refund_status: ppStatus,
+    travel_status: newTravel,
+    remarks: document.getElementById('lf-notes').value.trim()
   };
+
   if(editingLbId){
-    const i=lbDB.findIndex(x=>x.id===editingLbId);lbDB[i]=rec;
-    const action=oldRec&&oldRec.travelStatus!==newTravel
-      ?`Travel status: "${oldRec.travelStatus}" → "${newTravel}"`
-      :'Details updated';
-    addTimeline('lb',rec.id,action);
-    showToast('Candidate updated ✓','success');
+    const { error } = await supabase.from('refunds_logistics').update(payload).eq('id', editingLbId);
+    if (error) return showToast('Cloud sync failed: ' + error.message, 'error');
+    addTimeline('lb', editingLbId, `Logistics updated — Status: ${newTravel}`);
+    showToast('Logistics data synchronized ✓','success');
   } else {
-    lbDB.push(rec);
-    addTimeline('lb',rec.id,`Candidate added — ${ppStatus}, ${newTravel}`);
-    showToast('Candidate added ✓','success');
+    const { error } = await supabase.from('refunds_logistics').insert([payload]);
+    if (error) return showToast('Cloud save failed: ' + error.message, 'error');
+    showToast('Logistics candidate saved to cloud ✓','success');
   }
+  
   closeModal('lb-modal');
-  scheduleSave();
-  renderLB();renderDash();
+  fetchRefundsDatabase();
+  renderDash();
 }
 
-function deleteLB(id) {
-  const r=lbDB.find(x=>x.id===id);
-  if(!confirm(`Delete ${r?r.name:'this candidate'}? This cannot be undone.`))return;
-  lbDB=lbDB.filter(x=>x.id!==id);
-  scheduleSave();showToast('Candidate deleted','success');
-  renderLB();renderDash();
+async function deleteLB(id) {
+  if(!confirm(`Delete this logistics file from cloud? This cannot be undone.`))return;
+  const { error } = await supabase.from('refunds_logistics').delete().eq('id', id);
+  if (error) return showToast('Could not delete from cloud: ' + error.message, 'error');
+  showToast('Logistics record expunged','success');
+  fetchRefundsDatabase();
+  renderDash();
 }
 
 // ─── DOCUMENTS ────────────────────────────────────────────
@@ -847,7 +896,7 @@ function exportExcel(type) {
   if(type==='pro'){
     headers=['#','Name','Passport','Phone','Position','Company','Country','Stage','Commission (KES)','Paid (KES)','Balance (KES)','Submitted','Interview','Offer Letter','MOL','Visa','Travel'];
     rows=proDB.map((r,i)=>[
-      i+1,r.name,r.pp||'',r.phone||'',r.position||'',r.company||'',r.country||'',r.stage,
+      i+1, r.candidate_name || r.name, r.passport_number || r.pp || '', r.phone||'', r.position||'', r.company||'', r.country||'', r.file_status || r.stage,
       r.commission||'',r.paid||'',
       (r.commission&&r.paid)?Number(r.commission)-Number(r.paid):'',
       fmtDate(r.submitted),fmtDate(r.interview),fmtDate(r.ol),fmtDate(r.mol),fmtDate(r.visa),fmtDate(r.travel)
@@ -858,16 +907,17 @@ function exportExcel(type) {
     rows=lbDB.map((r,i)=>{
       const rs=getRefundStatus(r);
       const paid=(Number(r.r1Amt)||0)+(Number(r.r2Amt)||0);
-      const bal=(rs==='N/A'||rs==='RETURNED')?'':(Number(r.toRefund)-paid);
-      return [i+1,r.name,r.phone||'',r.ppStatus,r.travelStatus,fmtDate(r.travelDate),
-        rs==='N/A'?'':r.toRefund||0,rs==='N/A'?'':paid,bal,rs,r.notes||''];
+      const totalRefundAmt = r.amount_paid || r.toRefund;
+      const bal=(rs==='N/A'||rs==='RETURNED')?'':(Number(totalRefundAmt)-paid);
+      return [i+1, r.client_name || r.name, r.phone||'', r.ppStatus || 'APPLIED', r.travel_status || r.travelStatus, fmtDate(r.travelDate),
+        rs==='N/A'?'':totalRefundAmt||0, rs==='N/A'?'':paid, bal, rs, r.remarks || r.notes||''];
     });
     filename='Destiny_LB_Candidates';
   }
-  // Build CSV
+  // Build CSV and prepend explicit UTF-8 Byte Order Mark (BOM) to force Excel parsing clarity
   const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
-  const csv=[headers.map(esc).join(','),...rows.map(r=>r.map(esc).join(','))].join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});
+  const csvContent=[headers.map(esc).join(','),...rows.map(r=>r.map(esc).join(','))].join('\n');
+  const blob=new Blob(['\uFEFF' + csvContent],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
@@ -880,6 +930,7 @@ function exportExcel(type) {
 // ─── PAGINATION ───────────────────────────────────────────
 function renderPagination(elId,page,total,count,which){
   const el=document.getElementById(elId);
+  if(!el) return;
   if(total<=1){el.innerHTML=`<span>${count} record${count!==1?'s':''}</span><span></span>`;return;}
   let btns='';
   for(let p=1;p<=total;p++){
@@ -898,13 +949,19 @@ function goPage(which,p){
 
 // ─── MODAL ────────────────────────────────────────────────
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-['pro-modal','lb-modal','docs-modal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeModal(id);});
+window.addEventListener('DOMContentLoaded', () => {
+  ['pro-modal','lb-modal','docs-modal'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('click',function(e){if(e.target===this)closeModal(id);});
+    }
+  });
 });
 
 // ─── TOAST ────────────────────────────────────────────────
 function showToast(msg,type=''){
   const t=document.getElementById('toast');
+  if(!t) return;
   t.textContent=msg;t.className='toast '+type;
   void t.offsetWidth;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
