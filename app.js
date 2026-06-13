@@ -41,7 +41,24 @@ const PER_PAGE = 20;
 const EXCEL_EPOCH = new Date(1899, 11, 30);
 
 // ─── STATE ────────────────────────────────────────────────
-let proDB = [], lbDB = [];
+let proDB = [];
+let lbDB = [];
+
+// Fetch your candidate profiles data from Supabase
+async function fetchProfessionalDatabase() {
+  const { data, error } = await supabase
+    .from('professionals')
+    .select('*')
+    .order('status_updated_at', { ascending: false });
+
+  if (error) {
+    console.error("Error loading profiles:", error.message);
+    return;
+  }
+
+  proDB = data; // Put the cloud records straight into your app's existing array
+  renderPro();  // Run your existing function to draw the list onto the screen
+}
 let nextProId = 38, nextLbId = 99;
 let proPage = 1, lbPage = 1;
 let editingProId = null, editingLbId = null;
