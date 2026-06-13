@@ -1,6 +1,6 @@
 // Initialize Supabase Client Connection
-const SUPABASE_URL = "https://your-project-id.supabase.co"; // <-- Ensure this matches your project URL exactly
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // <-- Ensure this matches your anon public key exactly
+const SUPABASE_URL = "https://pizirpyvkxzghvxlipzc.supabase.co"; // <-- Ensure this matches your project URL exactly
+const SUPABASE_KEY = "sb_publishable_UIyIdjowYK4Klg2tU4Nz8A_t1BV2QgQ"; // <-- Ensure this matches your anon public key exactly
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── STAFF ACCOUNTS ───────────────────────────────────────
