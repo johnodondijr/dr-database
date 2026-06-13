@@ -1,3 +1,8 @@
+// Initialize Supabase Client Connection
+const SUPABASE_URL = "https://your-project-id.supabase.co"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; 
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ─── STAFF ACCOUNTS ───────────────────────────────────────
 const STAFF = {
   'fred':       { name: 'Fred',       password: 'Destiny@2025', role: 'admin' },
