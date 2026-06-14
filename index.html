@@ -1,3 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DR Database Login — Destiny Recruit Consults</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════════════════════════════
+       DESIGN SYSTEM & VARIABLES
+       ══════════════════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --gold-primary: #F5C453;      /* Warm aesthetic yellow/gold from reference image */
+      --gold-hover: #E4B33E;
+      --gold-muted: #FDF6E2;
+      --bg-dark: #1E1E1C;           /* Sleek soft black */
+      --text-dark: #2A2A28;
+      --text-muted: #7A7A77;
+      --border-color: #E6E4DD;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --radius-pill: 30px;
+      --radius-card: 24px;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: #E2E1DC; /* Warm grey external canvas background */
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       MAIN SPLIT CONTAINER
+       ══════════════════════════════════════════════════════════ */
+    .app-window {
+      background: linear-gradient(145deg, #F9F8F3 0%, #F1EFE6 100%);
+      width: 100%;
+      max-width: 1100px;
+      height: 720px;
+      border-radius: var(--radius-card);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.12);
+      display: flex;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    /* Close Window Icon Accent from reference */
+    .window-close-accent {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-dark);
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+    .window-close-accent:hover {
+      transform: scale(1.05);
+      background: #FAF8F5;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       LEFT PANEL: FORM CONTENT
+       ══════════════════════════════════════════════════════════ */
+    .form-panel {
+      flex: 1.1;
+      padding: 50px 65px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Brand Logo styling matching reference image label style */
+    .brand-tag {
+      align-self: flex-start;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill);
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-dark);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .form-content-area {
+      max-width: 360px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .form-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-dark);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Inputs Layout */
+    .input-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-left: 16px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      height: 48px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill);
+      padding: 0 22px;
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-dark);
+      transition: all 0.25s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: #D2C0A5;
+      box-shadow: 0 0 0 4px rgba(245, 196, 83, 0.15);
+    }
+
+    .pw-toggle-btn {
+      position: absolute;
+      right: 18px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .forgot-link-btn {
+      display: block;
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-top: 6px;
+      margin-right: 14px;
+      font-weight: 500;
+    }
+    .forgot-link-btn:hover {
+      color: var(--text-dark);
+      text-decoration: underline;
+    }
+
+    /* Actions & Buttons */
+    .submit-btn {
+      width: 100%;
+      height: 48px;
+      background-color: var(--gold-primary);
+      color: var(--text-dark);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      box-shadow: 0 8px 20px rgba(245, 196, 83, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .submit-btn:hover {
+      background-color: var(--gold-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(245, 196, 83, 0.35);
+    }
+
+    /* Quick Help Section underneath matching reference buttons layout */
+    .quick-auth-chips {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .chip-btn {
+      flex: 1;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-main);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chip-btn:hover {
+      background: #FAF9F5;
+      border-color: #D2C0A5;
+    }
+
+    /* Footer Meta */
+    .form-footer-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .form-footer-meta a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .form-footer-meta a:hover {
+      color: var(--text-dark);
+      text-decoration: underline;
+    }
+
+    /* Error Alert */
+    .alert-banner {
+      background: #FCEBEB;
+      border: 1px solid #EFA3A3;
+      color: #A32D2D;
+      padding: 10px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 14px;
+      display: none;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RIGHT PANEL: BEAUTIFUL INTEGRATED INFOGRAPHIC
+       ══════════════════════════════════════════════════════════ */
+    .media-panel {
+      flex: 1.1;
+      margin: 14px;
+      border-radius: 20px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+      /* Using a modern, clean professional collaborative imagery link tailored to staffing consultancies */
+      background-image: url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80');
+    }
+
+    /* Smooth darkening overlay to pop widgets like reference design */
+    .media-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(30,30,28,0.2) 0%, rgba(30,30,28,0.5) 100%);
+    }
+
+    /* ── WIDGETS LAYOUT (Mirroring Reference Visuals Exactly) ── */
+    
+    /* Yellow floating Task review badge top left */
+    .widget-task {
+      position: absolute;
+      top: 35px;
+      left: 35px;
+      background-color: var(--gold-primary);
+      padding: 12px 18px;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      max-width: 190px;
+      z-index: 2;
+    }
+    .widget-task h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+    .widget-task p {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    /* Transparent Secondary dark pill behind it */
+    .widget-pill-back {
+      position: absolute;
+      top: 75px;
+      left: 80px;
+      background: rgba(30, 30, 28, 0.65);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 9px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 500;
+      z-index: 1;
+    }
+
+    /* Team Circular Avatars positioned in the middle right aspect */
+    .widget-team-stack {
+      position: absolute;
+      right: 35px;
+      top: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: -10px; /* Overlap effect */
+      align-items: center;
+    }
+    .avatar-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #FFFFFF;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      margin-bottom: -12px;
+      transition: transform 0.2s;
+    }
+    .avatar-circle:hover {
+      transform: scale(1.1) translateX(-4px);
+      z-index: 5;
+    }
+
+    /* Bottom Section Layout containing Calendar row & Daily Meeting details */
+    .bottom-widgets-container {
+      position: absolute;
+      bottom: 35px;
+      left: 35px;
+      right: 35px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Week Schedule Row Widget */
+    .widget-calendar-strip {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      color: #FFFFFF;
+    }
+    .calendar-day {
+      text-align: center;
+      flex: 1;
+    }
+    .calendar-day .day-label {
+      font-size: 10px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .calendar-day .day-num {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .calendar-day.active-day {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 10px;
+      padding: 2px 0;
+    }
+
+    /* Floating white summary card at the very bottom left */
+    .widget-summary-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+      max-width: 240px;
+      align-self: flex-start;
+    }
+    .widget-summary-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+    .widget-summary-card p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .mini-avatar-row {
+      display: flex;
+      align-items: center;
+    }
+    .mini-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid #FFFFFF;
+      background-size: cover;
+      margin-right: -6px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .app-window {
+        height: auto;
+        flex-direction: column;
+      }
+      .media-panel {
+        display: none;
+      }
+      .form-panel {
+        padding: 40px 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-window">
+    <div class="window-close-accent" title="Minimize Window">×</div>
+
+    <!-- LEFT PANEL: ACCESS CONTROLS -->
+    <div class="form-panel">
+      <div class="brand-tag">Destiny Recruit Consults</div>
+
+      <div class="form-content-area">
+        <!-- Main Form Entry -->
+        <div id="login-main-form">
+          <div class="form-header">
+            <h1>Sign in to Portal</h1>
+            <p>Access active candidate pipelines</p>
+          </div>
+
+          <form onsubmit="event.preventDefault(); handleSystemLogin();">
+            <div class="input-group">
+              <label for="user-input">Username</label>
+              <div class="input-wrapper">
+                <input type="text" id="user-input" placeholder="e.g. fred" required autocomplete="username">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="pass-input">Password</label>
+              <div class="input-wrapper">
+                <input type="password" id="pass-input" placeholder="••••••••••••" required autocomplete="current-password">
+                <button class="pw-toggle-btn" type="button" onclick="togglePasswordVisibility()" id="eye-icon">👁</button>
+              </div>
+              <a href="#" class="forgot-link-btn" onclick="event.preventDefault(); showRecoveryView();">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Credentials</button>
+          </form>
+
+          <div class="alert-banner" id="error-banner">Incorrect username or security password.</div>
+
+          <div class="quick-auth-chips">
+            <div class="chip-btn" title="Internal Office Directory">📁 Office LAN</div>
+            <div class="chip-btn" title="System Check Info">🛡 Secure SSL</div>
+          </div>
+        </div>
+
+        <!-- Hidden Forgot Password / Recovery View Section -->
+        <div id="recovery-main-view" style="display: none;">
+          <div class="form-header">
+            <h1>Credentials Reset</h1>
+            <p>Enter administrative verification code</p>
+          </div>
+
+          <form onsubmit="event.preventDefault(); verifyAdminCode();">
+            <div class="input-group">
+              <label for="recovery-code-field">Recovery Code</label>
+              <div class="input-wrapper">
+                <input type="text" id="recovery-code-field" placeholder="DR-RESET-2025" required>
+              </div>
+            </div>
+            <button type="submit" class="submit-btn">Verify Identity</button>
+          </form>
+
+          <div class="alert-banner" id="recovery-error-banner">Invalid system recovery parameter.</div>
+          <div id="recovery-success-box" style="display:none; background:#F0FAED; border:1px solid #A3E2AB; padding:12px; border-radius:16px; margin-top:14px; font-size:11px; text-align:left; max-height:160px; overflow-y:auto;"></div>
+
+          <a href="#" class="forgot-link-btn" style="text-align:center; margin-top:16px;" onclick="event.preventDefault(); hideRecoveryView();">← Back to standard login</a>
+        </div>
+      </div>
+
+      <!-- Bottom Layout Footer Links -->
+      <div class="form-footer-meta">
+        <span>System Version v3.4.1</span>
+        <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: PREMIUM DATA INFOGRAPHIC OVERLAYS -->
+    <div class="media-panel">
+      <div class="media-overlay"></div>
+
+      <!-- Yellow Task Banner -->
+      <div class="widget-task">
+        <h4>Professional Job Review</h4>
+        <p>Deployment Schedule: 09:30am</p>
+      </div>
+      <div class="widget-pill-back">Next batch setup overview</div>
+
+      <!-- Floating User Avatars on Right Wall -->
+      <div class="widget-team-stack">
+        <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80')"></div>
+        <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80')"></div>
+        <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80')"></div>
+      </div>
+
+      <!-- Calendar and bottom cards area -->
+      <div class="bottom-widgets-container">
+        <!-- Grid Schedule Strip -->
+        <div class="widget-calendar-strip">
+          <div class="calendar-day"><div class="day-label">Sun</div><div class="day-num">22</div></div>
+          <div class="calendar-day"><div class="day-label">Mon</div><div class="day-num">23</div></div>
+          <div class="calendar-day active-day"><div class="day-label">Tue</div><div class="day-num">24</div></div>
+          <div class="calendar-day"><div class="day-label">Wed</div><div class="day-num">25</div></div>
+          <div class="calendar-day"><div class="day-label">Thu</div><div class="day-num">26</div></div>
+          <div class="calendar-day"><div class="day-label">Fri</div><div class="day-num">27</div></div>
+          <div class="calendar-day"><div class="day-label">Sat</div><div class="day-num">28</div></div>
+        </div>
+
+        <!-- Soft Summary Bottom Left Card -->
+        <div class="widget-summary-card">
+          <h4>LB Candidate Processing</h4>
+          <p>Passports Tracked: 98 Active</p>
+          <div class="mini-avatar-row">
+            <div class="mini-avatar" style="background-image: url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80')"></div>
+            <div class="mini-avatar" style="background-image: url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80')"></div>
+            <div class="mini-avatar" style="background-image: url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80')"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- INTERACTION HOOKS TIERED INTEGRATION TO CORE APP.JS -->
   <script>
