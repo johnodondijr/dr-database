@@ -9,6 +9,8 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
+      --gold:#C9A227;--gold-dark:#A8841C;--gold-light:#FBF3DC;--gold-lighter:#FDF8EC;
+      --charcoal:#262420;
       --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
       --amber:#BA7517;--amber-light:#FAEEDA;
       --blue:#185FA5;--blue-light:#E6F1FB;
@@ -24,79 +26,119 @@
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
 
     /* ── LOGIN ── */
-    #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:var(--bg)}
+    #login-screen{min-height:100vh;display:flex}
+    .login-split{display:flex;width:100%;min-height:100vh}
+
+    /* Brand panel (left) */
+    .login-brand{
+      flex:1.15;position:relative;overflow:hidden;color:#fff;
+      display:flex;align-items:center;padding:3.5rem;
+      background:linear-gradient(135deg,#1A1A18 0%,#3A2F0F 45%,var(--gold) 100%);
+    }
+    .brand-blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none}
+    .brand-blob.b1{width:380px;height:380px;background:#F0D98A;opacity:.35;top:-120px;right:-100px}
+    .brand-blob.b2{width:300px;height:300px;background:#fff;opacity:.06;bottom:-80px;left:-60px}
+    .brand-blob.b3{width:220px;height:220px;background:var(--gold);opacity:.30;bottom:18%;right:8%}
+    .brand-content{position:relative;z-index:1;max-width:460px}
+    .brand-logo-row{display:flex;align-items:center;gap:14px;margin-bottom:2.75rem}
+    .brand-logo-row .dr-ring{color:#fff}
+    .brand-name{font-size:15px;font-weight:600;line-height:1.35;letter-spacing:.02em}
+    .brand-title{font-size:32px;font-weight:600;line-height:1.28;margin-bottom:1rem;letter-spacing:-.01em}
+    .brand-title em{font-style:normal;color:#F4DD9B}
+    .brand-sub{font-size:14px;color:rgba(255,255,255,.75);line-height:1.65;margin-bottom:2.25rem}
+    .brand-features{list-style:none;display:flex;flex-direction:column;gap:.85rem}
+    .brand-features li{font-size:13px;color:rgba(255,255,255,.92);display:flex;align-items:center;gap:12px}
+    .brand-features .feat-icon{
+      width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.12);
+      display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+    }
+
+    /* Form panel (right) */
+    .login-form-side{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--bg)}
     .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem 2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06)}
-    .login-logo{font-size:22px;font-weight:600;margin-bottom:4px}.login-logo span{color:var(--green)}
-    .login-sub{font-size:13px;color:var(--text-3);margin-bottom:1.75rem}
+    .login-card-head{margin-bottom:1.75rem}
+    .login-card-head .dr-ring{color:var(--charcoal);margin-bottom:14px}
+    .login-card-head h2{font-size:20px;font-weight:600;margin-bottom:4px}
+    .login-card-head p{font-size:13px;color:var(--text-3)}
+
+    @media(max-width:900px){
+      .login-split{flex-direction:column}
+      .login-brand{flex:none;min-height:200px;padding:2rem 1.5rem;align-items:flex-start;justify-content:center}
+      .brand-content{max-width:100%}
+      .brand-logo-row{margin-bottom:1.25rem}
+      .brand-title{font-size:22px;margin-bottom:.4rem}
+      .brand-sub,.brand-features{display:none}
+      .login-form-side{padding:1.5rem}
+    }
     .login-field{text-align:left;margin-bottom:1rem}
     .login-field label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
     .login-field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .15s}
-    .login-field input:focus{outline:none;border-color:var(--green)}
+    .login-field input:focus{outline:none;border-color:var(--gold)}
     .pw-wrap{position:relative;display:flex;align-items:center}
     .pw-wrap input{flex:1;padding-right:44px}
     .pw-toggle{position:absolute;right:12px;background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-3);padding:0;line-height:1;user-select:none}
     .pw-toggle:hover{color:var(--text)}
-    .forgot-link{font-size:12px;color:var(--blue);cursor:pointer;text-align:right;margin-top:7px;display:block}
+    .forgot-link{font-size:12px;color:var(--gold-dark);cursor:pointer;text-align:right;margin-top:7px;display:block}
     .forgot-link:hover{text-decoration:underline}
-    .login-btn{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;margin-top:.75rem;transition:background .15s}
-    .login-btn:hover{background:var(--green-dark)}
+    .login-btn{width:100%;padding:11px;background:var(--gold);color:#1A1A1A;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:.75rem;transition:background .15s}
+    .login-btn:hover{background:var(--gold-dark);color:#fff}
     .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
-    .recovery-result{background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
-    .back-link{font-size:12px;color:var(--blue);cursor:pointer;margin-top:12px;display:inline-block}
+    .recovery-result{background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
+    .back-link{font-size:12px;color:var(--gold-dark);cursor:pointer;margin-top:12px;display:inline-block}
     .back-link:hover{text-decoration:underline}
     .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;color:var(--text-2)}
     .loading-overlay.show{display:flex}
-    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* ── APP SHELL ── */
     #app{display:none}
     .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:50}
-    .topbar-logo{font-size:16px;font-weight:600}.topbar-logo span{color:var(--green)}
+    .topbar-logo{font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}.topbar-logo span{color:var(--gold-dark)}
     .topbar-right{display:flex;align-items:center;gap:12px}
-    .user-chip{font-size:12px;background:var(--green-light);color:var(--green-dark);padding:4px 10px;border-radius:20px;font-weight:500}
+    .user-chip{font-size:12px;background:var(--gold-light);color:var(--charcoal);padding:4px 10px;border-radius:20px;font-weight:500}
     .save-status{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:5px}
     .save-status.saved{color:var(--green)}.save-status.saving{color:var(--amber)}
     .logout-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--text-2);cursor:pointer;font-family:inherit}
     .logout-btn:hover{background:var(--bg)}
     .tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;overflow-x:auto}
     .tab-btn{padding:14px 18px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
-    .tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+    .tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--gold-dark);border-bottom-color:var(--gold)}
     .main{padding:1.5rem;max-width:1400px;margin:0 auto}
 
     /* ── METRICS ── */
     .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
-    .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+    .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:0 1px 8px rgba(38,36,32,.03)}
     .metric-label{font-size:11px;color:var(--text-3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
     .metric-val{font-size:24px;font-weight:600;color:var(--text)}
     .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}.metric-val.blue{color:var(--blue)}.metric-val.red{color:var(--red)}.metric-val.sm{font-size:16px}
 
     /* ── DASHBOARD ── */
     .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem}
-    .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
+    .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:0 1px 10px rgba(38,36,32,.03)}
     .dash-card h3{font-size:14px;font-weight:600;margin-bottom:1rem}
     .dash-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
     .dash-row:last-child{border-bottom:none}
     .dash-row-label{font-size:13px;color:var(--text-2)}
     .dash-row-val{font-size:13px;font-weight:600}
-    .dash-bar-wrap{height:6px;background:var(--green-light);border-radius:3px;margin-top:4px;width:100%}
-    .dash-bar-fill{height:6px;background:var(--green);border-radius:3px}
+    .dash-bar-wrap{height:6px;background:var(--gold-light);border-radius:3px;margin-top:4px;width:100%}
+    .dash-bar-fill{height:6px;background:var(--gold);border-radius:3px}
 
     /* ── TOOLBAR ── */
     .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
     .search-wrap{position:relative;flex:1;min-width:200px}
     .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface)}
-    .search-wrap input:focus{outline:none;border-color:var(--green)}
+    .search-wrap input:focus{outline:none;border-color:var(--gold)}
     .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none}
     select{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);cursor:pointer}
-    select:focus{outline:none;border-color:var(--green)}
+    select:focus{outline:none;border-color:var(--gold)}
     .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:500;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);cursor:pointer;white-space:nowrap;transition:background .15s}
     .btn:hover{background:var(--bg)}
-    .btn.primary{background:var(--green);color:#fff;border-color:var(--green-dark)}.btn.primary:hover{background:var(--green-dark)}
+    .btn.primary{background:var(--gold);color:#1A1A1A;border-color:var(--gold-dark)}.btn.primary:hover{background:var(--gold-dark);color:#fff}
     .btn.export{background:var(--blue-light);color:var(--blue);border-color:#b8d4f5}.btn.export:hover{background:#d0e5f9}
 
     /* ── TABLE ── */
-    .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+    .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 10px rgba(38,36,32,.03)}
     .table-wrap{overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:13px}
     th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
@@ -130,7 +172,7 @@
     .pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
     .page-btns{display:flex;gap:4px}
     .page-btns button{padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:5px;background:var(--surface);cursor:pointer;color:var(--text-2);font-family:inherit}
-    .page-btns button.active{background:var(--green);color:#fff;border-color:var(--green-dark)}
+    .page-btns button.active{background:var(--gold);color:#1A1A1A;border-color:var(--gold-dark)}
     .page-btns button:hover:not(.active){background:var(--bg)}
 
     /* ── EMPTY ── */
@@ -139,27 +181,27 @@
     /* ── MODAL ── */
     .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
     .modal-bg.open{display:flex}
-    .modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.75rem;width:100%;max-width:580px;margin:auto}
+    .modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.75rem;width:100%;max-width:580px;margin:auto;box-shadow:0 8px 32px rgba(38,36,32,.10)}
     .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
     .modal-header h3{font-size:16px;font-weight:600}
     .modal-close{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;line-height:1;padding:2px 8px;border-radius:4px}
     .modal-close:hover{background:var(--bg);color:var(--text)}
     .modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
     .modal-tab{padding:8px 16px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-    .modal-tab.active{color:var(--green);border-bottom-color:var(--green)}
+    .modal-tab.active{color:var(--gold-dark);border-bottom-color:var(--gold)}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
     .form-full{grid-column:1/-1}
     .field{display:flex;flex-direction:column;gap:5px}
     .field label{font-size:12px;font-weight:500;color:var(--text-2)}
     .field input,.field select,.field textarea{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .15s}
-    .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--green)}
+    .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
     .field textarea{resize:vertical;min-height:64px}
     .section-divider{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px;grid-column:1/-1}
     .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
 
     /* ── DOCS ── */
     .doc-link-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface)}
-    .doc-link-input:focus{outline:none;border-color:var(--green)}
+    .doc-link-input:focus{outline:none;border-color:var(--gold)}
     .doc-open-btn{padding:9px 14px;background:var(--blue-light);color:var(--blue);border:1px solid #b8d4f5;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
     .doc-open-btn:hover{background:#d0e5f9}
     .doc-open-btn:disabled{opacity:.4;cursor:default}
@@ -167,7 +209,7 @@
     /* ── TIMELINE ── */
     .tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
     .tl-item:last-child{border-bottom:none}
-    .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px}
+    .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px}
     .tl-action{font-weight:500}
     .tl-meta{font-size:11px;color:var(--text-3);margin-top:2px}
     .tl-empty{color:var(--text-3);font-size:13px;text-align:center;padding:1.5rem}
@@ -196,53 +238,98 @@
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-card">
-    <div class="login-logo">Destiny Recruit <span>Consults</span></div>
-    <div class="login-sub">Candidate Database</div>
+  <div class="login-split">
 
-    <div id="login-main">
-      <form onsubmit="event.preventDefault(); doLogin();">
-        <div class="login-field">
-          <label>Username</label>
-          <input type="text" id="username-input" placeholder="e.g. fred" autocomplete="username">
+    <!-- BRAND PANEL -->
+    <div class="login-brand">
+      <div class="brand-blob b1"></div>
+      <div class="brand-blob b2"></div>
+      <div class="brand-blob b3"></div>
+      <div class="brand-content">
+        <div class="brand-logo-row">
+          <svg class="dr-ring" width="42" height="42" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="50" cy="50" r="42" stroke="#C9A227" stroke-width="10" stroke-linecap="round" stroke-dasharray="115 264" transform="rotate(-58 50 50)"/>
+            <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-dasharray="115 264" stroke-dashoffset="-145" transform="rotate(-58 50 50)"/>
+            <text x="50" y="61" font-family="Inter,sans-serif" font-weight="800" font-size="30" text-anchor="middle" fill="currentColor">DR</text>
+          </svg>
+          <span class="brand-name">DESTINY<br>RECRUIT CONSULTS</span>
         </div>
-        <div class="login-field">
-          <label>Password</label>
-          <div class="pw-wrap">
-            <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password">
-            <button class="pw-toggle" id="pw-toggle" type="button" onclick="togglePassword()" title="Show/hide password">👁</button>
-          </div>
-          <span class="forgot-link" onclick="showForgotPassword()">Forgot password?</span>
-        </div>
-        <button type="submit" class="login-btn">Sign in</button>
-      </form>
-      <div class="login-error" id="login-error">Incorrect username or password.</div>
-      <div style="font-size:11px;color:var(--text-3);margin-top:14px;text-align:left;line-height:1.7">
-        <strong>Usernames:</strong> fred · robert · doreen · maxwell · consolata
+        <h1 class="brand-title">Welcome to your<br><em>Candidate Database</em></h1>
+        <p class="brand-sub">Track Professional and LB candidates from first contact to travel — pipelines, refunds, documents, and activity, all in one place.</p>
+        <ul class="brand-features">
+          <li><span class="feat-icon">📊</span> Live dashboards for both job categories</li>
+          <li><span class="feat-icon">📁</span> One document folder per candidate</li>
+          <li><span class="feat-icon">💱</span> Automatic refund tracking</li>
+          <li><span class="feat-icon">🕐</span> Full activity timeline per candidate</li>
+        </ul>
       </div>
     </div>
 
-    <div id="forgot-section" style="display:none">
-      <div style="font-size:15px;font-weight:600;margin-bottom:6px;text-align:left">Forgot Password</div>
-      <div style="font-size:12px;color:var(--text-2);margin-bottom:14px;text-align:left">Enter the admin recovery code to view all staff passwords.</div>
-      <form onsubmit="event.preventDefault(); submitForgotPassword();">
-        <div class="login-field">
-          <label>Recovery code</label>
-          <input type="text" id="recovery-code-input" placeholder="Enter recovery code">
+    <!-- FORM PANEL -->
+    <div class="login-form-side">
+      <div class="login-card">
+        <div class="login-card-head">
+          <svg class="dr-ring" width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="50" cy="50" r="42" stroke="#C9A227" stroke-width="10" stroke-linecap="round" stroke-dasharray="115 264" transform="rotate(-58 50 50)"/>
+            <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-dasharray="115 264" stroke-dashoffset="-145" transform="rotate(-58 50 50)"/>
+            <text x="50" y="61" font-family="Inter,sans-serif" font-weight="800" font-size="30" text-anchor="middle" fill="currentColor">DR</text>
+          </svg>
+          <h2>Sign in</h2>
+          <p>Enter your credentials to continue</p>
         </div>
-        <button type="submit" class="login-btn">Verify code</button>
-      </form>
-      <div class="login-error" id="forgot-error" style="display:none"></div>
-      <div class="recovery-result" id="forgot-result" style="display:none"></div>
-      <span class="back-link" onclick="hideForgotPassword()">← Back to login</span>
+
+        <div id="login-main">
+          <form onsubmit="event.preventDefault(); doLogin();">
+            <div class="login-field">
+              <label>Username</label>
+              <input type="text" id="username-input" placeholder="e.g. fred" autocomplete="username">
+            </div>
+            <div class="login-field">
+              <label>Password</label>
+              <div class="pw-wrap">
+                <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password">
+                <button class="pw-toggle" id="pw-toggle" type="button" onclick="togglePassword()" title="Show/hide password">👁</button>
+              </div>
+              <span class="forgot-link" onclick="showForgotPassword()">Forgot password?</span>
+            </div>
+            <button type="submit" class="login-btn">Sign in</button>
+          </form>
+          <div class="login-error" id="login-error">Incorrect username or password.</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:14px;text-align:left;line-height:1.7">
+            <strong>Usernames:</strong> fred · robert · doreen · maxwell · consolata
+          </div>
+        </div>
+
+        <div id="forgot-section" style="display:none">
+          <div style="font-size:15px;font-weight:600;margin-bottom:6px;text-align:left">Forgot Password</div>
+          <div style="font-size:12px;color:var(--text-2);margin-bottom:14px;text-align:left">Enter the admin recovery code to view all staff passwords.</div>
+          <form onsubmit="event.preventDefault(); submitForgotPassword();">
+            <div class="login-field">
+              <label>Recovery code</label>
+              <input type="text" id="recovery-code-input" placeholder="Enter recovery code">
+            </div>
+            <button type="submit" class="login-btn">Verify code</button>
+          </form>
+          <div class="login-error" id="forgot-error" style="display:none"></div>
+          <div class="recovery-result" id="forgot-result" style="display:none"></div>
+          <span class="back-link" onclick="hideForgotPassword()">← Back to login</span>
+        </div>
+      </div>
     </div>
+
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
   <div class="topbar">
-    <div class="topbar-logo">DR <span>Database</span></div>
+    <div class="topbar-logo">
+      <svg class="dr-ring" width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="color:var(--charcoal)">
+        <circle cx="50" cy="50" r="42" stroke="#C9A227" stroke-width="12" stroke-linecap="round" stroke-dasharray="115 264" transform="rotate(-58 50 50)"/>
+        <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-dasharray="115 264" stroke-dashoffset="-145" transform="rotate(-58 50 50)"/>
+      </svg>
+      <span>DR <span style="color:var(--gold-dark)">Database</span></span>
+    </div>
     <div class="topbar-right">
       <span class="user-chip" id="user-chip">—</span>
       <span class="save-status saved" id="save-status">✓ <span id="save-text">Saved</span></span>
