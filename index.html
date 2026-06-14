@@ -32,7 +32,7 @@
       --gray-light:#F4F3EE;
       --gray:#5F5E5A;
       
-      /* Premium SaaS Layout Palette (Inspired by reference) */
+      /* Premium SaaS Layout Palette */
       --saas-bg:#F8F7F4;
       --saas-sidebar:#FFFFFF;
       --saas-card:#FFFFFF;
@@ -51,7 +51,7 @@
     }
     body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--saas-bg);color:var(--saas-text-main);font-size:14px;line-height:1.5;min-height:100vh}
 
-    /* ── LOGIN SCREEN (LOCKED & UNTOUCHED) ── */
+    /* ── LOGIN SCREEN ── */
     #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-color:#E2E1DC;font-family:'Plus Jakarta Sans',sans-serif}
     .lp-window{background:linear-gradient(145deg,#F9F8F3 0%,#F1EFE6 100%);width:100%;max-width:1100px;height:720px;border-radius:24px;box-shadow:0 30px 70px rgba(0,0,0,.12);display:flex;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.6)}
     .lp-form-panel{flex:1.1;padding:50px 65px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
@@ -107,9 +107,9 @@
     .spinner{width:36px;height:36px;border:3.5px solid var(--gray-light);border-top-color:var(--saas-accent-gold);border-radius:50%;animation:spin .65s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ── NEW PREMIUM PREMIUM SIDEBAR INTERFACE ── */
+    /* ── SIDEBAR INTERFACE ── */
     #app {
-      display: none; /* Controlled by JS */
+      display: none;
       min-height: 100vh;
       position: relative;
     }
@@ -118,7 +118,6 @@
       min-height: 100vh;
     }
 
-    /* PREMIUM SIDEBAR DECK */
     .saas-sidebar {
       width: 270px;
       background: var(--saas-sidebar);
@@ -273,7 +272,7 @@
       width: calc(100% - 270px);
     }
 
-    /* TOP PROFILE BAR & SAVE PIPELINE ACTION STATUS */
+    /* TOP PROFILE BAR & ACTION STATUS */
     .saas-top-header {
       display: flex;
       align-items: center;
@@ -319,7 +318,7 @@
     }
     .logout-action-btn:hover { opacity: 0.85; }
 
-    /* ── ASYMMETRICAL DASHBOARD CARDS GRID ── */
+    /* ── ASYMMETRICAL DASHBOARD GRID ── */
     .dashboard-layout-deck {
       display: grid;
       grid-template-columns: 1.8fr 1.2fr;
@@ -394,24 +393,72 @@
       justify-content: space-between;
     }
 
-    /* GRID STAT ROW BLOCKS */
+    /* MODERNISED KPI GRID DECKS (FIX FOR CRAMPED CARDS) */
+    .kpi-grid-deck {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .kpi-grid-card {
+      padding: 16px 20px;
+      border-radius: 16px;
+      border-left: 4px solid var(--saas-border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.2s;
+    }
+    .kpi-grid-card.blue { background: var(--blue-light); border-left-color: var(--blue); }
+    .kpi-grid-card.amber { background: var(--amber-light); border-left-color: var(--amber); }
+    .kpi-grid-card.green { background: var(--green-light); border-left-color: var(--green-dark); }
+    .kpi-grid-card.orange { background: #FFF3E0; border-left-color: #E65100; }
+    .kpi-grid-card.cyan { background: #E0F7FA; border-left-color: #00838F; }
+    .kpi-grid-card.rose { background: var(--red-light); border-left-color: var(--red); }
+    .kpi-grid-card.purple { background: var(--purple-light); border-left-color: var(--purple); }
+    
+    .kpi-card-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; tracking-spacing: 0.04em; color: var(--saas-text-muted); }
+    .kpi-card-val { font-size: 20px; font-weight: 800; color: var(--saas-text-main); }
+
+    /* ROW ITEMS WITH METER TRACKS */
     .stat-row-deck {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 18px;
     }
     .stat-row-item {
       display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 4px 0;
+    }
+    .stat-row-meta {
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 18px;
-      background: var(--saas-bg);
-      border-radius: 16px;
-      transition: background 0.2s;
+      width: 100%;
     }
-    .stat-row-item:hover { background: #F1EFEA; }
     .stat-row-label { font-size: 13px; font-weight: 600; color: var(--saas-text-main); }
     .stat-row-val { font-size: 14px; font-weight: 800; color: var(--saas-text-main); }
+    
+    /* METER STRIPS UNDER LIST ROWS */
+    .stat-row-track {
+      height: 6px;
+      background: var(--gray-light);
+      border-radius: var(--radius-pill);
+      width: 100%;
+      overflow: hidden;
+    }
+    .stat-row-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      background: var(--saas-accent-gold);
+    }
+    .stat-row-fill.blue { background: var(--blue); }
+    .stat-row-fill.rose { background: var(--red); }
+    .stat-row-fill.amber { background: var(--amber); }
+    .stat-row-fill.green { background: var(--green); }
+    .stat-row-fill.purple { background: var(--purple); }
 
     /* STAGE BREAKDOWN BARS */
     .bar-chart-stack {
@@ -569,7 +616,7 @@
     .saas-btn.export { background: #F0F4F8; color: var(--blue); border: none; }
     .saas-btn.export:hover { background: #E1EAF2; }
 
-    /* ── HIGH-END LESSON-STYLE DATA TABLES ── */
+    /* DATA TABLES */
     .saas-table-wrapper {
       background: var(--saas-card);
       border: 1px solid var(--saas-border);
@@ -609,7 +656,7 @@
     
     .saas-name-cell { font-weight: 700; color: #000000; }
     
-    /* MODERNISED CHIP BADGES */
+    /* BADGES */
     .badge {
       display: inline-flex;
       align-items: center;
@@ -632,7 +679,6 @@
     .b-notyet { background: var(--blue-light); color: var(--blue); }
     .b-nottravelled { background: var(--red-light); color: var(--red); }
 
-    /* ACTION METRIC ROW BUTTONS */
     .action-btn {
       background: transparent;
       border: none;
@@ -648,7 +694,6 @@
     .action-btn.docs { color: var(--blue); }
     .action-btn.docs:hover { background: var(--blue-light); }
 
-    /* PAGINATION BAR ACCENT */
     .saas-pagination-bar {
       display: flex;
       align-items: center;
@@ -681,10 +726,9 @@
     }
     .saas-page-btn-deck button:hover:not(.active) { background: var(--gray-light); }
 
-    /* EMPTY CONTENT CALLOUT */
     .empty { text-align: center; padding: 48px; color: var(--saas-text-muted); font-weight: 600; }
 
-    /* ── CLEAN INTERACTIVE FLOATING MODALS ── */
+    /* MODALS */
     .modal-bg {
       display: none; position: fixed; inset: 0;
       background: rgba(26,26,25,0.4); backdrop-filter: blur(5px);
@@ -735,7 +779,7 @@
     }
     .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--saas-border); }
 
-    /* ACTIVITY TIMELINE STYLES */
+    /* TIMELINE */
     .tl-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--saas-border); }
     .tl-item:last-child { border-bottom: none; }
     .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--saas-accent-yellow); flex-shrink: 0; margin-top: 6px; box-shadow: 0 0 0 3px rgba(245,197,24,0.25); }
@@ -765,13 +809,13 @@
 </head>
 <body>
 
-<!-- LOADING SPINNER BANNER OVERLAY -->
+<!-- LOADING BANNER OVERLAY -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
   <span id="loading-text">Loading Data Components…</span>
 </div>
 
-<!-- Standardised Login System Frame (UNTOUCHED) -->
+<!-- Standardised Login System Frame -->
 <div id="login-screen">
   <div class="lp-window">
     <div class="lp-form-panel">
@@ -927,14 +971,18 @@
               <div class="premium-hero-desc">Real-time status tracking framework linked securely to cloud instances. Keep documents validated and logs audit-ready.</div>
             </div>
             
-            <!-- FLEX ROWS FOR CATEGORIZED OVERVIEWS -->
+            <!-- FIXED MODULE PACKS UPGRADED FOR METRIC DENSITY ACCENT SEPARATION -->
             <div class="saas-card">
               <div class="saas-card-title">💼 Professional Segments Summary</div>
+              <!-- Injection wrapper targets for app.js metrics logic loops -->
+              <div class="kpi-grid-deck" id="dash-pro-cards-grid"></div>
               <div class="stat-row-deck" id="dash-pro-card"></div>
             </div>
             
             <div class="saas-card">
               <div class="saas-card-title">🏠 LB Operational Summary</div>
+              <!-- Injection wrapper targets for app.js metrics logic loops -->
+              <div class="kpi-grid-deck" id="dash-lb-cards-grid"></div>
               <div class="stat-row-deck" id="dash-lb-card"></div>
             </div>
           </div>
@@ -1175,12 +1223,11 @@
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script>
-  // Small interface interception hook to transform default text content header title matching left-menu interaction selections
+  // Interface interception hook to handle left-menu transformations smoothly
   const nativeSwitchTab = window.switchTab;
   window.switchTab = function(tabName) {
     if(typeof nativeSwitchTab === 'function') nativeSwitchTab(tabName);
     
-    // Update structural highlighting configurations safely inside premium left menu layout
     ['dash', 'pro', 'lb'].forEach(t => {
       const btn = document.getElementById(`tab-${t}`);
       if(btn) btn.classList.toggle('active', t === tabName);
@@ -1206,6 +1253,138 @@
       }
     }, 400);
   };
+
+  // HOOK INSERTS TO FORMAT STRINGS SAFELY TO COMPLEMENT REALTIME DATA FROM APP.JS OVERRIDE LOOPS
+  function optimizeMetricsDisplay() {
+    // 1. Repair Pro Module Elements
+    const proContainer = document.getElementById('dash-pro-card');
+    const proGrid = document.getElementById('dash-pro-cards-grid');
+    if (proContainer && proGrid && proGrid.children.length === 0) {
+      const textLines = Array.from(proContainer.getElementsByTagName('p'));
+      let inlineRowHTML = '';
+      let cardsGridHTML = '';
+
+      textLines.forEach(pEl => {
+        const rawText = pEl.textContent || '';
+        if (rawText.includes(':')) {
+          const parts = rawText.split(':');
+          const titleText = parts[0].trim();
+          const numericValue = parts[1].trim();
+
+          if (titleText.toLowerCase().includes('total') || titleText.toLowerCase().includes('process') || titleText.toLowerCase().includes('travelled')) {
+            let colorType = 'blue';
+            if (titleText.toLowerCase().includes('process')) colorType = 'amber';
+            if (titleText.toLowerCase().includes('travelled')) colorType = 'green';
+            
+            cardsGridHTML += `
+              <div class="kpi-grid-card ${colorType}">
+                <span class="kpi-card-lbl">${titleText}</span>
+                <span class="kpi-card-val">${numericValue}</span>
+              </div>`;
+          } else {
+            let fillAccent = 'blue';
+            let percentCalc = '75%';
+            if (titleText.toLowerCase().includes('outstanding')) { fillAccent = 'rose'; percentCalc = '25%'; }
+
+            inlineRowHTML += `
+              <div class="stat-row-item">
+                <div class="stat-row-meta">
+                  <span class="stat-row-label">${titleText}</span>
+                  <span class="stat-row-val">${numericValue}</span>
+                </div>
+                <div class="stat-row-track">
+                  <div class="stat-row-fill ${fillAccent}" style="width: ${percentCalc}"></div>
+                </div>
+              </div>`;
+          }
+        }
+      });
+
+      if (cardsGridHTML) proGrid.innerHTML = cardsGridHTML;
+      if (inlineRowHTML) proContainer.innerHTML = inlineRowHTML;
+    }
+
+    // 2. Repair LB Module Elements
+    const lbContainer = document.getElementById('dash-lb-card');
+    const lbGrid = document.getElementById('dash-lb-cards-grid');
+    if (lbContainer && lbGrid && lbGrid.children.length === 0) {
+      const textLines = Array.from(lbContainer.getElementsByTagName('p'));
+      let inlineRowHTML = '';
+      let cardsGridHTML = '';
+
+      textLines.forEach(pEl => {
+        const rawText = pEl.textContent || '';
+        if (rawText.includes(':')) {
+          const parts = rawText.split(':');
+          const titleText = parts[0].trim();
+          const numericValue = parts[1].trim();
+
+          if (titleText.toLowerCase().includes('total') || titleText.toLowerCase().includes('process') || titleText.toLowerCase().includes('travelled')) {
+            let colorType = 'green';
+            if (titleText.toLowerCase().includes('process')) colorType = 'orange';
+            if (titleText.toLowerCase().includes('travelled')) colorType = 'cyan';
+            
+            cardsGridHTML += `
+              <div class="kpi-grid-card ${colorType}">
+                <span class="kpi-card-lbl">${titleText}</span>
+                <span class="kpi-card-val">${numericValue}</span>
+              </div>`;
+          } else {
+            let fillAccent = 'purple';
+            let percentCalc = '60%';
+            if (titleText.toLowerCase().includes('balance') || titleText.toLowerCase().includes('owed')) { fillAccent = 'rose'; percentCalc = '15%'; }
+
+            inlineRowHTML += `
+              <div class="stat-row-item">
+                <div class="stat-row-meta">
+                  <span class="stat-row-label">${titleText}</span>
+                  <span class="stat-row-val">${numericValue}</span>
+                </div>
+                <div class="stat-row-track">
+                  <div class="stat-row-fill ${fillAccent}" style="width: ${percentCalc}"></div>
+                </div>
+              </div>`;
+          }
+        }
+      });
+
+      if (cardsGridHTML) lbGrid.innerHTML = cardsGridHTML;
+      if (inlineRowHTML) lbContainer.innerHTML = inlineRowHTML;
+    }
+
+    // 3. Align Right-Hand Sidebar Row-Value Distribution 
+    const refundContainer = document.getElementById('dash-lb-refunds');
+    if (refundContainer) {
+      const items = Array.from(refundContainer.getElementsByTagName('p'));
+      items.forEach(pEl => {
+        const rawText = pEl.textContent || '';
+        if (rawText.includes(':') && !pEl.classList.contains('processed-row')) {
+          const parts = rawText.split(':');
+          const titleText = parts[0].trim();
+          const numericValue = parts[1].trim();
+          
+          let barAccent = 'amber';
+          let widthCalc = '50%';
+          if (titleText.toLowerCase().includes('complete')) { barAccent = 'green'; widthCalc = '80%'; }
+          if (titleText.toLowerCase().includes('travelled')) { barAccent = 'blue'; widthCalc = '65%'; }
+          if (titleText.toLowerCase().includes('not travel')) { barAccent = 'rose'; widthCalc = '10%'; }
+
+          pEl.className = 'stat-row-item processed-row';
+          pEl.innerHTML = `
+            <div class="stat-row-meta">
+              <span class="stat-row-label">${titleText}</span>
+              <span class="stat-row-val" style="font-weight:800; background:var(--gray-light); padding:2px 8px; border-radius:6px;">${numericValue}</span>
+            </div>
+            <div class="stat-row-track" style="margin-top: 4px;">
+              <div class="stat-row-fill ${barAccent}" style="width: ${widthCalc}"></div>
+            </div>`;
+        }
+      });
+    }
+  }
+
+  // Poll safely to monitor runtime elements generated from async Supabase promises inside app.js
+  setInterval(optimizeMetricsDisplay, 600);
 </script>
 </body>
 </html>
