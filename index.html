@@ -7,21 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ══════════════════════════════════════════════════════════
-       DESIGN SYSTEM & VARIABLES
-       ══════════════════════════════════════════════════════════ */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --font-main: 'Plus Jakarta Sans', sans-serif;
-      --gold-primary: #F5C453;      /* Warm aesthetic yellow/gold from reference image */
+      --gold-primary: #F5C453;
       --gold-hover: #E4B33E;
       --gold-muted: #FDF6E2;
-      --bg-dark: #1E1E1C;           /* Sleek soft black */
+      --bg-dark: #1E1E1C;
       --text-dark: #2A2A28;
       --text-muted: #7A7A77;
       --border-color: #E6E4DD;
@@ -29,10 +21,9 @@
       --radius-pill: 30px;
       --radius-card: 24px;
     }
-
     body {
       font-family: var(--font-main);
-      background-color: #E2E1DC; /* Warm grey external canvas background */
+      background-color: #E2E1DC;
       color: var(--text-dark);
       min-height: 100vh;
       display: flex;
@@ -41,10 +32,6 @@
       padding: 20px;
       overflow-x: hidden;
     }
-
-    /* ══════════════════════════════════════════════════════════
-       MAIN SPLIT CONTAINER
-       ══════════════════════════════════════════════════════════ */
     .app-window {
       background: linear-gradient(145deg, #F9F8F3 0%, #F1EFE6 100%);
       width: 100%;
@@ -57,394 +44,90 @@
       position: relative;
       border: 1px solid rgba(255, 255, 255, 0.6);
     }
-
     .window-close-accent {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #FFFFFF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: var(--text-dark);
-      cursor: pointer;
-      z-index: 10;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      border: 1px solid var(--border-color);
+      position: absolute; top: 24px; right: 24px; width: 32px; height: 32px;
+      border-radius: 50%; background: #FFFFFF; display: flex; align-items: center;
+      justify-content: center; font-size: 14px; color: var(--text-dark); cursor: pointer;
+      z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
       transition: all 0.2s ease;
     }
-    .window-close-accent:hover {
-      transform: scale(1.05);
-      background: #FAF8F5;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       LEFT PANEL: FORM CONTENT
-       ══════════════════════════════════════════════════════════ */
+    .window-close-accent:hover { transform: scale(1.05); background: #FAF8F5; }
     .form-panel {
-      flex: 1.1;
-      padding: 50px 65px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
+      flex: 1.1; padding: 50px 65px; display: flex; flex-direction: column;
+      justify-content: space-between; position: relative;
     }
-
     .brand-tag {
-      align-self: flex-start;
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-pill);
-      padding: 8px 20px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: var(--text-dark);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      align-self: flex-start; background: #FFFFFF; border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill); padding: 8px 20px; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.02em; color: var(--text-dark); box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }
-
-    .form-content-area {
-      max-width: 360px;
-      width: 100%;
-      margin: 0 auto;
-    }
-
-    .form-header {
-      margin-bottom: 32px;
-      text-align: center;
-    }
-
-    .form-header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text-dark);
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
-
-    .form-header p {
-      font-size: 14px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .input-group {
-      margin-bottom: 18px;
-      text-align: left;
-    }
-
-    .input-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-left: 16px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
+    .form-content-area { max-width: 360px; width: 100%; margin: 0 auto; }
+    .form-header { margin-bottom: 32px; text-align: center; }
+    .form-header h1 { font-size: 28px; font-weight: 700; color: var(--text-dark); letter-spacing: -0.02em; margin-bottom: 6px; }
+    .form-header p { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+    .input-group { margin-bottom: 18px; text-align: left; }
+    .input-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-left: 16px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .input-wrapper { position: relative; display: flex; align-items: center; }
     .input-wrapper input {
-      width: 100%;
-      height: 48px;
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-pill);
-      padding: 0 22px;
-      font-family: var(--font-main);
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-dark);
-      transition: all 0.25s ease;
+      width: 100%; height: 48px; background: #FFFFFF; border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill); padding: 0 22px; font-family: var(--font-main);
+      font-size: 14px; font-weight: 500; color: var(--text-dark); transition: all 0.25s ease;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
     }
-
-    .input-wrapper input:focus {
-      outline: none;
-      border-color: #D2C0A5;
-      box-shadow: 0 0 0 4px rgba(245, 196, 83, 0.15);
-    }
-
-    .pw-toggle-btn {
-      position: absolute;
-      right: 18px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      color: var(--text-muted);
-    }
-
-    .forgot-link-btn {
-      display: block;
-      text-align: right;
-      font-size: 12px;
-      color: var(--text-muted);
-      text-decoration: none;
-      margin-top: 6px;
-      margin-right: 14px;
-      font-weight: 500;
-    }
-    .forgot-link-btn:hover {
-      color: var(--text-dark);
-      text-decoration: underline;
-    }
-
+    .input-wrapper input:focus { outline: none; border-color: #D2C0A5; box-shadow: 0 0 0 4px rgba(245, 196, 83, 0.15); }
+    .pw-toggle-btn { position: absolute; right: 18px; background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text-muted); }
+    .forgot-link-btn { display: block; text-align: right; font-size: 12px; color: var(--text-muted); text-decoration: none; margin-top: 6px; margin-right: 14px; font-weight: 500; }
+    .forgot-link-btn:hover { color: var(--text-dark); text-decoration: underline; }
     .submit-btn {
-      width: 100%;
-      height: 48px;
-      background-color: var(--gold-primary);
-      color: var(--text-dark);
-      border: none;
-      border-radius: var(--radius-pill);
-      font-family: var(--font-main);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 12px;
-      box-shadow: 0 8px 20px rgba(245, 196, 83, 0.25);
+      width: 100%; height: 48px; background-color: var(--gold-primary); color: var(--text-dark);
+      border: none; border-radius: var(--radius-pill); font-family: var(--font-main); font-size: 14px;
+      font-weight: 700; cursor: pointer; margin-top: 12px; box-shadow: 0 8px 20px rgba(245, 196, 83, 0.25);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .submit-btn:hover {
-      background-color: var(--gold-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(245, 196, 83, 0.35);
-    }
-
-    .quick-auth-chips {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
+    .submit-btn:hover { background-color: var(--gold-hover); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(245, 196, 83, 0.35); }
+    .quick-auth-chips { display: flex; gap: 12px; margin-top: 16px; }
     .chip-btn {
-      flex: 1;
-      height: 42px;
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-pill);
-      font-family: var(--font-main);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-dark);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      flex: 1; height: 42px; background: #FFFFFF; border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill); font-family: var(--font-main); font-size: 12px; font-weight: 600;
+      color: var(--text-dark); display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; cursor: pointer; transition: all 0.2s ease;
     }
-    .chip-btn:hover {
-      background: #FAF9F5;
-      border-color: #D2C0A5;
-    }
-
-    .form-footer-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .form-footer-meta a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .form-footer-meta a:hover {
-      color: var(--text-dark);
-      text-decoration: underline;
-    }
-
+    .chip-btn:hover { background: #FAF9F5; border-color: #D2C0A5; }
+    .form-footer-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .form-footer-meta a { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+    .form-footer-meta a:hover { color: var(--text-dark); text-decoration: underline; }
     .alert-banner {
-      background: #FCEBEB;
-      border: 1px solid #EFA3A3;
-      color: #A32D2D;
-      padding: 10px 16px;
-      border-radius: var(--radius-pill);
-      font-size: 12px;
-      font-weight: 500;
-      text-align: center;
-      margin-top: 14px;
-      display: none;
+      background: #FCEBEB; border: 1px solid #EFA3A3; color: #A32D2D; padding: 10px 16px;
+      border-radius: var(--radius-pill); font-size: 12px; font-weight: 500; text-align: center;
+      margin-top: 14px; display: none;
     }
-
-    /* ══════════════════════════════════════════════════════════
-       RIGHT PANEL: INFOGRAPHIC GRAPHICS
-       ══════════════════════════════════════════════════════════ */
     .media-panel {
-      flex: 1.1;
-      margin: 14px;
-      border-radius: 20px;
-      background-size: cover;
-      background-position: center;
-      position: relative;
-      overflow: hidden;
+      flex: 1.1; margin: 14px; border-radius: 20px; background-size: cover; background-position: center;
+      position: relative; overflow: hidden;
       background-image: url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80');
     }
-
-    .media-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, rgba(30,30,28,0.2) 0%, rgba(30,30,28,0.5) 100%);
-    }
-
-    .widget-task {
-      position: absolute;
-      top: 35px;
-      left: 35px;
-      background-color: var(--gold-primary);
-      padding: 12px 18px;
-      border-radius: 14px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      max-width: 190px;
-      z-index: 2;
-    }
-    .widget-task h4 {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 2px;
-    }
-    .widget-task p {
-      font-size: 10px;
-      font-weight: 500;
-      color: rgba(0, 0, 0, 0.6);
-    }
-
-    .widget-pill-back {
-      position: absolute;
-      top: 75px;
-      left: 80px;
-      background: rgba(30, 30, 28, 0.65);
-      backdrop-filter: blur(8px);
-      padding: 6px 14px;
-      border-radius: 10px;
-      font-size: 9px;
-      color: rgba(255,255,255,0.7);
-      font-weight: 500;
-      z-index: 1;
-    }
-
-    .widget-team-stack {
-      position: absolute;
-      right: 35px;
-      top: 220px;
-      display: flex;
-      flex-direction: column;
-      gap: -10px;
-      align-items: center;
-    }
-    .avatar-circle {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 2px solid #FFFFFF;
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-      margin-bottom: -12px;
-    }
-
-    .bottom-widgets-container {
-      position: absolute;
-      bottom: 35px;
-      left: 35px;
-      right: 35px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .widget-calendar-strip {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      color: #FFFFFF;
-    }
-    .calendar-day {
-      text-align: center;
-      flex: 1;
-    }
-    .calendar-day .day-label {
-      font-size: 10px;
-      opacity: 0.7;
-      text-transform: uppercase;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-    .calendar-day .day-num {
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .calendar-day.active-day {
-      background: rgba(255, 255, 255, 0.25);
-      border-radius: 10px;
-      padding: 2px 0;
-    }
-
-    .widget-summary-card {
-      background: #FFFFFF;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-      max-width: 240px;
-      align-self: flex-start;
-    }
-    .widget-summary-card h4 {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 2px;
-    }
-    .widget-summary-card p {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-bottom: 10px;
-    }
-    .mini-avatar-row {
-      display: flex;
-      align-items: center;
-    }
-    .mini-avatar {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 1.5px solid #FFFFFF;
-      background-size: cover;
-      margin-right: -6px;
-    }
-
+    .media-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(30,30,28,0.2) 0%, rgba(30,30,28,0.5) 100%); }
+    .widget-task { position: absolute; top: 35px; left: 35px; background-color: var(--gold-primary); padding: 12px 18px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-width: 190px; z-index: 2; }
+    .widget-task h4 { font-size: 12px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+    .widget-task p { font-size: 10px; font-weight: 500; color: rgba(0, 0, 0, 0.6); }
+    .widget-pill-back { position: absolute; top: 75px; left: 80px; background: rgba(30, 30, 28, 0.65); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 10px; font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 500; z-index: 1; }
+    .widget-team-stack { position: absolute; right: 35px; top: 220px; display: flex; flex-direction: column; gap: -10px; align-items: center; }
+    .avatar-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #FFFFFF; background-size: cover; background-position: center; box-shadow: 0 6px 15px rgba(0,0,0,0.15); margin-bottom: -12px; }
+    .bottom-widgets-container { position: absolute; bottom: 35px; left: 35px; right: 35px; display: flex; flex-direction: column; gap: 16px; }
+    .widget-calendar-strip { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 12px 16px; display: flex; justify-content: space-between; color: #FFFFFF; }
+    .calendar-day { text-align: center; flex: 1; }
+    .calendar-day .day-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; font-weight: 500; margin-bottom: 4px; }
+    .calendar-day .day-num { font-size: 13px; font-weight: 600; }
+    .calendar-day.active-day { background: rgba(255, 255, 255, 0.25); border-radius: 10px; padding: 2px 0; }
+    .widget-summary-card { background: #FFFFFF; border-radius: 16px; padding: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); max-width: 240px; align-self: flex-start; }
+    .widget-summary-card h4 { font-size: 13px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+    .widget-summary-card p { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 10px; }
+    .mini-avatar-row { display: flex; align-items: center; }
+    .mini-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #FFFFFF; background-size: cover; margin-right: -6px; }
     @media (max-width: 900px) {
-      .app-window {
-        height: auto;
-        flex-direction: column;
-      }
-      .media-panel {
-        display: none;
-      }
-      .form-panel {
-        padding: 40px 30px;
-      }
+      .app-window { height: auto; flex-direction: column; }
+      .media-panel { display: none; }
+      .form-panel { padding: 40px 30px; }
     }
   </style>
 </head>
@@ -522,19 +205,16 @@
 
     <div class="media-panel">
       <div class="media-overlay"></div>
-
       <div class="widget-task">
         <h4>Professional Job Review</h4>
         <p>Deployment Schedule: 09:30am</p>
       </div>
       <div class="widget-pill-back">Next batch setup overview</div>
-
       <div class="widget-team-stack">
         <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80')"></div>
         <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80')"></div>
         <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80')"></div>
       </div>
-
       <div class="bottom-widgets-container">
         <div class="widget-calendar-strip">
           <div class="calendar-day"><div class="day-label">Sun</div><div class="day-num">22</div></div>
@@ -545,7 +225,6 @@
           <div class="calendar-day"><div class="day-label">Fri</div><div class="day-num">27</div></div>
           <div class="calendar-day"><div class="day-label">Sat</div><div class="day-num">28</div></div>
         </div>
-
         <div class="widget-summary-card">
           <h4>LB Candidate Processing</h4>
           <p>Passports Tracked: 98 Active</p>
@@ -556,88 +235,72 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
   <script>
+    // ── Staff credentials (must match app.js) ──────────────────
+    const STAFF_ACCOUNTS = {
+      fred:      { password: 'Destiny@2025', display: 'Fred 👑' },
+      robert:    { password: 'Robert@2025',  display: 'Robert'  },
+      doreen:    { password: 'Doreen@2025',  display: 'Doreen'  },
+      maxwell:   { password: 'Maxwell@2025', display: 'Maxwell' },
+      consolata: { password: 'Consol@2025',  display: 'Consolata'}
+    };
+
     function togglePasswordVisibility() {
       const field = document.getElementById('pass-input');
-      const icon = document.getElementById('eye-icon');
-      if (field.type === 'password') {
-        field.type = 'text';
-        icon.textContent = '🙈';
-      } else {
-        field.type = 'password';
-        icon.textContent = '👁';
-      }
+      const icon  = document.getElementById('eye-icon');
+      if (field.type === 'password') { field.type = 'text';     icon.textContent = '🙈'; }
+      else                           { field.type = 'password'; icon.textContent = '👁'; }
     }
 
     function showRecoveryView() {
-      document.getElementById('login-main-form').style.display = 'none';
+      document.getElementById('login-main-form').style.display    = 'none';
       document.getElementById('recovery-main-view').style.display = 'block';
     }
 
     function hideRecoveryView() {
       document.getElementById('recovery-main-view').style.display = 'none';
-      document.getElementById('login-main-form').style.display = 'block';
+      document.getElementById('login-main-form').style.display    = 'block';
     }
 
     function handleSystemLogin() {
-      const u = document.getElementById('user-input').value.trim().toLowerCase();
-      const p = document.getElementById('pass-input').value.trim();
+      const u   = document.getElementById('user-input').value.trim().toLowerCase();
+      const p   = document.getElementById('pass-input').value.trim();
       const err = document.getElementById('error-banner');
 
-      // 1. Locate original inputs inside index.html's original unstyled login form
-      const oldUserInput = document.getElementById('username-input');
-      const oldPassInput = document.getElementById('pw-input');
-
-      if (oldUserInput && oldPassInput) {
-        // 2. Safely populate old hidden inputs with the new layout values
-        oldUserInput.value = u;
-        oldPassInput.value = p;
-        
-        // 3. Trigger your original application verification pipeline instantly
-        if (typeof window.doLogin === 'function') {
-          window.doLogin();
-          
-          // Double-check if the original app login threw an error message inside index.html
-          const originalError = document.getElementById('login-error');
-          if (originalError && originalError.style.display === 'block') {
-            err.style.display = 'block';
-          } else {
-            err.style.display = 'none';
-          }
+      const matched = STAFF_ACCOUNTS[u];
+      if (matched && matched.password === p) {
+        err.style.display = 'none';
+        // Save session and hand off to the main app
+        sessionStorage.setItem('dr_user', JSON.stringify({ username: u, ...matched }));
+        // If app.js / index.html elements exist in the same page, activate them
+        if (document.getElementById('login-screen')) {
+          document.getElementById('login-screen').style.display = 'none';
+        }
+        if (document.getElementById('app')) {
+          document.getElementById('app').style.display = 'block';
+        }
+        if (document.getElementById('user-chip')) {
+          document.getElementById('user-chip').textContent = matched.display;
+        }
+        if (typeof window.loadAllData === 'function') {
+          window.loadAllData();
+        }
+        // If login lives on its own page, redirect to the main app page
+        if (!document.getElementById('app')) {
+          window.location.href = 'index.html';
         }
       } else {
-        // Fallback option if tested in a sandbox layout environment
-        const STAFF_ACCOUNTS = {
-          fred:      { password: 'Destiny@2025', display: 'Fred 👑' },
-          robert:    { password: 'Robert@2025',  display: 'Robert'  },
-          doreen:    { password: 'Doreen@2025',  display: 'Doreen'  },
-          maxwell:   { password: 'Maxwell@2025', display: 'Maxwell' },
-          consolata: { password: 'Consol@2025',  display: 'Consolata'}
-        };
-        const matched = STAFF_ACCOUNTS[u];
-        if (matched && matched.password === p) {
-          err.style.display = 'none';
-          sessionStorage.setItem('dr_user', JSON.stringify({ username: u, ...matched }));
-          
-          // Hide login screen completely and activate application space container
-          if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
-          if (document.getElementById('app')) document.getElementById('app').style.display = 'block';
-          if (document.getElementById('user-chip')) document.getElementById('user-chip').textContent = matched.display;
-          if (typeof window.loadAllData === 'function') window.loadAllData();
-        } else {
-          err.style.display = 'block';
-        }
+        err.style.display = 'block';
       }
     }
 
     function verifyAdminCode() {
       const entered = document.getElementById('recovery-code-field').value.trim();
-      const fail = document.getElementById('recovery-error-banner');
-      const pass = document.getElementById('recovery-success-box');
+      const fail    = document.getElementById('recovery-error-banner');
+      const pass    = document.getElementById('recovery-success-box');
 
       if (entered === 'DR-RESET-2025') {
         fail.style.display = 'none';
