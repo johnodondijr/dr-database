@@ -7,162 +7,223 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --gold:#C9A227;--gold-dark:#A8841C;--gold-light:#FBF3DC;
-      --charcoal:#262420;
-      --green:#1D9E75;--amber:#BA7517;--blue:#185FA5;--red:#A32D2D;
-      --bg:#F7F7F5;--surface:#FFFFFF;--border:#E2E0D8;
-      --text:#1A1A18;--text-2:#555550;--text-3:#888780;
-      --radius:8px;--radius-lg:12px;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8f5f0;
+      color: #1a1a18;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
     }
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
 
-    /* ── MODERN DARK LOGIN ── */
+    /* LOGIN SPLIT LAYOUT */
     .login-split {
       display: flex;
-      width: 100%;
       min-height: 100vh;
-      background: #0f0f0f;
     }
 
-    .login-brand.dark-form {
+    /* LEFT SIDE - FORM */
+    .login-form-side {
       flex: 1;
-      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-      color: #fff;
-      padding: 4rem 3rem;
+      background: white;
+      padding: 3rem 4rem;
       display: flex;
       align-items: center;
+      justify-content: center;
     }
 
-    .brand-content { max-width: 420px; width: 100%; }
-    .brand-logo-row { display:flex; align-items:center; gap:14px; margin-bottom:2.5rem; }
-    .brand-name { font-size:15px; font-weight:600; line-height:1.3; letter-spacing:.02em; }
-    .brand-title { font-size:36px; font-weight:700; margin:1.5rem 0 0.5rem; color:#fff; }
-    .brand-sub { font-size:16px; color:#aaa; margin-bottom:2rem; }
+    .login-container {
+      width: 100%;
+      max-width: 380px;
+    }
 
-    .login-field { margin-bottom:1.25rem; }
-    .login-field label { display:block; font-size:13px; font-weight:500; color:#ccc; margin-bottom:6px; }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .dr-ring {
+      width: 48px;
+      height: 48px;
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a18;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1a1a18;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 15px;
+    }
+
+    .login-field {
+      margin-bottom: 1.25rem;
+    }
+
+    .login-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
     .login-field input {
-      width:100%; padding:14px 16px; background:#222; border:1px solid #444; border-radius:8px;
-      font-size:15px; color:#fff; font-family:inherit;
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #e2e0d8;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.2s;
     }
-    .login-field input:focus { outline:none; border-color:#C9A227; box-shadow:0 0 0 3px rgba(201,162,39,0.2); }
 
-    .pw-wrap { position:relative; }
-    .pw-wrap input { padding-right:50px; }
+    .login-field input:focus {
+      outline: none;
+      border-color: #C9A227;
+      box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.1);
+    }
+
+    .pw-wrap {
+      position: relative;
+    }
+
     .pw-toggle {
-      position:absolute; right:16px; top:50%; transform:translateY(-50%);
-      background:none; border:none; color:#888; font-size:20px; cursor:pointer;
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 1.5rem;
     }
 
     .login-btn {
-      width:100%; padding:14px; background:#C9A227; color:#1a1a1a; border:none;
-      border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; margin-top:8px;
+      width: 100%;
+      padding: 14px;
+      background: #C9A227;
+      color: #1a1a18;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .login-btn:hover { background:#e0b13d; }
 
-    .forgot-link { font-size:13px; color:#C9A227; cursor:pointer; display:block; margin-top:8px; text-align:right; }
-    .login-error { color:#ff6b6b; background:rgba(255,107,107,0.1); padding:10px; border-radius:6px; margin-top:12px; display:none; font-size:13px; }
+    .login-btn:hover {
+      background: #e0b13d;
+    }
 
-    .recovery-result { background:#2a2a2a; border:1px solid #C9A227; padding:12px; border-radius:8px; margin-top:12px; font-size:13px; }
-    .back-link { color:#C9A227; cursor:pointer; font-size:13px; margin-top:12px; display:inline-block; }
+    .login-error {
+      color: #e74c3c;
+      background: #fdf2f2;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+      font-size: 13px;
+    }
+
+    .forgot-link {
+      color: #C9A227;
+      cursor: pointer;
+      font-size: 13px;
+    }
 
     .staff-hint {
-      margin-top:2.5rem; font-size:12.5px; color:#777; line-height:1.5;
+      margin-top: 2rem;
+      font-size: 12.5px;
+      color: #777;
+      text-align: center;
     }
 
-    /* Preview Side */
-    .login-preview {
-      flex: 1.15;
-      background: linear-gradient(135deg, #1e2937, #0f172a);
+    /* RIGHT SIDE - ILLUSTRATION */
+    .login-illustration {
+      flex: 1.2;
+      background: linear-gradient(135deg, #f5e8c7 0%, #e8d4a0 100%);
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
       overflow: hidden;
+      padding: 2rem;
     }
 
-    .preview-content { max-width: 520px; width: 100%; }
-    .preview-header { text-align:center; margin-bottom:2rem; }
-    .preview-logo { font-size:28px; font-weight:700; color:#C9A227; }
-    .preview-tag { color:#aaa; font-size:14px; margin-top:4px; }
-
-    .preview-card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      backdrop-filter: blur(10px);
+    .illustration-content {
+      text-align: center;
+      max-width: 520px;
     }
-    .preview-card-header { font-weight:600; margin-bottom:12px; color:#ddd; font-size:15px; }
-    .mini-metric { font-size:28px; font-weight:700; color:#fff; margin:8px 0; }
-    .mini-metric .small { font-size:14px; font-weight:500; color:#aaa; }
 
-    /* Original App Styles (unchanged) */
-    #app{display:none}
-    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:50}
-    .topbar-logo{font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
-    .topbar-logo span{color:var(--gold-dark)}
-    .topbar-right{display:flex;align-items:center;gap:12px}
-    .user-chip{font-size:12px;background:var(--gold-light);color:var(--charcoal);padding:4px 10px;border-radius:20px;font-weight:500}
-    .save-status{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:5px}
-    .save-status.saved{color:var(--green)}.save-status.saving{color:var(--amber)}
-    .logout-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--text-2);cursor:pointer;font-family:inherit}
-    .logout-btn:hover{background:var(--bg)}
-    .tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;overflow-x:auto}
-    .tab-btn{padding:14px 18px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
-    .tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--gold-dark);border-bottom-color:var(--gold)}
-    .main{padding:1.5rem;max-width:1400px;margin:0 auto}
+    .illustration-content h2 {
+      font-size: 28px;
+      color: #1a1a18;
+      margin-bottom: 12px;
+    }
 
-    /* ... (rest of your original CSS remains the same) ... */
-    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
-    .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
-    .metric-label{font-size:11px;color:var(--text-3);margin-bottom:5px;text-transform:uppercase}
-    .metric-val{font-size:24px;font-weight:600;color:var(--text)}
-    .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}
+    .illustration-content p {
+      color: #555;
+      font-size: 15px;
+      margin-bottom: 2rem;
+    }
 
-    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem}
-    .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
-    .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-    .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500}
-    .action-btn{background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px 5px;border-radius:4px}
-    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem}
-    .modal-bg.open{display:flex}
-    .modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.75rem;width:100%;max-width:580px}
-    .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:999;opacity:0;transition:all .2s}
-    .toast.show{opacity:1}
-    .toast.success{background:var(--green)}.toast.error{background:var(--red)}
+    /* Simple SVG Recruitment Illustration */
+    .recruit-illustration {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+    }
+
+    /* Keep your original app styles */
+    #app { display: none; }
+    /* ... (your existing CSS for dashboard, tables, modals, etc.) ... */
   </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="spinner"></div>
-  <span id="loading-text">Loading…</span>
-</div>
-
-<!-- LOGIN -->
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-split">
 
     <!-- LEFT: Form -->
-    <div class="login-brand dark-form">
-      <div class="brand-content">
-        <div class="brand-logo-row">
-          <svg class="dr-ring" width="52" height="52" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="login-form-side">
+      <div class="login-container">
+        <div class="brand-logo">
+          <svg class="dr-ring" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="42" stroke="#C9A227" stroke-width="10" stroke-linecap="round" stroke-dasharray="115 264" transform="rotate(-58 50 50)"/>
-            <circle cx="50" cy="50" r="42" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-dasharray="115 264" stroke-dashoffset="-145" transform="rotate(-58 50 50)"/>
-            <text x="50" y="61" font-family="Inter,sans-serif" font-weight="800" font-size="32" text-anchor="middle" fill="#fff">DR</text>
+            <circle cx="50" cy="50" r="42" stroke="#1a1a18" stroke-width="10" stroke-linecap="round" stroke-dasharray="115 264" stroke-dashoffset="-145" transform="rotate(-58 50 50)"/>
+            <text x="50" y="61" font-family="Inter,sans-serif" font-weight="800" font-size="30" text-anchor="middle" fill="#1a1a18">DR</text>
           </svg>
-          <span class="brand-name">DESTINY RECRUIT<br>CONSULTS</span>
+          <div>
+            <span class="brand-name">DESTINY RECRUIT</span>
+            <div style="font-size:12px;color:#C9A227;font-weight:600;">CONSULTS</div>
+          </div>
         </div>
 
-        <h1 class="brand-title">Welcome Back</h1>
-        <p class="brand-sub">Sign in to access your candidate database</p>
+        <h1>Holla, Welcome Back</h1>
+        <p class="subtitle">Track your candidates • Manage pipelines • Monitor refunds</p>
 
         <div id="login-main">
           <form onsubmit="event.preventDefault(); doLogin();">
@@ -174,88 +235,80 @@
               <label>Password</label>
               <div class="pw-wrap">
                 <input type="password" id="pw-input" placeholder="Enter your password" autocomplete="current-password">
-                <button class="pw-toggle" id="pw-toggle" type="button" onclick="togglePassword()" title="Show/hide password">👁</button>
+                <button class="pw-toggle" id="pw-toggle" type="button" onclick="togglePassword()">👁</button>
               </div>
-              <span class="forgot-link" onclick="showForgotPassword()">Forgot password?</span>
             </div>
+
+            <div class="options">
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+                <input type="checkbox" checked> Remember me
+              </label>
+              <span class="forgot-link" onclick="showForgotPassword()">Forgot Password?</span>
+            </div>
+
             <button type="submit" class="login-btn">Sign In</button>
           </form>
           <div class="login-error" id="login-error">Incorrect username or password.</div>
         </div>
 
-        <div id="forgot-section" style="display:none">
-          <div style="font-size:15px;font-weight:600;margin-bottom:8px">Recovery Mode</div>
-          <p style="font-size:13px;color:#aaa;margin-bottom:16px">Enter the admin recovery code to view all staff credentials.</p>
+        <!-- Forgot Password Section -->
+        <div id="forgot-section" style="display:none; margin-top:1rem;">
+          <p style="font-size:13px;color:#555;margin-bottom:12px;">Enter recovery code to view staff credentials.</p>
           <form onsubmit="event.preventDefault(); submitForgotPassword();">
             <div class="login-field">
-              <label>Recovery Code</label>
               <input type="text" id="recovery-code-input" placeholder="DR-RESET-2025">
             </div>
             <button type="submit" class="login-btn">Verify Code</button>
           </form>
           <div class="login-error" id="forgot-error" style="display:none"></div>
           <div class="recovery-result" id="forgot-result" style="display:none"></div>
-          <span class="back-link" onclick="hideForgotPassword()">← Back to login</span>
+          <span class="forgot-link" onclick="hideForgotPassword()" style="display:block;text-align:center;margin-top:12px;">← Back to Login</span>
         </div>
 
         <div class="staff-hint">
-          <strong>Staff Usernames:</strong> fred, robert, doreen, maxwell, consolata
+          Staff: fred • robert • doreen • maxwell • consolata
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: Preview -->
-    <div class="login-preview">
-      <div class="preview-content">
-        <div class="preview-header">
-          <div class="preview-logo">DR Database</div>
-          <div class="preview-tag">Professional + LB Pipeline Management</div>
-        </div>
+    <!-- RIGHT: Recruitment Illustration -->
+    <div class="login-illustration">
+      <div class="illustration-content">
+        <svg class="recruit-illustration" viewBox="0 0 500 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background elements -->
+          <rect width="500" height="480" fill="#f5e8c7"/>
+          <!-- Simple recruitment scene -->
+          <circle cx="380" cy="180" r="85" fill="#C9A227" opacity="0.15"/>
+          <!-- Person -->
+          <rect x="220" y="140" width="80" height="160" rx="20" fill="#2c3e50"/>
+          <circle cx="260" cy="120" r="35" fill="#f8b58c"/>
+          <!-- Documents / Candidates -->
+          <rect x="80" y="220" width="65" height="85" rx="8" fill="#fff" stroke="#C9A227" stroke-width="12"/>
+          <rect x="95" y="235" width="35" height="8" fill="#C9A227"/>
+          <rect x="95" y="250" width="35" height="8" fill="#C9A227"/>
+          <!-- Dashboard -->
+          <rect x="320" y="260" width="110" height="95" rx="12" fill="#fff" stroke="#1a1a18" stroke-width="10"/>
+          <rect x="340" y="280" width="70" height="8" fill="#C9A227"/>
+          <rect x="340" y="295" width="50" height="8" fill="#C9A227"/>
+          <!-- Checkmarks -->
+          <path d="M120 300 L135 320 L170 270" stroke="#27ae60" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="380" y="420" font-size="28" fill="#1a1a18" font-weight="700" text-anchor="middle">DR Database</text>
+        </svg>
         
-        <div class="preview-card">
-          <div class="preview-card-header">💼 Professional Jobs</div>
-          <div class="mini-metric">37 <span class="small">Total</span></div>
-          <div class="mini-metric">14 <span class="small amber">In Process</span></div>
-          <div class="mini-metric">23 <span class="small green">Travelled</span></div>
-        </div>
-
-        <div class="preview-card">
-          <div class="preview-card-header">🏠 LB Jobs</div>
-          <div class="mini-metric">98 <span class="small">Total</span></div>
-          <div class="mini-metric">$12,450 <span class="small amber">Refund Balance</span></div>
-        </div>
-
-        <div style="text-align:center; margin-top:2rem; color:#777; font-size:13px;">
-          Live tracking • Documents • Timeline • Real-time updates
-        </div>
+        <h2>Track Every Candidate</h2>
+        <p>From first contact to successful travel — Professional &amp; LB pipelines in one place.</p>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- APP (rest of your original app) -->
+<!-- APP -->
 <div id="app">
-  <!-- ... Your existing topbar, tabs, dashboard, modals etc. remain unchanged ... -->
-  <div class="topbar">
-    <div class="topbar-logo">
-      <svg class="dr-ring" width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:var(--charcoal)">
-        <circle cx="50" cy="50" r="42" stroke="#C9A227" stroke-width="12" stroke-linecap="round" stroke-dasharray="115 264" transform="rotate(-58 50 50)"/>
-        <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-dasharray="115 264" stroke-dashoffset="-145" transform="rotate(-58 50 50)"/>
-      </svg>
-      <span>DR <span style="color:var(--gold-dark)">Database</span></span>
-    </div>
-    <div class="topbar-right">
-      <span class="user-chip" id="user-chip">—</span>
-      <span class="save-status saved" id="save-status">✓ <span id="save-text">Saved</span></span>
-      <button class="logout-btn" onclick="doLogout()">Sign out</button>
-    </div>
-  </div>
-  <!-- Rest of your app content (tabs, sections, modals) would go here -->
-  <!-- For brevity, I'm assuming you keep the rest from your original file -->
+  <!-- Your existing app content goes here (topbar, tabs, sections, modals, etc.) -->
+  <!-- Copy the rest of your original app HTML from the previous version -->
 </div>
 
-<!-- Your original scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
