@@ -147,7 +147,6 @@ async function loadAllData() {
     // Pro candidates
     if (proRes.data && proRes.data.length > 0) {
       proDB = proRes.data;
-      window.proData = proDB;
     } else if (!proRes.data || proRes.data.length === 0) {
       // First time — seed data
       await seedProData();
@@ -156,7 +155,6 @@ async function loadAllData() {
     // LB candidates
     if (lbRes.data && lbRes.data.length > 0) {
       lbDB = lbRes.data;
-      window.lbData = lbDB;
     } else if (!lbRes.data || lbRes.data.length === 0) {
       await seedLBData();
     }
@@ -646,9 +644,9 @@ function renderPro() {
       const bal  = (r.commission && r.paid) ? Number(r.commission)-Number(r.paid) : null;
       const balTxt = bal !== null ? 'KES '+bal.toLocaleString() : '—';
       const hd = hasDocs('pro', r.id);
-      return `<tr data-id="${r.id}" data-type="pro" style="cursor:pointer">
+      return `<tr>
         <td>${(proPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell"><div class="name-primary">${r.name}</div><div class="name-secondary">${r.company||r.position||''}</div></td>
+        <td class="name-cell">${r.name}</td>
         <td>${r.pp||'—'}</td>
         <td>${r.phone||'—'}</td>
         <td>${r.position||'—'}</td>
@@ -808,9 +806,9 @@ function renderLB() {
       const bal  = (rs==='N/A'||rs==='RETURNED') ? '—' : '$'+(toR-paid);
       const td   = r.travelDate || r.travel_date;
       const hd   = hasDocs('lb', r.id);
-      return `<tr data-id="${r.id}" data-type="lb" style="cursor:pointer">
+      return `<tr>
         <td>${(lbPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell"><div class="name-primary">${r.name}</div><div class="name-secondary">${r.phone||''}</div></td>
+        <td class="name-cell">${r.name}</td>
         <td>${r.phone||'—'}</td>
         <td>${r.ppStatus||r.pp_status||'—'}</td>
         <td>${travelBadge(ts)}</td>
