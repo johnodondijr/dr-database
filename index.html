@@ -81,14 +81,6 @@
     .dash-row-val{font-size:13px;font-weight:600}
     .dash-bar-wrap{height:6px;background:var(--green-light);border-radius:3px;margin-top:4px;width:100%}
     .dash-bar-fill{height:6px;background:var(--green);border-radius:3px}
-    .alerts-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.25rem}
-    .alerts-card h3{font-size:14px;font-weight:600;margin-bottom:1rem}
-    .alert-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
-    .alert-row:last-child{border-bottom:none}
-    .alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-    .alert-dot.red{background:var(--red)}.alert-dot.amber{background:var(--amber)}
-    .alert-name{font-weight:500}.alert-msg{color:var(--text-2)}
-    .no-alerts{color:var(--text-3);font-size:13px;text-align:center;padding:1rem}
 
     /* ── TOOLBAR ── */
     .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
@@ -166,16 +158,11 @@
     .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
 
     /* ── DOCS ── */
-    .docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .doc-slot{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg)}
-    .doc-slot-label{font-size:12px;font-weight:600;color:var(--text-2)}
-    .doc-link-row{display:flex;gap:8px;align-items:center}
-    .doc-link-input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:inherit;color:var(--text);background:var(--surface)}
+    .doc-link-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface)}
     .doc-link-input:focus{outline:none;border-color:var(--green)}
-    .doc-open-btn{padding:7px 12px;background:var(--blue-light);color:var(--blue);border:1px solid #b8d4f5;border-radius:var(--radius);font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+    .doc-open-btn{padding:9px 14px;background:var(--blue-light);color:var(--blue);border:1px solid #b8d4f5;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
     .doc-open-btn:hover{background:#d0e5f9}
     .doc-open-btn:disabled{opacity:.4;cursor:default}
-    .doc-note{font-size:10px;color:var(--text-3)}
 
     /* ── TIMELINE ── */
     .tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
@@ -192,7 +179,6 @@
 
     @media(max-width:768px){
       .dash-grid{grid-template-columns:1fr}
-      .docs-grid{grid-template-columns:1fr}
       .form-grid{grid-template-columns:1fr}
       .topbar{padding:0 1rem}.main{padding:1rem}
       .tabs-bar{padding:0 .5rem}
@@ -272,7 +258,6 @@
 
     <!-- DASHBOARD -->
     <div id="dash-section">
-      <div id="dash-alerts"></div>
       <div class="dash-grid">
         <div class="dash-card" id="dash-pro-card"></div>
         <div class="dash-card" id="dash-lb-card"></div>
@@ -383,7 +368,7 @@
         <div class="field"><label>Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
         <div class="field"><label>Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
         <div class="field"><label>Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
-        <div class="field"><label>Current stage *</label><select id="pf-stage"></select></div>
+        <div class="field"><label>Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
         <div class="field"><label>Date submitted</label><input type="date" id="pf-submitted"></div>
       </div>
     </div>
@@ -436,7 +421,7 @@
             <option value="PUSHED">Pushed</option>
           </select>
         </div>
-        <div class="field"><label>Travel status</label><select id="lf-travel"></select></div>
+        <div class="field"><label>Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
         <div class="field"><label>Travel date</label><input type="date" id="lf-tdate"></div>
         <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
       </div>
@@ -462,19 +447,25 @@
 
 <!-- DOCS MODAL -->
 <div class="modal-bg" id="docs-modal">
-  <div class="modal" style="max-width:640px">
+  <div class="modal" style="max-width:480px">
     <div class="modal-header">
       <h3 id="docs-modal-title">Documents</h3>
       <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
     </div>
     <p style="font-size:12px;color:var(--text-3);margin-bottom:1rem">
-      Paste a Google Drive share link for each document.
+      Upload all of this candidate's documents (passport, ID, offer letter, MOL, visa, etc.) into one Google Drive folder, then paste that folder's share link below.
       <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link →</a>
     </p>
-    <div class="docs-grid" id="docs-grid"></div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('docs-modal')">Close</button>
-      <button class="btn primary" onclick="saveDocs()">Save documents</button>
+    <div class="field">
+      <label>Documents folder link</label>
+      <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link…" oninput="onDocsLinkInput()" style="width:100%;padding:9px 12px;font-size:13px">
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="doc-open-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()">📂 View documents</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeModal('docs-modal')">Close</button>
+        <button class="btn primary" onclick="saveDocs()">Save</button>
+      </div>
     </div>
   </div>
 </div>
