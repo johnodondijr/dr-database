@@ -17,33 +17,39 @@
       --pink-light:#FBEAF0;--pink:#993556;
       --gray-light:#F1EFE8;--gray:#5F5E5A;
       --bg:#F7F7F5;--surface:#FFFFFF;
-      --border:#E2E0D8;--border-strong:#C8C6BE;
+      --border:#E2E0D8;
       --text:#1A1A18;--text-2:#555550;--text-3:#888780;
       --radius:8px;--radius-lg:12px;
     }
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
-    
-    /* LOGIN SCREEN STYLING */
+
+    /* ── LOGIN ── */
     #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:var(--bg)}
-    .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center}
+    .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem 2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06)}
     .login-logo{font-size:22px;font-weight:600;margin-bottom:4px}.login-logo span{color:var(--green)}
-    .login-sub{font-size:13px;color:var(--text-3);margin-bottom:1.5rem}
+    .login-sub{font-size:13px;color:var(--text-3);margin-bottom:1.75rem}
     .login-field{text-align:left;margin-bottom:1rem}
     .login-field label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
-    .login-field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface)}
+    .login-field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .15s}
     .login-field input:focus{outline:none;border-color:var(--green)}
     .pw-wrap{position:relative;display:flex;align-items:center}
-    .pw-wrap input{flex:1;padding-right:40px}
-    .pw-toggle{position:absolute;right:12px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-3);padding:0;user-select:none}
-    .forgot-link{font-size:12px;color:var(--blue);cursor:pointer;text-align:right;margin-top:6px;display:block;text-decoration:none}
+    .pw-wrap input{flex:1;padding-right:44px}
+    .pw-toggle{position:absolute;right:12px;background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-3);padding:0;line-height:1;user-select:none}
+    .pw-toggle:hover{color:var(--text)}
+    .forgot-link{font-size:12px;color:var(--blue);cursor:pointer;text-align:right;margin-top:7px;display:block}
     .forgot-link:hover{text-decoration:underline}
-    .login-btn{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;margin-top:.5rem}
+    .login-btn{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;margin-top:.75rem;transition:background .15s}
     .login-btn:hover{background:var(--green-dark)}
-    .login-error{color:var(--red);font-size:12px;margin-top:8px;display:none;background:var(--red-light);padding:8px;border-radius:var(--radius);text-align:center}
-    .recovery-result{background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px}
-    .back-link{font-size:12px;color:var(--blue);cursor:pointer;margin-top:10px;display:inline-block}
+    .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
+    .recovery-result{background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
+    .back-link{font-size:12px;color:var(--blue);cursor:pointer;margin-top:12px;display:inline-block}
+    .back-link:hover{text-decoration:underline}
+    .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;color:var(--text-2)}
+    .loading-overlay.show{display:flex}
+    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* APP SHELL */
+    /* ── APP SHELL ── */
     #app{display:none}
     .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:50}
     .topbar-logo{font-size:16px;font-weight:600}.topbar-logo span{color:var(--green)}
@@ -53,51 +59,51 @@
     .save-status.saved{color:var(--green)}.save-status.saving{color:var(--amber)}
     .logout-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--text-2);cursor:pointer;font-family:inherit}
     .logout-btn:hover{background:var(--bg)}
-    .tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:0;overflow-x:auto}
-    .tab-btn{padding:14px 18px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+    .tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;overflow-x:auto}
+    .tab-btn{padding:14px 18px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
     .tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
     .main{padding:1.5rem;max-width:1400px;margin:0 auto}
 
-    /* METRICS */
+    /* ── METRICS ── */
     .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
     .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
     .metric-label{font-size:11px;color:var(--text-3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
     .metric-val{font-size:24px;font-weight:600;color:var(--text)}
-    .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}.metric-val.blue{color:var(--blue)}.metric-val.red{color:var(--red)}
-    .metric-val.sm{font-size:16px}
+    .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}.metric-val.blue{color:var(--blue)}.metric-val.red{color:var(--red)}.metric-val.sm{font-size:16px}
 
-    /* DASHBOARD */
+    /* ── DASHBOARD ── */
     .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem}
     .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
-    .dash-card h3{font-size:14px;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
-    .dash-stage-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
-    .dash-stage-row:last-child{border-bottom:none}
-    .dash-stage-label{font-size:13px;color:var(--text-2)}
-    .dash-stage-count{font-size:13px;font-weight:600;color:var(--text)}
-    .dash-stage-bar{height:6px;background:var(--green-light);border-radius:3px;margin-top:4px}
-    .dash-stage-fill{height:6px;background:var(--green);border-radius:3px}
+    .dash-card h3{font-size:14px;font-weight:600;margin-bottom:1rem}
+    .dash-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+    .dash-row:last-child{border-bottom:none}
+    .dash-row-label{font-size:13px;color:var(--text-2)}
+    .dash-row-val{font-size:13px;font-weight:600}
+    .dash-bar-wrap{height:6px;background:var(--green-light);border-radius:3px;margin-top:4px;width:100%}
+    .dash-bar-fill{height:6px;background:var(--green);border-radius:3px}
     .alerts-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.25rem}
+    .alerts-card h3{font-size:14px;font-weight:600;margin-bottom:1rem}
     .alert-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
     .alert-row:last-child{border-bottom:none}
     .alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
     .alert-dot.red{background:var(--red)}.alert-dot.amber{background:var(--amber)}
-    .alert-name{font-weight:500;color:var(--text)}.alert-msg{color:var(--text-2)}
+    .alert-name{font-weight:500}.alert-msg{color:var(--text-2)}
     .no-alerts{color:var(--text-3);font-size:13px;text-align:center;padding:1rem}
 
-    /* TOOLBAR */
+    /* ── TOOLBAR ── */
     .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
     .search-wrap{position:relative;flex:1;min-width:200px}
     .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface)}
     .search-wrap input:focus{outline:none;border-color:var(--green)}
-    .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none;font-size:14px}
+    .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none}
     select{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);cursor:pointer}
     select:focus{outline:none;border-color:var(--green)}
-    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:500;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);cursor:pointer;white-space:nowrap}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:500;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);cursor:pointer;white-space:nowrap;transition:background .15s}
     .btn:hover{background:var(--bg)}
     .btn.primary{background:var(--green);color:#fff;border-color:var(--green-dark)}.btn.primary:hover{background:var(--green-dark)}
     .btn.export{background:var(--blue-light);color:var(--blue);border-color:#b8d4f5}.btn.export:hover{background:#d0e5f9}
 
-    /* TABLE */
+    /* ── TABLE ── */
     .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
     .table-wrap{overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:13px}
@@ -106,8 +112,9 @@
     tr:last-child td{border-bottom:none}
     tr:hover td{background:#FAFAF8}
     .name-cell{font-weight:500;max-width:200px}
+    .balance-owed{color:var(--amber);font-weight:600}
 
-    /* BADGES */
+    /* ── BADGES ── */
     .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap}
     .b-pol{background:var(--blue-light);color:var(--blue)}
     .b-mol{background:var(--amber-light);color:var(--amber)}
@@ -121,68 +128,67 @@
     .b-notyet{background:var(--blue-light);color:var(--blue)}
     .b-nottravelled{background:var(--red-light);color:var(--red)}
 
-    /* ACTION BUTTONS */
+    /* ── ACTION BUTTONS ── */
     .action-btn{background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px 5px;border-radius:4px;font-size:14px;line-height:1;transition:all .15s}
     .action-btn:hover{color:var(--text);background:var(--bg)}
     .action-btn.del:hover{color:var(--red);background:var(--red-light)}
     .action-btn.docs{color:var(--blue)}.action-btn.docs:hover{background:var(--blue-light)}
 
-    /* PAGINATION */
+    /* ── PAGINATION ── */
     .pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
     .page-btns{display:flex;gap:4px}
     .page-btns button{padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:5px;background:var(--surface);cursor:pointer;color:var(--text-2);font-family:inherit}
     .page-btns button.active{background:var(--green);color:#fff;border-color:var(--green-dark)}
     .page-btns button:hover:not(.active){background:var(--bg)}
 
-    /* EMPTY */
+    /* ── EMPTY ── */
     .empty{text-align:center;padding:3rem;color:var(--text-3);font-size:13px}
 
-    /* MODALS */
-    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+    /* ── MODAL ── */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
     .modal-bg.open{display:flex}
     .modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.75rem;width:100%;max-width:580px;margin:auto}
     .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
     .modal-header h3{font-size:16px;font-weight:600}
-    .modal-close{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;line-height:1;padding:2px 6px;border-radius:4px}
+    .modal-close{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;line-height:1;padding:2px 8px;border-radius:4px}
     .modal-close:hover{background:var(--bg);color:var(--text)}
-    .modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
-    .modal-tab{padding:8px 16px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent}
+    .modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+    .modal-tab{padding:8px 16px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
     .modal-tab.active{color:var(--green);border-bottom-color:var(--green)}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
     .form-full{grid-column:1/-1}
     .field{display:flex;flex-direction:column;gap:5px}
     .field label{font-size:12px;font-weight:500;color:var(--text-2)}
-    .field input,.field select,.field textarea{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface)}
+    .field input,.field select,.field textarea{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .15s}
     .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--green)}
     .field textarea{resize:vertical;min-height:64px}
+    .section-divider{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px;grid-column:1/-1}
+    .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
 
-    /* DOCS */
+    /* ── DOCS ── */
+    .docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .doc-slot{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg)}
     .doc-slot-label{font-size:12px;font-weight:600;color:var(--text-2)}
     .doc-link-row{display:flex;gap:8px;align-items:center}
     .doc-link-input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:inherit;color:var(--text);background:var(--surface)}
-    .doc-open-btn{padding:7px 12px;background:var(--blue-light);color:var(--blue);border:1px solid #b8d4f5;border-radius:var(--radius);font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit}
+    .doc-link-input:focus{outline:none;border-color:var(--green)}
+    .doc-open-btn{padding:7px 12px;background:var(--blue-light);color:var(--blue);border:1px solid #b8d4f5;border-radius:var(--radius);font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
     .doc-open-btn:hover{background:#d0e5f9}
     .doc-open-btn:disabled{opacity:.4;cursor:default}
-    .docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .doc-note{font-size:10px;color:var(--text-3)}
 
-    /* TIMELINE */
-    .timeline{padding:0}
+    /* ── TIMELINE ── */
     .tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
     .tl-item:last-child{border-bottom:none}
     .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px}
-    .tl-content{flex:1}
-    .tl-action{font-weight:500;color:var(--text)}
+    .tl-action{font-weight:500}
     .tl-meta{font-size:11px;color:var(--text-3);margin-top:2px}
-    .tl-empty{color:var(--text-3);font-size:13px;text-align:center;padding:1rem}
+    .tl-empty{color:var(--text-3);font-size:13px;text-align:center;padding:1.5rem}
 
-    /* TOAST */
+    /* ── TOAST ── */
     .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
     .toast.show{opacity:1;transform:translateY(0)}
     .toast.success{background:var(--green)}.toast.error{background:var(--red)}
-
-    .balance-owed{color:var(--amber);font-weight:600}
-    .flag-cell{color:var(--red);font-weight:500}
 
     @media(max-width:768px){
       .dash-grid{grid-template-columns:1fr}
@@ -196,38 +202,47 @@
 </head>
 <body>
 
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <span id="loading-text">Loading…</span>
+</div>
+
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">Destiny Recruit <span>Consults</span></div>
-    <div class="login-sub">Candidate Database v2</div>
+    <div class="login-sub">Candidate Database</div>
+
     <div id="login-main">
       <form onsubmit="event.preventDefault(); doLogin();">
         <div class="login-field">
           <label>Username</label>
-          <input type="text" id="username-input" placeholder="e.g. fred" required autocomplete="username">
+          <input type="text" id="username-input" placeholder="e.g. fred" autocomplete="username">
         </div>
         <div class="login-field">
           <label>Password</label>
           <div class="pw-wrap">
-            <input type="password" id="pw-input" placeholder="Enter password" required autocomplete="current-password">
-            <button class="pw-toggle" id="pw-toggle" type="button" onclick="togglePassword()">👁</button>
+            <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password">
+            <button class="pw-toggle" id="pw-toggle" type="button" onclick="togglePassword()" title="Show/hide password">👁</button>
           </div>
           <span class="forgot-link" onclick="showForgotPassword()">Forgot password?</span>
         </div>
         <button type="submit" class="login-btn">Sign in</button>
       </form>
       <div class="login-error" id="login-error">Incorrect username or password.</div>
-      <div style="font-size:11px;color:var(--text-3);margin-top:12px;text-align:left">
-        Usernames: fred, robert, doreen, maxwell, consolata
+      <div style="font-size:11px;color:var(--text-3);margin-top:14px;text-align:left;line-height:1.7">
+        <strong>Usernames:</strong> fred · robert · doreen · maxwell · consolata
       </div>
     </div>
+
     <div id="forgot-section" style="display:none">
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;text-align:left">Forgot Password</div>
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:14px;text-align:left">Enter the admin recovery code to view all staff passwords.</div>
       <form onsubmit="event.preventDefault(); submitForgotPassword();">
-        <div style="font-size:14px;font-weight:600;margin-bottom:8px;text-align:left">Reset / View Passwords</div>
-        <div style="font-size:12px;color:var(--text-2);margin-bottom:12px;text-align:left">Enter the recovery code to view all staff passwords.</div>
         <div class="login-field">
           <label>Recovery code</label>
-          <input type="text" id="recovery-code-input" placeholder="Enter recovery code" required>
+          <input type="text" id="recovery-code-input" placeholder="Enter recovery code">
         </div>
         <button type="submit" class="login-btn">Verify code</button>
       </form>
@@ -238,6 +253,7 @@
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <div class="topbar">
     <div class="topbar-logo">DR <span>Database</span></div>
@@ -253,6 +269,8 @@
     <button class="tab-btn" id="tab-lb" onclick="switchTab('lb')">🏠 LB Jobs</button>
   </div>
   <div class="main">
+
+    <!-- DASHBOARD -->
     <div id="dash-section">
       <div id="dash-alerts"></div>
       <div class="dash-grid">
@@ -264,6 +282,8 @@
         <div class="dash-card" id="dash-lb-refunds"></div>
       </div>
     </div>
+
+    <!-- PROFESSIONAL -->
     <div id="pro-section" style="display:none">
       <div class="metrics" id="pro-metrics"></div>
       <div class="toolbar">
@@ -280,8 +300,8 @@
           <option value="TRAVELLED">Travelled</option>
         </select>
         <select id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
-        <button class="btn export" onclick="exportExcel('pro')">⬇ Export Excel</button>
-        <button class="btn" onclick="openAddStageModal('pro')">⚙ Add stage</button>
+        <button class="btn export" onclick="exportCSV('pro')">⬇ Export</button>
+        <button class="btn" onclick="addCustomStage('pro')">⚙ Add stage</button>
         <button class="btn primary" onclick="openProForm()">＋ Add candidate</button>
       </div>
       <div class="table-card">
@@ -292,12 +312,14 @@
               <th>Position</th><th>Company</th><th>Country</th><th>Stage</th>
               <th>Commission</th><th>Paid</th><th>Balance</th><th>Docs</th><th></th>
             </tr></thead>
-            <tbody id="pro-tbody"></tbody>
+            <tbody id="pro-tbody"><tr><td colspan="13"><div class="empty">Loading…</div></td></tr></tbody>
           </table>
         </div>
         <div class="pagination" id="pro-pagination"></div>
       </div>
     </div>
+
+    <!-- LB -->
     <div id="lb-section" style="display:none">
       <div class="metrics" id="lb-metrics"></div>
       <div class="toolbar">
@@ -318,8 +340,8 @@
           <option value="RETURNED">Returned</option>
           <option value="N/A">N/A (HAD PP)</option>
         </select>
-        <button class="btn export" onclick="exportExcel('lb')">⬇ Export Excel</button>
-        <button class="btn" onclick="openAddStageModal('lb')">⚙ Add status</button>
+        <button class="btn export" onclick="exportCSV('lb')">⬇ Export</button>
+        <button class="btn" onclick="addCustomStage('lb')">⚙ Add status</button>
         <button class="btn primary" onclick="openLBForm()">＋ Add candidate</button>
       </div>
       <div class="table-card">
@@ -330,16 +352,67 @@
               <th>Travel status</th><th>Travel date</th><th>To refund</th>
               <th>Refunded</th><th>Balance</th><th>Refund status</th><th>Docs</th><th></th>
             </tr></thead>
-            <tbody id="lb-tbody"></tbody>
+            <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loading…</div></td></tr></tbody>
           </table>
         </div>
         <div class="pagination" id="lb-pagination"></div>
       </div>
     </div>
+
   </div>
 </div>
 
 <!-- PRO MODAL -->
+<div class="modal-bg" id="pro-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="pro-modal-title">Add professional candidate</h3>
+      <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="pro-mtab-details" onclick="switchModalTab('pro','details',this)">Details</button>
+      <button class="modal-tab" id="pro-mtab-pipeline" onclick="switchModalTab('pro','pipeline',this)">Pipeline</button>
+      <button class="modal-tab" id="pro-mtab-commission" onclick="switchModalTab('pro','commission',this)">Commission</button>
+      <button class="modal-tab" id="pro-mtab-timeline" onclick="switchModalTab('pro','timeline',this)">Timeline</button>
+    </div>
+    <div id="pro-tab-details">
+      <div class="form-grid">
+        <div class="field form-full"><label>Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
+        <div class="field"><label>Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
+        <div class="field"><label>Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label>Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
+        <div class="field"><label>Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
+        <div class="field"><label>Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
+        <div class="field"><label>Current stage *</label><select id="pf-stage"></select></div>
+        <div class="field"><label>Date submitted</label><input type="date" id="pf-submitted"></div>
+      </div>
+    </div>
+    <div id="pro-tab-pipeline" style="display:none">
+      <div class="form-grid">
+        <div class="field"><label>Interview / selection date</label><input type="date" id="pf-interview"></div>
+        <div class="field"><label>Offer letter date</label><input type="date" id="pf-ol"></div>
+        <div class="field"><label>MOL date</label><input type="date" id="pf-mol"></div>
+        <div class="field"><label>Visa date</label><input type="date" id="pf-visa"></div>
+        <div class="field form-full"><label>Travel date</label><input type="date" id="pf-travel"></div>
+      </div>
+    </div>
+    <div id="pro-tab-commission" style="display:none">
+      <div class="form-grid">
+        <div class="field"><label>Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
+        <div class="field"><label>Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
+      </div>
+    </div>
+    <div id="pro-tab-timeline" style="display:none">
+      <div id="pro-form-timeline"><div class="tl-empty">Save the candidate first to see timeline.</div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('pro-modal')">Cancel</button>
+      <button class="btn primary" onclick="savePro()">Save candidate</button>
+    </div>
+  </div>
+</div>
+
+<!-- LB MODAL -->
 <div class="modal-bg" id="lb-modal">
   <div class="modal">
     <div class="modal-header">
@@ -347,9 +420,9 @@
       <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
     </div>
     <div class="modal-tabs">
-      <button class="modal-tab active" onclick="switchModalTab('lb','details',this)">Details</button>
-      <button class="modal-tab" onclick="switchModalTab('lb','refunds',this)">Refunds</button>
-      <button class="modal-tab" onclick="switchModalTab('lb','timeline',this)">Timeline</button>
+      <button class="modal-tab active" id="lb-mtab-details" onclick="switchModalTab('lb','details',this)">Details</button>
+      <button class="modal-tab" id="lb-mtab-refunds" onclick="switchModalTab('lb','refunds',this)">Refunds</button>
+      <button class="modal-tab" id="lb-mtab-timeline" onclick="switchModalTab('lb','timeline',this)">Timeline</button>
     </div>
     <div id="lb-tab-details">
       <div class="form-grid">
@@ -363,15 +436,9 @@
             <option value="PUSHED">Pushed</option>
           </select>
         </div>
-        <div class="field"><label>Travel status</label>
-          <select id="lf-travel">
-            <option value="NOT YET">Not yet</option>
-            <option value="TRAVELLED">Travelled</option>
-            <option value="NOT TRAVELLED">Not travelled</option>
-          </select>
-        </div>
+        <div class="field"><label>Travel status</label><select id="lf-travel"></select></div>
         <div class="field"><label>Travel date</label><input type="date" id="lf-tdate"></div>
-        <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="e.g. RETURNED or any note"></div>
+        <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
       </div>
     </div>
     <div id="lb-tab-refunds" style="display:none">
@@ -384,7 +451,7 @@
       </div>
     </div>
     <div id="lb-tab-timeline" style="display:none">
-      <div class="timeline" id="lb-form-timeline"><div class="tl-empty">Save candidate first to see timeline.</div></div>
+      <div id="lb-form-timeline"><div class="tl-empty">Save the candidate first to see timeline.</div></div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('lb-modal')">Cancel</button>
@@ -393,6 +460,7 @@
   </div>
 </div>
 
+<!-- DOCS MODAL -->
 <div class="modal-bg" id="docs-modal">
   <div class="modal" style="max-width:640px">
     <div class="modal-header">
@@ -400,7 +468,7 @@
       <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
     </div>
     <p style="font-size:12px;color:var(--text-3);margin-bottom:1rem">
-      Paste Google Drive share links for each document. 
+      Paste a Google Drive share link for each document.
       <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link →</a>
     </p>
     <div class="docs-grid" id="docs-grid"></div>
@@ -413,7 +481,9 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
