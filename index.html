@@ -58,7 +58,6 @@
       border: 1px solid rgba(255, 255, 255, 0.6);
     }
 
-    /* Close Window Icon Accent from reference */
     .window-close-accent {
       position: absolute;
       top: 24px;
@@ -95,7 +94,6 @@
       position: relative;
     }
 
-    /* Brand Logo styling matching reference image label style */
     .brand-tag {
       align-self: flex-start;
       background: #FFFFFF;
@@ -134,7 +132,6 @@
       font-weight: 500;
     }
 
-    /* Inputs Layout */
     .input-group {
       margin-bottom: 18px;
       text-align: left;
@@ -203,7 +200,6 @@
       text-decoration: underline;
     }
 
-    /* Actions & Buttons */
     .submit-btn {
       width: 100%;
       height: 48px;
@@ -226,7 +222,6 @@
       box-shadow: 0 10px 24px rgba(245, 196, 83, 0.35);
     }
 
-    /* Quick Help Section underneath matching reference buttons layout */
     .quick-auth-chips {
       display: flex;
       gap: 12px;
@@ -255,7 +250,6 @@
       border-color: #D2C0A5;
     }
 
-    /* Footer Meta */
     .form-footer-meta {
       display: flex;
       justify-content: space-between;
@@ -275,7 +269,6 @@
       text-decoration: underline;
     }
 
-    /* Error Alert */
     .alert-banner {
       background: #FCEBEB;
       border: 1px solid #EFA3A3;
@@ -290,7 +283,7 @@
     }
 
     /* ══════════════════════════════════════════════════════════
-       RIGHT PANEL: BEAUTIFUL INTEGRATED INFOGRAPHIC
+       RIGHT PANEL: INFOGRAPHIC GRAPHICS
        ══════════════════════════════════════════════════════════ */
     .media-panel {
       flex: 1.1;
@@ -300,20 +293,15 @@
       background-position: center;
       position: relative;
       overflow: hidden;
-      /* Using a modern, clean professional collaborative imagery link tailored to staffing consultancies */
       background-image: url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80');
     }
 
-    /* Smooth darkening overlay to pop widgets like reference design */
     .media-overlay {
       position: absolute;
       inset: 0;
       background: linear-gradient(to bottom, rgba(30,30,28,0.2) 0%, rgba(30,30,28,0.5) 100%);
     }
 
-    /* ── WIDGETS LAYOUT (Mirroring Reference Visuals Exactly) ── */
-    
-    /* Yellow floating Task review badge top left */
     .widget-task {
       position: absolute;
       top: 35px;
@@ -337,7 +325,6 @@
       color: rgba(0, 0, 0, 0.6);
     }
 
-    /* Transparent Secondary dark pill behind it */
     .widget-pill-back {
       position: absolute;
       top: 75px;
@@ -352,14 +339,13 @@
       z-index: 1;
     }
 
-    /* Team Circular Avatars positioned in the middle right aspect */
     .widget-team-stack {
       position: absolute;
       right: 35px;
       top: 220px;
       display: flex;
       flex-direction: column;
-      gap: -10px; /* Overlap effect */
+      gap: -10px;
       align-items: center;
     }
     .avatar-circle {
@@ -371,14 +357,8 @@
       background-position: center;
       box-shadow: 0 6px 15px rgba(0,0,0,0.15);
       margin-bottom: -12px;
-      transition: transform 0.2s;
-    }
-    .avatar-circle:hover {
-      transform: scale(1.1) translateX(-4px);
-      z-index: 5;
     }
 
-    /* Bottom Section Layout containing Calendar row & Daily Meeting details */
     .bottom-widgets-container {
       position: absolute;
       bottom: 35px;
@@ -389,7 +369,6 @@
       gap: 16px;
     }
 
-    /* Week Schedule Row Widget */
     .widget-calendar-strip {
       background: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(12px);
@@ -422,7 +401,6 @@
       padding: 2px 0;
     }
 
-    /* Floating white summary card at the very bottom left */
     .widget-summary-card {
       background: #FFFFFF;
       border-radius: 16px;
@@ -456,7 +434,6 @@
       margin-right: -6px;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 900px) {
       .app-window {
         height: auto;
@@ -476,12 +453,10 @@
   <div class="app-window">
     <div class="window-close-accent" title="Minimize Window">×</div>
 
-    <!-- LEFT PANEL: ACCESS CONTROLS -->
     <div class="form-panel">
       <div class="brand-tag">Destiny Recruit Consults</div>
 
       <div class="form-content-area">
-        <!-- Main Form Entry -->
         <div id="login-main-form">
           <div class="form-header">
             <h1>Sign in to Portal</h1>
@@ -516,7 +491,6 @@
           </div>
         </div>
 
-        <!-- Hidden Forgot Password / Recovery View Section -->
         <div id="recovery-main-view" style="display: none;">
           <div class="form-header">
             <h1>Credentials Reset</h1>
@@ -534,51 +508,44 @@
           </form>
 
           <div class="alert-banner" id="recovery-error-banner">Invalid system recovery parameter.</div>
-          <div id="recovery-success-box" style="display:none; background:#F0FAED; border:1px solid #A3E2AB; padding:12px; border-radius:16px; margin-top:14px; font-size:11px; text-align:left; max-height:160px; overflow-y:auto;"></div>
+          <div id="recovery-success-box" style="display:none; background:#F0FAED; border:1px solid #A3E2AB; padding:12px; border-radius:16px; margin-top:14px; font-size:11px; text-align:left;"></div>
 
           <a href="#" class="forgot-link-btn" style="text-align:center; margin-top:16px;" onclick="event.preventDefault(); hideRecoveryView();">← Back to standard login</a>
         </div>
       </div>
 
-      <!-- Bottom Layout Footer Links -->
       <div class="form-footer-meta">
         <span>System Version v3.4.1</span>
         <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
       </div>
     </div>
 
-    <!-- RIGHT PANEL: PREMIUM DATA INFOGRAPHIC OVERLAYS -->
     <div class="media-panel">
       <div class="media-overlay"></div>
 
-      <!-- Yellow Task Banner -->
       <div class="widget-task">
         <h4>Professional Job Review</h4>
         <p>Deployment Schedule: 09:30am</p>
       </div>
       <div class="widget-pill-back">Next batch setup overview</div>
 
-      <!-- Floating User Avatars on Right Wall -->
       <div class="widget-team-stack">
         <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80')"></div>
         <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80')"></div>
         <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80')"></div>
       </div>
 
-      <!-- Calendar and bottom cards area -->
       <div class="bottom-widgets-container">
-        <!-- Grid Schedule Strip -->
         <div class="widget-calendar-strip">
           <div class="calendar-day"><div class="day-label">Sun</div><div class="day-num">22</div></div>
           <div class="calendar-day"><div class="day-label">Mon</div><div class="day-num">23</div></div>
-          <div class="calendar-day active-day"><div class="day-label">Tue</div><div class="day-num">24</div></div>
+          <div class="calendar-day active-day"><div class="day-filter">Tue</div><div class="day-num">24</div></div>
           <div class="calendar-day"><div class="day-label">Wed</div><div class="day-num">25</div></div>
           <div class="calendar-day"><div class="day-label">Thu</div><div class="day-num">26</div></div>
           <div class="calendar-day"><div class="day-label">Fri</div><div class="day-num">27</div></div>
           <div class="calendar-day"><div class="day-label">Sat</div><div class="day-num">28</div></div>
         </div>
 
-        <!-- Soft Summary Bottom Left Card -->
         <div class="widget-summary-card">
           <h4>LB Candidate Processing</h4>
           <p>Passports Tracked: 98 Active</p>
@@ -593,18 +560,7 @@
     </div>
   </div>
 
-  <!-- INTERACTION HOOKS TIERED INTEGRATION TO CORE APP.JS -->
   <script>
-    // Local copy of account structures mapping directly to app.js values
-    const STAFF_ACCOUNTS = {
-      fred:      { password: 'Destiny@2025', role: 'admin',  display: 'Fred 👑' },
-      robert:    { password: 'Robert@2025',  role: 'staff',  display: 'Robert'  },
-      doreen:    { password: 'Doreen@2025',  role: 'staff',  display: 'Doreen'  },
-      maxwell:   { password: 'Maxwell@2025', role: 'staff',  display: 'Maxwell' },
-      consolata: { password: 'Consol@2025',  role: 'staff',  display: 'Consolata'},
-    };
-    const MASTER_KEY = 'DR-RESET-2025';
-
     function togglePasswordVisibility() {
       const field = document.getElementById('pass-input');
       const icon = document.getElementById('eye-icon');
@@ -620,8 +576,6 @@
     function showRecoveryView() {
       document.getElementById('login-main-form').style.display = 'none';
       document.getElementById('recovery-main-view').style.display = 'block';
-      document.getElementById('recovery-error-banner').style.display = 'none';
-      document.getElementById('recovery-success-box').style.display = 'none';
     }
 
     function hideRecoveryView() {
@@ -634,32 +588,49 @@
       const p = document.getElementById('pass-input').value.trim();
       const err = document.getElementById('error-banner');
 
-      const account = STAFF_ACCOUNTS[u];
-      if (account && account.password === p) {
-        err.style.display = 'none';
+      // 1. Locate original inputs inside index.html's original unstyled login form
+      const oldUserInput = document.getElementById('username-input');
+      const oldPassInput = document.getElementById('pw-input');
+
+      if (oldUserInput && oldPassInput) {
+        // 2. Safely populate old hidden inputs with the new layout values
+        oldUserInput.value = u;
+        oldPassInput.value = p;
         
-        // If embedded alongside your core app page, synchronize values instantly and bypass modal popups:
-        const coreUserField = document.getElementById('username-input');
-        const corePassField = document.getElementById('pw-input');
-        
-        if (coreUserField && corePassField && typeof window.doLogin === 'function') {
-          coreUserField.value = u;
-          corePassField.value = p;
+        // 3. Trigger your original application verification pipeline instantly
+        if (typeof window.doLogin === 'function') {
           window.doLogin();
-        } else {
-          // Alternative fallback code route if elements are decoupled:
-          sessionStorage.setItem('dr_user', JSON.stringify({ username: u, ...account }));
-          const loginScreen = document.getElementById('login-screen');
-          const mainAppLayout = document.getElementById('app');
-          const chip = document.getElementById('user-chip');
           
-          if (loginScreen) loginScreen.style.display = 'none';
-          if (mainAppLayout) mainAppLayout.style.display = 'block';
-          if (chip) chip.textContent = account.display;
-          if (typeof window.loadAllData === 'function') window.loadAllData();
+          // Double-check if the original app login threw an error message inside index.html
+          const originalError = document.getElementById('login-error');
+          if (originalError && originalError.style.display === 'block') {
+            err.style.display = 'block';
+          } else {
+            err.style.display = 'none';
+          }
         }
       } else {
-        err.style.display = 'block';
+        // Fallback option if tested in a sandbox layout environment
+        const STAFF_ACCOUNTS = {
+          fred:      { password: 'Destiny@2025', display: 'Fred 👑' },
+          robert:    { password: 'Robert@2025',  display: 'Robert'  },
+          doreen:    { password: 'Doreen@2025',  display: 'Doreen'  },
+          maxwell:   { password: 'Maxwell@2025', display: 'Maxwell' },
+          consolata: { password: 'Consol@2025',  display: 'Consolata'}
+        };
+        const matched = STAFF_ACCOUNTS[u];
+        if (matched && matched.password === p) {
+          err.style.display = 'none';
+          sessionStorage.setItem('dr_user', JSON.stringify({ username: u, ...matched }));
+          
+          // Hide login screen completely and activate application space container
+          if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
+          if (document.getElementById('app')) document.getElementById('app').style.display = 'block';
+          if (document.getElementById('user-chip')) document.getElementById('user-chip').textContent = matched.display;
+          if (typeof window.loadAllData === 'function') window.loadAllData();
+        } else {
+          err.style.display = 'block';
+        }
       }
     }
 
@@ -668,9 +639,9 @@
       const fail = document.getElementById('recovery-error-banner');
       const pass = document.getElementById('recovery-success-box');
 
-      if (entered === MASTER_KEY) {
+      if (entered === 'DR-RESET-2025') {
         fail.style.display = 'none';
-        pass.innerHTML = `<strong>Verification Accepted. System Credentials:</strong><br>
+        pass.innerHTML = `<strong>Verification Code Accepted:</strong><br>
           • fred — Destiny@2025<br>
           • robert — Robert@2025<br>
           • doreen — Doreen@2025<br>
