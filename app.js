@@ -405,7 +405,7 @@ function stageBadge(s) {
     'PENDING OFFER LETTER':'b-pol','PENDING MOL':'b-mol',
     'PENDING VISA':'b-visa','PENDING TRAVEL':'b-travel','TRAVELLED':'b-travelled'
   };
-  return `<span class="badge ${map[s]||'b-na'}">${s.replace('PENDING ','')}</span>`;
+  return `<span class="badge ${map[s]||'b-na'}">${s}</span>`;
 }
 function travelBadge(s) {
   const map = {'TRAVELLED':'b-travelled','NOT YET':'b-notyet','NOT TRAVELLED':'b-nottravelled'};
@@ -414,10 +414,6 @@ function travelBadge(s) {
 function refundBadge(s) {
   const map = {complete:'b-complete',incomplete:'b-incomplete',RETURNED:'b-returned','N/A':'b-na'};
   return `<span class="badge ${map[s]||'b-na'}">${s}</span>`;
-}
-function docCount(type, id) {
-  const d = allDocs[`${type}_${id}`] || {};
-  return Object.values(d).filter(v => v && v.trim()).length;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -456,11 +452,18 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 // STAGES
 // ══════════════════════════════════════════════════════════
 function rebuildStageSelects() {
+  const ADD_NEW = '__add_new__';
   const proSel = document.getElementById('pf-stage');
-  if (proSel) proSel.innerHTML = proStages.map(s => `<option value="${s}">${s}</option>`).join('');
+  if (proSel) {
+    proSel.innerHTML = proStages.map(s => `<option value="${s}">${s}</option>`).join('')
+      + `<option value="${ADD_NEW}">+ Add new stage…</option>`;
+  }
 
   const lbSel = document.getElementById('lf-travel');
-  if (lbSel) lbSel.innerHTML = lbStages.map(s => `<option value="${s}">${s}</option>`).join('');
+  if (lbSel) {
+    lbSel.innerHTML = lbStages.map(s => `<option value="${s}">${s}</option>`).join('')
+      + `<option value="${ADD_NEW}">+ Add new status…</option>`;
+  }
 
   const proFilter = document.getElementById('pro-stage-f');
   if (proFilter) {
@@ -476,6 +479,39 @@ function rebuildStageSelects() {
       lbStages.map(s => `<option value="${s}">${s}</option>`).join('');
     lbFilter.value = cur;
   }
+}
+
+// Handles "+ Add new stage…" selected inline inside the Add/Edit candidate form
+function handleStageSelectChange(type, selectEl) {
+  if (selectEl.value !== '__add_new__') return;
+  const previous = selectEl.dataset.prev || (type === 'pro' ? proStages[0] : lbStages[0]);
+  const label = type === 'pro' ? 'professional stage' : 'LB travel status';
+  const name  = (prompt(`Enter new ${label} name:`) || '').trim().toUpperCase();
+  if (!name) { selectEl.value = previous; return; }
+  if (type === 'pro') {
+    if (proStages.includes(name)) {
+      if (name !== previous) showToast('Already exists','error');
+      selectEl.value = proStages.includes(name) ? name : previous;
+    } else {
+      proStages.splice(proStages.indexOf('TRAVELLED'), 0, name);
+      rebuildStageSelects();
+      selectEl.value = name;
+      saveStages();
+      showToast(`"${name}" added ✓`, 'success');
+    }
+  } else {
+    if (lbStages.includes(name)) {
+      selectEl.value = lbStages.includes(name) ? name : previous;
+      if (name !== previous) showToast('Already exists','error');
+    } else {
+      lbStages.push(name);
+      rebuildStageSelects();
+      selectEl.value = name;
+      saveStages();
+      showToast(`"${name}" added ✓`, 'success');
+    }
+  }
+  selectEl.dataset.prev = selectEl.value;
 }
 
 function addCustomStage(type) {
@@ -494,37 +530,11 @@ function addCustomStage(type) {
   showToast(`"${name}" added ✓`, 'success');
 }
 
+
 // ══════════════════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════════════════
 function renderDash() {
-  // Alerts
-  const alerts = [];
-  proDB.forEach(r => {
-    if (isInProcessPro(r)) {
-      const lastDate = norm(r,'visa','visa') || norm(r,'mol','mol') || norm(r,'ol','ol') || norm(r,'submitted','submitted');
-      const days = daysSince(lastDate);
-      if (days && days > 60) alerts.push({ level:'red', name:r.name, msg:`Stuck at "${r.stage}" for ${days} days` });
-    }
-  });
-  lbDB.forEach(r => {
-    if (getRefundStatus(r) === 'incomplete' && (r.travelStatus||r.travel_status) === 'TRAVELLED') {
-      const days = daysSince(r.r1Date || r.r1_date || r.travelDate || r.travel_date);
-      if (days && days > 30) {
-        const toR  = Number(r.toRefund||r.to_refund)||0;
-        const paid = (Number(r.r1Amt||r.r1_amt)||0) + (Number(r.r2Amt||r.r2_amt)||0);
-        alerts.push({ level:'amber', name:r.name, msg:`Refund overdue ${days} days — $${toR-paid} owed` });
-      }
-    }
-  });
-  document.getElementById('dash-alerts').innerHTML = alerts.length
-    ? `<div class="alerts-card"><h3>⚠️ Alerts (${alerts.length})</h3>` +
-      alerts.slice(0,10).map(a =>
-        `<div class="alert-row"><div class="alert-dot ${a.level}"></div>
-        <div><div class="alert-name">${a.name}</div><div class="alert-msg">${a.msg}</div></div></div>`
-      ).join('') + '</div>'
-    : `<div class="alerts-card"><h3>✅ Alerts</h3><div class="no-alerts">All clear — no issues detected!</div></div>`;
-
   // Pro summary
   const proTravelled  = proDB.filter(r => r.stage === 'TRAVELLED').length;
   const proInProcess  = proDB.filter(isInProcessPro).length;
@@ -633,12 +643,10 @@ function renderPro() {
       const paid = r.paid ? 'KES '+Number(r.paid).toLocaleString() : '—';
       const bal  = (r.commission && r.paid) ? Number(r.commission)-Number(r.paid) : null;
       const balTxt = bal !== null ? 'KES '+bal.toLocaleString() : '—';
-      const dc = docCount('pro', r.id);
-      const days = isInProcessPro(r) ? daysSince(r.visa||r.mol||r.ol||r.submitted) : null;
-      const warn = (days && days > 60) ? ' <span title="Stuck '+days+' days" style="color:var(--red)">⚠</span>' : '';
+      const hd = hasDocs('pro', r.id);
       return `<tr>
         <td>${(proPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell">${r.name}${warn}</td>
+        <td class="name-cell">${r.name}</td>
         <td>${r.pp||'—'}</td>
         <td>${r.phone||'—'}</td>
         <td>${r.position||'—'}</td>
@@ -648,7 +656,7 @@ function renderPro() {
         <td>${comm}</td>
         <td>${paid}</td>
         <td class="${bal&&bal>0?'balance-owed':''}">${balTxt}</td>
-        <td><button class="action-btn docs" onclick="openDocs('pro',${r.id},'${r.name.replace(/'/g,"\\'")}')">📎${dc?` <small>${dc}</small>`:''}</button></td>
+        <td><button class="action-btn docs" onclick="openDocs('pro',${r.id},'${r.name.replace(/'/g,"\\'")}')" title="${hd?'View/edit documents':'Add documents'}">${hd?'📎✅':'📎'}</button></td>
         <td style="white-space:nowrap">
           <button class="action-btn" onclick="editPro(${r.id})">✏️</button>
           <button class="action-btn del" onclick="deletePro(${r.id})">🗑</button>
@@ -665,7 +673,7 @@ function openProForm() {
    'pf-submitted','pf-interview','pf-ol','pf-mol','pf-visa','pf-travel','pf-comm','pf-paid']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   const stageEl = document.getElementById('pf-stage');
-  if (stageEl) stageEl.value = proStages[0] || 'PENDING OFFER LETTER';
+  if (stageEl) { stageEl.value = proStages[0] || 'PENDING OFFER LETTER'; stageEl.dataset.prev = stageEl.value; }
   document.getElementById('pro-form-timeline').innerHTML = '<div class="tl-empty">Save candidate first to see timeline.</div>';
   // reset to first tab
   document.getElementById('pro-tab-details').style.display = '';
@@ -686,7 +694,7 @@ function editPro(id) {
   document.getElementById('pf-position').value = r.position||'';
   document.getElementById('pf-company').value  = r.company||'';
   document.getElementById('pf-country').value  = r.country||'';
-  document.getElementById('pf-stage').value    = r.stage;
+  { const el = document.getElementById('pf-stage'); el.value = r.stage; el.dataset.prev = r.stage; }
   document.getElementById('pf-comm').value     = r.commission||'';
   document.getElementById('pf-paid').value     = r.paid||'';
   document.getElementById('pf-submitted').value  = toInput(r.submitted);
@@ -797,11 +805,10 @@ function renderLB() {
       const paid = (Number(r.r1Amt||r.r1_amt)||0) + (Number(r.r2Amt||r.r2_amt)||0);
       const bal  = (rs==='N/A'||rs==='RETURNED') ? '—' : '$'+(toR-paid);
       const td   = r.travelDate || r.travel_date;
-      const dc   = docCount('lb', r.id);
-      const overdue = rs==='incomplete' && ts==='TRAVELLED' && daysSince(r.r1Date||r.r1_date||td)>30;
+      const hd   = hasDocs('lb', r.id);
       return `<tr>
         <td>${(lbPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell">${r.name}${overdue?' <span style="color:var(--red)" title="Overdue">⚠</span>':''}</td>
+        <td class="name-cell">${r.name}</td>
         <td>${r.phone||'—'}</td>
         <td>${r.ppStatus||r.pp_status||'—'}</td>
         <td>${travelBadge(ts)}</td>
@@ -810,7 +817,7 @@ function renderLB() {
         <td>${rs==='N/A'?'—':'$'+paid}</td>
         <td class="${rs==='incomplete'?'balance-owed':''}">${bal}</td>
         <td>${refundBadge(rs)}</td>
-        <td><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${r.name.replace(/'/g,"\\'")}')">📎${dc?` <small>${dc}</small>`:''}</button></td>
+        <td><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${r.name.replace(/'/g,"\\'")}')" title="${hd?'View/edit documents':'Add documents'}">${hd?'📎✅':'📎'}</button></td>
         <td style="white-space:nowrap">
           <button class="action-btn" onclick="editLB(${r.id})">✏️</button>
           <button class="action-btn del" onclick="deleteLB(${r.id})">🗑</button>
@@ -826,7 +833,7 @@ function openLBForm() {
   ['lf-name','lf-phone','lf-tdate','lf-torefund','lf-r1date','lf-r1amt','lf-r2date','lf-r2amt','lf-notes']
     .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('lf-pp').value     = 'APPLIED';
-  document.getElementById('lf-travel').value = lbStages[0] || 'NOT YET';
+  { const el = document.getElementById('lf-travel'); el.value = lbStages[0] || 'NOT YET'; el.dataset.prev = el.value; }
   document.getElementById('lb-form-timeline').innerHTML = '<div class="tl-empty">Save candidate first to see timeline.</div>';
   document.getElementById('lb-tab-details').style.display = '';
   ['refunds','timeline'].forEach(t => document.getElementById(`lb-tab-${t}`).style.display='none');
@@ -841,7 +848,7 @@ function editLB(id) {
   document.getElementById('lf-name').value    = r.name;
   document.getElementById('lf-phone').value   = r.phone||'';
   document.getElementById('lf-pp').value      = r.ppStatus||r.pp_status||'APPLIED';
-  document.getElementById('lf-travel').value  = r.travelStatus||r.travel_status||'NOT YET';
+  { const el = document.getElementById('lf-travel'); el.value = r.travelStatus||r.travel_status||'NOT YET'; el.dataset.prev = el.value; }
   document.getElementById('lf-tdate').value   = toInput(r.travelDate||r.travel_date);
   document.getElementById('lf-torefund').value= r.toRefund||r.to_refund||'';
   document.getElementById('lf-r1date').value  = toInput(r.r1Date||r.r1_date);
@@ -903,53 +910,46 @@ async function deleteLB(id) {
 }
 
 // ══════════════════════════════════════════════════════════
-// DOCUMENTS
+// DOCUMENTS — one combined Google Drive link per candidate
 // ══════════════════════════════════════════════════════════
-const PRO_DOC_SLOTS = ['Passport','National ID','Offer Letter','MOL / Work Permit','Visa','Medical Certificate','Other'];
-const LB_DOC_SLOTS  = ['Passport','National ID','Visa / Travel Docs','Other'];
+function hasDocs(type, id) {
+  const v = allDocs[`${type}_${id}`];
+  return typeof v === 'string' && v.trim().length > 0;
+}
 
 function openDocs(type, id, name) {
   docsTarget = { type, id, name };
   document.getElementById('docs-modal-title').textContent = `Documents — ${name}`;
-  const existing = allDocs[`${type}_${id}`] || {};
-  const slots    = type === 'pro' ? PRO_DOC_SLOTS : LB_DOC_SLOTS;
-  document.getElementById('docs-grid').innerHTML = slots.map(slot => {
-    const key = slot.replace(/\s+/g,'_').replace(/\//g,'-');
-    const val = existing[slot] || '';
-    return `<div class="doc-slot">
-      <div class="doc-slot-label">${slot}</div>
-      <div class="doc-link-row">
-        <input class="doc-link-input" type="text" id="doc_${key}" placeholder="Paste Google Drive link…" value="${val}">
-        <button class="doc-open-btn" ${!val?'disabled':''} onclick="openDocLink('${key}')">Open</button>
-      </div>
-      <div class="doc-note">Drive → Share → Anyone with the link → Copy link</div>
-    </div>`;
-  }).join('');
+  let existing = allDocs[`${type}_${id}`];
+  if (typeof existing !== 'string') existing = '';
+  const input = document.getElementById('docs-link-input');
+  const openBtn = document.getElementById('docs-open-btn');
+  input.value = existing;
+  openBtn.disabled = !existing.trim();
   document.getElementById('docs-modal').classList.add('open');
 }
 
-function openDocLink(key) {
-  const val = (document.getElementById('doc_'+key)||{}).value||'';
-  if (val.trim()) window.open(val.trim(), '_blank');
+function onDocsLinkInput() {
+  const val = document.getElementById('docs-link-input').value.trim();
+  document.getElementById('docs-open-btn').disabled = !val;
+}
+
+function openCurrentDocLink() {
+  const val = document.getElementById('docs-link-input').value.trim();
+  if (val) window.open(val, '_blank');
 }
 
 async function saveDocs() {
   if (!docsTarget) return;
   const { type, id } = docsTarget;
-  const slots = type === 'pro' ? PRO_DOC_SLOTS : LB_DOC_SLOTS;
-  const docs = {};
-  slots.forEach(slot => {
-    const key = slot.replace(/\s+/g,'_').replace(/\//g,'-');
-    const el  = document.getElementById('doc_'+key);
-    if (el && el.value.trim()) docs[slot] = el.value.trim();
-  });
+  const link = document.getElementById('docs-link-input').value.trim();
   const dbKey = `${type}_${id}`;
-  allDocs[dbKey] = docs;
-  addTimeline(type, id, 'Documents updated');
+  allDocs[dbKey] = link;
+  addTimeline(type, id, link ? 'Documents link updated' : 'Documents link removed');
   closeModal('docs-modal');
   showToast('Documents saved ✓','success');
   if (type==='pro') renderPro(); else renderLB();
-  await saveDocsToDB(dbKey, docs);
+  await saveDocsToDB(dbKey, link);
 }
 
 // ══════════════════════════════════════════════════════════
