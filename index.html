@@ -3,319 +3,574 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DR Database Login — Destiny Recruit Consults</title>
+  <title>DR Database — Destiny Recruit Consults</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --font-main: 'Plus Jakarta Sans', sans-serif;
-      --gold-primary: #F5C453;
-      --gold-hover: #E4B33E;
-      --gold-muted: #FDF6E2;
-      --bg-dark: #1E1E1C;
-      --text-dark: #2A2A28;
-      --text-muted: #7A7A77;
-      --border-color: #E6E4DD;
-      --glass-bg: rgba(255, 255, 255, 0.85);
-      --radius-pill: 30px;
-      --radius-card: 24px;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --gold:#C9A227;--gold-dark:#A8841C;--gold-light:#FBF3DC;--gold-lighter:#FDF8EC;
+      --charcoal:#262420;
+      --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
+      --amber:#BA7517;--amber-light:#FAEEDA;
+      --blue:#185FA5;--blue-light:#E6F1FB;
+      --red:#A32D2D;--red-light:#FCEBEB;
+      --purple-light:#EEEDFE;--purple:#3C3489;
+      --pink-light:#FBEAF0;--pink:#993556;
+      --gray-light:#F1EFE8;--gray:#5F5E5A;
+      --bg:#F7F7F5;--surface:#FFFFFF;
+      --border:#E2E0D8;
+      --text:#1A1A18;--text-2:#555550;--text-3:#888780;
+      --radius:8px;--radius-lg:12px;
     }
-    body {
-      font-family: var(--font-main);
-      background-color: #E2E1DC;
-      color: var(--text-dark);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      overflow-x: hidden;
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+
+    /* ── LOGIN (new design) ── */
+    #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-color:#E2E1DC;font-family:'Plus Jakarta Sans',sans-serif}
+    .lp-window{background:linear-gradient(145deg,#F9F8F3 0%,#F1EFE6 100%);width:100%;max-width:1100px;height:720px;border-radius:24px;box-shadow:0 30px 70px rgba(0,0,0,.12);display:flex;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.6)}
+    .lp-form-panel{flex:1.1;padding:50px 65px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
+    .lp-brand-tag{align-self:flex-start;background:#fff;border:1px solid #E6E4DD;border-radius:30px;padding:8px 20px;font-size:13px;font-weight:600;letter-spacing:.02em;color:#2A2A28;box-shadow:0 2px 6px rgba(0,0,0,.02)}
+    .lp-content-area{max-width:360px;width:100%;margin:0 auto}
+    .lp-header{margin-bottom:32px;text-align:center}
+    .lp-header h1{font-size:28px;font-weight:700;color:#2A2A28;letter-spacing:-.02em;margin-bottom:6px}
+    .lp-header p{font-size:14px;color:#7A7A77;font-weight:500}
+    .lp-input-group{margin-bottom:18px;text-align:left}
+    .lp-input-group label{display:block;font-size:12px;font-weight:600;color:#7A7A77;margin-left:16px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
+    .lp-input-wrap{position:relative;display:flex;align-items:center}
+    .lp-input-wrap input{width:100%;height:48px;background:#fff;border:1px solid #E6E4DD;border-radius:30px;padding:0 22px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;color:#2A2A28;transition:all .25s;box-shadow:inset 0 2px 4px rgba(0,0,0,.01)}
+    .lp-input-wrap input:focus{outline:none;border-color:#D2C0A5;box-shadow:0 0 0 4px rgba(245,196,83,.15)}
+    .lp-pw-toggle{position:absolute;right:18px;background:none;border:none;cursor:pointer;font-size:16px;color:#7A7A77}
+    .lp-forgot{display:block;text-align:right;font-size:12px;color:#7A7A77;text-decoration:none;margin-top:6px;margin-right:14px;font-weight:500;cursor:pointer}
+    .lp-forgot:hover{color:#2A2A28;text-decoration:underline}
+    .lp-submit{width:100%;height:48px;background:#F5C453;color:#2A2A28;border:none;border-radius:30px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 8px 20px rgba(245,196,83,.25);transition:all .2s cubic-bezier(.16,1,.3,1)}
+    .lp-submit:hover{background:#E4B33E;transform:translateY(-1px);box-shadow:0 10px 24px rgba(245,196,83,.35)}
+    .lp-chips{display:flex;gap:12px;margin-top:16px}
+    .lp-chip{flex:1;height:42px;background:#fff;border:1px solid #E6E4DD;border-radius:30px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:#2A2A28;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:default}
+    .lp-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#7A7A77;font-weight:500}
+    .lp-footer a{color:#7A7A77;text-decoration:none;font-weight:600}
+    .lp-footer a:hover{color:#2A2A28;text-decoration:underline}
+    .lp-alert{background:#FCEBEB;border:1px solid #EFA3A3;color:#A32D2D;padding:10px 16px;border-radius:30px;font-size:12px;font-weight:500;text-align:center;margin-top:14px;display:none}
+    .lp-success{background:#F0FAED;border:1px solid #A3E2AB;padding:12px;border-radius:16px;margin-top:14px;font-size:11px;text-align:left;display:none}
+    .lp-media{flex:1.1;margin:14px;border-radius:20px;background-size:cover;background-position:center;position:relative;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80')}
+    .lp-media-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(30,30,28,.2) 0%,rgba(30,30,28,.5) 100%)}
+    .lp-widget-task{position:absolute;top:35px;left:35px;background:#F5C453;padding:12px 18px;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.15);max-width:190px;z-index:2}
+    .lp-widget-task h4{font-size:12px;font-weight:700;color:#2A2A28;margin-bottom:2px}
+    .lp-widget-task p{font-size:10px;font-weight:500;color:rgba(0,0,0,.6)}
+    .lp-widget-pill{position:absolute;top:75px;left:80px;background:rgba(30,30,28,.65);backdrop-filter:blur(8px);padding:6px 14px;border-radius:10px;font-size:9px;color:rgba(255,255,255,.7);font-weight:500;z-index:1}
+    .lp-bottom{position:absolute;bottom:35px;left:35px;right:35px;display:flex;flex-direction:column;gap:16px}
+    .lp-cal{background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;color:#fff}
+    .lp-cal-day{text-align:center;flex:1}
+    .lp-cal-day .dl{font-size:10px;opacity:.7;text-transform:uppercase;font-weight:500;margin-bottom:4px}
+    .lp-cal-day .dn{font-size:13px;font-weight:600}
+    .lp-cal-day.act{background:rgba(255,255,255,.25);border-radius:10px;padding:2px 0}
+    .lp-summary{background:#fff;border-radius:16px;padding:16px;box-shadow:0 15px 35px rgba(0,0,0,.15);max-width:240px}
+    .lp-summary h4{font-size:13px;font-weight:700;color:#2A2A28;margin-bottom:2px}
+    .lp-summary p{font-size:11px;color:#7A7A77;font-weight:500;margin-bottom:10px}
+    .lp-avatars{display:flex;align-items:center}
+    .lp-av{width:22px;height:22px;border-radius:50%;border:1.5px solid #fff;background-size:cover;margin-right:-6px}
+    /* recovery-result reused from app.js styles */
+    .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
+    .recovery-result{background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
+    @media(max-width:900px){
+      #login-screen{padding:0}
+      .lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}
+      .lp-media{display:none}
+      .lp-form-panel{padding:40px 30px}
     }
-    .app-window {
-      background: linear-gradient(145deg, #F9F8F3 0%, #F1EFE6 100%);
-      width: 100%;
-      max-width: 1100px;
-      height: 720px;
-      border-radius: var(--radius-card);
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.12);
-      display: flex;
-      overflow: hidden;
-      position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-    .window-close-accent {
-      position: absolute; top: 24px; right: 24px; width: 32px; height: 32px;
-      border-radius: 50%; background: #FFFFFF; display: flex; align-items: center;
-      justify-content: center; font-size: 14px; color: var(--text-dark); cursor: pointer;
-      z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
-      transition: all 0.2s ease;
-    }
-    .window-close-accent:hover { transform: scale(1.05); background: #FAF8F5; }
-    .form-panel {
-      flex: 1.1; padding: 50px 65px; display: flex; flex-direction: column;
-      justify-content: space-between; position: relative;
-    }
-    .brand-tag {
-      align-self: flex-start; background: #FFFFFF; border: 1px solid var(--border-color);
-      border-radius: var(--radius-pill); padding: 8px 20px; font-size: 13px; font-weight: 600;
-      letter-spacing: 0.02em; color: var(--text-dark); box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-    }
-    .form-content-area { max-width: 360px; width: 100%; margin: 0 auto; }
-    .form-header { margin-bottom: 32px; text-align: center; }
-    .form-header h1 { font-size: 28px; font-weight: 700; color: var(--text-dark); letter-spacing: -0.02em; margin-bottom: 6px; }
-    .form-header p { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-    .input-group { margin-bottom: 18px; text-align: left; }
-    .input-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-left: 16px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
-    .input-wrapper { position: relative; display: flex; align-items: center; }
-    .input-wrapper input {
-      width: 100%; height: 48px; background: #FFFFFF; border: 1px solid var(--border-color);
-      border-radius: var(--radius-pill); padding: 0 22px; font-family: var(--font-main);
-      font-size: 14px; font-weight: 500; color: var(--text-dark); transition: all 0.25s ease;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
-    }
-    .input-wrapper input:focus { outline: none; border-color: #D2C0A5; box-shadow: 0 0 0 4px rgba(245, 196, 83, 0.15); }
-    .pw-toggle-btn { position: absolute; right: 18px; background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text-muted); }
-    .forgot-link-btn { display: block; text-align: right; font-size: 12px; color: var(--text-muted); text-decoration: none; margin-top: 6px; margin-right: 14px; font-weight: 500; }
-    .forgot-link-btn:hover { color: var(--text-dark); text-decoration: underline; }
-    .submit-btn {
-      width: 100%; height: 48px; background-color: var(--gold-primary); color: var(--text-dark);
-      border: none; border-radius: var(--radius-pill); font-family: var(--font-main); font-size: 14px;
-      font-weight: 700; cursor: pointer; margin-top: 12px; box-shadow: 0 8px 20px rgba(245, 196, 83, 0.25);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .submit-btn:hover { background-color: var(--gold-hover); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(245, 196, 83, 0.35); }
-    .quick-auth-chips { display: flex; gap: 12px; margin-top: 16px; }
-    .chip-btn {
-      flex: 1; height: 42px; background: #FFFFFF; border: 1px solid var(--border-color);
-      border-radius: var(--radius-pill); font-family: var(--font-main); font-size: 12px; font-weight: 600;
-      color: var(--text-dark); display: inline-flex; align-items: center; justify-content: center;
-      gap: 8px; cursor: pointer; transition: all 0.2s ease;
-    }
-    .chip-btn:hover { background: #FAF9F5; border-color: #D2C0A5; }
-    .form-footer-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); font-weight: 500; }
-    .form-footer-meta a { color: var(--text-muted); text-decoration: none; font-weight: 600; }
-    .form-footer-meta a:hover { color: var(--text-dark); text-decoration: underline; }
-    .alert-banner {
-      background: #FCEBEB; border: 1px solid #EFA3A3; color: #A32D2D; padding: 10px 16px;
-      border-radius: var(--radius-pill); font-size: 12px; font-weight: 500; text-align: center;
-      margin-top: 14px; display: none;
-    }
-    .media-panel {
-      flex: 1.1; margin: 14px; border-radius: 20px; background-size: cover; background-position: center;
-      position: relative; overflow: hidden;
-      background-image: url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80');
-    }
-    .media-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(30,30,28,0.2) 0%, rgba(30,30,28,0.5) 100%); }
-    .widget-task { position: absolute; top: 35px; left: 35px; background-color: var(--gold-primary); padding: 12px 18px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-width: 190px; z-index: 2; }
-    .widget-task h4 { font-size: 12px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
-    .widget-task p { font-size: 10px; font-weight: 500; color: rgba(0, 0, 0, 0.6); }
-    .widget-pill-back { position: absolute; top: 75px; left: 80px; background: rgba(30, 30, 28, 0.65); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 10px; font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 500; z-index: 1; }
-    .widget-team-stack { position: absolute; right: 35px; top: 220px; display: flex; flex-direction: column; gap: -10px; align-items: center; }
-    .avatar-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #FFFFFF; background-size: cover; background-position: center; box-shadow: 0 6px 15px rgba(0,0,0,0.15); margin-bottom: -12px; }
-    .bottom-widgets-container { position: absolute; bottom: 35px; left: 35px; right: 35px; display: flex; flex-direction: column; gap: 16px; }
-    .widget-calendar-strip { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 12px 16px; display: flex; justify-content: space-between; color: #FFFFFF; }
-    .calendar-day { text-align: center; flex: 1; }
-    .calendar-day .day-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; font-weight: 500; margin-bottom: 4px; }
-    .calendar-day .day-num { font-size: 13px; font-weight: 600; }
-    .calendar-day.active-day { background: rgba(255, 255, 255, 0.25); border-radius: 10px; padding: 2px 0; }
-    .widget-summary-card { background: #FFFFFF; border-radius: 16px; padding: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); max-width: 240px; align-self: flex-start; }
-    .widget-summary-card h4 { font-size: 13px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
-    .widget-summary-card p { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 10px; }
-    .mini-avatar-row { display: flex; align-items: center; }
-    .mini-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #FFFFFF; background-size: cover; margin-right: -6px; }
-    @media (max-width: 900px) {
-      .app-window { height: auto; flex-direction: column; }
-      .media-panel { display: none; }
-      .form-panel { padding: 40px 30px; }
+    .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;color:var(--text-2)}
+    .loading-overlay.show{display:flex}
+    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── APP SHELL ── */
+    #app{display:none}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:50}
+    .topbar-logo{font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}.topbar-logo span{color:var(--gold-dark)}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .user-chip{font-size:12px;background:var(--gold-light);color:var(--charcoal);padding:4px 10px;border-radius:20px;font-weight:500}
+    .save-status{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:5px}
+    .save-status.saved{color:var(--green)}.save-status.saving{color:var(--amber)}
+    .logout-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--text-2);cursor:pointer;font-family:inherit}
+    .logout-btn:hover{background:var(--bg)}
+    .tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;overflow-x:auto}
+    .tab-btn{padding:14px 18px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
+    .tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--gold-dark);border-bottom-color:var(--gold)}
+    .main{padding:1.5rem;max-width:1400px;margin:0 auto}
+
+    /* ── METRICS ── */
+    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
+    .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:0 1px 8px rgba(38,36,32,.03)}
+    .metric-label{font-size:11px;color:var(--text-3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+    .metric-val{font-size:24px;font-weight:600;color:var(--text)}
+    .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}.metric-val.blue{color:var(--blue)}.metric-val.red{color:var(--red)}.metric-val.sm{font-size:16px}
+
+    /* ── DASHBOARD ── */
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem}
+    .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:0 1px 10px rgba(38,36,32,.03)}
+    .dash-card h3{font-size:14px;font-weight:600;margin-bottom:1rem}
+    .dash-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+    .dash-row:last-child{border-bottom:none}
+    .dash-row-label{font-size:13px;color:var(--text-2)}
+    .dash-row-val{font-size:13px;font-weight:600}
+    .dash-bar-wrap{height:6px;background:var(--gold-light);border-radius:3px;margin-top:4px;width:100%}
+    .dash-bar-fill{height:6px;background:var(--gold);border-radius:3px}
+
+    /* ── TOOLBAR ── */
+    .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+    .search-wrap{position:relative;flex:1;min-width:200px}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface)}
+    .search-wrap input:focus{outline:none;border-color:var(--gold)}
+    .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none}
+    select{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);cursor:pointer}
+    select:focus{outline:none;border-color:var(--gold)}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:500;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);cursor:pointer;white-space:nowrap;transition:background .15s}
+    .btn:hover{background:var(--bg)}
+    .btn.primary{background:var(--gold);color:#1A1A1A;border-color:var(--gold-dark)}.btn.primary:hover{background:var(--gold-dark);color:#fff}
+    .btn.export{background:var(--blue-light);color:var(--blue);border-color:#b8d4f5}.btn.export:hover{background:#d0e5f9}
+
+    /* ── TABLE ── */
+    .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 10px rgba(38,36,32,.03)}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
+    td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:#FAFAF8}
+    .name-cell{font-weight:500;max-width:200px}
+    .balance-owed{color:var(--amber);font-weight:600}
+
+    /* ── BADGES ── */
+    .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap}
+    .b-pol{background:var(--blue-light);color:var(--blue)}
+    .b-mol{background:var(--amber-light);color:var(--amber)}
+    .b-visa{background:var(--pink-light);color:var(--pink)}
+    .b-travel{background:var(--purple-light);color:var(--purple)}
+    .b-travelled{background:var(--green-light);color:var(--green-dark)}
+    .b-complete{background:var(--green-light);color:var(--green-dark)}
+    .b-incomplete{background:var(--amber-light);color:var(--amber)}
+    .b-returned{background:var(--red-light);color:var(--red)}
+    .b-na{background:var(--gray-light);color:var(--gray)}
+    .b-notyet{background:var(--blue-light);color:var(--blue)}
+    .b-nottravelled{background:var(--red-light);color:var(--red)}
+
+    /* ── ACTION BUTTONS ── */
+    .action-btn{background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px 5px;border-radius:4px;font-size:14px;line-height:1;transition:all .15s}
+    .action-btn:hover{color:var(--text);background:var(--bg)}
+    .action-btn.del:hover{color:var(--red);background:var(--red-light)}
+    .action-btn.docs{color:var(--blue)}.action-btn.docs:hover{background:var(--blue-light)}
+
+    /* ── PAGINATION ── */
+    .pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
+    .page-btns{display:flex;gap:4px}
+    .page-btns button{padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:5px;background:var(--surface);cursor:pointer;color:var(--text-2);font-family:inherit}
+    .page-btns button.active{background:var(--gold);color:#1A1A1A;border-color:var(--gold-dark)}
+    .page-btns button:hover:not(.active){background:var(--bg)}
+
+    /* ── EMPTY ── */
+    .empty{text-align:center;padding:3rem;color:var(--text-3);font-size:13px}
+
+    /* ── MODAL ── */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+    .modal-bg.open{display:flex}
+    .modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.75rem;width:100%;max-width:580px;margin:auto;box-shadow:0 8px 32px rgba(38,36,32,.10)}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+    .modal-header h3{font-size:16px;font-weight:600}
+    .modal-close{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;line-height:1;padding:2px 8px;border-radius:4px}
+    .modal-close:hover{background:var(--bg);color:var(--text)}
+    .modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+    .modal-tab{padding:8px 16px;font-size:13px;font-weight:500;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+    .modal-tab.active{color:var(--gold-dark);border-bottom-color:var(--gold)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+    .form-full{grid-column:1/-1}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field label{font-size:12px;font-weight:500;color:var(--text-2)}
+    .field input,.field select,.field textarea{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .15s}
+    .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+    .field textarea{resize:vertical;min-height:64px}
+    .section-divider{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px;grid-column:1/-1}
+    .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+    /* ── DOCS ── */
+    .doc-link-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface)}
+    .doc-link-input:focus{outline:none;border-color:var(--gold)}
+    .doc-open-btn{padding:9px 14px;background:var(--blue-light);color:var(--blue);border:1px solid #b8d4f5;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
+    .doc-open-btn:hover{background:#d0e5f9}
+    .doc-open-btn:disabled{opacity:.4;cursor:default}
+
+    /* ── TIMELINE ── */
+    .tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+    .tl-item:last-child{border-bottom:none}
+    .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px}
+    .tl-action{font-weight:500}
+    .tl-meta{font-size:11px;color:var(--text-3);margin-top:2px}
+    .tl-empty{color:var(--text-3);font-size:13px;text-align:center;padding:1.5rem}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast.success{background:var(--green)}.toast.error{background:var(--red)}
+
+    @media(max-width:768px){
+      .dash-grid{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+      .topbar{padding:0 1rem}.main{padding:1rem}
+      .tabs-bar{padding:0 .5rem}
+      .metrics{grid-template-columns:repeat(2,1fr)}
     }
   </style>
 </head>
 <body>
 
-  <div class="app-window">
-    <div class="window-close-accent" title="Minimize Window">×</div>
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <span id="loading-text">Loading…</span>
+</div>
 
-    <div class="form-panel">
-      <div class="brand-tag">Destiny Recruit Consults</div>
+<!-- LOGIN -->
+<div id="login-screen">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <div class="lp-window">
 
-      <div class="form-content-area">
-        <div id="login-main-form">
-          <div class="form-header">
+    <!-- FORM PANEL -->
+    <div class="lp-form-panel">
+      <div class="lp-brand-tag">Destiny Recruit Consults</div>
+
+      <div class="lp-content-area">
+
+        <!-- Main login -->
+        <div id="login-main">
+          <div class="lp-header">
             <h1>Sign in to Portal</h1>
             <p>Access active candidate pipelines</p>
           </div>
-
-          <form onsubmit="event.preventDefault(); handleSystemLogin();">
-            <div class="input-group">
-              <label for="user-input">Username</label>
-              <div class="input-wrapper">
-                <input type="text" id="user-input" placeholder="e.g. fred" required autocomplete="username">
+          <form onsubmit="event.preventDefault(); doLogin();">
+            <div class="lp-input-group">
+              <label for="username-input">Username</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="username-input" placeholder="e.g. fred" required autocomplete="username">
               </div>
             </div>
-
-            <div class="input-group">
-              <label for="pass-input">Password</label>
-              <div class="input-wrapper">
-                <input type="password" id="pass-input" placeholder="••••••••••••" required autocomplete="current-password">
-                <button class="pw-toggle-btn" type="button" onclick="togglePasswordVisibility()" id="eye-icon">👁</button>
+            <div class="lp-input-group">
+              <label for="pw-input">Password</label>
+              <div class="lp-input-wrap">
+                <input type="password" id="pw-input" placeholder="••••••••••••" required autocomplete="current-password">
+                <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()">👁</button>
               </div>
-              <a href="#" class="forgot-link-btn" onclick="event.preventDefault(); showRecoveryView();">Forgot Password?</a>
+              <span class="lp-forgot" onclick="showForgotPassword()">Forgot Password?</span>
             </div>
-
-            <button type="submit" class="submit-btn">Submit Credentials</button>
+            <button type="submit" class="lp-submit">Submit Credentials</button>
           </form>
-
-          <div class="alert-banner" id="error-banner">Incorrect username or security password.</div>
-
-          <div class="quick-auth-chips">
-            <div class="chip-btn" title="Internal Office Directory">📁 Office LAN</div>
-            <div class="chip-btn" title="System Check Info">🛡 Secure SSL</div>
+          <div class="login-error" id="login-error">Incorrect username or password.</div>
+          <div class="lp-chips">
+            <div class="lp-chip">📁 Office LAN</div>
+            <div class="lp-chip">🛡 Secure SSL</div>
           </div>
         </div>
 
-        <div id="recovery-main-view" style="display: none;">
-          <div class="form-header">
+        <!-- Forgot password -->
+        <div id="forgot-section" style="display:none">
+          <div class="lp-header">
             <h1>Credentials Reset</h1>
             <p>Enter administrative verification code</p>
           </div>
-
-          <form onsubmit="event.preventDefault(); verifyAdminCode();">
-            <div class="input-group">
-              <label for="recovery-code-field">Recovery Code</label>
-              <div class="input-wrapper">
-                <input type="text" id="recovery-code-field" placeholder="DR-RESET-2025" required>
+          <form onsubmit="event.preventDefault(); submitForgotPassword();">
+            <div class="lp-input-group">
+              <label for="recovery-code-input">Recovery Code</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="recovery-code-input" placeholder="DR-RESET-2025" required>
               </div>
             </div>
-            <button type="submit" class="submit-btn">Verify Identity</button>
+            <button type="submit" class="lp-submit">Verify Identity</button>
           </form>
-
-          <div class="alert-banner" id="recovery-error-banner">Invalid system recovery parameter.</div>
-          <div id="recovery-success-box" style="display:none; background:#F0FAED; border:1px solid #A3E2AB; padding:12px; border-radius:16px; margin-top:14px; font-size:11px; text-align:left;"></div>
-
-          <a href="#" class="forgot-link-btn" style="text-align:center; margin-top:16px;" onclick="event.preventDefault(); hideRecoveryView();">← Back to standard login</a>
+          <div class="login-error" id="forgot-error" style="display:none"></div>
+          <div class="recovery-result" id="forgot-result" style="display:none"></div>
+          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">← Back to standard login</span>
         </div>
+
       </div>
 
-      <div class="form-footer-meta">
+      <div class="lp-footer">
         <span>System Version v3.4.1</span>
         <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
       </div>
     </div>
 
-    <div class="media-panel">
-      <div class="media-overlay"></div>
-      <div class="widget-task">
+    <!-- MEDIA PANEL -->
+    <div class="lp-media">
+      <div class="lp-media-overlay"></div>
+      <div class="lp-widget-task">
         <h4>Professional Job Review</h4>
         <p>Deployment Schedule: 09:30am</p>
       </div>
-      <div class="widget-pill-back">Next batch setup overview</div>
-      <div class="widget-team-stack">
-        <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80')"></div>
-        <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80')"></div>
-        <div class="avatar-circle" style="background-image: url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80')"></div>
-      </div>
-      <div class="bottom-widgets-container">
-        <div class="widget-calendar-strip">
-          <div class="calendar-day"><div class="day-label">Sun</div><div class="day-num">22</div></div>
-          <div class="calendar-day"><div class="day-label">Mon</div><div class="day-num">23</div></div>
-          <div class="calendar-day active-day"><div class="day-filter">Tue</div><div class="day-num">24</div></div>
-          <div class="calendar-day"><div class="day-label">Wed</div><div class="day-num">25</div></div>
-          <div class="calendar-day"><div class="day-label">Thu</div><div class="day-num">26</div></div>
-          <div class="calendar-day"><div class="day-label">Fri</div><div class="day-num">27</div></div>
-          <div class="calendar-day"><div class="day-label">Sat</div><div class="day-num">28</div></div>
+      <div class="lp-widget-pill">Next batch setup overview</div>
+      <div class="lp-bottom">
+        <div class="lp-cal">
+          <div class="lp-cal-day"><div class="dl">Sun</div><div class="dn">22</div></div>
+          <div class="lp-cal-day"><div class="dl">Mon</div><div class="dn">23</div></div>
+          <div class="lp-cal-day act"><div class="dl">Tue</div><div class="dn">24</div></div>
+          <div class="lp-cal-day"><div class="dl">Wed</div><div class="dn">25</div></div>
+          <div class="lp-cal-day"><div class="dl">Thu</div><div class="dn">26</div></div>
+          <div class="lp-cal-day"><div class="dl">Fri</div><div class="dn">27</div></div>
+          <div class="lp-cal-day"><div class="dl">Sat</div><div class="dn">28</div></div>
         </div>
-        <div class="widget-summary-card">
+        <div class="lp-summary">
           <h4>LB Candidate Processing</h4>
           <p>Passports Tracked: 98 Active</p>
-          <div class="mini-avatar-row">
-            <div class="mini-avatar" style="background-image: url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="mini-avatar" style="background-image: url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="mini-avatar" style="background-image: url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80')"></div>
+          <div class="lp-avatars">
+            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80')"></div>
+            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80')"></div>
+            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80')"></div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
+</div>
 
-  <script>
-    // ── Staff credentials (must match app.js) ──────────────────
-    const STAFF_ACCOUNTS = {
-      fred:      { password: 'Destiny@2025', display: 'Fred 👑' },
-      robert:    { password: 'Robert@2025',  display: 'Robert'  },
-      doreen:    { password: 'Doreen@2025',  display: 'Doreen'  },
-      maxwell:   { password: 'Maxwell@2025', display: 'Maxwell' },
-      consolata: { password: 'Consol@2025',  display: 'Consolata'}
-    };
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg class="dr-ring" width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="color:var(--charcoal)">
+        <circle cx="50" cy="50" r="42" stroke="#C9A227" stroke-width="12" stroke-linecap="round" stroke-dasharray="115 264" transform="rotate(-58 50 50)"/>
+        <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-dasharray="115 264" stroke-dashoffset="-145" transform="rotate(-58 50 50)"/>
+      </svg>
+      <span>DR <span style="color:var(--gold-dark)">Database</span></span>
+    </div>
+    <div class="topbar-right">
+      <span class="user-chip" id="user-chip">—</span>
+      <span class="save-status saved" id="save-status">✓ <span id="save-text">Saved</span></span>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="tabs-bar">
+    <button class="tab-btn active" id="tab-dash" onclick="switchTab('dash')">📊 Dashboard</button>
+    <button class="tab-btn" id="tab-pro" onclick="switchTab('pro')">💼 Professional</button>
+    <button class="tab-btn" id="tab-lb" onclick="switchTab('lb')">🏠 LB Jobs</button>
+  </div>
+  <div class="main">
 
-    function togglePasswordVisibility() {
-      const field = document.getElementById('pass-input');
-      const icon  = document.getElementById('eye-icon');
-      if (field.type === 'password') { field.type = 'text';     icon.textContent = '🙈'; }
-      else                           { field.type = 'password'; icon.textContent = '👁'; }
-    }
+    <!-- DASHBOARD -->
+    <div id="dash-section">
+      <div class="dash-grid">
+        <div class="dash-card" id="dash-pro-card"></div>
+        <div class="dash-card" id="dash-lb-card"></div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card" id="dash-pro-stages"></div>
+        <div class="dash-card" id="dash-lb-refunds"></div>
+      </div>
+    </div>
 
-    function showRecoveryView() {
-      document.getElementById('login-main-form').style.display    = 'none';
-      document.getElementById('recovery-main-view').style.display = 'block';
-    }
+    <!-- PROFESSIONAL -->
+    <div id="pro-section" style="display:none">
+      <div class="metrics" id="pro-metrics"></div>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="pro-search" placeholder="Search name, passport, company…" oninput="renderPro()">
+        </div>
+        <select id="pro-stage-f" onchange="renderPro()">
+          <option value="">All stages</option>
+          <option value="PENDING OFFER LETTER">Pending Offer Letter</option>
+          <option value="PENDING MOL">Pending MOL</option>
+          <option value="PENDING VISA">Pending Visa</option>
+          <option value="PENDING TRAVEL">Pending Travel</option>
+          <option value="TRAVELLED">Travelled</option>
+        </select>
+        <select id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
+        <button class="btn export" onclick="exportCSV('pro')">⬇ Export</button>
+        <button class="btn" onclick="addCustomStage('pro')">⚙ Add stage</button>
+        <button class="btn primary" onclick="openProForm()">＋ Add candidate</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Full name</th><th>Passport</th><th>Phone</th>
+              <th>Position</th><th>Company</th><th>Country</th><th>Stage</th>
+              <th>Commission</th><th>Paid</th><th>Balance</th><th>Docs</th><th></th>
+            </tr></thead>
+            <tbody id="pro-tbody"><tr><td colspan="13"><div class="empty">Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pro-pagination"></div>
+      </div>
+    </div>
 
-    function hideRecoveryView() {
-      document.getElementById('recovery-main-view').style.display = 'none';
-      document.getElementById('login-main-form').style.display    = 'block';
-    }
+    <!-- LB -->
+    <div id="lb-section" style="display:none">
+      <div class="metrics" id="lb-metrics"></div>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="lb-search" placeholder="Search name, phone…" oninput="renderLB()">
+        </div>
+        <select id="lb-travel-f" onchange="renderLB()">
+          <option value="">All travel statuses</option>
+          <option value="TRAVELLED">Travelled</option>
+          <option value="NOT YET">Not yet</option>
+          <option value="NOT TRAVELLED">Not travelled</option>
+        </select>
+        <select id="lb-refund-f" onchange="renderLB()">
+          <option value="">All refund statuses</option>
+          <option value="complete">Complete</option>
+          <option value="incomplete">Incomplete</option>
+          <option value="RETURNED">Returned</option>
+          <option value="N/A">N/A (HAD PP)</option>
+        </select>
+        <button class="btn export" onclick="exportCSV('lb')">⬇ Export</button>
+        <button class="btn" onclick="addCustomStage('lb')">⚙ Add status</button>
+        <button class="btn primary" onclick="openLBForm()">＋ Add candidate</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Full name</th><th>Phone</th><th>Passport</th>
+              <th>Travel status</th><th>Travel date</th><th>To refund</th>
+              <th>Refunded</th><th>Balance</th><th>Refund status</th><th>Docs</th><th></th>
+            </tr></thead>
+            <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="lb-pagination"></div>
+      </div>
+    </div>
 
-    function handleSystemLogin() {
-      const u   = document.getElementById('user-input').value.trim().toLowerCase();
-      const p   = document.getElementById('pass-input').value.trim();
-      const err = document.getElementById('error-banner');
+  </div>
+</div>
 
-      const matched = STAFF_ACCOUNTS[u];
-      if (matched && matched.password === p) {
-        err.style.display = 'none';
-        // Save session and hand off to the main app
-        sessionStorage.setItem('dr_user', JSON.stringify({ username: u, ...matched }));
-        // If app.js / index.html elements exist in the same page, activate them
-        if (document.getElementById('login-screen')) {
-          document.getElementById('login-screen').style.display = 'none';
-        }
-        if (document.getElementById('app')) {
-          document.getElementById('app').style.display = 'block';
-        }
-        if (document.getElementById('user-chip')) {
-          document.getElementById('user-chip').textContent = matched.display;
-        }
-        if (typeof window.loadAllData === 'function') {
-          window.loadAllData();
-        }
-        // If login lives on its own page, redirect to the main app page
-        if (!document.getElementById('app')) {
-          window.location.href = 'index.html';
-        }
-      } else {
-        err.style.display = 'block';
-      }
-    }
+<!-- PRO MODAL -->
+<div class="modal-bg" id="pro-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="pro-modal-title">Add professional candidate</h3>
+      <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="pro-mtab-details" onclick="switchModalTab('pro','details',this)">Details</button>
+      <button class="modal-tab" id="pro-mtab-pipeline" onclick="switchModalTab('pro','pipeline',this)">Pipeline</button>
+      <button class="modal-tab" id="pro-mtab-commission" onclick="switchModalTab('pro','commission',this)">Commission</button>
+      <button class="modal-tab" id="pro-mtab-timeline" onclick="switchModalTab('pro','timeline',this)">Timeline</button>
+    </div>
+    <div id="pro-tab-details">
+      <div class="form-grid">
+        <div class="field form-full"><label>Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
+        <div class="field"><label>Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
+        <div class="field"><label>Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label>Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
+        <div class="field"><label>Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
+        <div class="field"><label>Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
+        <div class="field"><label>Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
+        <div class="field"><label>Date submitted</label><input type="date" id="pf-submitted"></div>
+      </div>
+    </div>
+    <div id="pro-tab-pipeline" style="display:none">
+      <div class="form-grid">
+        <div class="field"><label>Interview / selection date</label><input type="date" id="pf-interview"></div>
+        <div class="field"><label>Offer letter date</label><input type="date" id="pf-ol"></div>
+        <div class="field"><label>MOL date</label><input type="date" id="pf-mol"></div>
+        <div class="field"><label>Visa date</label><input type="date" id="pf-visa"></div>
+        <div class="field form-full"><label>Travel date</label><input type="date" id="pf-travel"></div>
+      </div>
+    </div>
+    <div id="pro-tab-commission" style="display:none">
+      <div class="form-grid">
+        <div class="field"><label>Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
+        <div class="field"><label>Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
+      </div>
+    </div>
+    <div id="pro-tab-timeline" style="display:none">
+      <div id="pro-form-timeline"><div class="tl-empty">Save the candidate first to see timeline.</div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('pro-modal')">Cancel</button>
+      <button class="btn primary" onclick="savePro()">Save candidate</button>
+    </div>
+  </div>
+</div>
 
-    function verifyAdminCode() {
-      const entered = document.getElementById('recovery-code-field').value.trim();
-      const fail    = document.getElementById('recovery-error-banner');
-      const pass    = document.getElementById('recovery-success-box');
+<!-- LB MODAL -->
+<div class="modal-bg" id="lb-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="lb-modal-title">Add LB candidate</h3>
+      <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="lb-mtab-details" onclick="switchModalTab('lb','details',this)">Details</button>
+      <button class="modal-tab" id="lb-mtab-refunds" onclick="switchModalTab('lb','refunds',this)">Refunds</button>
+      <button class="modal-tab" id="lb-mtab-timeline" onclick="switchModalTab('lb','timeline',this)">Timeline</button>
+    </div>
+    <div id="lb-tab-details">
+      <div class="form-grid">
+        <div class="field form-full"><label>Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
+        <div class="field"><label>Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label>Passport status *</label>
+          <select id="lf-pp">
+            <option value="APPLIED">Applied</option>
+            <option value="HAD PP">Had PP</option>
+            <option value="NOT APPLIED">Not applied</option>
+            <option value="PUSHED">Pushed</option>
+          </select>
+        </div>
+        <div class="field"><label>Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
+        <div class="field"><label>Travel date</label><input type="date" id="lf-tdate"></div>
+        <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+      </div>
+    </div>
+    <div id="lb-tab-refunds" style="display:none">
+      <div class="form-grid">
+        <div class="field form-full"><label>Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
+        <div class="field"><label>1st payment date</label><input type="date" id="lf-r1date"></div>
+        <div class="field"><label>1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
+        <div class="field"><label>2nd payment date</label><input type="date" id="lf-r2date"></div>
+        <div class="field"><label>2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+      </div>
+    </div>
+    <div id="lb-tab-timeline" style="display:none">
+      <div id="lb-form-timeline"><div class="tl-empty">Save the candidate first to see timeline.</div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('lb-modal')">Cancel</button>
+      <button class="btn primary" onclick="saveLB()">Save candidate</button>
+    </div>
+  </div>
+</div>
 
-      if (entered === 'DR-RESET-2025') {
-        fail.style.display = 'none';
-        pass.innerHTML = `<strong>Verification Code Accepted:</strong><br>
-          • fred — Destiny@2025<br>
-          • robert — Robert@2025<br>
-          • doreen — Doreen@2025<br>
-          • maxwell — Maxwell@2025<br>
-          • consolata — Consol@2025`;
-        pass.style.display = 'block';
-      } else {
-        pass.style.display = 'none';
-        fail.style.display = 'block';
-      }
-    }
-  </script>
+<!-- DOCS MODAL -->
+<div class="modal-bg" id="docs-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3 id="docs-modal-title">Documents</h3>
+      <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--text-3);margin-bottom:1rem">
+      Upload all of this candidate's documents (passport, ID, offer letter, MOL, visa, etc.) into one Google Drive folder, then paste that folder's share link below.
+      <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link →</a>
+    </p>
+    <div class="field">
+      <label>Documents folder link</label>
+      <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link…" oninput="onDocsLinkInput()" style="width:100%;padding:9px 12px;font-size:13px">
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="doc-open-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()">📂 View documents</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeModal('docs-modal')">Close</button>
+        <button class="btn primary" onclick="saveDocs()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
