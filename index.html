@@ -100,7 +100,7 @@
       .lp-media{display:none}
       .lp-form-panel{padding:40px 30px}
     }
-     
+    
     /* ── LOADING OVERLAY ── */
     .loading-overlay{display:none;position:fixed;inset:0;background:rgba(248,247,244,.85);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;color:var(--saas-text-muted)}
     .loading-overlay.show{display:flex}
@@ -394,7 +394,7 @@
       justify-content: space-between;
     }
 
-    /* GRID STAT ROW BLOCKS - ADDED DEEP BLUE / TEAL ACCENTS & RIGHT-ALIGNED FIXES */
+    /* GRID STAT ROW BLOCKS */
     .stat-row-deck {
       display: flex;
       flex-direction: column;
@@ -408,20 +408,10 @@
       background: var(--saas-bg);
       border-radius: 16px;
       transition: background 0.2s;
-      border-left: 4px solid transparent;
     }
     .stat-row-item:hover { background: #F1EFEA; }
-    
-    /* Specific row styling variants for color updates */
-    .pro-accent-row { border-left-color: #2b5987; background: #f4f6f9; }
-    .lb-accent-row { border-left-color: #1a8c8c; background: #f2f8f8; }
-    
-    /* Target Balance Status Blocks */
-    .status-clear-block { background: #edf9f4; border-left-color: var(--green); }
-    .status-pending-block { background: #fef7ed; border-left-color: var(--amber); }
-
-    .stat-row-label { font-size: 13px; font-weight: 600; color: var(--saas-text-main); text-align: left; }
-    .stat-row-val { font-size: 14px; font-weight: 800; color: var(--saas-text-main); text-align: right; margin-left: auto; }
+    .stat-row-label { font-size: 13px; font-weight: 600; color: var(--saas-text-main); }
+    .stat-row-val { font-size: 14px; font-weight: 800; color: var(--saas-text-main); }
 
     /* STAGE BREAKDOWN BARS */
     .bar-chart-stack {
@@ -433,19 +423,13 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: linear-gradient(to right, #f4f5f8, var(--saas-card));
-      padding: 10px 14px;
-      border-radius: 12px;
     }
     .bar-chart-meta {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       font-size: 12px;
       font-weight: 700;
     }
-    .bar-chart-meta span:first-child { text-align: left; }
-    .bar-chart-meta span:last-child { text-align: right; margin-left: auto; font-weight: 800; }
     .bar-chart-track {
       height: 7px;
       background: var(--gray-light);
@@ -455,7 +439,7 @@
     }
     .bar-chart-fill {
       height: 100%;
-      background: linear-gradient(to right, #3b82f6, #8b5cf6);
+      background: var(--saas-accent-gold);
       border-radius: var(--radius-pill);
       transition: width 0.4s ease;
     }
@@ -473,7 +457,6 @@
       border-radius: 18px;
       padding: 20px 24px;
       box-shadow: var(--shadow-sm);
-      border-top: 3px solid transparent;
     }
     .matrix-metric-label {
       font-size: 11px;
@@ -573,23 +556,70 @@
       white-space: nowrap;
     }
     .saas-btn:hover { background: var(--gray-light); border-color: #D2CEBF; }
-    .saas-btn.primary { background: var(--charcoal); color: var(--gold); border: none; box-shadow: 0 4px 14px rgba(30,30,28,0.15); }
-    .saas-btn.primary:hover { background: #000000; transform: translateY(-1px); }
+    .saas-btn.primary {
+      background: var(--charcoal);
+      color: var(--gold);
+      border: none;
+      box-shadow: 0 4px 14px rgba(30,30,28,0.15);
+    }
+    .saas-btn.primary:hover {
+      background: #000000;
+      transform: translateY(-1px);
+    }
     .saas-btn.export { background: #F0F4F8; color: var(--blue); border: none; }
     .saas-btn.export:hover { background: #E1EAF2; }
 
     /* ── HIGH-END LESSON-STYLE DATA TABLES ── */
-    .saas-table-wrapper { background: var(--saas-card); border: 1px solid var(--saas-border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .saas-table-wrapper {
+      background: var(--saas-card);
+      border: 1px solid var(--saas-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
     .saas-overflow-x { overflow-x: auto; }
-    table.saas-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    table.saas-table th { padding: 14px 20px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--saas-text-muted); background: #FAF9F6; border-bottom: 1px solid var(--saas-border); }
-    table.saas-table td { padding: 16px 20px; border-bottom: 1px solid var(--saas-border); color: var(--saas-text-main); white-space: nowrap; max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+    
+    table.saas-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table.saas-table th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--saas-text-muted);
+      background: #FAF9F6;
+      border-bottom: 1px solid var(--saas-border);
+    }
+    table.saas-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--saas-border);
+      color: var(--saas-text-main);
+      white-space: nowrap;
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     table.saas-table tr:last-child td { border-bottom: none; }
-    table.saas-table tr:hover td { background: #FDFFCF9; }
+    table.saas-table tr:hover td { background: #FDFCF9; }
+    
     .saas-name-cell { font-weight: 700; color: #000000; }
-
+    
     /* MODERNISED CHIP BADGES */
-    .badge { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
     .b-pol { background: var(--blue-light); color: var(--blue); }
     .b-mol { background: var(--amber-light); color: var(--amber); }
     .b-visa { background: var(--pink-light); color: var(--pink); }
@@ -603,716 +633,579 @@
     .b-nottravelled { background: var(--red-light); color: var(--red); }
 
     /* ACTION METRIC ROW BUTTONS */
-    .action-btn { background: transparent; border: none; cursor: pointer; color: var(--saas-text-muted); padding: 6px; border-radius: 8px; font-size: 14px; transition: all 0.2s; }
+    .action-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--saas-text-muted);
+      padding: 6px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
     .action-btn:hover { color: var(--saas-text-main); background: var(--gray-light); }
     .action-btn.del:hover { color: var(--red); background: var(--red-light); }
     .action-btn.docs { color: var(--blue); }
     .action-btn.docs:hover { background: var(--blue-light); }
 
     /* PAGINATION BAR ACCENT */
-    .saas-pagination-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #FAF9F6; border-top: 1px solid var(--saas-border); font-size: 12px; color: var(--saas-text-muted); font-weight: 600; }
-    .page-btns { display: flex; gap: 6px; }
-    .page-btns button { padding: 6px 12px; background: #fff; border: 1px solid var(--saas-border); border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--saas-text-main); cursor: pointer; transition: all 0.2s; }
-    .page-btns button:hover { background: var(--gray-light); }
-    .page-btns button.active { background: var(--charcoal); color: var(--gold); border-color: var(--charcoal); }
+    .saas-pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: #FAF9F6;
+      border-top: 1px solid var(--saas-border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--saas-text-muted);
+    }
+    .saas-page-btn-deck { display: flex; gap: 6px; }
+    .saas-page-btn-deck button {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      border: 1px solid var(--saas-border);
+      border-radius: var(--radius-pill);
+      background: var(--saas-card);
+      color: var(--saas-text-main);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .saas-page-btn-deck button.active {
+      background: var(--charcoal);
+      color: var(--gold);
+      border: none;
+    }
+    .saas-page-btn-deck button:hover:not(.active) { background: var(--gray-light); }
 
-    /* ── POPUP WINDOW DIALOG MODALS ── */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,30,28,0.4); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #fff; width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 1px solid var(--saas-border); display: flex; flex-direction: column; overflow: hidden; animation: modalUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes modalUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal-header { padding: 20px 24px; border-b: 1px solid var(--saas-border); display: flex; align-items: center; justify-content: space-between; background: #FAF9F6; }
-    .modal-header h3 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--saas-text-main); }
-    .modal-close { background: transparent; border: none; font-size: 22px; color: var(--saas-text-muted); cursor: pointer; line-height: 1; }
-    .modal-close:hover { color: var(--saas-text-main); }
-    .modal-body { padding: 24px; overflow-y: auto; max-height: calc(100vh - 160px); }
-    .modal-footer { padding: 18px 24px; border-top: 1px solid var(--saas-border); background: #FAF9F6; display: flex; justify-content: flex-end; gap: 10px; }
+    /* EMPTY CONTENT CALLOUT */
+    .empty { text-align: center; padding: 48px; color: var(--saas-text-muted); font-weight: 600; }
 
-    /* FORM FIELDS IN MODAL */
-    .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
-    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-    .field.full { grid-column: 1 / -1; }
-    .field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--saas-text-muted); }
-    .field input, .field select, .field textarea { height: 42px; background: #fff; border: 1px solid var(--saas-border); border-radius: 10px; padding: 0 14px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--saas-text-main); transition: border 0.2s; }
-    .field textarea { height: 80px; padding: 10px 14px; resize: none; }
-    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--saas-accent-gold); }
+    /* ── CLEAN INTERACTIVE FLOATING MODALS ── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,26,25,0.4); backdrop-filter: blur(5px);
+      z-index: 1000; align-items: flex-start; justify-content: center;
+      padding: 40px 20px; overflow-y: auto;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--saas-card); border-radius: var(--radius-lg);
+      border: 1px solid var(--saas-border); padding: 32px;
+      width: 100%; max-width: 620px; margin: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-header h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--saas-text-main); }
+    .modal-close {
+      background: transparent; border: 1px solid var(--saas-border); cursor: pointer;
+      color: var(--saas-text-muted); font-size: 20px; line-height: 1; padding: 4px 12px;
+      border-radius: var(--radius); transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--gray-light); color: var(--saas-text-main); }
+    
+    .modal-tabs { display: flex; border-bottom: 1px solid var(--saas-border); margin-bottom: 24px; gap: 4px; }
+    .modal-tab {
+      padding: 10px 16px; font-size: 13px; font-weight: 700; font-family: inherit;
+      border: none; background: transparent; color: var(--saas-text-muted); cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.2s;
+    }
+    .modal-tab.active { color: var(--saas-accent-gold); border-bottom-color: var(--saas-accent-gold); }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-full { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 11px; font-weight: 800; color: var(--saas-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .field input, .field select, .field textarea {
+      padding: 11px 14px; border: 1px solid var(--saas-border); border-radius: var(--radius);
+      font-size: 13px; font-family: inherit; color: var(--saas-text-main); background: var(--saas-bg);
+      font-weight: 600; transition: all 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--saas-accent-gold); box-shadow: 0 0 0 3px rgba(204,164,59,0.1);
+    }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .section-divider {
+      font-size: 11px; font-weight: 800; color: var(--saas-text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 16px 0 4px; border-top: 1px solid var(--saas-border);
+      margin-top: 8px; grid-column: 1 / -1;
+    }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--saas-border); }
 
-    /* TOAST ALERTS POPPING */
-    #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-    .toast { background: var(--charcoal); color: #fff; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: toastIn 0.2s ease; border-left: 4px solid var(--gold); }
-    @keyframes toastIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .toast.success { border-left-color: var(--green); }
-    .toast.error { border-left-color: var(--red); }
+    /* ACTIVITY TIMELINE STYLES */
+    .tl-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--saas-border); }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--saas-accent-yellow); flex-shrink: 0; margin-top: 6px; box-shadow: 0 0 0 3px rgba(245,197,24,0.25); }
+    .tl-action { font-weight: 700; font-size: 13px; color: var(--saas-text-main); }
+    .tl-meta { font-size: 11px; color: var(--saas-text-muted); margin-top: 2px; font-weight: 600; }
+    .tl-empty { color: var(--saas-text-muted); font-size: 13px; text-align: center; padding: 24px; font-weight: 600; }
+
+    /* TOAST DECK */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px; background: var(--charcoal); color: #fff;
+      padding: 12px 24px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 700;
+      z-index: 99999; opacity: 0; transform: translateY(10px); transition: all 0.25s;
+      pointer-events: none; box-shadow: var(--shadow-lg);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--green-dark); color: #fff; }
+    .toast.error { background: var(--red); color: #fff; }
+
+    @media(max-width:1024px){
+      .dashboard-layout-deck { grid-template-columns: 1fr; }
+      .saas-sidebar { width: 80px; padding: 24px 12px; align-items: center; }
+      .sidebar-label, .sidebar-btn span:not(.sidebar-btn-icon), .sidebar-user-meta { display: none; }
+      .sidebar-logo { justify-content: center; }
+      .saas-content-frame { margin-left: 80px; width: calc(100% - 80px); padding: 32px 24px; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="loading-overlay" id="loading-overlay">
-    <div class="spinner"></div>
-    <p id="loading-text">Loading secure synchronization link…</p>
-  </div>
+<!-- LOADING SPINNER BANNER OVERLAY -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <span id="loading-text">Loading Data Components…</span>
+</div>
 
-  <div id="login-screen">
-    <div class="lp-window">
-      <div class="lp-form-panel">
-        <div class="lp-brand-tag">Destiny Recruit System v2.4</div>
-        <div class="lp-content-area">
+<!-- Standardised Login System Frame (UNTOUCHED) -->
+<div id="login-screen">
+  <div class="lp-window">
+    <div class="lp-form-panel">
+      <div class="lp-brand-tag">Destiny Recruit Consults</div>
+      <div class="lp-content-area">
+        <div id="login-main">
           <div class="lp-header">
-            <h1>Staff Database</h1>
-            <p>Sign in to update real-time sync nodes</p>
+            <h1>Sign in to Portal</h1>
+            <p>Access active candidate pipelines</p>
           </div>
-          <div class="lp-input-group">
-            <label>Staff User ID</label>
-            <div class="lp-input-wrap">
-              <input type="text" id="username-input" placeholder="e.g. fred, robert, doreen" autocomplete="username">
+          <form onsubmit="event.preventDefault(); doLogin();">
+            <div class="lp-input-group">
+              <label for="username-input">Username</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="username-input" placeholder="e.g. fred" required autocomplete="username">
+              </div>
             </div>
-          </div>
-          <div class="lp-input-group" style="margin-bottom:6px">
-            <label>Access Pin Password</label>
-            <div class="lp-input-wrap">
-              <input type="password" id="password-input" placeholder="••••••••" autocomplete="current-password">
-              <button class="lp-pw-toggle" type="button" onclick="toggleLPPassword()">👁️</button>
+            <div class="lp-input-group">
+              <label for="pw-input">Password</label>
+              <div class="lp-input-wrap">
+                <input type="password" id="pw-input" placeholder="••••••••••••" required autocomplete="current-password">
+                <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()">👁</button>
+              </div>
+              <span class="lp-forgot" onclick="showForgotPassword()">Forgot Password?</span>
             </div>
-            <a class="lp-forgot" onclick="forgotPin()">Forgot login pin credentials?</a>
-          </div>
-          <div class="login-error" id="login-err-msg">Incorrect credentials combination</div>
-          <button class="lp-submit" type="button" onclick="doLogin()">Authenticate Node</button>
+            <button type="submit" class="lp-submit">Submit Credentials</button>
+          </form>
+          <div class="login-error" id="login-error">Incorrect username or password.</div>
           <div class="lp-chips">
-            <div class="lp-chip">🔐 AES Encrypted</div>
-            <div class="lp-chip">☁️ Supabase Cloud</div>
+            <div class="lp-chip">📁 Office LAN</div>
+            <div class="lp-chip">🛡 Secure SSL</div>
           </div>
         </div>
-        <div class="lp-footer">
-          <span>Status: <strong style="color:#1D9E75">Active Web Node</strong></span>
-          <a href="https://supabase.com" target="_blank">Engine: Postgres API</a>
+        <div id="forgot-section" style="display:none">
+          <div class="lp-header">
+            <h1>Credentials Reset</h1>
+            <p>Enter administrative verification code</p>
+          </div>
+          <form onsubmit="event.preventDefault(); submitForgotPassword();">
+            <div class="lp-input-group">
+              <label for="recovery-code-input">Recovery Code</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="recovery-code-input" placeholder="DR-RESET-2025" required>
+              </div>
+            </div>
+            <button type="submit" class="lp-submit">Verify Identity</button>
+          </form>
+          <div class="login-error" id="forgot-error" style="display:none"></div>
+          <div class="recovery-result" id="forgot-result" style="display:none"></div>
+          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">← Back to standard login</span>
         </div>
       </div>
-      <div class="lp-media">
-        <div class="lp-media-overlay"></div>
-        <div class="lp-widget-task">
-          <h4>Destiny Operations</h4>
-          <p>Continuous pipeline status monitoring engine online.</p>
+      <div class="lp-footer">
+        <span>System Version v3.4.1</span>
+        <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
+      </div>
+    </div>
+    <div class="lp-media">
+      <div class="lp-media-overlay"></div>
+      <div class="lp-widget-task">
+        <h4>Professional Job Review</h4>
+        <p>Deployment Schedule: 09:30am</p>
+      </div>
+      <div class="lp-widget-pill">Next batch setup overview</div>
+      <div class="lp-bottom">
+        <div class="lp-cal">
+          <div class="lp-cal-day"><div class="dl">Sun</div><div class="dn">22</div></div>
+          <div class="lp-cal-day"><div class="dl">Mon</div><div class="dn">23</div></div>
+          <div class="lp-cal-day act"><div class="dl">Tue</div><div class="dn">24</div></div>
+          <div class="lp-cal-day"><div class="dl">Wed</div><div class="dn">25</div></div>
+          <div class="lp-cal-day"><div class="dl">Thu</div><div class="dn">26</div></div>
+          <div class="lp-cal-day"><div class="dl">Fri</div><div class="dn">27</div></div>
+          <div class="lp-cal-day"><div class="dl">Sat</div><div class="dn">28</div></div>
         </div>
-        <div class="lp-widget-pill">System Load: 0.04 ms</div>
-        <div class="lp-bottom">
-          <div class="lp-cal">
-            <div class="lp-cal-day">
-              <div class="dl">Mon</div><div class="dn">08</div>
-            </div>
-            <div class="lp-cal-day">
-              <div class="dl">Tue</div><div class="dn">09</div>
-            </div>
-            <div class="lp-cal-day act">
-              <div class="dl">Wed</div><div class="dn">10</div>
-            </div>
-            <div class="lp-cal-day">
-              <div class="dl">Thu</div><div class="dn">11</div>
-            </div>
-            <div class="lp-cal-day">
-              <div class="dl">Fri</div><div class="dn">12</div>
-            </div>
-          </div>
-          <div class="lp-summary">
-            <h4>Live Engine Summary</h4>
-            <p>Active portfolios connected globally across active segments.</p>
-            <div class="lp-avatars">
-              <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop')"></div>
-              <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop')"></div>
-              <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop')"></div>
-            </div>
+        <div class="lp-summary">
+          <h4>LB Candidate Processing</h4>
+          <p>Passports Tracked: 98 Active</p>
+          <div class="lp-avatars">
+            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80')"></div>
+            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80')"></div>
+            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80')"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <div id="app">
-    <div class="app-inner">
-      
-      <aside class="saas-sidebar">
-        <div class="sidebar-top">
-          <div class="sidebar-logo">
-            <div class="sidebar-logo-icon">DR</div>
-            <span>Destiny Consults</span>
-          </div>
-          <nav class="sidebar-menu">
-            <div class="sidebar-group">
-              <span class="sidebar-label">Overview Overview</span>
-              <button class="sidebar-btn active" id="tab-dash" onclick="switchTab('dash')">
-                <span class="sidebar-btn-icon">📊</span> Executive Dashboard
-              </button>
-            </div>
-            <div class="sidebar-group">
-              <span class="sidebar-label">Pipelines Control</span>
-              <button class="sidebar-btn" id="tab-pro" onclick="switchTab('pro')">
-                <span class="sidebar-btn-icon">💼</span> Professional Pipeline
-              </button>
-              <button class="sidebar-btn" id="tab-lb" onclick="switchTab('lb')">
-                <span class="sidebar-btn-icon">📁</span> LB Portfolios Track
-              </button>
-            </div>
-          </nav>
+<!-- MAIN COHESIVE INTERNAL SAAS SUITE INTERFACE -->
+<div id="app">
+  <div class="app-inner">
+  
+    <!-- ASYMMETRIC LEFT SIDEBAR NAVIGATION CONTROL UNIT -->
+    <div class="saas-sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">DR</div>
+          <span>Destiny Recruit</span>
         </div>
-
-        <div class="sidebar-footer">
-          <div class="sidebar-user-card">
-            <div class="sidebar-user-avatar" id="avatar-char">U</div>
-            <div class="sidebar-user-meta">
-              <div class="sidebar-user-name" id="user-chip">—</div>
-              <div class="sidebar-user-status">Active Console</div>
-            </div>
-          </div>
-          <button class="logout-action-btn" onclick="doLogout()">Disconnect Node</button>
-        </div>
-      </aside>
-
-      <main class="saas-content-frame">
         
-        <header class="saas-top-header">
-          <h2 class="saas-page-headline" id="saas-page-title">Executive Dashboard Summary</h2>
-          <div class="saas-header-actions">
-            <div class="save-status saved" id="save-indicator">
-              <span class="save-status-dot">●</span> <span id="save-text">Engine Sync Stable</span>
-            </div>
+        <div class="sidebar-menu">
+          <div class="sidebar-group">
+            <div class="sidebar-label">Overview Overview</div>
+            <button class="sidebar-btn active" id="tab-dash" onclick="switchTab('dash')">
+              <span class="sidebar-btn-icon">📊</span><span>Dashboard</span>
+            </button>
           </div>
-        </header>
-
-        <div class="tab-view" id="view-dash">
-          <div class="dashboard-layout-deck">
-            
-            <div class="dashboard-center-stack">
-              <div class="premium-hero-banner">
-                <div class="premium-hero-label">Strategic Overview Engine</div>
-                <h3 class="premium-hero-title">Integrated Personnel Allocation & Deposit Ledgers Matrix</h3>
-                <p class="premium-hero-desc">Real-time analytical summaries compiling data from Professional Recruitment operations and LB system pipelines instantly.</p>
-              </div>
-
-              <div class="saas-card" style="padding-bottom: 24px;">
-                <div class="saas-card-title">
-                  <span>Professional Recruitment Pipeline</span>
-                  <span style="font-size: 11px; font-weight: 700; color: #185FA5;">PRO WORK RIG</span>
-                </div>
-                
-                <div class="metrics-matrix-deck" style="margin-bottom: 24px;">
-                  <div class="matrix-metric-card" style="border-top-color: var(--green);">
-                    <div class="matrix-metric-label">Total Active Candidates</div>
-                    <div class="matrix-metric-value text-right" style="text-align: right;">185</div>
-                  </div>
-                  <div class="matrix-metric-card" style="border-top-color: var(--amber);">
-                    <div class="matrix-metric-label">Interviews Scheduled</div>
-                    <div class="matrix-metric-value text-right" style="text-align: right;">14</div>
-                  </div>
-                  <div class="matrix-metric-card" style="border-top-color: var(--blue);">
-                    <div class="matrix-metric-label">Placement Rate</div>
-                    <div class="matrix-metric-value text-right" style="text-align: right;">78.3%</div>
-                  </div>
-                </div>
-
-                <div class="stat-row-deck">
-                  <div class="stat-row-item pro-accent-row">
-                    <span class="stat-row-label">Active Job Orders</span>
-                    <span class="stat-row-val" id="dash-pro-total">24</span>
-                  </div>
-                  <div class="stat-row-item pro-accent-row">
-                    <span class="stat-row-label">Shortlisted Profiles</span>
-                    <span class="stat-row-val">142</span>
-                  </div>
-                  <div class="stat-row-item pro-accent-row">
-                    <span class="stat-row-label">Offers Extended</span>
-                    <span class="stat-row-val">8</span>
-                  </div>
-                  <div class="stat-row-item pro-accent-row">
-                    <span class="stat-row-label">Target Monthly Revenue</span>
-                    <span class="stat-row-val" style="color: var(--green-dark); font-weight: 800;">$15,000</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="saas-card" style="padding-bottom: 24px;">
-                <div class="saas-card-title">
-                  <span>LB Operational Portfolios</span>
-                  <span style="font-size: 11px; font-weight: 700; color: #1a8c8c;">LB WORK RIG</span>
-                </div>
-                
-                <div class="metrics-matrix-deck" style="margin-bottom: 24px;">
-                  <div class="matrix-metric-card" style="border-top-color: var(--purple);">
-                    <div class="matrix-metric-label">Total Open Portfolios</div>
-                    <div class="matrix-metric-value text-right" style="text-align: right;">42</div>
-                  </div>
-                  <div class="matrix-metric-card" style="border-top-color: var(--red);">
-                    <div class="matrix-metric-label">Pending Verifications</div>
-                    <div class="matrix-metric-value text-right" style="text-align: right;">7</div>
-                  </div>
-                </div>
-
-                <div class="stat-row-deck">
-                  <div class="stat-row-item lb-accent-row">
-                    <span class="stat-row-label">Onboarding Checklists Completed</span>
-                    <span class="stat-row-val" id="dash-lb-total">89%</span>
-                  </div>
-                  <div class="stat-row-item lb-accent-row">
-                    <span class="stat-row-label">Avg. Document Processing Time</span>
-                    <span class="stat-row-val">1.8 Days</span>
-                  </div>
-                  <div class="stat-row-item lb-accent-row">
-                    <span class="stat-row-label">Escalated Issues</span>
-                    <span class="stat-row-val" style="color: var(--red); font-weight: 800;">3</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="dashboard-center-stack">
-              
-              <div class="saas-card">
-                <div class="saas-card-title">Dynamic Stage Breakdowns</div>
-                <div class="bar-chart-stack">
-                  <div class="bar-chart-row">
-                    <div class="bar-chart-meta">
-                      <span>Stage 1: Sourcing & Screen</span>
-                      <span>45</span>
-                    </div>
-                    <div class="bar-chart-track"><div class="bar-chart-fill" style="width: 85%"></div></div>
-                  </div>
-                  <div class="bar-chart-row">
-                    <div class="bar-chart-meta">
-                      <span>Stage 2: Client Interview</span>
-                      <span>18</span>
-                    </div>
-                    <div class="bar-chart-track"><div class="bar-chart-fill" style="width: 52%"></div></div>
-                  </div>
-                  <div class="bar-chart-row">
-                    <div class="bar-chart-meta">
-                      <span>Stage 3: Background Check</span>
-                      <span>12</span>
-                    </div>
-                    <div class="bar-chart-track"><div class="bar-chart-fill" style="width: 38%"></div></div>
-                  </div>
-                  <div class="bar-chart-row">
-                    <div class="bar-chart-meta">
-                      <span>Stage 4: Final Offer</span>
-                      <span>5</span>
-                    </div>
-                    <div class="bar-chart-track"><div class="bar-chart-fill" style="width: 15%"></div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="saas-card">
-                <div class="saas-card-title">Refund Clearances & Statuses</div>
-                <div class="stat-row-deck">
-                  <div class="stat-row-item status-clear-block">
-                    <div style="display: flex; flex-direction: column; gap: 2px;">
-                      <span class="stat-row-label" style="font-weight: 700;">Client Account: Steaven</span>
-                      <span style="font-size: 10px; color: var(--green-dark); font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em;">[Cleared] 2nd Deposit OK</span>
-                    </div>
-                    <span class="stat-row-val" style="color: var(--green-dark);">0k Balance</span>
-                  </div>
-                  <div class="stat-row-item status-pending-block">
-                    <div style="display: flex; flex-direction: column; gap: 2px;">
-                      <span class="stat-row-label" style="font-weight: 700;">Client Account: Account B</span>
-                      <span style="font-size: 10px; color: var(--amber); font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em;">[Pending 2nd Deposit]</span>
-                    </div>
-                    <span class="stat-row-val" style="color: var(--amber);">30k Balance</span>
-                  </div>
-                  <div class="stat-row-item status-clear-block">
-                    <div style="display: flex; flex-direction: column; gap: 2px;">
-                      <span class="stat-row-label" style="font-weight: 700;">Client Account: Account C</span>
-                      <span style="font-size: 10px; color: var(--green-dark); font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em;">[Cleared]</span>
-                    </div>
-                    <span class="stat-row-val" style="color: var(--green-dark);">0k Balance</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
-        <div class="tab-view" id="view-pro" style="display:none">
-          <div class="metrics-matrix-deck">
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">Total Professionals</div>
-              <div class="matrix-metric-value" id="count-pro-total">0</div>
-            </div>
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">With Visa Records</div>
-              <div class="matrix-metric-value green" id="count-pro-visa">0</div>
-            </div>
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">Departed & Travelled</div>
-              <div class="matrix-metric-value amber" id="count-pro-travel">0</div>
-            </div>
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">Missing Medical/Bio</div>
-              <div class="matrix-metric-value red" id="count-pro-alert">0</div>
-            </div>
-          </div>
-
-          <div class="saas-toolbar">
-            <div class="saas-search-box-wrap">
-              <span class="saas-search-icon">🔍</span>
-              <input type="text" class="saas-search-input" id="search-pro" placeholder="Search by candidate name, passport, company name, position…" oninput="onSearchPro()">
-            </div>
-            <select class="saas-filter-dropdown" id="filter-pro-stage" onchange="onSearchPro()">
-              <option value="">All Pipeline Stages</option>
-              <option value="REGISTERED">REGISTERED</option>
-              <option value="MEDICAL/BIO PASSED">MEDICAL/BIO PASSED</option>
-              <option value="INTERVIEW ADVERTISED">INTERVIEW ADVERTISED</option>
-              <option value="PENDING OFFER LETTER">PENDING OFFER LETTER</option>
-              <option value="OFFER LETTER SIGNED">OFFER LETTER SIGNED</option>
-              <option value="MOL READY">MOL READY</option>
-              <option value="VISA PROCESS STARTED">VISA PROCESS STARTED</option>
-              <option value="VISA STAMPED">VISA STAMPED</option>
-              <option value="TRAVELLED">TRAVELLED</option>
-              <option value="RETURNED">RETURNED</option>
-            </select>
-            <select class="saas-filter-dropdown" id="filter-pro-paid" onchange="onSearchPro()">
-              <option value="">All Financial Status</option>
-              <option value="FULLY PAID">FULLY PAID</option>
-              <option value="PARTIALLY PAID">PARTIALLY PAID</option>
-              <option value="UNPAID">UNPAID</option>
-            </select>
-            <button class="saas-btn primary" onclick="openNewProModal()">＋ Add Candidate</button>
-            <button class="saas-btn export" onclick="exportPro()">📥 Export CSV</button>
-          </div>
-
-          <div class="saas-table-wrapper">
-            <div class="saas-overflow-x">
-              <table class="saas-table">
-                <thead>
-                  <tr>
-                    <th>Ref ID</th>
-                    <th>Candidate Name</th>
-                    <th>Passport No</th>
-                    <th>Job Position</th>
-                    <th>Target Company</th>
-                    <th>Pipeline Stage</th>
-                    <th>Visa Stamped</th>
-                    <th>Travel Date</th>
-                    <th>Financials</th>
-                    <th style="width:100px;text-align:center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="table-pro-body"></tbody>
-              </table>
-            </div>
-            <div class="saas-pagination-bar" id="pagination-pro"></div>
-          </div>
-        </div>
-
-        <div class="tab-view" id="view-lb" style="display:none">
-          <div class="metrics-matrix-deck">
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">Total LB Portfolios</div>
-              <div class="matrix-metric-value" id="count-lb-total">0</div>
-            </div>
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">Clearance Completed</div>
-              <div class="matrix-metric-value green" id="count-lb-complete">0</div>
-            </div>
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">Pending Verification</div>
-              <div class="matrix-metric-value amber" id="count-lb-pending">0</div>
-            </div>
-            <div class="matrix-metric-card">
-              <div class="matrix-metric-label">Outstanding Balances</div>
-              <div class="matrix-metric-value red sm" id="sum-lb-balance">0k</div>
-            </div>
-          </div>
-
-          <div class="saas-toolbar">
-            <div class="saas-search-box-wrap">
-              <span class="saas-search-icon">🔍</span>
-              <input type="text" class="saas-search-input" id="search-lb" placeholder="Search LB candidates by name tracking credentials…" oninput="onSearchLB()">
-            </div>
-            <select class="saas-filter-dropdown" id="filter-lb-status" onchange="onSearchLB()">
-              <option value="">All Verification Statuses</option>
-              <option value="COMPLETED">COMPLETED</option>
-              <option value="INCOMPLETE">INCOMPLETE</option>
-            </select>
-            <select class="saas-filter-dropdown" id="filter-lb-travel" onchange="onSearchLB()">
-              <option value="">All Deployment Statuses</option>
-              <option value="TRAVELLED">TRAVELLED</option>
-              <option value="NOT YET">NOT YET</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
-            <button class="saas-btn primary" onclick="openNewLBModal()">＋ Add Portfolio</button>
-            <button class="saas-btn export" onclick="exportLB()">📥 Export CSV</button>
-          </div>
-
-          <div class="saas-table-wrapper">
-            <div class="saas-overflow-x">
-              <table class="saas-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Candidate Tracking Name</th>
-                    <th>Passport Status</th>
-                    <th>Deployment</th>
-                    <th>Travel Date</th>
-                    <th>To Refund</th>
-                    <th>R1 Amount Paid</th>
-                    <th>R2 Amount Paid</th>
-                    <th>Outstanding Bal</th>
-                    <th style="width:100px;text-align:center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="table-lb-body"></tbody>
-              </table>
-            </div>
-            <div class="saas-pagination-bar" id="pagination-lb"></div>
-          </div>
-        </div>
-
-      </main>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="pro-modal">
-    <div class="modal" style="max-width:760px">
-      <div class="modal-header">
-        <h3 id="pro-modal-title">Candidate Pipeline Profile Card</h3>
-        <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="pro-id-field">
-        <div class="field-grid">
-          <div class="field">
-            <label>Full Legal Name</label>
-            <input type="text" id="pro-name-input" placeholder="Enter passport name…">
-          </div>
-          <div class="field">
-            <label>Passport Serial No</label>
-            <input type="text" id="pro-pp-input" placeholder="e.g. AK0887406">
-          </div>
-          <div class="field">
-            <label>Primary Phone Number</label>
-            <input type="text" id="pro-phone-input" placeholder="e.g. +254…">
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Job Designation Position</label>
-            <input type="text" id="pro-position-input" placeholder="e.g. STEEL FIXER">
-          </div>
-          <div class="field">
-            <label>Employing Enterprise Company</label>
-            <input type="text" id="pro-company-input" placeholder="e.g. NAYA ISHA">
-          </div>
-          <div class="field">
-            <label>Destination Country</label>
-            <input type="text" id="pro-country-input" placeholder="e.g. QATAR, UAE">
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Pipeline Operation Stage</label>
-            <select id="pro-stage-select">
-              <option value="REGISTERED">REGISTERED</option>
-              <option value="MEDICAL/BIO PASSED">MEDICAL/BIO PASSED</option>
-              <option value="INTERVIEW ADVERTISED">INTERVIEW ADVERTISED</option>
-              <option value="PENDING OFFER LETTER">PENDING OFFER LETTER</option>
-              <option value="OFFER LETTER SIGNED">OFFER LETTER SIGNED</option>
-              <option value="MOL READY">MOL READY</option>
-              <option value="VISA PROCESS STARTED">VISA PROCESS STARTED</option>
-              <option value="VISA STAMPED">VISA STAMPED</option>
-              <option value="TRAVELLED">TRAVELLED</option>
-              <option value="RETURNED">RETURNED</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Interview Channel Type</label>
-            <input type="text" id="pro-interview-input" placeholder="e.g. CV SELECTION, LIVE">
-          </div>
-          <div class="field">
-            <label>System Submitted Date</label>
-            <input type="date" id="pro-submitted-input">
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Offer Letter Status (OL)</label>
-            <input type="text" id="pro-ol-input" placeholder="Pending, Sent, or Date">
-          </div>
-          <div class="field">
-            <label>Ministry of Labor Track (MOL)</label>
-            <input type="text" id="pro-mol-input" placeholder="Reference code or date">
-          </div>
-          <div class="field">
-            <label>Visa Allocation Reference</label>
-            <input type="text" id="pro-visa-input" placeholder="Stamping code or date">
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Deployment Travel Date</label>
-            <input type="date" id="pro-travel-input">
-          </div>
-          <div class="field">
-            <label>Commission Ledger Status</label>
-            <input type="text" id="pro-commission-input" placeholder="Ledger notation if any">
-          </div>
-          <div class="field">
-            <label>Financial Status Category</label>
-            <select id="pro-paid-select">
-              <option value="UNPAID">UNPAID</option>
-              <option value="PARTIALLY PAID">PARTIALLY PAID</option>
-              <option value="FULLY PAID">FULLY PAID</option>
-            </select>
+          
+          <div class="sidebar-group">
+            <div class="sidebar-label">Pipeline Pipelines</div>
+            <button class="sidebar-btn" id="tab-pro" onclick="switchTab('pro')">
+              <span class="sidebar-btn-icon">💼</span><span>Professional Jobs</span>
+            </button>
+            <button class="sidebar-btn" id="tab-lb" onclick="switchTab('lb')">
+              <span class="sidebar-btn-icon">🏠</span><span>LB Jobs Sector</span>
+            </button>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="saas-btn" onclick="closeModal('pro-modal')">Discard</button>
-        <button class="saas-btn primary" onclick="savePro()">Commit Configuration Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="lb-modal">
-    <div class="modal" style="max-width:720px">
-      <div class="modal-header">
-        <h3 id="lb-modal-title">LB Portfolio Clearance Configuration Card</h3>
-        <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="lb-id-field">
-        <div class="field-grid">
-          <div class="field">
-            <label>Candidate Tracking Name</label>
-            <input type="text" id="lb-name-input" placeholder="Enter candidate full identifier name…">
-          </div>
-          <div class="field">
-            <label>Primary Phone Reference</label>
-            <input type="text" id="lb-phone-input" placeholder="Contact link number if any…">
-          </div>
-          <div class="field">
-            <label>Passport Document Status</label>
-            <select id="lb-ppstatus-select">
-              <option value="NOT APPLIED">NOT APPLIED</option>
-              <option value="PASSPORT APPLIED">PASSPORT APPLIED</option>
-              <option value="PASSPORT READY">PASSPORT READY</option>
-              <option value="HELD BY OFFICE">HELD BY OFFICE</option>
-            </select>
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Deployment Deployment Status</label>
-            <select id="lb-travelstatus-select">
-              <option value="NOT YET">NOT YET</option>
-              <option value="TRAVELLED">TRAVELLED</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Deployment Flight Travel Date</label>
-            <input type="date" id="lb-traveldate-input">
-          </div>
-          <div class="field">
-            <label>Total To Refund Allocation Amount</label>
-            <input type="number" id="lb-torefund-input" placeholder="0">
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Release Payment 1 Date (R1)</label>
-            <input type="date" id="lb-r1date-input">
-          </div>
-          <div class="field">
-            <label>Release Payment 1 Amount (R1)</label>
-            <input type="number" id="lb-r1amt-input" placeholder="0">
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Release Payment 2 Date (R2)</label>
-            <input type="date" id="lb-r2date-input">
-          </div>
-          <div class="field">
-            <label>Release Payment 2 Amount (R2)</label>
-            <input type="number" id="lb-r2amt-input" placeholder="0">
-          </div>
-        </div>
-        <div class="field full">
-          <label>Internal Operations Documentation Notes</label>
-          <textarea id="lb-notes-input" placeholder="Log any ledger transactions, clearance exceptions, tracking notations safely here…"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="saas-btn" onclick="closeModal('lb-modal')">Discard</button>
-        <button class="saas-btn primary" onclick="saveLB()">Commit Portfolio Parameters</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="docs-modal">
-    <div class="modal" style="max-width:480px">
-      <div class="modal-header">
-        <h3 id="docs-modal-title">Documents Storage Sharing Node Link</h3>
-        <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size:12px;color:var(--saas-text-muted);margin-bottom:1rem">
-          Upload all files (passport, ID cards, signing sheets, MOL clearance copies, visa stamps) into a centralized Google Drive cloud directory folder, and link below.
-          <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue); text-decoration: underline; margin-left: 4px;">Google Drive Share Settings Guide →</a>
-        </p>
-        <div class="field">
-          <label>Documents folder storage uniform share link</label>
-          <input class="doc-link-input" type="text" id=\"docs-link-input\" placeholder=\"Paste Google Drive target URL network address link safely here…\" oninput=\"onDocsLinkInput()\" style=\"width:100%;margin-top:4px;\">
-        </div>
-        <div class="modal-footer" style="justify-content:space-between; padding-left:0; padding-right:0; margin-top:12px; padding-bottom:0; background:transparent; border-top:none;">
-          <button class="saas-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()" style="background:#E6F1FB; color:var(--blue); border:none;">📂 Target Storage Link Node</button>
-          <div style="display:flex;gap:8px">
-            <button class="saas-btn" onclick="closeModal('docs-modal')">Close</button>
-            <button class="saas-btn primary" onclick="saveDocs()">Save Document Node</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast-container"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="data.js"></script>
-  <script src="app.js"></script>
-  <script>
-    // Interception hook to transform default text content header title matching left-menu interaction selections
-    const nativeSwitchTab = window.switchTab;
-    window.switchTab = function(tabName) {
-      if(typeof nativeSwitchTab === 'function') nativeSwitchTab(tabName);
       
-      // Update structural highlighting configurations safely inside premium left menu layout
-      ['dash', 'pro', 'lb'].forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        if(btn) btn.classList.toggle('active', t === tabName);
-      });
-      
-      const titleEl = document.getElementById('saas-page-title');
-      if(titleEl) {
-        if(tabName === 'dash') titleEl.textContent = 'Executive Dashboard Summary';
-        if(tabName === 'pro') titleEl.textContent = 'Professional Recruitment Pipeline';
-        if(tabName === 'lb') titleEl.textContent = 'LB Operational Portfolios';
-      }
-    };
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="sidebar-user-avatar" id="avatar-char">U</div>
+          <div class="sidebar-user-meta">
+            <div class="sidebar-user-name" id="user-chip">—</div>
+            <div class="sidebar-user-status">Active Session</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CORE WORKSPACE FRAME -->
+    <div class="saas-content-frame">
     
-    // Custom interception for avatar initial sync logic
-    const nativeDoLogin = window.doLogin;
-    window.doLogin = function() {
-      if(typeof nativeDoLogin === 'function') nativeDoLogin();
-      setTimeout(() => {
-        const chip = document.getElementById('user-chip');
-        const avatarChar = document.getElementById('avatar-char');
-        if(chip && avatarChar && chip.textContent && chip.textContent !== '—') {
-          avatarChar.textContent = chip.textContent.trim().charAt(0).toUpperCase();
-        }
-      }, 400);
-    };
-  </script>
+      <!-- CONSOLIDATED WORKSPACE TOP HEADER BAR -->
+      <div class="saas-top-header">
+        <div class="saas-page-headline" id="saas-page-title">Executive Dashboard</div>
+        <div class="saas-header-actions">
+          <div class="save-status saved" id="save-status">✓ <span id="save-text">Saved</span></div>
+          <button class="logout-action-btn" onclick="doLogout()">Sign Out Portal</button>
+        </div>
+      </div>
 
+      <!-- ── DASHBOARD SECTION ── -->
+      <div id="dash-section">
+        <div class="dashboard-layout-deck">
+        
+          <div class="dashboard-center-stack">
+            <!-- LUXURY PROMOTIONAL SUMMARY BANNER HUB -->
+            <div class="premium-hero-banner">
+              <div class="premium-hero-label">Recruitment Hub Overview</div>
+              <div class="premium-hero-title">Optimize Placements & Manage Pipeline Deliverables</div>
+              <div class="premium-hero-desc">Real-time status tracking framework linked securely to cloud instances. Keep documents validated and logs audit-ready.</div>
+            </div>
+            
+            <!-- FLEX ROWS FOR CATEGORIZED OVERVIEWS -->
+            <div class="saas-card">
+              <div class="saas-card-title">💼 Professional Segments Summary</div>
+              <div class="stat-row-deck" id="dash-pro-card"></div>
+            </div>
+            
+            <div class="saas-card">
+              <div class="saas-card-title">🏠 LB Operational Summary</div>
+              <div class="stat-row-deck" id="dash-lb-card"></div>
+            </div>
+          </div>
+          
+          <!-- RIGHT-SIDE DATA PERFORMANCE PANEL CHANNELS -->
+          <div class="dashboard-center-stack">
+            <div class="saas-card">
+              <div class="saas-card-title">📊 Dynamic Stage Breakdowns</div>
+              <div class="bar-chart-stack" id="dash-pro-stages"></div>
+            </div>
+            
+            <div class="saas-card">
+              <div class="saas-card-title">↩️ Refund Clearances & Statuses</div>
+              <div class="stat-row-deck" id="dash-lb-refunds"></div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- ── PROFESSIONAL INTERACTION ZONE ── -->
+      <div id="pro-section" style="display:none">
+        <div class="metrics-matrix-deck" id="pro-metrics"></div>
+        
+        <div class="saas-toolbar">
+          <div class="saas-search-box-wrap">
+            <span class="saas-search-icon">🔍</span>
+            <input type="text" class="saas-search-input" id="pro-search" placeholder="Search name, passport, company code…" oninput="renderPro()">
+          </div>
+          <select class="saas-filter-dropdown" id="pro-stage-f" onchange="renderPro()"></select>
+          <select class="saas-filter-dropdown" id="pro-company-f" onchange="renderPro()"></select>
+          <button class="saas-btn export" onclick="exportCSV('pro')">⬇ Export CSV</button>
+          <button class="saas-btn" onclick="addCustomStage('pro')">⚙ Add Stage</button>
+          <button class="saas-btn primary" onclick="openProForm()">＋ Add Candidate</button>
+        </div>
+        
+        <div class="saas-table-wrapper">
+          <div class="saas-overflow-x">
+            <table class="saas-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Full Candidate Name</th><th>Passport</th><th>Phone</th>
+                  <th>Position</th><th>Company</th><th>Country</th><th>Current Stage</th>
+                  <th>Commission</th><th>Amount Paid</th><th>Balance</th><th>Docs Folder</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pro-tbody">
+                <tr><td colspan="13"><div class="empty">Loading datasets…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="saas-pagination-bar" id="pro-pagination"></div>
+        </div>
+      </div>
+
+      <!-- ── LB JOBS INTERACTION ZONE ── -->
+      <div id="lb-section" style="display:none">
+        <div class="metrics-matrix-deck" id="lb-metrics"></div>
+        
+        <div class="saas-toolbar">
+          <div class="saas-search-box-wrap">
+            <span class="saas-search-icon">🔍</span>
+            <input type="text" class="saas-search-input" id="lb-search" placeholder="Search candidate identity, phone sequence…" oninput="renderLB()">
+          </div>
+          <select class="saas-filter-dropdown" id="lb-travel-f" onchange="renderLB()"></select>
+          <select class="saas-filter-dropdown" id="lb-refund-f" onchange="renderLB()">
+            <option value="">All refund statuses</option>
+            <option value="complete">Complete</option>
+            <option value="incomplete">Incomplete</option>
+            <option value="RETURNED">Returned</option>
+            <option value="N/A">N/A (HAD PP)</option>
+          </select>
+          <button class="saas-btn export" onclick="exportCSV('lb')">⬇ Export CSV</button>
+          <button class="saas-btn" onclick="addCustomStage('lb')">⚙ Add Status</button>
+          <button class="saas-btn primary" onclick="openLBForm()">＋ Add Candidate</button>
+        </div>
+        
+        <div class="saas-table-wrapper">
+          <div class="saas-overflow-x">
+            <table class="saas-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Full Candidate Name</th><th>Phone Number</th><th>Passport</th>
+                  <th>Travel Status</th><th>Travel Date</th><th>To Refund</th>
+                  <th>Refunded</th><th>Balance Owed</th><th>Refund Metric</th><th>Docs Folder</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="lb-tbody">
+                <tr><td colspan="12"><div class="empty">Loading datasets…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="saas-pagination-bar" id="lb-pagination"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── PROFESSIONAL OPERATIONAL MODAL SHEET ── -->
+<div class="modal-bg" id="pro-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="pro-modal-title">Add Professional Candidate</h3>
+      <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="pro-mtab-details" onclick="switchModalTab('pro','details',this)">Details Segment</button>
+      <button class="modal-tab" id="pro-mtab-pipeline" onclick="switchModalTab('pro','pipeline',this)">Pipeline Stage</button>
+      <button class="modal-tab" id="pro-mtab-commission" onclick="switchModalTab('pro','commission',this)">Commissions</button>
+      <button class="modal-tab" id="pro-mtab-timeline" onclick="switchModalTab('pro','timeline',this)">Timeline Audit</button>
+    </div>
+    
+    <div id="pro-tab-details">
+      <div class="form-grid">
+        <div class="field form-full"><label>Full Name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
+        <div class="field"><label>Passport No.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
+        <div class="field"><label>Phone Number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label>Position Field</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
+        <div class="field"><label>Corporate Entity</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
+        <div class="field"><label>Destination Country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
+        <div class="field"><label>Current Stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
+        <div class="field"><label>Date Submitted</label><input type="date" id="pf-submitted"></div>
+      </div>
+    </div>
+    
+    <div id="pro-tab-pipeline" style="display:none">
+      <div class="form-grid">
+        <div class="field"><label>Interview / Selection Date</label><input type="date" id="pf-interview"></div>
+        <div class="field"><label>Offer Letter Date</label><input type="date" id="pf-ol"></div>
+        <div class="field"><label>MOL Date Tag</label><input type="date" id="pf-mol"></div>
+        <div class="field"><label>Visa Release Date</label><input type="date" id="pf-visa"></div>
+        <div class="field form-full"><label>Actual Travel Date</label><input type="date" id="pf-travel"></div>
+      </div>
+    </div>
+    
+    <div id="pro-tab-commission" style="display:none">
+      <div class="form-grid">
+        <div class="field"><label>Commission Fee (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
+        <div class="field"><label>Amount Paid In (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
+      </div>
+    </div>
+    
+    <div id="pro-tab-timeline" style="display:none">
+      <div id="pro-form-timeline"><div class="tl-empty">Save individual to populate data stream.</div></div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="saas-btn" onclick="closeModal('pro-modal')">Discard Changes</button>
+      <button class="saas-btn primary" onclick="savePro()">Commit Candidate</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LB OPERATIONAL MODAL SHEET ── -->
+<div class="modal-bg" id="lb-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="lb-modal-title">Add LB Candidate</h3>
+      <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="lb-mtab-details" onclick="switchModalTab('lb','details',this)">Identity Group</button>
+      <button class="modal-tab" id="lb-mtab-refunds" onclick="switchModalTab('lb','refunds',this)">Refund Protocols</button>
+      <button class="modal-tab" id="lb-mtab-timeline" onclick="switchModalTab('lb','timeline',this)">Log Matrix</button>
+    </div>
+    
+    <div id="lb-tab-details">
+      <div class="form-grid">
+        <div class="field form-full"><label>Full Name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
+        <div class="field"><label>Phone Number Reference</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label>Passport Status *</label>
+          <select id="lf-pp">
+            <option value="APPLIED">Applied Pipeline</option>
+            <option value="HAD PP">Had PP Already</option>
+            <option value="NOT APPLIED">Not Yet Applied</option>
+            <option value="PUSHED">Pushed Sequence</option>
+          </select>
+        </div>
+        <div class="field"><label>Travel Status State</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
+        <div class="field"><label>Travel Allocation Date</label><input type="date" id="lf-tdate"></div>
+        <div class="field"><label>Internal System Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+      </div>
+    </div>
+    
+    <div id="lb-tab-refunds" style="display:none">
+      <div class="form-grid">
+        <div class="field form-full"><label>Target Allocation To Refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
+        <div class="section-divider">Installment Sequence 1</div>
+        <div class="field"><label>1st Clearance Date</label><input type="date" id="lf-r1date"></div>
+        <div class="field"><label>1st Cleared Value (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
+        <div class="section-divider">Installment Sequence 2</div>
+        <div class="field"><label>2nd Clearance Date</label><input type="date" id="lf-r2date"></div>
+        <div class="field"><label>2nd Cleared Value (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+      </div>
+    </div>
+    
+    <div id="lb-tab-timeline" style="display:none">
+      <div id="lb-form-timeline"><div class="tl-empty">Save individual to populate data stream.</div></div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="saas-btn" onclick="closeModal('lb-modal')">Discard Changes</button>
+      <button class="saas-btn primary" onclick="saveLB()">Commit Candidate</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EXTERNAL LINK DRIVE MANAGEMENT MODAL ── -->
+<div class="modal-bg" id="docs-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3 id="docs-modal-title">Unified Document Repositories</h3>
+      <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--saas-text-muted);margin-bottom:18px">
+      Link secure shared storage paths (Google Drive, Dropbox) hosting candidate assets (Visas, Identifications, Passports) to tie records directly.
+    </p>
+    <div class="field" style="margin-bottom:12px">
+      <label>Google Shared Folder URL</label>
+      <input type="text" id="docs-link-input" placeholder="Paste cloud repository URL sequence…" oninput="onDocsLinkInput()">
+    </div>
+    <div class="modal-footer" style="justify-content:space-between; margin-top:20px;">
+      <button class="saas-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()" style="background:#EBF3FC; color:var(--blue); border:none;">📂 Launch Repository</button>
+      <div style="display:flex;gap:6px">
+        <button class="saas-btn" onclick="closeModal('docs-modal')">Cancel</button>
+        <button class="saas-btn primary" onclick="saveDocs()">Save Mapping</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Supabase CDN and Local Core Systems Linkage -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  // Small interface interception hook to transform default text content header title matching left-menu interaction selections
+  const nativeSwitchTab = window.switchTab;
+  window.switchTab = function(tabName) {
+    if(typeof nativeSwitchTab === 'function') nativeSwitchTab(tabName);
+    
+    // Update structural highlighting configurations safely inside premium left menu layout
+    ['dash', 'pro', 'lb'].forEach(t => {
+      const btn = document.getElementById(`tab-${t}`);
+      if(btn) btn.classList.toggle('active', t === tabName);
+    });
+    
+    const titleEl = document.getElementById('saas-page-title');
+    if(titleEl) {
+      if(tabName === 'dash') titleEl.textContent = 'Executive Dashboard Summary';
+      if(tabName === 'pro') titleEl.textContent = 'Professional Recruitment Pipeline';
+      if(tabName === 'lb') titleEl.textContent = 'LB Operational Portfolios';
+    }
+  };
+  
+  // Custom interception for avatar initial sync logic
+  const nativeDoLogin = window.doLogin;
+  window.doLogin = function() {
+    if(typeof nativeDoLogin === 'function') nativeDoLogin();
+    setTimeout(() => {
+      const chip = document.getElementById('user-chip');
+      const avatarChar = document.getElementById('avatar-char');
+      if(chip && avatarChar && chip.textContent && chip.textContent !== '—') {
+        avatarChar.textContent = chip.textContent.trim().charAt(0).toUpperCase();
+      }
+    }, 400);
+  };
+</script>
 </body>
 </html>
