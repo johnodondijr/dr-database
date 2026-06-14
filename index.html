@@ -3,1388 +3,254 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DR Database — Destiny Recruit Consults</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --gold:#F5C453;
-      --gold-dark:#C9A227;
-      --gold-deeper:#A8841C;
-      --gold-light:#FDF6E2;
-      --gold-lighter:#FEFCF4;
-      --charcoal:#1E1E1C;
-      --charcoal-light:#2A2A28;
-      --green:#1D9E75;
-      --green-dark:#0F6E56;
-      --green-light:#E1F5EE;
-      --amber:#BA7517;
-      --amber-light:#FAEEDA;
-      --blue:#185FA5;
-      --blue-light:#E6F1FB;
-      --red:#A32D2D;
-      --red-light:#FCEBEB;
-      --purple-light:#EEEDFE;
-      --purple:#3C3489;
-      --pink-light:#FBEAF0;
-      --pink:#993556;
-      --gray-light:#F4F3EE;
-      --gray:#5F5E5A;
-      
-      /* Premium SaaS Layout Palette */
-      --saas-bg:#F8F7F4;
-      --saas-sidebar:#FFFFFF;
-      --saas-card:#FFFFFF;
-      --saas-border:rgba(42,42,40,0.06);
-      --saas-text-main:#1A1A19;
-      --saas-text-muted:#7C7A72;
-      --saas-accent-gold:#CCA43B;
-      --saas-accent-yellow:#F5C518;
-      
-      --radius:12px;
-      --radius-lg:22px;
-      --radius-pill:100px;
-      --shadow-sm:0 2px 8px rgba(42,42,40,.03);
-      --shadow:0 8px 30px rgba(42,42,40,.04);
-      --shadow-lg:0 16px 48px rgba(42,42,40,.1);
-    }
-    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--saas-bg);color:var(--saas-text-main);font-size:14px;line-height:1.5;min-height:100vh}
-
-    /* ── LOGIN SCREEN ── */
-    #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-color:#E2E1DC;font-family:'Plus Jakarta Sans',sans-serif}
-    .lp-window{background:linear-gradient(145deg,#F9F8F3 0%,#F1EFE6 100%);width:100%;max-width:1100px;height:720px;border-radius:24px;box-shadow:0 30px 70px rgba(0,0,0,.12);display:flex;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.6)}
-    .lp-form-panel{flex:1.1;padding:50px 65px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
-    .lp-brand-tag{align-self:flex-start;background:#fff;border:1px solid #E6E4DD;border-radius:30px;padding:8px 20px;font-size:13px;font-weight:600;letter-spacing:.02em;color:#2A2A28;box-shadow:0 2px 6px rgba(0,0,0,.02)}
-    .lp-content-area{max-width:360px;width:100%;margin:0 auto}
-    .lp-header{margin-bottom:32px;text-align:center}
-    .lp-header h1{font-size:28px;font-weight:700;color:#2A2A28;letter-spacing:-.02em;margin-bottom:6px}
-    .lp-header p{font-size:14px;color:#7A7A77;font-weight:500}
-    .lp-input-group{margin-bottom:18px;text-align:left}
-    .lp-input-group label{display:block;font-size:12px;font-weight:600;color:#7A7A77;margin-left:16px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
-    .lp-input-wrap{position:relative;display:flex;align-items:center}
-    .lp-input-wrap input{width:100%;height:48px;background:#fff;border:1px solid #E6E4DD;border-radius:30px;padding:0 22px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;color:#2A2A28;transition:all .25s;box-shadow:inset 0 2px 4px rgba(0,0,0,.01)}
-    .lp-input-wrap input:focus{outline:none;border-color:#D2C0A5;box-shadow:0 0 0 4px rgba(245,196,83,.15)}
-    .lp-pw-toggle{position:absolute;right:18px;background:none;border:none;cursor:pointer;font-size:16px;color:#7A7A77}
-    .lp-forgot{display:block;text-align:right;font-size:12px;color:#7A7A77;text-decoration:none;margin-top:6px;margin-right:14px;font-weight:500;cursor:pointer}
-    .lp-forgot:hover{color:#2A2A28;text-decoration:underline}
-    .lp-submit{width:100%;height:48px;background:#F5C453;color:#2A2A28;border:none;border-radius:30px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 8px 20px rgba(245,196,83,.25);transition:all .2s cubic-bezier(.16,1,.3,1)}
-    .lp-submit:hover{background:#E4B33E;transform:translateY(-1px);box-shadow:0 10px 24px rgba(245,196,83,.35)}
-    .lp-chips{display:flex;gap:12px;margin-top:16px}
-    .lp-chip{flex:1;height:42px;background:#fff;border:1px solid #E6E4DD;border-radius:30px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:#2A2A28;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:default}
-    .lp-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#7A7A77;font-weight:500}
-    .lp-footer a{color:#7A7A77;text-decoration:none;font-weight:600}
-    .lp-footer a:hover{color:#2A2A28;text-decoration:underline}
-    .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
-    .recovery-result{background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
-    .lp-media{flex:1.1;margin:14px;border-radius:20px;background-size:cover;background-position:center;position:relative;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80')}
-    .lp-media-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(30,30,28,.2) 0%,rgba(30,30,28,.5) 100%)}
-    .lp-widget-task{position:absolute;top:35px;left:35px;background:#F5C453;padding:12px 18px;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.15);max-width:190px;z-index:2}
-    .lp-widget-task h4{font-size:12px;font-weight:700;color:#2A2A28;margin-bottom:2px}
-    .lp-widget-task p{font-size:10px;font-weight:500;color:rgba(0,0,0,.6)}
-    .lp-widget-pill{position:absolute;top:75px;left:80px;background:rgba(30,30,28,.65);backdrop-filter:blur(8px);padding:6px 14px;border-radius:10px;font-size:9px;color:rgba(255,255,255,.7);font-weight:500;z-index:1}
-    .lp-bottom{position:absolute;bottom:35px;left:35px;right:35px;display:flex;flex-direction:column;gap:16px}
-    .lp-cal{background:rgba(255,255,255,.15);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;color:#fff}
-    .lp-cal-day{text-align:center;flex:1}
-    .lp-cal-day .dl{font-size:10px;opacity:.7;text-transform:uppercase;font-weight:500;margin-bottom:4px}
-    .lp-cal-day .dn{font-size:13px;font-weight:600}
-    .lp-cal-day.act{background:rgba(255,255,255,.25);border-radius:10px;padding:2px 0}
-    .lp-summary{background:#fff;border-radius:16px;padding:16px;box-shadow:0 15px 35px rgba(0,0,0,.15);max-width:240px}
-    .lp-summary h4{font-size:13px;font-weight:700;color:#2A2A28;margin-bottom:2px}
-    .lp-summary p{font-size:11px;color:#7A7A77;font-weight:500;margin-bottom:10px}
-    .lp-avatars{display:flex;align-items:center}
-    .lp-av{width:22px;height:22px;border-radius:50%;border:1.5px solid #fff;background-size:cover;margin-right:-6px}
-    @media(max-width:900px){
-      #login-screen{padding:0}
-      .lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}
-      .lp-media{display:none}
-      .lp-form-panel{padding:40px 30px}
-    }
-    
-    /* ── LOADING OVERLAY ── */
-    .loading-overlay{display:none;position:fixed;inset:0;background:rgba(248,247,244,.85);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;color:var(--saas-text-muted)}
-    .loading-overlay.show{display:flex}
-    .spinner{width:36px;height:36px;border:3.5px solid var(--gray-light);border-top-color:var(--saas-accent-gold);border-radius:50%;animation:spin .65s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* ── SIDEBAR INTERFACE ── */
-    #app {
-      display: none;
-      min-height: 100vh;
-      position: relative;
-    }
-    .app-inner {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .saas-sidebar {
-      width: 270px;
-      background: var(--saas-sidebar);
-      border-right: 1px solid var(--saas-border);
-      padding: 32px 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 100;
-    }
-    .sidebar-top {
-      display: flex;
-      flex-direction: column;
-      gap: 36px;
-    }
-    .sidebar-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--saas-text-main);
-      letter-spacing: -0.02em;
-    }
-    .sidebar-logo-icon {
-      background: var(--charcoal);
-      color: var(--gold);
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 13px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .sidebar-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
-    .sidebar-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .sidebar-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--saas-text-muted);
-      margin-bottom: 6px;
-      padding-left: 14px;
-    }
-    .sidebar-btn {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: inherit;
-      color: var(--saas-text-muted);
-      background: transparent;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      text-align: left;
-    }
-    .sidebar-btn:hover {
-      color: var(--saas-text-main);
-      background: var(--gray-light);
-    }
-    .sidebar-btn.active {
-      color: var(--saas-text-main);
-      background: #FDF9EC;
-      font-weight: 700;
-      box-shadow: inset 3px 0 0 var(--saas-accent-gold);
-    }
-    .sidebar-btn-icon {
-      font-size: 16px;
-    }
-    .sidebar-footer {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      border-top: 1px solid var(--saas-border);
-      padding-top: 20px;
-    }
-    .sidebar-user-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .sidebar-user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--charcoal) 0%, #444 100%);
-      color: var(--gold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 14px;
-      border: 1.5px solid #fff;
-      box-shadow: var(--shadow-sm);
-    }
-    .sidebar-user-meta {
-      flex: 1;
-      overflow: hidden;
-    }
-    .sidebar-user-name {
-      font-weight: 700;
-      font-size: 13px;
-      color: var(--saas-text-main);
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-    .sidebar-user-status {
-      font-size: 11px;
-      color: var(--green);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .sidebar-user-status::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      background: var(--green);
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    /* MAIN RIG CONTENT FRAME */
-    .saas-content-frame {
-      flex: 1;
-      margin-left: 270px;
-      padding: 40px 48px;
-      max-width: 1500px;
-      width: calc(100% - 270px);
-    }
-
-    /* TOP PROFILE BAR & ACTION STATUS */
-    .saas-top-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 36px;
-    }
-    .saas-page-headline {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--saas-text-main);
-    }
-    .saas-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .save-status {
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: var(--radius-pill);
-      background: #fff;
-      border: 1px solid var(--saas-border);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: var(--shadow-sm);
-    }
-    .save-status.saved { color: var(--green-dark); background: var(--green-light); border-color: transparent; }
-    .save-status.saving { color: var(--amber); background: var(--amber-light); border-color: transparent; }
-    
-    .logout-action-btn {
-      padding: 8px 16px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--red);
-      background: var(--red-light);
-      border: none;
-      border-radius: var(--radius-pill);
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .logout-action-btn:hover { opacity: 0.85; }
-
-    /* ── ASYMMETRICAL DASHBOARD GRID ── */
-    .dashboard-layout-deck {
-      display: grid;
-      grid-template-columns: 1.8fr 1.2fr;
-      gap: 28px;
-      align-items: start;
-    }
-    .dashboard-center-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
-    
-    /* HERO HIGHLIGHT CARDS BANNER */
-    .premium-hero-banner {
-      background: linear-gradient(135deg, #1A1A19 0%, #2D2D29 60%, #3D3A2F 100%);
-      color: #FFFFFF;
-      border-radius: var(--radius-lg);
-      padding: 40px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 12px 40px rgba(26,26,25,0.12);
-    }
-    .premium-hero-banner::after {
-      content: '';
-      position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle, rgba(245,196,83,0.18) 0%, rgba(0,0,0,0) 70%);
-      border-radius: 50%;
-    }
-    .premium-hero-label {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--saas-accent-gold);
-      margin-bottom: 12px;
-    }
-    .premium-hero-title {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.25;
-      max-width: 460px;
-      margin-bottom: 16px;
-    }
-    .premium-hero-desc {
-      font-size: 13px;
-      color: rgba(255,255,255,0.65);
-      font-weight: 500;
-    }
-
-    /* FLOAT CARD TEMPLATE */
-    .saas-card {
-      background: var(--saas-card);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--saas-border);
-      padding: 28px;
-      box-shadow: var(--shadow-sm);
-    }
-    .saas-card-title {
-      font-size: 13px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--saas-text-muted);
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* MODERNISED KPI GRID DECKS (FIX FOR CRAMPED CARDS) */
-    .kpi-grid-deck {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .kpi-grid-card {
-      padding: 16px 20px;
-      border-radius: 16px;
-      border-left: 4px solid var(--saas-border);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      transition: background 0.2s;
-    }
-    .kpi-grid-card.blue { background: var(--blue-light); border-left-color: var(--blue); }
-    .kpi-grid-card.amber { background: var(--amber-light); border-left-color: var(--amber); }
-    .kpi-grid-card.green { background: var(--green-light); border-left-color: var(--green-dark); }
-    .kpi-grid-card.orange { background: #FFF3E0; border-left-color: #E65100; }
-    .kpi-grid-card.cyan { background: #E0F7FA; border-left-color: #00838F; }
-    .kpi-grid-card.rose { background: var(--red-light); border-left-color: var(--red); }
-    .kpi-grid-card.purple { background: var(--purple-light); border-left-color: var(--purple); }
-    
-    .kpi-card-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; tracking-spacing: 0.04em; color: var(--saas-text-muted); }
-    .kpi-card-val { font-size: 20px; font-weight: 800; color: var(--saas-text-main); }
-
-    /* ROW ITEMS WITH METER TRACKS */
-    .stat-row-deck {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .stat-row-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 4px 0;
-    }
-    .stat-row-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-    }
-    .stat-row-label { font-size: 13px; font-weight: 600; color: var(--saas-text-main); }
-    .stat-row-val { font-size: 14px; font-weight: 800; color: var(--saas-text-main); }
-    
-    /* METER STRIPS UNDER LIST ROWS */
-    .stat-row-track {
-      height: 6px;
-      background: var(--gray-light);
-      border-radius: var(--radius-pill);
-      width: 100%;
-      overflow: hidden;
-    }
-    .stat-row-fill {
-      height: 100%;
-      border-radius: var(--radius-pill);
-      background: var(--saas-accent-gold);
-    }
-    .stat-row-fill.blue { background: var(--blue); }
-    .stat-row-fill.rose { background: var(--red); }
-    .stat-row-fill.amber { background: var(--amber); }
-    .stat-row-fill.green { background: var(--green); }
-    .stat-row-fill.purple { background: var(--purple); }
-
-    /* STAGE BREAKDOWN BARS */
-    .bar-chart-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .bar-chart-row {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .bar-chart-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .bar-chart-track {
-      height: 7px;
-      background: var(--gray-light);
-      border-radius: var(--radius-pill);
-      width: 100%;
-      overflow: hidden;
-    }
-    .bar-chart-fill {
-      height: 100%;
-      background: var(--saas-accent-gold);
-      border-radius: var(--radius-pill);
-      transition: width 0.4s ease;
-    }
-
-    /* ── CORE METRICS MATRICES ── */
-    .metrics-matrix-deck {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .matrix-metric-card {
-      background: var(--saas-card);
-      border: 1px solid var(--saas-border);
-      border-radius: 18px;
-      padding: 20px 24px;
-      box-shadow: var(--shadow-sm);
-    }
-    .matrix-metric-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--saas-text-muted);
-      margin-bottom: 12px;
-    }
-    .matrix-metric-value {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--saas-text-main);
-      letter-spacing: -0.02em;
-    }
-    .matrix-metric-value.amber { color: var(--amber); }
-    .matrix-metric-value.green { color: var(--green-dark); }
-    .matrix-metric-value.red { color: var(--red); }
-    .matrix-metric-value.sm { font-size: 16px; word-break: break-all; }
-
-    /* ── SEARCH & FILTER TOOLBAR CONTROLS ── */
-    .saas-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    .saas-search-box-wrap {
-      position: relative;
-      flex: 1;
-      min-width: 240px;
-    }
-    .saas-search-input {
-      width: 100%;
-      height: 44px;
-      background: var(--saas-card);
-      border: 1px solid var(--saas-border);
-      border-radius: var(--radius-pill);
-      padding: 0 16px 0 42px;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--saas-text-main);
-      transition: all 0.2s;
-    }
-    .saas-search-input:focus {
-      outline: none;
-      border-color: var(--saas-accent-gold);
-      box-shadow: 0 0 0 3px rgba(204,164,59,0.1);
-    }
-    .saas-search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 13px;
-      color: var(--saas-text-muted);
-      pointer-events: none;
-    }
-    
-    select.saas-filter-dropdown {
-      height: 44px;
-      padding: 0 36px 0 16px;
-      border: 1px solid var(--saas-border);
-      background: var(--saas-card);
-      border-radius: var(--radius-pill);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--saas-text-main);
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237C7A72' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-    }
-    select.saas-filter-dropdown:focus { outline: none; border-color: var(--saas-accent-gold); }
-
-    /* CORE BUTTON STYLES */
-    .saas-btn {
-      height: 44px;
-      padding: 0 20px;
-      font-size: 13px;
-      font-weight: 700;
-      font-family: inherit;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--saas-border);
-      background: var(--saas-card);
-      color: var(--saas-text-main);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-    .saas-btn:hover { background: var(--gray-light); border-color: #D2CEBF; }
-    .saas-btn.primary {
-      background: var(--charcoal);
-      color: var(--gold);
-      border: none;
-      box-shadow: 0 4px 14px rgba(30,30,28,0.15);
-    }
-    .saas-btn.primary:hover {
-      background: #000000;
-      transform: translateY(-1px);
-    }
-    .saas-btn.export { background: #F0F4F8; color: var(--blue); border: none; }
-    .saas-btn.export:hover { background: #E1EAF2; }
-
-    /* DATA TABLES */
-    .saas-table-wrapper {
-      background: var(--saas-card);
-      border: 1px solid var(--saas-border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-    .saas-overflow-x { overflow-x: auto; }
-    
-    table.saas-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    table.saas-table th {
-      padding: 14px 20px;
-      text-align: left;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--saas-text-muted);
-      background: #FAF9F6;
-      border-bottom: 1px solid var(--saas-border);
-    }
-    table.saas-table td {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--saas-border);
-      color: var(--saas-text-main);
-      white-space: nowrap;
-      max-width: 190px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    table.saas-table tr:last-child td { border-bottom: none; }
-    table.saas-table tr:hover td { background: #FDFCF9; }
-    
-    .saas-name-cell { font-weight: 700; color: #000000; }
-    
-    /* BADGES */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 12px;
-      border-radius: var(--radius-pill);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-    .b-pol { background: var(--blue-light); color: var(--blue); }
-    .b-mol { background: var(--amber-light); color: var(--amber); }
-    .b-visa { background: var(--pink-light); color: var(--pink); }
-    .b-travel { background: var(--purple-light); color: var(--purple); }
-    .b-travelled { background: var(--green-light); color: var(--green-dark); }
-    .b-complete { background: var(--green-light); color: var(--green-dark); }
-    .b-incomplete { background: var(--amber-light); color: var(--amber); }
-    .b-returned { background: var(--red-light); color: var(--red); }
-    .b-na { background: var(--gray-light); color: var(--saas-text-muted); }
-    .b-notyet { background: var(--blue-light); color: var(--blue); }
-    .b-nottravelled { background: var(--red-light); color: var(--red); }
-
-    .action-btn {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: var(--saas-text-muted);
-      padding: 6px;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    .action-btn:hover { color: var(--saas-text-main); background: var(--gray-light); }
-    .action-btn.del:hover { color: var(--red); background: var(--red-light); }
-    .action-btn.docs { color: var(--blue); }
-    .action-btn.docs:hover { background: var(--blue-light); }
-
-    .saas-pagination-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      background: #FAF9F6;
-      border-top: 1px solid var(--saas-border);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--saas-text-muted);
-    }
-    .saas-page-btn-deck { display: flex; gap: 6px; }
-    .saas-page-btn-deck button {
-      height: 32px;
-      padding: 0 12px;
-      font-size: 12px;
-      font-weight: 700;
-      font-family: inherit;
-      border: 1px solid var(--saas-border);
-      border-radius: var(--radius-pill);
-      background: var(--saas-card);
-      color: var(--saas-text-main);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .saas-page-btn-deck button.active {
-      background: var(--charcoal);
-      color: var(--gold);
-      border: none;
-    }
-    .saas-page-btn-deck button:hover:not(.active) { background: var(--gray-light); }
-
-    .empty { text-align: center; padding: 48px; color: var(--saas-text-muted); font-weight: 600; }
-
-    /* MODALS */
-    .modal-bg {
-      display: none; position: fixed; inset: 0;
-      background: rgba(26,26,25,0.4); backdrop-filter: blur(5px);
-      z-index: 1000; align-items: flex-start; justify-content: center;
-      padding: 40px 20px; overflow-y: auto;
-    }
-    .modal-bg.open { display: flex; }
-    .modal {
-      background: var(--saas-card); border-radius: var(--radius-lg);
-      border: 1px solid var(--saas-border); padding: 32px;
-      width: 100%; max-width: 620px; margin: auto;
-      box-shadow: var(--shadow-lg);
-    }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-    .modal-header h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--saas-text-main); }
-    .modal-close {
-      background: transparent; border: 1px solid var(--saas-border); cursor: pointer;
-      color: var(--saas-text-muted); font-size: 20px; line-height: 1; padding: 4px 12px;
-      border-radius: var(--radius); transition: all 0.2s;
-    }
-    .modal-close:hover { background: var(--gray-light); color: var(--saas-text-main); }
-    
-    .modal-tabs { display: flex; border-bottom: 1px solid var(--saas-border); margin-bottom: 24px; gap: 4px; }
-    .modal-tab {
-      padding: 10px 16px; font-size: 13px; font-weight: 700; font-family: inherit;
-      border: none; background: transparent; color: var(--saas-text-muted); cursor: pointer;
-      border-bottom: 2px solid transparent; transition: all 0.2s;
-    }
-    .modal-tab.active { color: var(--saas-accent-gold); border-bottom-color: var(--saas-accent-gold); }
-    
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .form-full { grid-column: 1 / -1; }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 11px; font-weight: 800; color: var(--saas-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .field input, .field select, .field textarea {
-      padding: 11px 14px; border: 1px solid var(--saas-border); border-radius: var(--radius);
-      font-size: 13px; font-family: inherit; color: var(--saas-text-main); background: var(--saas-bg);
-      font-weight: 600; transition: all 0.2s;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus {
-      outline: none; border-color: var(--saas-accent-gold); box-shadow: 0 0 0 3px rgba(204,164,59,0.1);
-    }
-    .field textarea { resize: vertical; min-height: 70px; }
-    .section-divider {
-      font-size: 11px; font-weight: 800; color: var(--saas-text-muted); text-transform: uppercase;
-      letter-spacing: 0.06em; padding: 16px 0 4px; border-top: 1px solid var(--saas-border);
-      margin-top: 8px; grid-column: 1 / -1;
-    }
-    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--saas-border); }
-
-    /* TIMELINE */
-    .tl-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--saas-border); }
-    .tl-item:last-child { border-bottom: none; }
-    .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--saas-accent-yellow); flex-shrink: 0; margin-top: 6px; box-shadow: 0 0 0 3px rgba(245,197,24,0.25); }
-    .tl-action { font-weight: 700; font-size: 13px; color: var(--saas-text-main); }
-    .tl-meta { font-size: 11px; color: var(--saas-text-muted); margin-top: 2px; font-weight: 600; }
-    .tl-empty { color: var(--saas-text-muted); font-size: 13px; text-align: center; padding: 24px; font-weight: 600; }
-
-    /* TOAST DECK */
-    .toast {
-      position: fixed; bottom: 32px; right: 32px; background: var(--charcoal); color: #fff;
-      padding: 12px 24px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 700;
-      z-index: 99999; opacity: 0; transform: translateY(10px); transition: all 0.25s;
-      pointer-events: none; box-shadow: var(--shadow-lg);
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-    .toast.success { background: var(--green-dark); color: #fff; }
-    .toast.error { background: var(--red); color: #fff; }
-
-    @media(max-width:1024px){
-      .dashboard-layout-deck { grid-template-columns: 1fr; }
-      .saas-sidebar { width: 80px; padding: 24px 12px; align-items: center; }
-      .sidebar-label, .sidebar-btn span:not(.sidebar-btn-icon), .sidebar-user-meta { display: none; }
-      .sidebar-logo { justify-content: center; }
-      .saas-content-frame { margin-left: 80px; width: calc(100% - 80px); padding: 32px 24px; }
-    }
-  </style>
+  <title>Agency Operations Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased">
 
-<!-- LOADING BANNER OVERLAY -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="spinner"></div>
-  <span id="loading-text">Loading Data Components…</span>
-</div>
+  <div class="min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg text-white shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid fa-chart-network text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">Destiny Recruit Consults</h1>
+          <p class="text-xs text-slate-400">Agency Control Dashboard</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-2 text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-medium border border-emerald-500/20">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live System
+        </span>
+      </div>
+    </header>
 
-<!-- Standardised Login System Frame -->
-<div id="login-screen">
-  <div class="lp-window">
-    <div class="lp-form-panel">
-      <div class="lp-brand-tag">Destiny Recruit Consults</div>
-      <div class="lp-content-area">
-        <div id="login-main">
-          <div class="lp-header">
-            <h1>Sign in to Portal</h1>
-            <p>Access active candidate pipelines</p>
-          </div>
-          <form onsubmit="event.preventDefault(); doLogin();">
-            <div class="lp-input-group">
-              <label for="username-input">Username</label>
-              <div class="lp-input-wrap">
-                <input type="text" id="username-input" placeholder="e.g. fred" required autocomplete="username">
-              </div>
-            </div>
-            <div class="lp-input-group">
-              <label for="pw-input">Password</label>
-              <div class="lp-input-wrap">
-                <input type="password" id="pw-input" placeholder="••••••••••••" required autocomplete="current-password">
-                <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()">👁</button>
-              </div>
-              <span class="lp-forgot" onclick="showForgotPassword()">Forgot Password?</span>
-            </div>
-            <button type="submit" class="lp-submit">Submit Credentials</button>
-          </form>
-          <div class="login-error" id="login-error">Incorrect username or password.</div>
-          <div class="lp-chips">
-            <div class="lp-chip">📁 Office LAN</div>
-            <div class="lp-chip">🛡 Secure SSL</div>
-          </div>
-        </div>
-        <div id="forgot-section" style="display:none">
-          <div class="lp-header">
-            <h1>Credentials Reset</h1>
-            <p>Enter administrative verification code</p>
-          </div>
-          <form onsubmit="event.preventDefault(); submitForgotPassword();">
-            <div class="lp-input-group">
-              <label for="recovery-code-input">Recovery Code</label>
-              <div class="lp-input-wrap">
-                <input type="text" id="recovery-code-input" placeholder="DR-RESET-2025" required>
-              </div>
-            </div>
-            <button type="submit" class="lp-submit">Verify Identity</button>
-          </form>
-          <div class="login-error" id="forgot-error" style="display:none"></div>
-          <div class="recovery-result" id="forgot-result" style="display:none"></div>
-          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">← Back to standard login</span>
-        </div>
-      </div>
-      <div class="lp-footer">
-        <span>System Version v3.4.1</span>
-        <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
-      </div>
-    </div>
-    <div class="lp-media">
-      <div class="lp-media-overlay"></div>
-      <div class="lp-widget-task">
-        <h4>Professional Job Review</h4>
-        <p>Deployment Schedule: 09:30am</p>
-      </div>
-      <div class="lp-widget-pill">Next batch setup overview</div>
-      <div class="lp-bottom">
-        <div class="lp-cal">
-          <div class="lp-cal-day"><div class="dl">Sun</div><div class="dn">22</div></div>
-          <div class="lp-cal-day"><div class="dl">Mon</div><div class="dn">23</div></div>
-          <div class="lp-cal-day act"><div class="dl">Tue</div><div class="dn">24</div></div>
-          <div class="lp-cal-day"><div class="dl">Wed</div><div class="dn">25</div></div>
-          <div class="lp-cal-day"><div class="dl">Thu</div><div class="dn">26</div></div>
-          <div class="lp-cal-day"><div class="dl">Fri</div><div class="dn">27</div></div>
-          <div class="lp-cal-day"><div class="dl">Sat</div><div class="dn">28</div></div>
-        </div>
-        <div class="lp-summary">
-          <h4>LB Candidate Processing</h4>
-          <p>Passports Tracked: 98 Active</p>
-          <div class="lp-avatars">
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80')"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MAIN COHESIVE INTERNAL SAAS SUITE INTERFACE -->
-<div id="app">
-  <div class="app-inner">
-  
-    <!-- ASYMMETRIC LEFT SIDEBAR NAVIGATION CONTROL UNIT -->
-    <div class="saas-sidebar">
-      <div class="sidebar-top">
-        <div class="sidebar-logo">
-          <div class="sidebar-logo-icon">DR</div>
-          <span>Destiny Recruit</span>
-        </div>
-        
-        <div class="sidebar-menu">
-          <div class="sidebar-group">
-            <div class="sidebar-label">Overview Overview</div>
-            <button class="sidebar-btn active" id="tab-dash" onclick="switchTab('dash')">
-              <span class="sidebar-btn-icon">📊</span><span>Dashboard</span>
-            </button>
-          </div>
-          
-          <div class="sidebar-group">
-            <div class="sidebar-label">Pipeline Pipelines</div>
-            <button class="sidebar-btn" id="tab-pro" onclick="switchTab('pro')">
-              <span class="sidebar-btn-icon">💼</span><span>Professional Jobs</span>
-            </button>
-            <button class="sidebar-btn" id="tab-lb" onclick="switchTab('lb')">
-              <span class="sidebar-btn-icon">🏠</span><span>LB Jobs Sector</span>
-            </button>
-          </div>
-        </div>
-      </div>
+    <!-- Main Content Grid -->
+    <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full space-y-8">
       
-      <div class="sidebar-footer">
-        <div class="sidebar-user-card">
-          <div class="sidebar-user-avatar" id="avatar-char">U</div>
-          <div class="sidebar-user-meta">
-            <div class="sidebar-user-name" id="user-chip">—</div>
-            <div class="sidebar-user-status">Active Session</div>
-          </div>
+      <!-- ============================================================================== -->
+      <!-- SECTION 1: PROFESSIONAL RECRUITMENT PIPELINE -->
+      <!-- ============================================================================== -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h2 class="text-xl font-semibold tracking-tight flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-briefcase text-blue-400"></i> Professional Recruitment Pipeline
+          </h2>
         </div>
-      </div>
-    </div>
 
-    <!-- CORE WORKSPACE FRAME -->
-    <div class="saas-content-frame">
-    
-      <!-- CONSOLIDATED WORKSPACE TOP HEADER BAR -->
-      <div class="saas-top-header">
-        <div class="saas-page-headline" id="saas-page-title">Executive Dashboard</div>
-        <div class="saas-header-actions">
-          <div class="save-status saved" id="save-status">✓ <span id="save-text">Saved</span></div>
-          <button class="logout-action-btn" onclick="doLogout()">Sign Out Portal</button>
-        </div>
-      </div>
-
-      <!-- ── DASHBOARD SECTION ── -->
-      <div id="dash-section">
-        <div class="dashboard-layout-deck">
-        
-          <div class="dashboard-center-stack">
-            <!-- LUXURY PROMOTIONAL SUMMARY BANNER HUB -->
-            <div class="premium-hero-banner">
-              <div class="premium-hero-label">Recruitment Hub Overview</div>
-              <div class="premium-hero-title">Optimize Placements & Manage Pipeline Deliverables</div>
-              <div class="premium-hero-desc">Real-time status tracking framework linked securely to cloud instances. Keep documents validated and logs audit-ready.</div>
+        <!-- NEW: Top Metrics Cards for Professional Recruitment -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-slate-800/40 border-l-4 border-emerald-500 p-4 rounded-r-xl border border-y-slate-800 border-r-slate-800 flex justify-between items-center shadow-sm">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Active Candidates</p>
+              <p class="text-slate-500 text-[10px] mt-0.5">Currently managed in pipeline</p>
             </div>
-            
-            <!-- FIXED MODULE PACKS UPGRADED FOR METRIC DENSITY ACCENT SEPARATION -->
-            <div class="saas-card">
-              <div class="saas-card-title">💼 Professional Segments Summary</div>
-              <!-- Injection wrapper targets for app.js metrics logic loops -->
-              <div class="kpi-grid-deck" id="dash-pro-cards-grid"></div>
-              <div class="stat-row-deck" id="dash-pro-card"></div>
-            </div>
-            
-            <div class="saas-card">
-              <div class="saas-card-title">🏠 LB Operational Summary</div>
-              <!-- Injection wrapper targets for app.js metrics logic loops -->
-              <div class="kpi-grid-deck" id="dash-lb-cards-grid"></div>
-              <div class="stat-row-deck" id="dash-lb-card"></div>
-            </div>
+            <span class="text-2xl font-bold tracking-tight text-emerald-400 text-right">185</span>
           </div>
           
-          <!-- RIGHT-SIDE DATA PERFORMANCE PANEL CHANNELS -->
-          <div class="dashboard-center-stack">
-            <div class="saas-card">
-              <div class="saas-card-title">📊 Dynamic Stage Breakdowns</div>
-              <div class="bar-chart-stack" id="dash-pro-stages"></div>
+          <div class="bg-slate-800/40 border-l-4 border-amber-500 p-4 rounded-r-xl border border-y-slate-800 border-r-slate-800 flex justify-between items-center shadow-sm">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Interviews Scheduled</p>
+              <p class="text-slate-500 text-[10px] mt-0.5">Booked for the current week</p>
             </div>
-            
-            <div class="saas-card">
-              <div class="saas-card-title">↩️ Refund Clearances & Statuses</div>
-              <div class="stat-row-deck" id="dash-lb-refunds"></div>
+            <span class="text-2xl font-bold tracking-tight text-amber-400 text-right">14</span>
+          </div>
+
+          <div class="bg-slate-800/40 border-l-4 border-blue-500 p-4 rounded-r-xl border border-y-slate-800 border-r-slate-800 flex justify-between items-center shadow-sm">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Placement Rate</p>
+              <p class="text-slate-500 text-[10px] mt-0.5">Month-to-date success ratio</p>
             </div>
+            <span class="text-2xl font-bold tracking-tight text-blue-400 text-right">78.3%</span>
+          </div>
+        </div>
+
+        <!-- Content Row: Professional Cards Summary & Dynamic Stage Breakdowns -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Professional Cards Summary -->
+          <div class="bg-slate-800/20 border border-slate-800/80 rounded-xl p-5 space-y-4">
+            <h3 class="text-sm font-semibold tracking-wider uppercase text-slate-400 flex items-center gap-2">
+              <span class="w-1 h-3.5 bg-slate-500 rounded-full"></span> Professional Cards Summary
+            </h3>
+            <div class="space-y-2">
+              <div class="bg-slate-800/40 border-l-4 border-slate-600 px-4 py-3 rounded-r-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium">Active Job Orders</span>
+                <span class="font-bold text-slate-100 text-right">24</span>
+              </div>
+              <div class="bg-slate-800/40 border-l-4 border-slate-600 px-4 py-3 rounded-r-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium">Shortlisted Profiles</span>
+                <span class="font-bold text-slate-100 text-right">142</span>
+              </div>
+              <div class="bg-slate-800/40 border-l-4 border-slate-600 px-4 py-3 rounded-r-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium">Offers Extended</span>
+                <span class="font-bold text-slate-100 text-right">8</span>
+              </div>
+              <div class="bg-slate-800/40 border-l-4 border-slate-600 px-4 py-3 rounded-r-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium">Target Monthly Revenue</span>
+                <span class="font-bold text-emerald-400 text-right">$15,000</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Stage Breakdowns -->
+          <div class="bg-slate-800/20 border border-slate-800/80 rounded-xl p-5 space-y-4">
+            <h3 class="text-sm font-semibold tracking-wider uppercase text-slate-400 flex items-center gap-2">
+              <span class="w-1 h-3.5 bg-indigo-500 rounded-full"></span> Dynamic Stage Breakdowns
+            </h3>
+            <div class="space-y-2">
+              <div class="bg-gradient-to-r from-blue-950/40 to-slate-800/40 border border-slate-800/60 px-4 py-3 rounded-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-blue-500"></span> Stage 1: Sourcing & Screen
+                </span>
+                <span class="font-bold text-slate-100 text-right">45</span>
+              </div>
+              <div class="bg-gradient-to-r from-indigo-950/40 to-slate-800/40 border border-slate-800/60 px-4 py-3 rounded-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Stage 2: Client Interview
+                </span>
+                <span class="font-bold text-slate-100 text-right">18</span>
+              </div>
+              <div class="bg-gradient-to-r from-violet-950/40 to-slate-800/40 border border-slate-800/60 px-4 py-3 rounded-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-violet-500"></span> Stage 3: Background Check
+                </span>
+                <span class="font-bold text-slate-100 text-right">12</span>
+              </div>
+              <div class="bg-gradient-to-r from-fuchsia-950/40 to-slate-800/40 border border-slate-800/60 px-4 py-3 rounded-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-fuchsia-500"></span> Stage 4: Final Offer
+                </span>
+                <span class="font-bold text-slate-100 text-right">5</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================================== -->
+      <!-- SECTION 2: LB OPERATIONAL PORTFOLIOS -->
+      <!-- ============================================================================== -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h2 class="text-xl font-semibold tracking-tight flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-folder-tree text-teal-400"></i> LB Operational Portfolios
+          </h2>
+        </div>
+
+        <!-- NEW: Top Metrics Cards for LB Operations -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-800/40 border-l-4 border-indigo-500 p-4 rounded-r-xl border border-y-slate-800 border-r-slate-800 flex justify-between items-center shadow-sm">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Open Portfolios</p>
+              <p class="text-slate-500 text-[10px] mt-0.5">Active operation and document tracks</p>
+            </div>
+            <span class="text-2xl font-bold tracking-tight text-indigo-400 text-right">42</span>
           </div>
           
-        </div>
-      </div>
-
-      <!-- ── PROFESSIONAL INTERACTION ZONE ── -->
-      <div id="pro-section" style="display:none">
-        <div class="metrics-matrix-deck" id="pro-metrics"></div>
-        
-        <div class="saas-toolbar">
-          <div class="saas-search-box-wrap">
-            <span class="saas-search-icon">🔍</span>
-            <input type="text" class="saas-search-input" id="pro-search" placeholder="Search name, passport, company code…" oninput="renderPro()">
-          </div>
-          <select class="saas-filter-dropdown" id="pro-stage-f" onchange="renderPro()"></select>
-          <select class="saas-filter-dropdown" id="pro-company-f" onchange="renderPro()"></select>
-          <button class="saas-btn export" onclick="exportCSV('pro')">⬇ Export CSV</button>
-          <button class="saas-btn" onclick="addCustomStage('pro')">⚙ Add Stage</button>
-          <button class="saas-btn primary" onclick="openProForm()">＋ Add Candidate</button>
-        </div>
-        
-        <div class="saas-table-wrapper">
-          <div class="saas-overflow-x">
-            <table class="saas-table">
-              <thead>
-                <tr>
-                  <th>#</th><th>Full Candidate Name</th><th>Passport</th><th>Phone</th>
-                  <th>Position</th><th>Company</th><th>Country</th><th>Current Stage</th>
-                  <th>Commission</th><th>Amount Paid</th><th>Balance</th><th>Docs Folder</th><th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="pro-tbody">
-                <tr><td colspan="13"><div class="empty">Loading datasets…</div></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="saas-pagination-bar" id="pro-pagination"></div>
-        </div>
-      </div>
-
-      <!-- ── LB JOBS INTERACTION ZONE ── -->
-      <div id="lb-section" style="display:none">
-        <div class="metrics-matrix-deck" id="lb-metrics"></div>
-        
-        <div class="saas-toolbar">
-          <div class="saas-search-box-wrap">
-            <span class="saas-search-icon">🔍</span>
-            <input type="text" class="saas-search-input" id="lb-search" placeholder="Search candidate identity, phone sequence…" oninput="renderLB()">
-          </div>
-          <select class="saas-filter-dropdown" id="lb-travel-f" onchange="renderLB()"></select>
-          <select class="saas-filter-dropdown" id="lb-refund-f" onchange="renderLB()">
-            <option value="">All refund statuses</option>
-            <option value="complete">Complete</option>
-            <option value="incomplete">Incomplete</option>
-            <option value="RETURNED">Returned</option>
-            <option value="N/A">N/A (HAD PP)</option>
-          </select>
-          <button class="saas-btn export" onclick="exportCSV('lb')">⬇ Export CSV</button>
-          <button class="saas-btn" onclick="addCustomStage('lb')">⚙ Add Status</button>
-          <button class="saas-btn primary" onclick="openLBForm()">＋ Add Candidate</button>
-        </div>
-        
-        <div class="saas-table-wrapper">
-          <div class="saas-overflow-x">
-            <table class="saas-table">
-              <thead>
-                <tr>
-                  <th>#</th><th>Full Candidate Name</th><th>Phone Number</th><th>Passport</th>
-                  <th>Travel Status</th><th>Travel Date</th><th>To Refund</th>
-                  <th>Refunded</th><th>Balance Owed</th><th>Refund Metric</th><th>Docs Folder</th><th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="lb-tbody">
-                <tr><td colspan="12"><div class="empty">Loading datasets…</div></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="saas-pagination-bar" id="lb-pagination"></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ── PROFESSIONAL OPERATIONAL MODAL SHEET ── -->
-<div class="modal-bg" id="pro-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="pro-modal-title">Add Professional Candidate</h3>
-      <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
-    </div>
-    <div class="modal-tabs">
-      <button class="modal-tab active" id="pro-mtab-details" onclick="switchModalTab('pro','details',this)">Details Segment</button>
-      <button class="modal-tab" id="pro-mtab-pipeline" onclick="switchModalTab('pro','pipeline',this)">Pipeline Stage</button>
-      <button class="modal-tab" id="pro-mtab-commission" onclick="switchModalTab('pro','commission',this)">Commissions</button>
-      <button class="modal-tab" id="pro-mtab-timeline" onclick="switchModalTab('pro','timeline',this)">Timeline Audit</button>
-    </div>
-    
-    <div id="pro-tab-details">
-      <div class="form-grid">
-        <div class="field form-full"><label>Full Name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
-        <div class="field"><label>Passport No.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
-        <div class="field"><label>Phone Number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
-        <div class="field"><label>Position Field</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
-        <div class="field"><label>Corporate Entity</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
-        <div class="field"><label>Destination Country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
-        <div class="field"><label>Current Stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
-        <div class="field"><label>Date Submitted</label><input type="date" id="pf-submitted"></div>
-      </div>
-    </div>
-    
-    <div id="pro-tab-pipeline" style="display:none">
-      <div class="form-grid">
-        <div class="field"><label>Interview / Selection Date</label><input type="date" id="pf-interview"></div>
-        <div class="field"><label>Offer Letter Date</label><input type="date" id="pf-ol"></div>
-        <div class="field"><label>MOL Date Tag</label><input type="date" id="pf-mol"></div>
-        <div class="field"><label>Visa Release Date</label><input type="date" id="pf-visa"></div>
-        <div class="field form-full"><label>Actual Travel Date</label><input type="date" id="pf-travel"></div>
-      </div>
-    </div>
-    
-    <div id="pro-tab-commission" style="display:none">
-      <div class="form-grid">
-        <div class="field"><label>Commission Fee (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
-        <div class="field"><label>Amount Paid In (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
-      </div>
-    </div>
-    
-    <div id="pro-tab-timeline" style="display:none">
-      <div id="pro-form-timeline"><div class="tl-empty">Save individual to populate data stream.</div></div>
-    </div>
-    
-    <div class="modal-footer">
-      <button class="saas-btn" onclick="closeModal('pro-modal')">Discard Changes</button>
-      <button class="saas-btn primary" onclick="savePro()">Commit Candidate</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── LB OPERATIONAL MODAL SHEET ── -->
-<div class="modal-bg" id="lb-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="lb-modal-title">Add LB Candidate</h3>
-      <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
-    </div>
-    <div class="modal-tabs">
-      <button class="modal-tab active" id="lb-mtab-details" onclick="switchModalTab('lb','details',this)">Identity Group</button>
-      <button class="modal-tab" id="lb-mtab-refunds" onclick="switchModalTab('lb','refunds',this)">Refund Protocols</button>
-      <button class="modal-tab" id="lb-mtab-timeline" onclick="switchModalTab('lb','timeline',this)">Log Matrix</button>
-    </div>
-    
-    <div id="lb-tab-details">
-      <div class="form-grid">
-        <div class="field form-full"><label>Full Name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
-        <div class="field"><label>Phone Number Reference</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
-        <div class="field"><label>Passport Status *</label>
-          <select id="lf-pp">
-            <option value="APPLIED">Applied Pipeline</option>
-            <option value="HAD PP">Had PP Already</option>
-            <option value="NOT APPLIED">Not Yet Applied</option>
-            <option value="PUSHED">Pushed Sequence</option>
-          </select>
-        </div>
-        <div class="field"><label>Travel Status State</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
-        <div class="field"><label>Travel Allocation Date</label><input type="date" id="lf-tdate"></div>
-        <div class="field"><label>Internal System Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
-      </div>
-    </div>
-    
-    <div id="lb-tab-refunds" style="display:none">
-      <div class="form-grid">
-        <div class="field form-full"><label>Target Allocation To Refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
-        <div class="section-divider">Installment Sequence 1</div>
-        <div class="field"><label>1st Clearance Date</label><input type="date" id="lf-r1date"></div>
-        <div class="field"><label>1st Cleared Value (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
-        <div class="section-divider">Installment Sequence 2</div>
-        <div class="field"><label>2nd Clearance Date</label><input type="date" id="lf-r2date"></div>
-        <div class="field"><label>2nd Cleared Value (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
-      </div>
-    </div>
-    
-    <div id="lb-tab-timeline" style="display:none">
-      <div id="lb-form-timeline"><div class="tl-empty">Save individual to populate data stream.</div></div>
-    </div>
-    
-    <div class="modal-footer">
-      <button class="saas-btn" onclick="closeModal('lb-modal')">Discard Changes</button>
-      <button class="saas-btn primary" onclick="saveLB()">Commit Candidate</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── EXTERNAL LINK DRIVE MANAGEMENT MODAL ── -->
-<div class="modal-bg" id="docs-modal">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header">
-      <h3 id="docs-modal-title">Unified Document Repositories</h3>
-      <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
-    </div>
-    <p style="font-size:12px;color:var(--saas-text-muted);margin-bottom:18px">
-      Link secure shared storage paths (Google Drive, Dropbox) hosting candidate assets (Visas, Identifications, Passports) to tie records directly.
-    </p>
-    <div class="field" style="margin-bottom:12px">
-      <label>Google Shared Folder URL</label>
-      <input type="text" id="docs-link-input" placeholder="Paste cloud repository URL sequence…" oninput="onDocsLinkInput()">
-    </div>
-    <div class="modal-footer" style="justify-content:space-between; margin-top:20px;">
-      <button class="saas-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()" style="background:#EBF3FC; color:var(--blue); border:none;">📂 Launch Repository</button>
-      <div style="display:flex;gap:6px">
-        <button class="saas-btn" onclick="closeModal('docs-modal')">Cancel</button>
-        <button class="saas-btn primary" onclick="saveDocs()">Save Mapping</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- Supabase CDN and Local Core Systems Linkage -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="data.js"></script>
-<script src="app.js"></script>
-<script>
-  // Interface interception hook to handle left-menu transformations smoothly
-  const nativeSwitchTab = window.switchTab;
-  window.switchTab = function(tabName) {
-    if(typeof nativeSwitchTab === 'function') nativeSwitchTab(tabName);
-    
-    ['dash', 'pro', 'lb'].forEach(t => {
-      const btn = document.getElementById(`tab-${t}`);
-      if(btn) btn.classList.toggle('active', t === tabName);
-    });
-    
-    const titleEl = document.getElementById('saas-page-title');
-    if(titleEl) {
-      if(tabName === 'dash') titleEl.textContent = 'Executive Dashboard Summary';
-      if(tabName === 'pro') titleEl.textContent = 'Professional Recruitment Pipeline';
-      if(tabName === 'lb') titleEl.textContent = 'LB Operational Portfolios';
-    }
-  };
-  
-  // Custom interception for avatar initial sync logic
-  const nativeDoLogin = window.doLogin;
-  window.doLogin = function() {
-    if(typeof nativeDoLogin === 'function') nativeDoLogin();
-    setTimeout(() => {
-      const chip = document.getElementById('user-chip');
-      const avatarChar = document.getElementById('avatar-char');
-      if(chip && avatarChar && chip.textContent && chip.textContent !== '—') {
-        avatarChar.textContent = chip.textContent.trim().charAt(0).toUpperCase();
-      }
-    }, 400);
-  };
-
-  // HOOK INSERTS TO FORMAT STRINGS SAFELY TO COMPLEMENT REALTIME DATA FROM APP.JS OVERRIDE LOOPS
-  function optimizeMetricsDisplay() {
-    // 1. Repair Pro Module Elements
-    const proContainer = document.getElementById('dash-pro-card');
-    const proGrid = document.getElementById('dash-pro-cards-grid');
-    if (proContainer && proGrid && proGrid.children.length === 0) {
-      const textLines = Array.from(proContainer.getElementsByTagName('p'));
-      let inlineRowHTML = '';
-      let cardsGridHTML = '';
-
-      textLines.forEach(pEl => {
-        const rawText = pEl.textContent || '';
-        if (rawText.includes(':')) {
-          const parts = rawText.split(':');
-          const titleText = parts[0].trim();
-          const numericValue = parts[1].trim();
-
-          if (titleText.toLowerCase().includes('total') || titleText.toLowerCase().includes('process') || titleText.toLowerCase().includes('travelled')) {
-            let colorType = 'blue';
-            if (titleText.toLowerCase().includes('process')) colorType = 'amber';
-            if (titleText.toLowerCase().includes('travelled')) colorType = 'green';
-            
-            cardsGridHTML += `
-              <div class="kpi-grid-card ${colorType}">
-                <span class="kpi-card-lbl">${titleText}</span>
-                <span class="kpi-card-val">${numericValue}</span>
-              </div>`;
-          } else {
-            let fillAccent = 'blue';
-            let percentCalc = '75%';
-            if (titleText.toLowerCase().includes('outstanding')) { fillAccent = 'rose'; percentCalc = '25%'; }
-
-            inlineRowHTML += `
-              <div class="stat-row-item">
-                <div class="stat-row-meta">
-                  <span class="stat-row-label">${titleText}</span>
-                  <span class="stat-row-val">${numericValue}</span>
-                </div>
-                <div class="stat-row-track">
-                  <div class="stat-row-fill ${fillAccent}" style="width: ${percentCalc}"></div>
-                </div>
-              </div>`;
-          }
-        }
-      });
-
-      if (cardsGridHTML) proGrid.innerHTML = cardsGridHTML;
-      if (inlineRowHTML) proContainer.innerHTML = inlineRowHTML;
-    }
-
-    // 2. Repair LB Module Elements
-    const lbContainer = document.getElementById('dash-lb-card');
-    const lbGrid = document.getElementById('dash-lb-cards-grid');
-    if (lbContainer && lbGrid && lbGrid.children.length === 0) {
-      const textLines = Array.from(lbContainer.getElementsByTagName('p'));
-      let inlineRowHTML = '';
-      let cardsGridHTML = '';
-
-      textLines.forEach(pEl => {
-        const rawText = pEl.textContent || '';
-        if (rawText.includes(':')) {
-          const parts = rawText.split(':');
-          const titleText = parts[0].trim();
-          const numericValue = parts[1].trim();
-
-          if (titleText.toLowerCase().includes('total') || titleText.toLowerCase().includes('process') || titleText.toLowerCase().includes('travelled')) {
-            let colorType = 'green';
-            if (titleText.toLowerCase().includes('process')) colorType = 'orange';
-            if (titleText.toLowerCase().includes('travelled')) colorType = 'cyan';
-            
-            cardsGridHTML += `
-              <div class="kpi-grid-card ${colorType}">
-                <span class="kpi-card-lbl">${titleText}</span>
-                <span class="kpi-card-val">${numericValue}</span>
-              </div>`;
-          } else {
-            let fillAccent = 'purple';
-            let percentCalc = '60%';
-            if (titleText.toLowerCase().includes('balance') || titleText.toLowerCase().includes('owed')) { fillAccent = 'rose'; percentCalc = '15%'; }
-
-            inlineRowHTML += `
-              <div class="stat-row-item">
-                <div class="stat-row-meta">
-                  <span class="stat-row-label">${titleText}</span>
-                  <span class="stat-row-val">${numericValue}</span>
-                </div>
-                <div class="stat-row-track">
-                  <div class="stat-row-fill ${fillAccent}" style="width: ${percentCalc}"></div>
-                </div>
-              </div>`;
-          }
-        }
-      });
-
-      if (cardsGridHTML) lbGrid.innerHTML = cardsGridHTML;
-      if (inlineRowHTML) lbContainer.innerHTML = inlineRowHTML;
-    }
-
-    // 3. Align Right-Hand Sidebar Row-Value Distribution 
-    const refundContainer = document.getElementById('dash-lb-refunds');
-    if (refundContainer) {
-      const items = Array.from(refundContainer.getElementsByTagName('p'));
-      items.forEach(pEl => {
-        const rawText = pEl.textContent || '';
-        if (rawText.includes(':') && !pEl.classList.contains('processed-row')) {
-          const parts = rawText.split(':');
-          const titleText = parts[0].trim();
-          const numericValue = parts[1].trim();
-          
-          let barAccent = 'amber';
-          let widthCalc = '50%';
-          if (titleText.toLowerCase().includes('complete')) { barAccent = 'green'; widthCalc = '80%'; }
-          if (titleText.toLowerCase().includes('travelled')) { barAccent = 'blue'; widthCalc = '65%'; }
-          if (titleText.toLowerCase().includes('not travel')) { barAccent = 'rose'; widthCalc = '10%'; }
-
-          pEl.className = 'stat-row-item processed-row';
-          pEl.innerHTML = `
-            <div class="stat-row-meta">
-              <span class="stat-row-label">${titleText}</span>
-              <span class="stat-row-val" style="font-weight:800; background:var(--gray-light); padding:2px 8px; border-radius:6px;">${numericValue}</span>
+          <div class="bg-slate-800/40 border-l-4 border-rose-500 p-4 rounded-r-xl border border-y-slate-800 border-r-slate-800 flex justify-between items-center shadow-sm">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Verifications</p>
+              <p class="text-slate-500 text-[10px] mt-0.5">Awaiting compliance validation sign-off</p>
             </div>
-            <div class="stat-row-track" style="margin-top: 4px;">
-              <div class="stat-row-fill ${barAccent}" style="width: ${widthCalc}"></div>
-            </div>`;
-        }
-      });
-    }
-  }
+            <span class="text-2xl font-bold tracking-tight text-rose-400 text-right">7</span>
+          </div>
+        </div>
 
-  // Poll safely to monitor runtime elements generated from async Supabase promises inside app.js
-  setInterval(optimizeMetricsDisplay, 600);
-</script>
+        <!-- Content Row: LB Operations Summary & Refund Clearances -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- LB Operations Summary -->
+          <div class="bg-slate-800/20 border border-slate-800/80 rounded-xl p-5 space-y-4">
+            <h3 class="text-sm font-semibold tracking-wider uppercase text-slate-400 flex items-center gap-2">
+              <span class="w-1 h-3.5 bg-teal-500 rounded-full"></span> LB Operations Summary
+            </h3>
+            <div class="space-y-2">
+              <div class="bg-slate-800/40 border-l-4 border-teal-500 px-4 py-3 rounded-r-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium">Onboarding Checklists Completed</span>
+                <span class="font-bold text-slate-100 text-right">89%</span>
+              </div>
+              <div class="bg-slate-800/40 border-l-4 border-teal-500 px-4 py-3 rounded-r-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium">Avg. Document Processing Time</span>
+                <span class="font-bold text-slate-100 text-right">1.8 Days</span>
+              </div>
+              <div class="bg-slate-800/40 border-l-4 border-teal-500 px-4 py-3 rounded-r-lg flex justify-between items-center">
+                <span class="text-sm text-slate-300 font-medium">Escalated Issues</span>
+                <span class="font-bold text-rose-400 text-right">3</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Refund Clearances & Statuses -->
+          <div class="bg-slate-800/20 border border-slate-800/80 rounded-xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold tracking-wider uppercase text-slate-400 flex items-center gap-2">
+                <span class="w-1 h-3.5 bg-emerald-500 rounded-full"></span> Refund Clearances & Statuses
+              </h3>
+            </div>
+            
+            <div class="space-y-2">
+              <!-- Steaven: Fully Cleared Status Record -->
+              <div class="bg-slate-800/40 border border-slate-800/60 p-3 rounded-lg flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-200">Client Account: Steaven</p>
+                    <p class="text-[10px] text-emerald-400/80 font-medium uppercase tracking-wider">2nd Deposit Cleared</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-bold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded">Cleared</div>
+                  <p class="text-xs font-bold text-slate-400 mt-1">0k Balance</p>
+                </div>
+              </div>
+
+              <!-- Account B: Pending Status Record -->
+              <div class="bg-slate-800/40 border border-slate-800/60 p-3 rounded-lg flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-200">Client Account: Account B</p>
+                    <p class="text-[10px] text-amber-400/80 font-medium uppercase tracking-wider">Awaiting Verification</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-bold px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded">Pending 2nd Deposit</div>
+                  <p class="text-xs font-bold text-amber-400 mt-1">30k Balance</p>
+                </div>
+              </div>
+
+              <!-- Account C: Fully Cleared Status Record -->
+              <div class="bg-slate-800/40 border border-slate-800/60 p-3 rounded-lg flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-200">Client Account: Account C</p>
+                    <p class="text-[10px] text-emerald-400/80 font-medium uppercase tracking-wider">File Complete</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-bold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded">Cleared</div>
+                  <p class="text-xs font-bold text-slate-400 mt-1">0k Balance</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Simple Footer Status Bar -->
+    <footer class="border-t border-slate-800/60 bg-slate-950/20 py-3 px-6 text-center text-xs text-slate-500">
+      Destiny Recruit Consults UI &bull; Database & Interface Sync Engine Connected
+    </footer>
+  </div>
+
 </body>
 </html>
