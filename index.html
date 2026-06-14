@@ -5,30 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DR Database — Destiny Recruit Consults</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --gold:#F5C453;--gold-dark:#C9A227;--gold-deeper:#A8841C;--gold-light:#FDF6E2;--gold-lighter:#FEFCF4;
-      --charcoal:#2A2A28;
-      --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
-      --amber:#BA7517;--amber-light:#FAEEDA;
-      --blue:#185FA5;--blue-light:#E6F1FB;
-      --red:#A32D2D;--red-light:#FCEBEB;
-      --purple-light:#EEEDFE;--purple:#3C3489;
-      --pink-light:#FBEAF0;--pink:#993556;
-      --gray-light:#F1EFE8;--gray:#5F5E5A;
-      --bg:#E8E6E0;--surface:#F9F8F3;--surface-2:#FFFFFF;
-      --border:#E2DDD4;--border-2:#D4CEBF;
-      --text:#2A2A28;--text-2:#5A5955;--text-3:#8A8880;
-      --radius:10px;--radius-lg:16px;--radius-pill:30px;
-      --shadow-sm:0 1px 4px rgba(42,42,40,.06);
-      --shadow:0 4px 16px rgba(42,42,40,.08);
-      --shadow-lg:0 12px 40px rgba(42,42,40,.12);
+      --gold:#F5C453;
+      --gold-dark:#C9A227;
+      --gold-deeper:#A8841C;
+      --gold-light:#FDF6E2;
+      --gold-lighter:#FEFCF4;
+      --charcoal:#1E1E1C;
+      --charcoal-light:#2A2A28;
+      --green:#1D9E75;
+      --green-dark:#0F6E56;
+      --green-light:#E1F5EE;
+      --amber:#BA7517;
+      --amber-light:#FAEEDA;
+      --blue:#185FA5;
+      --blue-light:#E6F1FB;
+      --red:#A32D2D;
+      --red-light:#FCEBEB;
+      --purple-light:#EEEDFE;
+      --purple:#3C3489;
+      --pink-light:#FBEAF0;
+      --pink:#993556;
+      --gray-light:#F4F3EE;
+      --gray:#5F5E5A;
+      
+      /* Premium SaaS Layout Palette (Inspired by reference) */
+      --saas-bg:#F8F7F4;
+      --saas-sidebar:#FFFFFF;
+      --saas-card:#FFFFFF;
+      --saas-border:rgba(42,42,40,0.06);
+      --saas-text-main:#1A1A19;
+      --saas-text-muted:#7C7A72;
+      --saas-accent-gold:#CCA43B;
+      --saas-accent-yellow:#F5C518;
+      
+      --radius:12px;
+      --radius-lg:22px;
+      --radius-pill:100px;
+      --shadow-sm:0 2px 8px rgba(42,42,40,.03);
+      --shadow:0 8px 30px rgba(42,42,40,.04);
+      --shadow-lg:0 16px 48px rgba(42,42,40,.1);
     }
-    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--saas-bg);color:var(--saas-text-main);font-size:14px;line-height:1.5;min-height:100vh}
 
-    /* ── LOGIN (new design) ── */
+    /* ── LOGIN SCREEN (LOCKED & UNTOUCHED) ── */
     #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-color:#E2E1DC;font-family:'Plus Jakarta Sans',sans-serif}
     .lp-window{background:linear-gradient(145deg,#F9F8F3 0%,#F1EFE6 100%);width:100%;max-width:1100px;height:720px;border-radius:24px;box-shadow:0 30px 70px rgba(0,0,0,.12);display:flex;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.6)}
     .lp-form-panel{flex:1.1;padding:50px 65px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
@@ -52,8 +75,8 @@
     .lp-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#7A7A77;font-weight:500}
     .lp-footer a{color:#7A7A77;text-decoration:none;font-weight:600}
     .lp-footer a:hover{color:#2A2A28;text-decoration:underline}
-    .lp-alert{background:#FCEBEB;border:1px solid #EFA3A3;color:#A32D2D;padding:10px 16px;border-radius:30px;font-size:12px;font-weight:500;text-align:center;margin-top:14px;display:none}
-    .lp-success{background:#F0FAED;border:1px solid #A3E2AB;padding:12px;border-radius:16px;margin-top:14px;font-size:11px;text-align:left;display:none}
+    .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
+    .recovery-result{background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
     .lp-media{flex:1.1;margin:14px;border-radius:20px;background-size:cover;background-position:center;position:relative;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80')}
     .lp-media-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(30,30,28,.2) 0%,rgba(30,30,28,.5) 100%)}
     .lp-widget-task{position:absolute;top:35px;left:35px;background:#F5C453;padding:12px 18px;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.15);max-width:190px;z-index:2}
@@ -61,7 +84,7 @@
     .lp-widget-task p{font-size:10px;font-weight:500;color:rgba(0,0,0,.6)}
     .lp-widget-pill{position:absolute;top:75px;left:80px;background:rgba(30,30,28,.65);backdrop-filter:blur(8px);padding:6px 14px;border-radius:10px;font-size:9px;color:rgba(255,255,255,.7);font-weight:500;z-index:1}
     .lp-bottom{position:absolute;bottom:35px;left:35px;right:35px;display:flex;flex-direction:column;gap:16px}
-    .lp-cal{background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;color:#fff}
+    .lp-cal{background:rgba(255,255,255,.15);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;color:#fff}
     .lp-cal-day{text-align:center;flex:1}
     .lp-cal-day .dl{font-size:10px;opacity:.7;text-transform:uppercase;font-weight:500;margin-bottom:4px}
     .lp-cal-day .dn{font-size:13px;font-weight:600}
@@ -71,280 +94,689 @@
     .lp-summary p{font-size:11px;color:#7A7A77;font-weight:500;margin-bottom:10px}
     .lp-avatars{display:flex;align-items:center}
     .lp-av{width:22px;height:22px;border-radius:50%;border:1.5px solid #fff;background-size:cover;margin-right:-6px}
-    /* recovery-result reused from app.js styles */
-    .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
-    .recovery-result{background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
     @media(max-width:900px){
       #login-screen{padding:0}
       .lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}
       .lp-media{display:none}
       .lp-form-panel{padding:40px 30px}
     }
-    .loading-overlay{display:none;position:fixed;inset:0;background:rgba(249,248,243,.9);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;color:var(--text-2)}
+    
+    /* ── LOADING OVERLAY ── */
+    .loading-overlay{display:none;position:fixed;inset:0;background:rgba(248,247,244,.85);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;color:var(--saas-text-muted)}
     .loading-overlay.show{display:flex}
-    .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+    .spinner{width:36px;height:36px;border:3.5px solid var(--gray-light);border-top-color:var(--saas-accent-gold);border-radius:50%;animation:spin .65s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ══════════════════════════════════
-       APP SHELL — SIDEBAR LAYOUT
-    ══════════════════════════════════ */
-    #app{display:none;min-height:100vh}
-    .app-layout{display:flex;min-height:100vh}
-
-    /* ── SIDEBAR ── */
-    .sidebar{
-      width:240px;flex-shrink:0;
-      background:linear-gradient(180deg,#2A2A28 0%,#3A3328 55%,#4A3C1A 100%);
-      display:flex;flex-direction:column;
-      position:fixed;top:0;left:0;bottom:0;z-index:100;
-      transition:width .25s cubic-bezier(.16,1,.3,1);
-      overflow:hidden;
+    /* ── NEW PREMIUM PREMIUM SIDEBAR INTERFACE ── */
+    #app {
+      display: none; /* Controlled by JS */
+      min-height: 100vh;
+      position: relative;
     }
-    .sidebar-header{
-      padding:22px 20px 18px;
-      border-bottom:1px solid rgba(245,196,83,.15);
-      display:flex;align-items:center;gap:12px;flex-shrink:0;
+    .app-inner {
+      display: flex;
+      min-height: 100vh;
     }
-    .sidebar-logo-badge{
-      width:36px;height:36px;border-radius:10px;
-      background:var(--gold);color:var(--charcoal);
-      font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;letter-spacing:.02em;
+
+    /* PREMIUM SIDEBAR DECK */
+    .saas-sidebar {
+      width: 270px;
+      background: var(--saas-sidebar);
+      border-right: 1px solid var(--saas-border);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
     }
-    .sidebar-brand{color:#fff;font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap}
-    .sidebar-brand span{display:block;font-size:10px;font-weight:500;color:rgba(255,255,255,.45);margin-top:1px;letter-spacing:.05em;text-transform:uppercase}
-
-    .sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-    .nav-section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;padding:10px 10px 6px;white-space:nowrap}
-    .nav-item{
-      display:flex;align-items:center;gap:12px;
-      padding:11px 12px;border-radius:10px;
-      font-size:13px;font-weight:600;color:rgba(255,255,255,.6);
-      cursor:pointer;transition:all .18s;white-space:nowrap;border:none;background:none;
-      font-family:inherit;width:100%;text-align:left;
+    .sidebar-top {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
     }
-    .nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
-    .nav-item.active{background:rgba(245,196,83,.15);color:var(--gold);border:1px solid rgba(245,196,83,.2)}
-    .nav-item .nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
-    .nav-item .nav-badge{margin-left:auto;background:rgba(245,196,83,.2);color:var(--gold);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
-
-    .sidebar-footer{
-      padding:16px 12px;border-top:1px solid rgba(245,196,83,.12);flex-shrink:0;
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--saas-text-main);
+      letter-spacing: -0.02em;
     }
-    .sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:default}
-    .sidebar-user-avatar{width:32px;height:32px;border-radius:8px;background:rgba(245,196,83,.2);border:1px solid rgba(245,196,83,.3);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-    .sidebar-user-info{overflow:hidden}
-    .sidebar-user-name{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .sidebar-user-role{font-size:10px;color:rgba(255,255,255,.35);font-weight:500}
-    .sidebar-logout{width:100%;margin-top:8px;padding:9px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
-    .sidebar-logout:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.2)}
-
-    /* ── MAIN CONTENT AREA ── */
-    .app-main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
-    .topbar{
-      background:var(--surface-2);border-bottom:1px solid var(--border);
-      padding:0 2rem;display:flex;align-items:center;justify-content:space-between;
-      height:58px;position:sticky;top:0;z-index:50;
-      box-shadow:0 1px 8px rgba(42,42,40,.05);
+    .sidebar-logo-icon {
+      background: var(--charcoal);
+      color: var(--gold);
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .topbar-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.01em}
-    .topbar-subtitle{font-size:12px;color:var(--text-3);font-weight:500;margin-top:1px}
-    .topbar-right{display:flex;align-items:center;gap:10px}
-    .save-status{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:5px;font-weight:500}
-    .save-status.saved{color:var(--green)}.save-status.saving{color:var(--amber)}
-    .main{padding:2rem;max-width:1400px;margin:0 auto;width:100%}
-
-    /* ── STAT CARDS ── */
-    .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:2rem}
-    .stat-card{border-radius:var(--radius-lg);padding:20px 22px;position:relative;overflow:hidden;cursor:default;transition:transform .2s,box-shadow .2s}
-    .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-    .stat-card-icon{font-size:22px;margin-bottom:10px;display:block}
-    .stat-card-val{font-size:30px;font-weight:800;line-height:1;margin-bottom:4px;letter-spacing:-.02em}
-    .stat-card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;opacity:.75}
-    .stat-card-sub{font-size:11px;margin-top:6px;font-weight:500;opacity:.65}
-    .stat-card-glow{position:absolute;width:100px;height:100px;border-radius:50%;right:-20px;top:-20px;opacity:.15;filter:blur(20px)}
-
-    /* Gold card */
-    .sc-gold{background:linear-gradient(135deg,#F5C453 0%,#E4A820 100%);color:var(--charcoal)}
-    .sc-gold .stat-card-glow{background:#fff}
-    /* Teal card */
-    .sc-teal{background:linear-gradient(135deg,#0D7377 0%,#0A5D60 100%);color:#fff}
-    .sc-teal .stat-card-glow{background:#4ECDC4}
-    /* Navy card */
-    .sc-navy{background:linear-gradient(135deg,#1E3A5F 0%,#162D4A 100%);color:#fff}
-    .sc-navy .stat-card-glow{background:#5B8FD4}
-    /* Charcoal card */
-    .sc-dark{background:linear-gradient(135deg,#3A3328 0%,#2A2A28 100%);color:#fff}
-    .sc-dark .stat-card-glow{background:#F5C453}
-    /* Terracotta card */
-    .sc-terra{background:linear-gradient(135deg,#C4622D 0%,#A84E22 100%);color:#fff}
-    .sc-terra .stat-card-glow{background:#F0A070}
-    /* Cream/surface card */
-    .sc-cream{background:var(--surface-2);border:1px solid var(--border);color:var(--text);box-shadow:var(--shadow-sm)}
-    .sc-cream .stat-card-val{color:var(--charcoal)}
-
-    /* ── METRICS (section-level, smaller) ── */
-    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:1.75rem}
-    .metric{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow-sm)}
-    .metric-label{font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
-    .metric-val{font-size:24px;font-weight:800;color:var(--text)}
-    .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}.metric-val.blue{color:var(--blue)}.metric-val.red{color:var(--red)}.metric-val.sm{font-size:16px}
-
-    /* ── DASHBOARD ── */
-    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
-    .dash-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow-sm)}
-    .dash-card h3{font-size:11px;font-weight:700;margin-bottom:1.25rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em}
-    .dash-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-    .dash-row:last-child{border-bottom:none}
-    .dash-row-label{font-size:13px;color:var(--text-2);font-weight:500}
-    .dash-row-val{font-size:13px;font-weight:700;color:var(--text)}
-    .dash-bar-wrap{height:4px;background:var(--gold-light);border-radius:3px;margin-top:5px;width:100%}
-    .dash-bar-fill{height:4px;background:var(--gold);border-radius:3px}
-
-    /* ── TOOLBAR ── */
-    .toolbar{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center}
-    .search-wrap{position:relative;flex:1;min-width:200px}
-    .search-wrap input{width:100%;padding:10px 14px 10px 38px;border:1px solid var(--border);border-radius:var(--radius-pill);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface-2);font-weight:500;transition:all .2s}
-    .search-wrap input:focus{outline:none;border-color:var(--gold-dark);box-shadow:0 0 0 3px rgba(245,196,83,.12)}
-    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none;font-size:13px}
-    select{padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-pill);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface-2);cursor:pointer;font-weight:500;transition:border-color .2s}
-    select:focus{outline:none;border-color:var(--gold-dark)}
-    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;font-size:13px;font-weight:600;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface-2);color:var(--text);cursor:pointer;white-space:nowrap;transition:all .2s}
-    .btn:hover{background:var(--surface);border-color:var(--border-2)}
-    .btn.primary{background:var(--gold);color:var(--charcoal);border-color:var(--gold-dark);box-shadow:0 4px 14px rgba(245,196,83,.3)}
-    .btn.primary:hover{background:var(--gold-dark);color:#fff;box-shadow:0 6px 18px rgba(201,162,39,.35);transform:translateY(-1px)}
-    .btn.export{background:#E6F4F3;color:#0D7377;border-color:#A8D8D8}.btn.export:hover{background:#CCE8E8}
-
-    /* ── TABLE ── */
-    .table-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th{padding:11px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);background:var(--surface);border-bottom:1px solid var(--border);white-space:nowrap}
-    td{padding:13px 16px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
-    tr:last-child td{border-bottom:none}
-    tbody tr{cursor:pointer;transition:background .15s}
-    tbody tr:hover td{background:var(--gold-lighter)}
-    tbody tr:hover .name-primary{color:var(--gold-deeper)}
-    .name-cell{max-width:200px}
-    .name-primary{font-weight:700;font-size:13px;color:var(--text);transition:color .15s}
-    .name-secondary{font-size:11px;color:var(--text-3);font-weight:500;margin-top:2px}
-    .balance-owed{color:var(--amber);font-weight:700}
-
-    /* ── BADGES ── */
-    .badge{display:inline-block;padding:3px 10px;border-radius:var(--radius-pill);font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.02em}
-    .b-pol{background:#E6F1FB;color:#185FA5}
-    .b-mol{background:#FAEEDA;color:#BA7517}
-    .b-visa{background:#FBEAF0;color:#993556}
-    .b-travel{background:#EEEDFE;color:#3C3489}
-    .b-travelled{background:#E1F5EE;color:#0F6E56}
-    .b-complete{background:#E1F5EE;color:#0F6E56}
-    .b-incomplete{background:#FAEEDA;color:#BA7517}
-    .b-returned{background:#FCEBEB;color:#A32D2D}
-    .b-na{background:var(--gray-light);color:var(--gray)}
-    .b-notyet{background:#E6F4F3;color:#0D7377}
-    .b-nottravelled{background:#FCEBEB;color:#A32D2D}
-
-    /* ── ACTION BUTTONS ── */
-    .action-btn{background:none;border:none;cursor:pointer;color:var(--text-3);padding:5px 7px;border-radius:var(--radius);font-size:14px;line-height:1;transition:all .15s}
-    .action-btn:hover{color:var(--text);background:var(--gray-light)}
-    .action-btn.del:hover{color:var(--red);background:var(--red-light)}
-    .action-btn.docs{color:#0D7377}.action-btn.docs:hover{background:#E6F4F3}
-
-    /* ── PAGINATION ── */
-    .pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3);font-weight:500}
-    .page-btns{display:flex;gap:5px}
-    .page-btns button{padding:5px 11px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface-2);cursor:pointer;color:var(--text-2);font-family:inherit;font-weight:500;transition:all .15s}
-    .page-btns button.active{background:var(--gold);color:var(--charcoal);border-color:var(--gold-dark);font-weight:700}
-    .page-btns button:hover:not(.active){background:var(--surface);border-color:var(--border-2)}
-
-    /* ── EMPTY ── */
-    .empty{text-align:center;padding:3rem;color:var(--text-3);font-size:13px;font-weight:500}
-
-    /* ── MODAL ── */
-    .modal-bg{display:none;position:fixed;inset:0;background:rgba(42,42,40,.55);backdrop-filter:blur(5px);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
-    .modal-bg.open{display:flex}
-    .modal{background:var(--surface-2);border-radius:20px;border:1px solid var(--border);padding:2rem;width:100%;max-width:580px;margin:auto;box-shadow:var(--shadow-lg)}
-    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
-    .modal-header h3{font-size:17px;font-weight:700;color:var(--text)}
-    .modal-close{background:none;border:1px solid var(--border);cursor:pointer;color:var(--text-3);font-size:18px;line-height:1;padding:5px 11px;border-radius:var(--radius);transition:all .15s;font-weight:300}
-    .modal-close:hover{background:var(--gray-light);color:var(--text)}
-    .modal-tabs{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface);padding:5px;border-radius:var(--radius-lg)}
-    .modal-tab{flex:1;padding:8px 12px;font-size:12px;font-weight:600;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-radius:10px;transition:all .18s;text-align:center}
-    .modal-tab.active{background:var(--surface-2);color:var(--charcoal);box-shadow:0 1px 6px rgba(42,42,40,.1)}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
-    .form-full{grid-column:1/-1}
-    .field{display:flex;flex-direction:column;gap:6px}
-    .field label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em}
-    .field input,.field select,.field textarea{padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);transition:all .2s;font-weight:500}
-    .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold-dark);box-shadow:0 0 0 3px rgba(245,196,83,.12)}
-    .field textarea{resize:vertical;min-height:64px}
-    .section-divider{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;padding:12px 0 6px;border-top:1px solid var(--border);margin-top:4px;grid-column:1/-1}
-    .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--border)}
-
-    /* ── DOCS ── */
-    .doc-link-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);font-weight:500}
-    .doc-link-input:focus{outline:none;border-color:var(--gold-dark);box-shadow:0 0 0 3px rgba(245,196,83,.12)}
-    .doc-open-btn{padding:10px 16px;background:#E6F4F3;color:#0D7377;border:1px solid #A8D8D8;border-radius:var(--radius-pill);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
-    .doc-open-btn:hover{background:#CCE8E8}
-    .doc-open-btn:disabled{opacity:.4;cursor:default}
-
-    /* ── TIMELINE ── */
-    .tl-item{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}
-    .tl-item:last-child{border-bottom:none}
-    .tl-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px;box-shadow:0 0 0 3px rgba(245,196,83,.2)}
-    .tl-action{font-weight:600;color:var(--text)}
-    .tl-meta{font-size:11px;color:var(--text-3);margin-top:3px;font-weight:500}
-    .tl-empty{color:var(--text-3);font-size:13px;text-align:center;padding:1.5rem;font-weight:500}
-
-    /* ── TOAST ── */
-    .toast{position:fixed;bottom:28px;right:28px;background:var(--charcoal);color:#fff;padding:12px 22px;border-radius:var(--radius-pill);font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;box-shadow:var(--shadow-lg)}
-    .toast.show{opacity:1;transform:translateY(0)}
-    .toast.success{background:var(--green)}.toast.error{background:var(--red)}
-
-    /* ── ALERT CARD (stuck candidates) ── */
-    .alert-card{background:linear-gradient(135deg,#C4622D 0%,#A84E22 100%);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;color:#fff;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 20px rgba(196,98,45,.3)}
-    .alert-card-text h4{font-size:14px;font-weight:700;margin-bottom:3px}
-    .alert-card-text p{font-size:12px;opacity:.8;font-weight:500}
-    .alert-card-btn{padding:8px 16px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:var(--radius-pill);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
-    .alert-card-btn:hover{background:rgba(255,255,255,.3)}
-
-    @media(max-width:900px){
-      .sidebar{width:64px}
-      .sidebar-brand,.nav-item span:not(.nav-icon),.nav-badge,.sidebar-user-info,.sidebar-logout{display:none}
-      .sidebar-header{padding:16px 14px;justify-content:center}
-      .nav-item{justify-content:center;padding:12px}
-      .nav-item .nav-icon{width:auto}
-      .sidebar-user{justify-content:center}
-      .app-main{margin-left:64px}
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
     }
-    @media(max-width:768px){
-      .dash-grid{grid-template-columns:1fr}
-      .form-grid{grid-template-columns:1fr}
-      .topbar{padding:0 1rem}.main{padding:1rem}
-      .stat-cards{grid-template-columns:repeat(2,1fr)}
-      .metrics{grid-template-columns:repeat(2,1fr)}
+    .sidebar-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sidebar-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--saas-text-muted);
+      margin-bottom: 6px;
+      padding-left: 14px;
+    }
+    .sidebar-btn {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--saas-text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      text-align: left;
+    }
+    .sidebar-btn:hover {
+      color: var(--saas-text-main);
+      background: var(--gray-light);
+    }
+    .sidebar-btn.active {
+      color: var(--saas-text-main);
+      background: #FDF9EC;
+      font-weight: 700;
+      box-shadow: inset 3px 0 0 var(--saas-accent-gold);
+    }
+    .sidebar-btn-icon {
+      font-size: 16px;
+    }
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border-top: 1px solid var(--saas-border);
+      padding-top: 20px;
+    }
+    .sidebar-user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--charcoal) 0%, #444 100%);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1.5px solid #fff;
+      box-shadow: var(--shadow-sm);
+    }
+    .sidebar-user-meta {
+      flex: 1;
+      overflow: hidden;
+    }
+    .sidebar-user-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--saas-text-main);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .sidebar-user-status {
+      font-size: 11px;
+      color: var(--green);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sidebar-user-status::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* MAIN RIG CONTENT FRAME */
+    .saas-content-frame {
+      flex: 1;
+      margin-left: 270px;
+      padding: 40px 48px;
+      max-width: 1500px;
+      width: calc(100% - 270px);
+    }
+
+    /* TOP PROFILE BAR & SAVE PIPELINE ACTION STATUS */
+    .saas-top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+    .saas-page-headline {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--saas-text-main);
+    }
+    .saas-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .save-status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background: #fff;
+      border: 1px solid var(--saas-border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-sm);
+    }
+    .save-status.saved { color: var(--green-dark); background: var(--green-light); border-color: transparent; }
+    .save-status.saving { color: var(--amber); background: var(--amber-light); border-color: transparent; }
+    
+    .logout-action-btn {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--red);
+      background: var(--red-light);
+      border: none;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .logout-action-btn:hover { opacity: 0.85; }
+
+    /* ── ASYMMETRICAL DASHBOARD CARDS GRID ── */
+    .dashboard-layout-deck {
+      display: grid;
+      grid-template-columns: 1.8fr 1.2fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .dashboard-center-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    
+    /* HERO HIGHLIGHT CARDS BANNER */
+    .premium-hero-banner {
+      background: linear-gradient(135deg, #1A1A19 0%, #2D2D29 60%, #3D3A2F 100%);
+      color: #FFFFFF;
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(26,26,25,0.12);
+    }
+    .premium-hero-banner::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(245,196,83,0.18) 0%, rgba(0,0,0,0) 70%);
+      border-radius: 50%;
+    }
+    .premium-hero-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--saas-accent-gold);
+      margin-bottom: 12px;
+    }
+    .premium-hero-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      max-width: 460px;
+      margin-bottom: 16px;
+    }
+    .premium-hero-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      font-weight: 500;
+    }
+
+    /* FLOAT CARD TEMPLATE */
+    .saas-card {
+      background: var(--saas-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--saas-border);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+    .saas-card-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--saas-text-muted);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* GRID STAT ROW BLOCKS */
+    .stat-row-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .stat-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--saas-bg);
+      border-radius: 16px;
+      transition: background 0.2s;
+    }
+    .stat-row-item:hover { background: #F1EFEA; }
+    .stat-row-label { font-size: 13px; font-weight: 600; color: var(--saas-text-main); }
+    .stat-row-val { font-size: 14px; font-weight: 800; color: var(--saas-text-main); }
+
+    /* STAGE BREAKDOWN BARS */
+    .bar-chart-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .bar-chart-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .bar-chart-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .bar-chart-track {
+      height: 7px;
+      background: var(--gray-light);
+      border-radius: var(--radius-pill);
+      width: 100%;
+      overflow: hidden;
+    }
+    .bar-chart-fill {
+      height: 100%;
+      background: var(--saas-accent-gold);
+      border-radius: var(--radius-pill);
+      transition: width 0.4s ease;
+    }
+
+    /* ── CORE METRICS MATRICES ── */
+    .metrics-matrix-deck {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .matrix-metric-card {
+      background: var(--saas-card);
+      border: 1px solid var(--saas-border);
+      border-radius: 18px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .matrix-metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--saas-text-muted);
+      margin-bottom: 12px;
+    }
+    .matrix-metric-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--saas-text-main);
+      letter-spacing: -0.02em;
+    }
+    .matrix-metric-value.amber { color: var(--amber); }
+    .matrix-metric-value.green { color: var(--green-dark); }
+    .matrix-metric-value.red { color: var(--red); }
+    .matrix-metric-value.sm { font-size: 16px; word-break: break-all; }
+
+    /* ── SEARCH & FILTER TOOLBAR CONTROLS ── */
+    .saas-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .saas-search-box-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+    .saas-search-input {
+      width: 100%;
+      height: 44px;
+      background: var(--saas-card);
+      border: 1px solid var(--saas-border);
+      border-radius: var(--radius-pill);
+      padding: 0 16px 0 42px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--saas-text-main);
+      transition: all 0.2s;
+    }
+    .saas-search-input:focus {
+      outline: none;
+      border-color: var(--saas-accent-gold);
+      box-shadow: 0 0 0 3px rgba(204,164,59,0.1);
+    }
+    .saas-search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: var(--saas-text-muted);
+      pointer-events: none;
+    }
+    
+    select.saas-filter-dropdown {
+      height: 44px;
+      padding: 0 36px 0 16px;
+      border: 1px solid var(--saas-border);
+      background: var(--saas-card);
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--saas-text-main);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237C7A72' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    select.saas-filter-dropdown:focus { outline: none; border-color: var(--saas-accent-gold); }
+
+    /* CORE BUTTON STYLES */
+    .saas-btn {
+      height: 44px;
+      padding: 0 20px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--saas-border);
+      background: var(--saas-card);
+      color: var(--saas-text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .saas-btn:hover { background: var(--gray-light); border-color: #D2CEBF; }
+    .saas-btn.primary {
+      background: var(--charcoal);
+      color: var(--gold);
+      border: none;
+      box-shadow: 0 4px 14px rgba(30,30,28,0.15);
+    }
+    .saas-btn.primary:hover {
+      background: #000000;
+      transform: translateY(-1px);
+    }
+    .saas-btn.export { background: #F0F4F8; color: var(--blue); border: none; }
+    .saas-btn.export:hover { background: #E1EAF2; }
+
+    /* ── HIGH-END LESSON-STYLE DATA TABLES ── */
+    .saas-table-wrapper {
+      background: var(--saas-card);
+      border: 1px solid var(--saas-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .saas-overflow-x { overflow-x: auto; }
+    
+    table.saas-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table.saas-table th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--saas-text-muted);
+      background: #FAF9F6;
+      border-bottom: 1px solid var(--saas-border);
+    }
+    table.saas-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--saas-border);
+      color: var(--saas-text-main);
+      white-space: nowrap;
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    table.saas-table tr:last-child td { border-bottom: none; }
+    table.saas-table tr:hover td { background: #FDFCF9; }
+    
+    .saas-name-cell { font-weight: 700; color: #000000; }
+    
+    /* MODERNISED CHIP BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .b-pol { background: var(--blue-light); color: var(--blue); }
+    .b-mol { background: var(--amber-light); color: var(--amber); }
+    .b-visa { background: var(--pink-light); color: var(--pink); }
+    .b-travel { background: var(--purple-light); color: var(--purple); }
+    .b-travelled { background: var(--green-light); color: var(--green-dark); }
+    .b-complete { background: var(--green-light); color: var(--green-dark); }
+    .b-incomplete { background: var(--amber-light); color: var(--amber); }
+    .b-returned { background: var(--red-light); color: var(--red); }
+    .b-na { background: var(--gray-light); color: var(--saas-text-muted); }
+    .b-notyet { background: var(--blue-light); color: var(--blue); }
+    .b-nottravelled { background: var(--red-light); color: var(--red); }
+
+    /* ACTION METRIC ROW BUTTONS */
+    .action-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--saas-text-muted);
+      padding: 6px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .action-btn:hover { color: var(--saas-text-main); background: var(--gray-light); }
+    .action-btn.del:hover { color: var(--red); background: var(--red-light); }
+    .action-btn.docs { color: var(--blue); }
+    .action-btn.docs:hover { background: var(--blue-light); }
+
+    /* PAGINATION BAR ACCENT */
+    .saas-pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: #FAF9F6;
+      border-top: 1px solid var(--saas-border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--saas-text-muted);
+    }
+    .saas-page-btn-deck { display: flex; gap: 6px; }
+    .saas-page-btn-deck button {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      border: 1px solid var(--saas-border);
+      border-radius: var(--radius-pill);
+      background: var(--saas-card);
+      color: var(--saas-text-main);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .saas-page-btn-deck button.active {
+      background: var(--charcoal);
+      color: var(--gold);
+      border: none;
+    }
+    .saas-page-btn-deck button:hover:not(.active) { background: var(--gray-light); }
+
+    /* EMPTY CONTENT CALLOUT */
+    .empty { text-align: center; padding: 48px; color: var(--saas-text-muted); font-weight: 600; }
+
+    /* ── CLEAN INTERACTIVE FLOATING MODALS ── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,26,25,0.4); backdrop-filter: blur(5px);
+      z-index: 1000; align-items: flex-start; justify-content: center;
+      padding: 40px 20px; overflow-y: auto;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--saas-card); border-radius: var(--radius-lg);
+      border: 1px solid var(--saas-border); padding: 32px;
+      width: 100%; max-width: 620px; margin: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-header h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--saas-text-main); }
+    .modal-close {
+      background: transparent; border: 1px solid var(--saas-border); cursor: pointer;
+      color: var(--saas-text-muted); font-size: 20px; line-height: 1; padding: 4px 12px;
+      border-radius: var(--radius); transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--gray-light); color: var(--saas-text-main); }
+    
+    .modal-tabs { display: flex; border-bottom: 1px solid var(--saas-border); margin-bottom: 24px; gap: 4px; }
+    .modal-tab {
+      padding: 10px 16px; font-size: 13px; font-weight: 700; font-family: inherit;
+      border: none; background: transparent; color: var(--saas-text-muted); cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.2s;
+    }
+    .modal-tab.active { color: var(--saas-accent-gold); border-bottom-color: var(--saas-accent-gold); }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-full { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 11px; font-weight: 800; color: var(--saas-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .field input, .field select, .field textarea {
+      padding: 11px 14px; border: 1px solid var(--saas-border); border-radius: var(--radius);
+      font-size: 13px; font-family: inherit; color: var(--saas-text-main); background: var(--saas-bg);
+      font-weight: 600; transition: all 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--saas-accent-gold); box-shadow: 0 0 0 3px rgba(204,164,59,0.1);
+    }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .section-divider {
+      font-size: 11px; font-weight: 800; color: var(--saas-text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 16px 0 4px; border-top: 1px solid var(--saas-border);
+      margin-top: 8px; grid-column: 1 / -1;
+    }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--saas-border); }
+
+    /* ACTIVITY TIMELINE STYLES */
+    .tl-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--saas-border); }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--saas-accent-yellow); flex-shrink: 0; margin-top: 6px; box-shadow: 0 0 0 3px rgba(245,197,24,0.25); }
+    .tl-action { font-weight: 700; font-size: 13px; color: var(--saas-text-main); }
+    .tl-meta { font-size: 11px; color: var(--saas-text-muted); margin-top: 2px; font-weight: 600; }
+    .tl-empty { color: var(--saas-text-muted); font-size: 13px; text-align: center; padding: 24px; font-weight: 600; }
+
+    /* TOAST DECK */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px; background: var(--charcoal); color: #fff;
+      padding: 12px 24px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 700;
+      z-index: 99999; opacity: 0; transform: translateY(10px); transition: all 0.25s;
+      pointer-events: none; box-shadow: var(--shadow-lg);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--green-dark); color: #fff; }
+    .toast.error { background: var(--red); color: #fff; }
+
+    @media(max-width:1024px){
+      .dashboard-layout-deck { grid-template-columns: 1fr; }
+      .saas-sidebar { width: 80px; padding: 24px 12px; align-items: center; }
+      .sidebar-label, .sidebar-btn span:not(.sidebar-btn-icon), .sidebar-user-meta { display: none; }
+      .sidebar-logo { justify-content: center; }
+      .saas-content-frame { margin-left: 80px; width: calc(100% - 80px); padding: 32px 24px; }
     }
   </style>
 </head>
 <body>
 
-<!-- LOADING -->
+<!-- LOADING SPINNER BANNER OVERLAY -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
-  <span id="loading-text">Loading…</span>
+  <span id="loading-text">Loading Data Components…</span>
 </div>
 
-<!-- LOGIN -->
+<!-- Standardised Login System Frame (UNTOUCHED) -->
 <div id="login-screen">
   <div class="lp-window">
-
-    <!-- FORM PANEL -->
     <div class="lp-form-panel">
       <div class="lp-brand-tag">Destiny Recruit Consults</div>
-
       <div class="lp-content-area">
-
-        <!-- Main login -->
         <div id="login-main">
           <div class="lp-header">
             <h1>Sign in to Portal</h1>
@@ -373,8 +805,6 @@
             <div class="lp-chip">🛡 Secure SSL</div>
           </div>
         </div>
-
-        <!-- Forgot password -->
         <div id="forgot-section" style="display:none">
           <div class="lp-header">
             <h1>Credentials Reset</h1>
@@ -393,16 +823,12 @@
           <div class="recovery-result" id="forgot-result" style="display:none"></div>
           <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">← Back to standard login</span>
         </div>
-
       </div>
-
       <div class="lp-footer">
         <span>System Version v3.4.1</span>
         <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
       </div>
     </div>
-
-    <!-- MEDIA PANEL -->
     <div class="lp-media">
       <div class="lp-media-overlay"></div>
       <div class="lp-widget-task">
@@ -431,322 +857,312 @@
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- APP -->
+<!-- MAIN COHESIVE INTERNAL SAAS SUITE INTERFACE -->
 <div id="app">
-<div class="app-layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo-badge">DR</div>
-      <div class="sidebar-brand">
-        Destiny Recruit
-        <span>Consults Portal</span>
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Menu</div>
-      <button class="nav-item active" id="tab-dash" onclick="switchTab('dash')">
-        <span class="nav-icon">📊</span>
-        <span>Dashboard</span>
-      </button>
-      <button class="nav-item" id="tab-pro" onclick="switchTab('pro')">
-        <span class="nav-icon">💼</span>
-        <span>Professional Jobs</span>
-      </button>
-      <button class="nav-item" id="tab-lb" onclick="switchTab('lb')">
-        <span class="nav-icon">🏠</span>
-        <span>LB Jobs</span>
-      </button>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-user-avatar">👤</div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name" id="user-chip">—</div>
-          <div class="sidebar-user-role">Staff</div>
+  <div class="app-inner">
+  
+    <!-- ASYMMETRIC LEFT SIDEBAR NAVIGATION CONTROL UNIT -->
+    <div class="saas-sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">DR</div>
+          <span>Destiny Recruit</span>
+        </div>
+        
+        <div class="sidebar-menu">
+          <div class="sidebar-group">
+            <div class="sidebar-label">Overview Overview</div>
+            <button class="sidebar-btn active" id="tab-dash" onclick="switchTab('dash')">
+              <span class="sidebar-btn-icon">📊</span><span>Dashboard</span>
+            </button>
+          </div>
+          
+          <div class="sidebar-group">
+            <div class="sidebar-label">Pipeline Pipelines</div>
+            <button class="sidebar-btn" id="tab-pro" onclick="switchTab('pro')">
+              <span class="sidebar-btn-icon">💼</span><span>Professional Jobs</span>
+            </button>
+            <button class="sidebar-btn" id="tab-lb" onclick="switchTab('lb')">
+              <span class="sidebar-btn-icon">🏠</span><span>LB Jobs Sector</span>
+            </button>
+          </div>
         </div>
       </div>
-      <button class="sidebar-logout" onclick="doLogout()">Sign out</button>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <div class="app-main">
-    <div class="topbar">
-      <div>
-        <div class="topbar-title" id="topbar-title">Dashboard</div>
-        <div class="topbar-subtitle" id="topbar-subtitle">Overview of all candidate pipelines</div>
-      </div>
-      <div class="topbar-right">
-        <span class="save-status saved" id="save-status">✓ <span id="save-text">Saved</span></span>
-      </div>
-    </div>
-    <div class="main">
-
-    <!-- DASHBOARD -->
-    <div id="dash-section">
-      <!-- Alert card for stuck candidates — shown dynamically by app.js if needed -->
-      <div class="alert-card" id="dash-alert-card" style="display:none">
-        <div class="alert-card-text">
-          <h4>⚠️ Candidates Need Attention</h4>
-          <p id="dash-alert-text">Some candidates have been in the same stage for over 30 days.</p>
+      
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="sidebar-user-avatar" id="avatar-char">U</div>
+          <div class="sidebar-user-meta">
+            <div class="sidebar-user-name" id="user-chip">—</div>
+            <div class="sidebar-user-status">Active Session</div>
+          </div>
         </div>
-        <button class="alert-card-btn" onclick="switchTab('pro')">Review now →</button>
-      </div>
-
-      <!-- Top stat cards -->
-      <div class="stat-cards" id="dash-stat-cards">
-        <div class="stat-card sc-gold">
-          <div class="stat-card-glow"></div>
-          <span class="stat-card-icon">💼</span>
-          <div class="stat-card-val" id="dsc-pro-total">—</div>
-          <div class="stat-card-label">Professional Candidates</div>
-          <div class="stat-card-sub" id="dsc-pro-sub">Loading…</div>
-        </div>
-        <div class="stat-card sc-teal">
-          <div class="stat-card-glow"></div>
-          <span class="stat-card-icon">✈️</span>
-          <div class="stat-card-val" id="dsc-pro-travelled">—</div>
-          <div class="stat-card-label">Pro Travelled</div>
-          <div class="stat-card-sub" id="dsc-pro-trav-sub">This pipeline</div>
-        </div>
-        <div class="stat-card sc-navy">
-          <div class="stat-card-glow"></div>
-          <span class="stat-card-icon">🏠</span>
-          <div class="stat-card-val" id="dsc-lb-total">—</div>
-          <div class="stat-card-label">LB Candidates</div>
-          <div class="stat-card-sub" id="dsc-lb-sub">Loading…</div>
-        </div>
-        <div class="stat-card sc-terra">
-          <div class="stat-card-glow"></div>
-          <span class="stat-card-icon">💰</span>
-          <div class="stat-card-val" id="dsc-refunds">—</div>
-          <div class="stat-card-label">Pending Refunds</div>
-          <div class="stat-card-sub" id="dsc-refund-sub">USD outstanding</div>
-        </div>
-        <div class="stat-card sc-dark">
-          <div class="stat-card-glow"></div>
-          <span class="stat-card-icon">📋</span>
-          <div class="stat-card-val" id="dsc-pipeline">—</div>
-          <div class="stat-card-label">In Pipeline</div>
-          <div class="stat-card-sub">Active processing</div>
-        </div>
-      </div>
-
-      <div class="dash-grid">
-        <div class="dash-card" id="dash-pro-card"></div>
-        <div class="dash-card" id="dash-lb-card"></div>
-      </div>
-      <div class="dash-grid">
-        <div class="dash-card" id="dash-pro-stages"></div>
-        <div class="dash-card" id="dash-lb-refunds"></div>
       </div>
     </div>
 
-    <!-- PROFESSIONAL -->
-    <div id="pro-section" style="display:none">
-      <div class="metrics" id="pro-metrics"></div>
-      <div class="toolbar">
-        <div class="search-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="pro-search" placeholder="Search name, passport, company…" oninput="renderPro()">
+    <!-- CORE WORKSPACE FRAME -->
+    <div class="saas-content-frame">
+    
+      <!-- CONSOLIDATED WORKSPACE TOP HEADER BAR -->
+      <div class="saas-top-header">
+        <div class="saas-page-headline" id="saas-page-title">Executive Dashboard</div>
+        <div class="saas-header-actions">
+          <div class="save-status saved" id="save-status">✓ <span id="save-text">Saved</span></div>
+          <button class="logout-action-btn" onclick="doLogout()">Sign Out Portal</button>
         </div>
-        <select id="pro-stage-f" onchange="renderPro()">
-          <option value="">All stages</option>
-          <option value="PENDING OFFER LETTER">Pending Offer Letter</option>
-          <option value="PENDING MOL">Pending MOL</option>
-          <option value="PENDING VISA">Pending Visa</option>
-          <option value="PENDING TRAVEL">Pending Travel</option>
-          <option value="TRAVELLED">Travelled</option>
-        </select>
-        <select id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
-        <button class="btn export" onclick="exportCSV('pro')">⬇ Export</button>
-        <button class="btn" onclick="addCustomStage('pro')">⚙ Add stage</button>
-        <button class="btn primary" onclick="openProForm()">＋ Add candidate</button>
       </div>
-      <div class="table-card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>#</th><th>Candidate</th><th>Passport</th><th>Phone</th>
-              <th>Position</th><th>Company</th><th>Country</th><th>Stage</th>
-              <th>Commission</th><th>Paid</th><th>Balance</th><th>Docs</th><th></th>
-            </tr></thead>
-            <tbody id="pro-tbody"><tr><td colspan="13"><div class="empty">Loading…</div></td></tr></tbody>
-          </table>
+
+      <!-- ── DASHBOARD SECTION ── -->
+      <div id="dash-section">
+        <div class="dashboard-layout-deck">
+        
+          <div class="dashboard-center-stack">
+            <!-- LUXURY PROMOTIONAL SUMMARY BANNER HUB -->
+            <div class="premium-hero-banner">
+              <div class="premium-hero-label">Recruitment Hub Overview</div>
+              <div class="premium-hero-title">Optimize Placements & Manage Pipeline Deliverables</div>
+              <div class="premium-hero-desc">Real-time status tracking framework linked securely to cloud instances. Keep documents validated and logs audit-ready.</div>
+            </div>
+            
+            <!-- FLEX ROWS FOR CATEGORIZED OVERVIEWS -->
+            <div class="saas-card">
+              <div class="saas-card-title">💼 Professional Segments Summary</div>
+              <div class="stat-row-deck" id="dash-pro-card"></div>
+            </div>
+            
+            <div class="saas-card">
+              <div class="saas-card-title">🏠 LB Operational Summary</div>
+              <div class="stat-row-deck" id="dash-lb-card"></div>
+            </div>
+          </div>
+          
+          <!-- RIGHT-SIDE DATA PERFORMANCE PANEL CHANNELS -->
+          <div class="dashboard-center-stack">
+            <div class="saas-card">
+              <div class="saas-card-title">📊 Dynamic Stage Breakdowns</div>
+              <div class="bar-chart-stack" id="dash-pro-stages"></div>
+            </div>
+            
+            <div class="saas-card">
+              <div class="saas-card-title">↩️ Refund Clearances & Statuses</div>
+              <div class="stat-row-deck" id="dash-lb-refunds"></div>
+            </div>
+          </div>
+          
         </div>
-        <div class="pagination" id="pro-pagination"></div>
       </div>
+
+      <!-- ── PROFESSIONAL INTERACTION ZONE ── -->
+      <div id="pro-section" style="display:none">
+        <div class="metrics-matrix-deck" id="pro-metrics"></div>
+        
+        <div class="saas-toolbar">
+          <div class="saas-search-box-wrap">
+            <span class="saas-search-icon">🔍</span>
+            <input type="text" class="saas-search-input" id="pro-search" placeholder="Search name, passport, company code…" oninput="renderPro()">
+          </div>
+          <select class="saas-filter-dropdown" id="pro-stage-f" onchange="renderPro()"></select>
+          <select class="saas-filter-dropdown" id="pro-company-f" onchange="renderPro()"></select>
+          <button class="saas-btn export" onclick="exportCSV('pro')">⬇ Export CSV</button>
+          <button class="saas-btn" onclick="addCustomStage('pro')">⚙ Add Stage</button>
+          <button class="saas-btn primary" onclick="openProForm()">＋ Add Candidate</button>
+        </div>
+        
+        <div class="saas-table-wrapper">
+          <div class="saas-overflow-x">
+            <table class="saas-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Full Candidate Name</th><th>Passport</th><th>Phone</th>
+                  <th>Position</th><th>Company</th><th>Country</th><th>Current Stage</th>
+                  <th>Commission</th><th>Amount Paid</th><th>Balance</th><th>Docs Folder</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pro-tbody">
+                <tr><td colspan="13"><div class="empty">Loading datasets…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="saas-pagination-bar" id="pro-pagination"></div>
+        </div>
+      </div>
+
+      <!-- ── LB JOBS INTERACTION ZONE ── -->
+      <div id="lb-section" style="display:none">
+        <div class="metrics-matrix-deck" id="lb-metrics"></div>
+        
+        <div class="saas-toolbar">
+          <div class="saas-search-box-wrap">
+            <span class="saas-search-icon">🔍</span>
+            <input type="text" class="saas-search-input" id="lb-search" placeholder="Search candidate identity, phone sequence…" oninput="renderLB()">
+          </div>
+          <select class="saas-filter-dropdown" id="lb-travel-f" onchange="renderLB()"></select>
+          <select class="saas-filter-dropdown" id="lb-refund-f" onchange="renderLB()">
+            <option value="">All refund statuses</option>
+            <option value="complete">Complete</option>
+            <option value="incomplete">Incomplete</option>
+            <option value="RETURNED">Returned</option>
+            <option value="N/A">N/A (HAD PP)</option>
+          </select>
+          <button class="saas-btn export" onclick="exportCSV('lb')">⬇ Export CSV</button>
+          <button class="saas-btn" onclick="addCustomStage('lb')">⚙ Add Status</button>
+          <button class="saas-btn primary" onclick="openLBForm()">＋ Add Candidate</button>
+        </div>
+        
+        <div class="saas-table-wrapper">
+          <div class="saas-overflow-x">
+            <table class="saas-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Full Candidate Name</th><th>Phone Number</th><th>Passport</th>
+                  <th>Travel Status</th><th>Travel Date</th><th>To Refund</th>
+                  <th>Refunded</th><th>Balance Owed</th><th>Refund Metric</th><th>Docs Folder</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="lb-tbody">
+                <tr><td colspan="12"><div class="empty">Loading datasets…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="saas-pagination-bar" id="lb-pagination"></div>
+        </div>
+      </div>
+
     </div>
+  </div>
+</div>
 
-    <!-- LB -->
-    <div id="lb-section" style="display:none">
-      <div class="metrics" id="lb-metrics"></div>
-      <div class="toolbar">
-        <div class="search-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="lb-search" placeholder="Search name, phone…" oninput="renderLB()">
-        </div>
-        <select id="lb-travel-f" onchange="renderLB()">
-          <option value="">All travel statuses</option>
-          <option value="TRAVELLED">Travelled</option>
-          <option value="NOT YET">Not yet</option>
-          <option value="NOT TRAVELLED">Not travelled</option>
-        </select>
-        <select id="lb-refund-f" onchange="renderLB()">
-          <option value="">All refund statuses</option>
-          <option value="complete">Complete</option>
-          <option value="incomplete">Incomplete</option>
-          <option value="RETURNED">Returned</option>
-          <option value="N/A">N/A (HAD PP)</option>
-        </select>
-        <button class="btn export" onclick="exportCSV('lb')">⬇ Export</button>
-        <button class="btn" onclick="addCustomStage('lb')">⚙ Add status</button>
-        <button class="btn primary" onclick="openLBForm()">＋ Add candidate</button>
-      </div>
-      <div class="table-card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>#</th><th>Full name</th><th>Phone</th><th>Passport</th>
-              <th>Travel status</th><th>Travel date</th><th>To refund</th>
-              <th>Refunded</th><th>Balance</th><th>Refund status</th><th>Docs</th><th></th>
-            </tr></thead>
-            <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loading…</div></td></tr></tbody>
-          </table>
-        </div>
-        <div class="pagination" id="lb-pagination"></div>
-      </div>
-    </div>
-
-  </div><!-- /.main -->
-  </div><!-- /.app-main -->
-</div><!-- /.app-layout -->
-</div><!-- /#app -->
-
-<!-- PRO MODAL -->
+<!-- ── PROFESSIONAL OPERATIONAL MODAL SHEET ── -->
 <div class="modal-bg" id="pro-modal">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="pro-modal-title">Add professional candidate</h3>
+      <h3 id="pro-modal-title">Add Professional Candidate</h3>
       <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
     </div>
     <div class="modal-tabs">
-      <button class="modal-tab active" id="pro-mtab-details" onclick="switchModalTab('pro','details',this)">Details</button>
-      <button class="modal-tab" id="pro-mtab-pipeline" onclick="switchModalTab('pro','pipeline',this)">Pipeline</button>
-      <button class="modal-tab" id="pro-mtab-commission" onclick="switchModalTab('pro','commission',this)">Commission</button>
-      <button class="modal-tab" id="pro-mtab-timeline" onclick="switchModalTab('pro','timeline',this)">Timeline</button>
+      <button class="modal-tab active" id="pro-mtab-details" onclick="switchModalTab('pro','details',this)">Details Segment</button>
+      <button class="modal-tab" id="pro-mtab-pipeline" onclick="switchModalTab('pro','pipeline',this)">Pipeline Stage</button>
+      <button class="modal-tab" id="pro-mtab-commission" onclick="switchModalTab('pro','commission',this)">Commissions</button>
+      <button class="modal-tab" id="pro-mtab-timeline" onclick="switchModalTab('pro','timeline',this)">Timeline Audit</button>
     </div>
+    
     <div id="pro-tab-details">
       <div class="form-grid">
-        <div class="field form-full"><label>Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
-        <div class="field"><label>Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
-        <div class="field"><label>Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
-        <div class="field"><label>Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
-        <div class="field"><label>Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
-        <div class="field"><label>Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
-        <div class="field"><label>Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
-        <div class="field"><label>Date submitted</label><input type="date" id="pf-submitted"></div>
+        <div class="field form-full"><label>Full Name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
+        <div class="field"><label>Passport No.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
+        <div class="field"><label>Phone Number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label>Position Field</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
+        <div class="field"><label>Corporate Entity</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
+        <div class="field"><label>Destination Country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
+        <div class="field"><label>Current Stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
+        <div class="field"><label>Date Submitted</label><input type="date" id="pf-submitted"></div>
       </div>
     </div>
+    
     <div id="pro-tab-pipeline" style="display:none">
       <div class="form-grid">
-        <div class="field"><label>Interview / selection date</label><input type="date" id="pf-interview"></div>
-        <div class="field"><label>Offer letter date</label><input type="date" id="pf-ol"></div>
-        <div class="field"><label>MOL date</label><input type="date" id="pf-mol"></div>
-        <div class="field"><label>Visa date</label><input type="date" id="pf-visa"></div>
-        <div class="field form-full"><label>Travel date</label><input type="date" id="pf-travel"></div>
+        <div class="field"><label>Interview / Selection Date</label><input type="date" id="pf-interview"></div>
+        <div class="field"><label>Offer Letter Date</label><input type="date" id="pf-ol"></div>
+        <div class="field"><label>MOL Date Tag</label><input type="date" id="pf-mol"></div>
+        <div class="field"><label>Visa Release Date</label><input type="date" id="pf-visa"></div>
+        <div class="field form-full"><label>Actual Travel Date</label><input type="date" id="pf-travel"></div>
       </div>
     </div>
+    
     <div id="pro-tab-commission" style="display:none">
       <div class="form-grid">
-        <div class="field"><label>Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
-        <div class="field"><label>Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
+        <div class="field"><label>Commission Fee (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
+        <div class="field"><label>Amount Paid In (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
       </div>
     </div>
+    
     <div id="pro-tab-timeline" style="display:none">
-      <div id="pro-form-timeline"><div class="tl-empty">Save the candidate first to see timeline.</div></div>
+      <div id="pro-form-timeline"><div class="tl-empty">Save individual to populate data stream.</div></div>
     </div>
+    
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal('pro-modal')">Cancel</button>
-      <button class="btn primary" onclick="savePro()">Save candidate</button>
+      <button class="saas-btn" onclick="closeModal('pro-modal')">Discard Changes</button>
+      <button class="saas-btn primary" onclick="savePro()">Commit Candidate</button>
     </div>
   </div>
 </div>
 
-<!-- LB MODAL -->
+<!-- ── LB OPERATIONAL MODAL SHEET ── -->
 <div class="modal-bg" id="lb-modal">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="lb-modal-title">Add LB candidate</h3>
+      <h3 id="lb-modal-title">Add LB Candidate</h3>
       <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
     </div>
     <div class="modal-tabs">
-      <button class="modal-tab active" id="lb-mtab-details" onclick="switchModalTab('lb','details',this)">Details</button>
-      <button class="modal-tab" id="lb-mtab-refunds" onclick="switchModalTab('lb','refunds',this)">Refunds</button>
-      <button class="modal-tab" id="lb-mtab-timeline" onclick="switchModalTab('lb','timeline',this)">Timeline</button>
+      <button class="modal-tab active" id="lb-mtab-details" onclick="switchModalTab('lb','details',this)">Identity Group</button>
+      <button class="modal-tab" id="lb-mtab-refunds" onclick="switchModalTab('lb','refunds',this)">Refund Protocols</button>
+      <button class="modal-tab" id="lb-mtab-timeline" onclick="switchModalTab('lb','timeline',this)">Log Matrix</button>
     </div>
+    
     <div id="lb-tab-details">
       <div class="form-grid">
-        <div class="field form-full"><label>Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
-        <div class="field"><label>Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
-        <div class="field"><label>Passport status *</label>
+        <div class="field form-full"><label>Full Name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
+        <div class="field"><label>Phone Number Reference</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label>Passport Status *</label>
           <select id="lf-pp">
-            <option value="APPLIED">Applied</option>
-            <option value="HAD PP">Had PP</option>
-            <option value="NOT APPLIED">Not applied</option>
-            <option value="PUSHED">Pushed</option>
+            <option value="APPLIED">Applied Pipeline</option>
+            <option value="HAD PP">Had PP Already</option>
+            <option value="NOT APPLIED">Not Yet Applied</option>
+            <option value="PUSHED">Pushed Sequence</option>
           </select>
         </div>
-        <div class="field"><label>Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
-        <div class="field"><label>Travel date</label><input type="date" id="lf-tdate"></div>
-        <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+        <div class="field"><label>Travel Status State</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
+        <div class="field"><label>Travel Allocation Date</label><input type="date" id="lf-tdate"></div>
+        <div class="field"><label>Internal System Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
       </div>
     </div>
+    
     <div id="lb-tab-refunds" style="display:none">
       <div class="form-grid">
-        <div class="field form-full"><label>Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
-        <div class="field"><label>1st payment date</label><input type="date" id="lf-r1date"></div>
-        <div class="field"><label>1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
-        <div class="field"><label>2nd payment date</label><input type="date" id="lf-r2date"></div>
-        <div class="field"><label>2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+        <div class="field form-full"><label>Target Allocation To Refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
+        <div class="section-divider">Installment Sequence 1</div>
+        <div class="field"><label>1st Clearance Date</label><input type="date" id="lf-r1date"></div>
+        <div class="field"><label>1st Cleared Value (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
+        <div class="section-divider">Installment Sequence 2</div>
+        <div class="field"><label>2nd Clearance Date</label><input type="date" id="lf-r2date"></div>
+        <div class="field"><label>2nd Cleared Value (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
       </div>
     </div>
+    
     <div id="lb-tab-timeline" style="display:none">
-      <div id="lb-form-timeline"><div class="tl-empty">Save the candidate first to see timeline.</div></div>
+      <div id="lb-form-timeline"><div class="tl-empty">Save individual to populate data stream.</div></div>
     </div>
+    
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal('lb-modal')">Cancel</button>
-      <button class="btn primary" onclick="saveLB()">Save candidate</button>
+      <button class="saas-btn" onclick="closeModal('lb-modal')">Discard Changes</button>
+      <button class="saas-btn primary" onclick="saveLB()">Commit Candidate</button>
     </div>
   </div>
 </div>
 
-<!-- DOCS MODAL -->
+<!-- ── EXTERNAL LINK DRIVE MANAGEMENT MODAL ── -->
 <div class="modal-bg" id="docs-modal">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
-      <h3 id="docs-modal-title">Documents</h3>
+      <h3 id="docs-modal-title">Unified Document Repositories</h3>
       <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
     </div>
-    <p style="font-size:12px;color:var(--text-3);margin-bottom:1rem">
-      Upload all of this candidate's documents (passport, ID, offer letter, MOL, visa, etc.) into one Google Drive folder, then paste that folder's share link below.
-      <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link →</a>
+    <p style="font-size:12px;color:var(--saas-text-muted);margin-bottom:18px">
+      Link secure shared storage paths (Google Drive, Dropbox) hosting candidate assets (Visas, Identifications, Passports) to tie records directly.
     </p>
-    <div class="field">
-      <label>Documents folder link</label>
-      <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link…" oninput="onDocsLinkInput()" style="width:100%;padding:9px 12px;font-size:13px">
+    <div class="field" style="margin-bottom:12px">
+      <label>Google Shared Folder URL</label>
+      <input type="text" id="docs-link-input" placeholder="Paste cloud repository URL sequence…" oninput="onDocsLinkInput()">
     </div>
-    <div class="modal-footer" style="justify-content:space-between">
-      <button class="doc-open-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()">📂 View documents</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn" onclick="closeModal('docs-modal')">Close</button>
-        <button class="btn primary" onclick="saveDocs()">Save</button>
+    <div class="modal-footer" style="justify-content:space-between; margin-top:20px;">
+      <button class="saas-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()" style="background:#EBF3FC; color:var(--blue); border:none;">📂 Launch Repository</button>
+      <div style="display:flex;gap:6px">
+        <button class="saas-btn" onclick="closeModal('docs-modal')">Cancel</button>
+        <button class="saas-btn primary" onclick="saveDocs()">Save Mapping</button>
       </div>
     </div>
   </div>
@@ -754,91 +1170,42 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Sidebar & stat card patch -->
-<script>
-(function(){
-  const TAB_META = {
-    dash: { title:'Dashboard', sub:'Overview of all candidate pipelines' },
-    pro:  { title:'Professional Jobs', sub:'Manage professional placement candidates' },
-    lb:   { title:'LB Jobs', sub:'Manage labour-broker candidates & refunds' },
-  };
-
-  // Patch switchTab to update sidebar active state + topbar title
-  document.addEventListener('DOMContentLoaded', function(){
-    const origSwitch = window.switchTab;
-    window.switchTab = function(tab){
-      origSwitch && origSwitch(tab);
-      // Sidebar active
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-      const nb = document.getElementById('tab-'+tab);
-      if(nb) nb.classList.add('active');
-      // Topbar
-      const m = TAB_META[tab] || {};
-      const tt = document.getElementById('topbar-title');
-      const ts = document.getElementById('topbar-subtitle');
-      if(tt) tt.textContent = m.title || '';
-      if(ts) ts.textContent = m.sub || '';
-    };
-
-    // Populate dashboard stat cards from loaded data
-    // Called after loadAllData resolves — we hook into a short poll
-    function tryPopulateStatCards(){
-      if(typeof window.proData === 'undefined' || typeof window.lbData === 'undefined'){
-        setTimeout(tryPopulateStatCards, 600); return;
-      }
-      const pro = window.proData || [];
-      const lb  = window.lbData  || [];
-
-      // Pro stats
-      const proTravelled = pro.filter(r => (r.stage||'').toUpperCase()==='TRAVELLED').length;
-      const proPipeline  = pro.filter(r => (r.stage||'').toUpperCase()!=='TRAVELLED').length;
-      set('dsc-pro-total',    pro.length);
-      set('dsc-pro-travelled',proTravelled);
-      set('dsc-pro-sub',      proPipeline + ' in pipeline');
-      set('dsc-pro-trav-sub', proTravelled + ' of ' + pro.length + ' total');
-
-      // LB stats
-      const lbTravelled = lb.filter(r => (r.travel_status||'').toUpperCase()==='TRAVELLED').length;
-      set('dsc-lb-total', lb.length);
-      set('dsc-lb-sub',   lbTravelled + ' travelled');
-
-      // Refunds
-      let pendingUSD = 0;
-      lb.forEach(r => {
-        const toR = parseFloat(r.to_refund||0);
-        const r1  = parseFloat(r.refund1_amount||0);
-        const r2  = parseFloat(r.refund2_amount||0);
-        const rem = toR - r1 - r2;
-        if(rem > 0) pendingUSD += rem;
-      });
-      set('dsc-refunds',    'US$' + Math.round(pendingUSD).toLocaleString());
-      set('dsc-refund-sub', pendingUSD > 0 ? 'Across ' + lb.filter(r=>{const t=parseFloat(r.to_refund||0),a=parseFloat(r.refund1_amount||0)+parseFloat(r.refund2_amount||0);return t-a>0}).length + ' candidates' : 'All clear ✓');
-
-      set('dsc-pipeline', proPipeline + lbTravelled);
-    }
-
-    function set(id, val){
-      const el = document.getElementById(id);
-      if(el) el.textContent = val;
-    }
-
-    // Clickable rows — delegate click on tbody, ignore action button clicks
-    document.addEventListener('click', function(e){
-      const row = e.target.closest('tbody tr');
-      if(!row) return;
-      if(e.target.closest('.action-btn')) return; // let action buttons work normally
-      const id = row.dataset.id;
-      const type = row.dataset.type;
-      if(!id || !type) return;
-      if(type === 'pro' && typeof window.openProForm === 'function') window.openProForm(id);
-      if(type === 'lb'  && typeof window.openLBForm  === 'function') window.openLBForm(id);
-    });
-})();
-</script>
-
-<!-- Supabase CDN -->
+<!-- Supabase CDN and Local Core Systems Linkage -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+  // Small interface interception hook to transform default text content header title matching left-menu interaction selections
+  const nativeSwitchTab = window.switchTab;
+  window.switchTab = function(tabName) {
+    if(typeof nativeSwitchTab === 'function') nativeSwitchTab(tabName);
+    
+    // Update structural highlighting configurations safely inside premium left menu layout
+    ['dash', 'pro', 'lb'].forEach(t => {
+      const btn = document.getElementById(`tab-${t}`);
+      if(btn) btn.classList.toggle('active', t === tabName);
+    });
+    
+    const titleEl = document.getElementById('saas-page-title');
+    if(titleEl) {
+      if(tabName === 'dash') titleEl.textContent = 'Executive Dashboard Summary';
+      if(tabName === 'pro') titleEl.textContent = 'Professional Recruitment Pipeline';
+      if(tabName === 'lb') titleEl.textContent = 'LB Operational Portfolios';
+    }
+  };
+  
+  // Custom interception for avatar initial sync logic
+  const nativeDoLogin = window.doLogin;
+  window.doLogin = function() {
+    if(typeof nativeDoLogin === 'function') nativeDoLogin();
+    setTimeout(() => {
+      const chip = document.getElementById('user-chip');
+      const avatarChar = document.getElementById('avatar-char');
+      if(chip && avatarChar && chip.textContent && chip.textContent !== '—') {
+        avatarChar.textContent = chip.textContent.trim().charAt(0).toUpperCase();
+      }
+    }, 400);
+  };
+</script>
 </body>
 </html>
