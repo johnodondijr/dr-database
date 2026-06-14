@@ -10,7 +10,7 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // STAFF ACCOUNTS
 // ══════════════════════════════════════════════════════════
 const STAFF_ACCOUNTS = {
-  Fred:      { password: 'Destiny@2025', role: 'admin', display: 'Fred' },
+  fred:      { password: 'Destiny@2025', role: 'admin', display: 'Fred' },
   robert:    { password: 'Robert@2025',  role: 'staff', display: 'Robert'    },
   doreen:    { password: 'Doreen@2025',  role: 'staff', display: 'Doreen'    },
   maxwell:   { password: 'Maxwell@2025', role: 'staff', display: 'Maxwell'   },
