@@ -259,8 +259,26 @@
     /* ── SECTION HEADER ── */
     .section-eyebrow { font-size:10px; font-weight:700; color:var(--text-3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px; }
 
+    /* ── WELCOME CARD ── */
+    .welcome-card {
+      background:linear-gradient(135deg, var(--charcoal-2) 0%, var(--charcoal) 100%);
+      border-radius:var(--radius-lg);
+      padding:20px 24px;
+      margin-bottom:18px;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .welcome-card h2 { font-size:18px; font-weight:700; margin-bottom:4px; letter-spacing:-.01em; }
+    .welcome-card h2 span { color:var(--gold); }
+    .welcome-card p { font-size:12px; color:rgba(255,255,255,.5); }
+    .welcome-card-date { font-size:11px; font-weight:600; color:rgba(255,255,255,.55); background:rgba(255,255,255,.06); padding:7px 14px; border-radius:var(--radius-pill); white-space:nowrap; }
+
     /* ── PIPELINE CARDS ── */
-    .pipeline-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .pipeline-cards { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:20px; }
     .p-card { border-radius:var(--radius-lg); padding:18px 16px; cursor:pointer; transition:transform .18s, box-shadow .18s; position:relative; overflow:hidden; }
     .p-card:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
     .p-card-label { font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; opacity:.6; margin-bottom:10px; }
@@ -624,6 +642,14 @@
         <!-- ── DASHBOARD ── -->
         <div id="dash-section">
 
+          <div class="welcome-card">
+            <div>
+              <h2>Welcome back, <span id="welcome-name">there</span></h2>
+              <p>Here's what's happening across your pipelines today.</p>
+            </div>
+            <div class="welcome-card-date" id="welcome-date"></div>
+          </div>
+
           <div class="section-eyebrow">Pipeline overview</div>
           <div class="pipeline-cards" id="dash-pipeline-cards">
             <!-- filled by renderDash() -->
@@ -688,6 +714,11 @@
                   <button class="pill-tab" onclick="setLBTravelPill('TRAVELLED',this)">Travelled</button>
                   <button class="pill-tab" onclick="setLBTravelPill('NOT YET',this)">Not yet</button>
                   <button class="pill-tab" onclick="setLBTravelPill('NOT TRAVELLED',this)">Did not travel</button>
+                </div>
+                <div class="pill-tabs" id="lb-pp-pills">
+                  <button class="pill-tab active" onclick="setLBPPPill('',this)">All passports</button>
+                  <button class="pill-tab" onclick="setLBPPPill('APPLIED',this)">PP applied</button>
+                  <button class="pill-tab" onclick="setLBPPPill('NOT APPLIED',this)">PP not applied</button>
                 </div>
                 <div class="search-wrap">
                   <i class="ti ti-search"></i>
@@ -868,6 +899,7 @@
 /* Pill filter state */
 let proStagePillFilter = '';
 let lbTravelPillFilter = '';
+let lbPPPillFilter = '';
 
 function setProStagePill(val, btn) {
   proStagePillFilter = val;
@@ -885,6 +917,13 @@ function setLBTravelPill(val, btn) {
   btn.classList.add('active');
   const sel = document.getElementById('lb-travel-f');
   if (sel) sel.value = val;
+  renderLB();
+}
+
+function setLBPPPill(val, btn) {
+  lbPPPillFilter = val;
+  document.querySelectorAll('#lb-pp-pills .pill-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
   renderLB();
 }
 
@@ -946,11 +985,13 @@ function getFilteredLB() {
   const q      = (document.getElementById('lb-search').value || '').toLowerCase();
   const travel = lbTravelPillFilter || (document.getElementById('lb-travel-f') ? document.getElementById('lb-travel-f').value : '');
   const refund = document.getElementById('lb-refund-f') ? document.getElementById('lb-refund-f').value : '';
+  const pp     = lbPPPillFilter;
   return lbDB.filter(r => {
     const text = `${r.name} ${r.phone||''}`.toLowerCase();
     const ts = r.travelStatus || r.travel_status || '';
+    const ps = r.ppStatus || r.pp_status || '';
     const rs = getRefundStatus(r);
-    return (!q || text.includes(q)) && (!travel || ts === travel) && (!refund || rs === refund);
+    return (!q || text.includes(q)) && (!travel || ts === travel) && (!refund || rs === refund) && (!pp || ps === pp);
   });
 }
 
@@ -1068,13 +1109,18 @@ function renderLB() {
 
 /* Override renderDash to use new pipeline cards + right column */
 function renderDash() {
+  const wd = document.getElementById('welcome-date');
+  if (wd) wd.textContent = new Date().toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+
   const proTravelled = proDB.filter(r => r.stage === 'TRAVELLED').length;
   const proInProcess = proDB.filter(isInProcessPro).length;
   let totalComm = 0, totalPaid = 0;
   proDB.forEach(r => { if(r.commission) totalComm += Number(r.commission); if(r.paid) totalPaid += Number(r.paid); });
   const lbTravelled  = lbDB.filter(r => (r.travelStatus||r.travel_status) === 'TRAVELLED').length;
   const lbInProcess  = lbDB.filter(isInProcessLB).length;
-  const lbIncomplete = lbDB.filter(r => getRefundStatus(r) === 'incomplete').length;
+  const lbIncompleteTravelled = lbDB.filter(r =>
+    (r.travelStatus||r.travel_status) === 'TRAVELLED' && getRefundStatus(r) === 'incomplete'
+  ).length;
   let lbOwed = 0, lbPaid = 0;
   lbDB.forEach(r => {
     if ((r.travelStatus||r.travel_status) === 'TRAVELLED' &&
@@ -1091,26 +1137,14 @@ function renderDash() {
     <div class="p-card card-gold" onclick="switchTab('pro')">
       <div class="p-card-label">In process</div>
       <div class="p-card-count">${proInProcess}</div>
-      <div class="p-card-sub">Professional</div>
+      <div class="p-card-sub">Professional candidates</div>
       <i class="ti ti-briefcase p-card-icon"></i>
     </div>
-    <div class="p-card card-dark" onclick="switchTab('pro')">
-      <div class="p-card-label">Travelled</div>
-      <div class="p-card-count">${proTravelled}</div>
-      <div class="p-card-sub">Professional</div>
-      <i class="ti ti-plane p-card-icon"></i>
-    </div>
     <div class="p-card card-slate" onclick="switchTab('lb')">
-      <div class="p-card-label">LB active</div>
+      <div class="p-card-label">In process</div>
       <div class="p-card-count">${lbInProcess}</div>
-      <div class="p-card-sub">Not yet travelled</div>
+      <div class="p-card-sub">LB candidates</div>
       <i class="ti ti-home p-card-icon"></i>
-    </div>
-    <div class="p-card card-amber" onclick="switchTab('lb')">
-      <div class="p-card-label">Refund balance</div>
-      <div class="p-card-count" style="font-size:22px">$${lbOwed-lbPaid}</div>
-      <div class="p-card-sub">Outstanding USD</div>
-      <i class="ti ti-coin p-card-icon"></i>
     </div>`;
 
   /* Stage breakdown + summaries */
@@ -1144,8 +1178,9 @@ function renderDash() {
       <div class="dash-row"><span class="dash-row-label">Total candidates</span><span class="dash-row-val">${lbDB.length}</span></div>
       <div class="dash-row"><span class="dash-row-label">In process</span><span class="dash-row-val" style="color:var(--amber)">${lbInProcess}</span></div>
       <div class="dash-row"><span class="dash-row-label">Travelled</span><span class="dash-row-val" style="color:var(--green)">${lbTravelled}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Refund balance owed</span><span class="dash-row-val" style="color:var(--amber)">$${lbOwed-lbPaid}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Incomplete refunds</span><span class="dash-row-val" style="color:var(--red)">${lbIncomplete}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Total fees collected</span><span class="dash-row-val">$${lbOwed.toLocaleString()}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Pending refund balance</span><span class="dash-row-val" style="color:var(--amber)">$${(lbOwed-lbPaid).toLocaleString()}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Incomplete refunds</span><span class="dash-row-val" style="color:var(--red)">${lbIncompleteTravelled}</span></div>
     </div>
     <div class="dash-card">
       <h3>Stage Breakdown</h3>
@@ -1154,7 +1189,7 @@ function renderDash() {
     <div class="dash-card">
       <h3>Refund Overview</h3>
       <div class="dash-row"><span class="dash-row-label">Complete</span><span class="dash-row-val" style="color:var(--green)">${lbComplete}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Incomplete</span><span class="dash-row-val" style="color:var(--amber)">${lbIncomplete}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Incomplete</span><span class="dash-row-val" style="color:var(--amber)">${lbIncompleteTravelled}</span></div>
       <div class="dash-row"><span class="dash-row-label">Returned</span><span class="dash-row-val" style="color:var(--red)">${lbReturned}</span></div>
       <div class="dash-row"><span class="dash-row-label">N/A (HAD PP)</span><span class="dash-row-val">${lbNA}</span></div>
       <div class="dash-row"><span class="dash-row-label">Not yet travelled</span><span class="dash-row-val" style="color:var(--blue)">${lbDB.filter(r=>(r.travelStatus||r.travel_status)==='NOT YET').length}</span></div>
@@ -1190,9 +1225,10 @@ function renderDash() {
       <div class="spotlight-label">Commission summary</div>
       <div class="spotlight-amount">KES ${totalComm.toLocaleString()}</div>
       <div class="spotlight-sub">Total billed across all candidates</div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Collected</span><span class="spotlight-row-val" style="color:#6FCF97">KES ${totalPaid.toLocaleString()}</span></div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val" style="color:var(--gold)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
-      <div class="spotlight-row"><span class="spotlight-row-label">LB refund balance</span><span class="spotlight-row-val" style="color:var(--gold)">$${lbOwed-lbPaid}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Professional collected</span><span class="spotlight-row-val" style="color:#6FCF97">KES ${totalPaid.toLocaleString()}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Professional balance</span><span class="spotlight-row-val" style="color:var(--gold)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">LB fees collected</span><span class="spotlight-row-val" style="color:#6FCF97">$${lbOwed.toLocaleString()}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">LB balance</span><span class="spotlight-row-val" style="color:var(--gold)">$${(lbOwed-lbPaid).toLocaleString()}</span></div>
     </div>
     <div class="due-panel">
       <div class="due-header"><i class="ti ti-plane"></i><span>Pending travel</span></div>
@@ -1252,8 +1288,10 @@ function setUserDisplay(display) {
   const av     = document.getElementById('user-avatar-initials');
   const sbName = document.getElementById('sb-username');
   const sbAv   = document.getElementById('sb-avatar');
+  const wName  = document.getElementById('welcome-name');
   if (chip) chip.textContent = display;
   if (sbName) sbName.textContent = display;
+  if (wName) wName.textContent = display;
   const parts = display.replace(/[^a-zA-Z ]/g,'').trim().split(' ');
   const initials = parts.length >= 2
     ? (parts[0][0]+parts[parts.length-1][0]).toUpperCase()
