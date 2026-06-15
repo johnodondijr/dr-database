@@ -1,9 +1,8 @@
 // ══════════════════════════════════════════════════════════
 // SUPABASE CONFIG — replace with your project values
 // ══════════════════════════════════════════════════════════
-const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';       // e.g. https://abcxyz.supabase.co
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';  // long key from Supabase dashboard
-
+const SUPABASE_URL      = 'ttps://pizirpyvkxzghvxlipzc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ══════════════════════════════════════════════════════════
@@ -14,6 +13,7 @@ const STAFF_ACCOUNTS = {
   robert:    { password: 'Robert@2025',  role: 'staff', display: 'Robert'    },
   doreen:    { password: 'Doreen@2025',  role: 'staff', display: 'Doreen'    },
   maxwell:   { password: 'Maxwell@2025', role: 'staff', display: 'Maxwell'   },
+  consolata: { password: 'Consol@2025',  role: 'staff', display: 'Consolata' },
 };
 const RECOVERY_CODE = 'DR-RESET-2025';
 
