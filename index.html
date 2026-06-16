@@ -433,6 +433,69 @@
     /* ── RESPONSIVE ── */
     @media(max-width:1100px){.split-65-35{grid-template-columns:1fr}.right-col{display:none}}
     @media(max-width:768px){.pipeline-cards{grid-template-columns:repeat(2,1fr)}.dash-2col{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.content-area{padding:14px}.sidebar{width:var(--sidebar-w-collapsed)}.sidebar-logo-text,.sidebar-user-info,.nav-item-label,.nav-section-label,.sidebar-logout{display:none}}
+    /* ── KANBAN ── */
+    .kanban-col{flex:0 0 240px;background:var(--gray-light);border-radius:var(--radius-xl);padding:12px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--border)}
+    .kanban-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;padding:0 2px}
+    .kanban-col-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.06em}
+    .kanban-col-count{background:var(--ink);color:var(--accent);font-size:10px;font-weight:800;border-radius:20px;padding:2px 8px;min-width:22px;text-align:center}
+    .kanban-card{background:var(--surface-2);border-radius:var(--radius-lg);padding:12px 14px;border:1px solid var(--border);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .18s}
+    .kanban-card:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--border-2)}
+    .kanban-card-name{font-size:12px;font-weight:800;color:var(--text);margin-bottom:4px;line-height:1.3;letter-spacing:-.01em}
+    .kanban-card-meta{font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px;margin-bottom:2px;font-weight:500}
+    .kanban-card-meta i{font-size:12px;flex-shrink:0}
+    .kanban-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+    .kanban-card-country{font-size:10px;color:var(--text-3);font-weight:600}
+    .kanban-card-comm{font-size:10px;font-weight:800;color:var(--green-dark)}
+    .kanban-empty{font-size:11px;color:var(--text-3);text-align:center;padding:20px 8px;font-weight:500}
+
+    /* ── CALENDAR ── */
+    .cal-header-row{display:grid;grid-template-columns:repeat(7,1fr);background:var(--ink)}
+    .cal-header-cell{padding:10px 0;text-align:center;font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em}
+    .cal-grid-body{display:grid;grid-template-columns:repeat(7,1fr)}
+    .cal-day{min-height:90px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px 8px;position:relative;background:var(--surface-2)}
+    .cal-day:nth-child(7n){border-right:none}
+    .cal-day.other-month{background:var(--gray-light)}
+    .cal-day.today{background:var(--accent-lighter)}
+    .cal-day-num{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .cal-day.today .cal-day-num{color:var(--accent-dark);font-weight:900}
+    .cal-day.other-month .cal-day-num{color:var(--text-3)}
+    .cal-event{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:opacity .15s}
+    .cal-event:hover{opacity:.8}
+    .cal-ev-travel{background:var(--green-light);color:var(--green-dark)}
+    .cal-ev-ol{background:var(--blue-light);color:var(--blue)}
+    .cal-ev-mol{background:var(--amber-light);color:var(--amber)}
+    .cal-ev-visa{background:var(--pink-light);color:var(--pink)}
+    .cal-ev-interview{background:var(--purple-light);color:var(--purple)}
+    .cal-ev-lb{background:var(--accent-light);color:var(--accent-deeper)}
+
+    /* ── REPORTS ── */
+    .reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .report-card{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow-sm)}
+    .report-card-title{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;display:flex;align-items:center;gap:7px}
+    .report-card-title i{font-size:15px;color:var(--sage)}
+    .rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .rev-cell{background:var(--gray-light);border-radius:14px;padding:14px 16px}
+    .rev-cell-val{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:2px}
+    .rev-cell-val.green{color:var(--green-dark)}.rev-cell-val.amber{color:#8C6200}
+    .rev-cell-label{font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+    /* bar chart */
+    .bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-bottom:24px;position:relative}
+    .bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end;position:relative}
+    .bar-fill{border-radius:6px 6px 0 0;width:100%;transition:height .4s;min-height:3px;position:relative}
+    .bar-label-top{font-size:9px;font-weight:700;color:var(--text-2);position:absolute;top:-16px;width:100%;text-align:center}
+    .bar-label-bottom{font-size:9px;color:var(--text-3);margin-top:4px;text-align:center;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    /* position table */
+    .pos-table{width:100%;border-collapse:collapse;font-size:12px}
+    .pos-table th{padding:8px 12px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);background:var(--gray-light);border-bottom:1px solid var(--border)}
+    .pos-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+    .pos-table tr:last-child td{border-bottom:none}
+    .pos-table tbody tr:hover td{background:var(--accent-lighter)}
+    .conv-pill{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+    .conv-0{background:var(--amber-light);color:#8C6200}
+    .conv-hi{background:var(--green-light);color:var(--green-dark)}
+    .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+    .chart-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .chart-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3);font-weight:600}
   </style>
 </head>
 <body>
@@ -584,6 +647,18 @@
       </a>
       <a class="nav-item" id="nav-lb" data-title="LB Jobs" onclick="switchTab('lb')">
         <i class="ti ti-home"></i><span class="nav-item-label">LB Jobs</span>
+      </a>
+
+      <div class="sidebar-divider" style="margin-top:4px"></div>
+      <div class="nav-section-label">Views</div>
+      <a class="nav-item" id="nav-kanban" data-title="Kanban Board" onclick="switchTab('kanban')">
+        <i class="ti ti-layout-columns"></i><span class="nav-item-label">Kanban Board</span>
+      </a>
+      <a class="nav-item" id="nav-calendar" data-title="Calendar" onclick="switchTab('calendar')">
+        <i class="ti ti-calendar"></i><span class="nav-item-label">Calendar</span>
+      </a>
+      <a class="nav-item" id="nav-reports" data-title="Reports" onclick="switchTab('reports')">
+        <i class="ti ti-chart-bar"></i><span class="nav-item-label">Reports</span>
       </a>
 
       <div class="nav-spacer"></div>
@@ -762,6 +837,51 @@
             <div class="click-hint"><i class="ti ti-hand-click"></i> Click any row to edit that candidate</div>
             <div class="pagination" id="lb-pagination"></div>
           </div>
+        </div>
+
+        <!-- ── KANBAN BOARD ── -->
+        <div id="kanban-section" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div>
+              <div id="kanban-title" style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em">Professional Pipeline Board</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="pill-tabs" id="kanban-source-tabs">
+                <button class="pill-tab active" onclick="setKanbanSource('pro',this)">Professional</button>
+                <button class="pill-tab" onclick="setKanbanSource('lb',this)">LB Jobs</button>
+              </div>
+              <button class="btn" onclick="switchTab('pro')"><i class="ti ti-table"></i> Table View</button>
+              <button class="btn primary" id="kanban-add-btn" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
+            </div>
+          </div>
+          <div id="kanban-board" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;min-height:300px"></div>
+        </div>
+
+        <!-- ── CALENDAR ── -->
+        <div id="calendar-section" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;align-items:center;gap:14px">
+              <button class="btn" onclick="calNav(-1)"><i class="ti ti-chevron-left"></i></button>
+              <span id="cal-month-label" style="font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.02em;min-width:120px;text-align:center"></span>
+              <button class="btn" onclick="calNav(1)"><i class="ti ti-chevron-right"></i></button>
+            </div>
+            <div class="pill-tabs" id="cal-source-tabs">
+              <button class="pill-tab active" onclick="setCalSource('pro',this)">Professional</button>
+              <button class="pill-tab" onclick="setCalSource('lb',this)">LB Jobs</button>
+            </div>
+          </div>
+          <div class="panel" style="overflow:hidden">
+            <div id="cal-grid"></div>
+          </div>
+        </div>
+
+        <!-- ── REPORTS ── -->
+        <div id="reports-section" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="font-size:13px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em">Placement Analytics</div>
+            <button class="btn export" onclick="exportReportPDF()"><i class="ti ti-download"></i> Export PDF</button>
+          </div>
+          <div id="reports-content"></div>
         </div>
 
       </div><!-- /content-area -->
