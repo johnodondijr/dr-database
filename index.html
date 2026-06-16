@@ -269,10 +269,48 @@
 
     /* ── METRICS STRIP ── */
     .metrics-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
-    .metric-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:16px 18px;box-shadow:var(--shadow-sm)}
+
+    /* base card */
+    .metric-card{
+      position:relative;overflow:hidden;
+      background:var(--surface-2);border:1px solid var(--border);
+      border-radius:var(--radius-xl);padding:16px 18px;
+      box-shadow:var(--shadow-sm);transition:transform .18s,box-shadow .18s;
+    }
+    .metric-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+
+    /* subtle top-edge accent bar */
+    .metric-card::before{
+      content:'';position:absolute;inset:0 0 auto 0;
+      height:3px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;
+      background:var(--border);
+    }
+
+    /* ── CARD THEMES ── each adds a tinted gradient fill + accent bar colour */
+    .metric-card.mc-default::before{background:var(--border-2)}
+
+    .metric-card.mc-amber{background:linear-gradient(160deg,#FFFDF5 0%,#FFF8E0 100%);border-color:#EFD97A}
+    .metric-card.mc-amber::before{background:linear-gradient(90deg,var(--accent-dark),var(--accent))}
+
+    .metric-card.mc-green{background:linear-gradient(160deg,#F4FCF8 0%,#E2F5EE 100%);border-color:#A8DCC5}
+    .metric-card.mc-green::before{background:linear-gradient(90deg,var(--green-dark),var(--green))}
+
+    .metric-card.mc-red{background:linear-gradient(160deg,#FFF5F5 0%,#FDEAEA 100%);border-color:#E8AAAA}
+    .metric-card.mc-red::before{background:linear-gradient(90deg,#8B1A1A,var(--red))}
+
+    .metric-card.mc-ink{background:linear-gradient(160deg,#22252A 0%,#18191B 100%);border-color:#333}
+    .metric-card.mc-ink::before{background:linear-gradient(90deg,var(--accent-dark),var(--accent))}
+    .metric-card.mc-ink .metric-label{color:rgba(255,255,255,.4)}
+    .metric-card.mc-ink .metric-val{color:#fff}
+    .metric-card.mc-ink .metric-val.green{color:var(--accent)}
+
+    .metric-card.mc-sage{background:linear-gradient(160deg,#F4F7F3 0%,#EAF0E8 100%);border-color:#BDD0BA}
+    .metric-card.mc-sage::before{background:linear-gradient(90deg,var(--sage-dark),var(--sage))}
+
+    /* value colours still work inside themed cards */
     .metric-label{font-size:10px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
     .metric-val{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.02em}
-    .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}.metric-val.red{color:var(--red)}.metric-val.blue{color:var(--blue)}.metric-val.sm{font-size:16px}
+    .metric-val.green{color:var(--green-dark)}.metric-val.amber{color:#8C6200}.metric-val.red{color:var(--red)}.metric-val.blue{color:var(--blue)}.metric-val.sm{font-size:16px}
 
     /* ── DASHBOARD CARDS ── */
     .dash-card{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:18px;box-shadow:var(--shadow-sm)}
