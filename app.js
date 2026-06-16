@@ -323,15 +323,18 @@ function ppBadge(s){
 // TABS + MODALS
 // ══════════════════════════════════════════════════════════
 function switchTab(t){
-  ['dash','pro','lb'].forEach(x=>{
+  ['dash','pro','lb','kanban','calendar','reports'].forEach(x=>{
     const nav=document.getElementById('nav-'+x); if(nav) nav.classList.toggle('active',x===t);
     const sec=document.getElementById(x+'-section'); if(sec) sec.style.display=x===t?'':'none';
   });
-  const titles={dash:'Dashboard',pro:'Professional',lb:'LB Jobs'};
+  const titles={dash:'Dashboard',pro:'Professional',lb:'LB Jobs',kanban:'Kanban Board',calendar:'Calendar',reports:'Reports'};
   const titleEl=document.getElementById('topbar-title'); if(titleEl) titleEl.textContent=titles[t]||'';
-  if(t==='dash') renderDash();
-  if(t==='pro')  { rebuildProPills(); renderPro(); }
-  if(t==='lb')   renderLB();
+  if(t==='dash')     renderDash();
+  if(t==='pro')      { rebuildProPills(); renderPro(); }
+  if(t==='lb')       renderLB();
+  if(t==='kanban')   renderKanban();
+  if(t==='calendar') renderCalendar();
+  if(t==='reports')  renderReports();
 }
 function switchModalTab(modal,tab,btn){
   const tabs=modal==='pro'?['details','pipeline','commission','timeline']:['details','refunds','timeline'];
@@ -1028,4 +1031,367 @@ function setUserDisplay(display, role) {
     pdBadge.className = 'pd-role-badge' + (isAdmin ? ' admin' : '');
     pdRoleText.textContent = isAdmin ? 'Administrator' : 'Staff';
   }
+}
+
+// ══════════════════════════════════════════════════════════
+// KANBAN BOARD
+// ══════════════════════════════════════════════════════════
+window.kanbanSource = 'pro';
+
+function setKanbanSource(src, btn) {
+  window.kanbanSource = src;
+  document.querySelectorAll('#kanban-source-tabs .pill-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const titleEl = document.getElementById('kanban-title');
+  const addBtn  = document.getElementById('kanban-add-btn');
+  if (titleEl) titleEl.textContent = src === 'pro' ? 'Professional Pipeline Board' : 'LB Jobs Board';
+  if (addBtn)  { addBtn.onclick = src === 'pro' ? openProForm : openLBForm; }
+  renderKanban();
+}
+
+function renderKanban() {
+  const board = document.getElementById('kanban-board');
+  if (!board) return;
+
+  if (window.kanbanSource === 'pro') {
+    // One column per stage
+    board.innerHTML = proStages.map(stage => {
+      const cards = proDB.filter(r => r.stage === stage);
+      const cardsHTML = cards.length
+        ? cards.map(r => {
+            const comm = r.commission ? `KES ${Number(r.commission).toLocaleString()}` : '—';
+            return `<div class="kanban-card" onclick="editPro(${r.id})">
+              <div class="kanban-card-name">${r.name}</div>
+              <div class="kanban-card-meta"><i class="ti ti-briefcase"></i>${r.position || '—'}</div>
+              <div class="kanban-card-meta"><i class="ti ti-building"></i>${r.company || '—'}</div>
+              <div class="kanban-card-footer">
+                <span class="kanban-card-country">${r.country || '—'}</span>
+                <span class="kanban-card-comm">${comm}</span>
+              </div>
+            </div>`;
+          }).join('')
+        : '<div class="kanban-empty">No candidates</div>';
+
+      const stageShort = stage.replace('PENDING ', '');
+      return `<div class="kanban-col">
+        <div class="kanban-col-header">
+          <span class="kanban-col-title">${stageShort}</span>
+          <span class="kanban-col-count">${cards.length}</span>
+        </div>
+        ${cardsHTML}
+      </div>`;
+    }).join('');
+
+  } else {
+    // LB: group by travel status
+    const cols = [
+      { key: 'NOT YET',       label: 'Not Yet' },
+      { key: 'TRAVELLED',     label: 'Travelled' },
+      { key: 'NOT TRAVELLED', label: 'Did Not Travel' },
+    ];
+    // include any custom lb stages
+    lbStages.filter(s => !cols.find(c => c.key === s)).forEach(s => cols.push({ key: s, label: s }));
+
+    board.innerHTML = cols.map(({ key, label }) => {
+      const cards = lbDB.filter(r => (r.travelStatus || r.travel_status) === key);
+      const cardsHTML = cards.length
+        ? cards.map(r => {
+            const pp = r.ppStatus || r.pp_status || '—';
+            const rs = getRefundStatus(r);
+            const rsColor = rs === 'complete' ? 'var(--green-dark)' : rs === 'incomplete' ? '#8C6200' : rs === 'RETURNED' ? 'var(--red)' : 'var(--text-3)';
+            return `<div class="kanban-card" onclick="editLB(${r.id})">
+              <div class="kanban-card-name">${r.name}</div>
+              <div class="kanban-card-meta"><i class="ti ti-passport"></i>${pp}</div>
+              <div class="kanban-card-meta"><i class="ti ti-phone"></i>${r.phone || '—'}</div>
+              <div class="kanban-card-footer">
+                <span class="kanban-card-country">${r.travelDate || r.travel_date ? fmtDate(r.travelDate || r.travel_date) : '—'}</span>
+                <span style="font-size:10px;font-weight:800;color:${rsColor}">${rs}</span>
+              </div>
+            </div>`;
+          }).join('')
+        : '<div class="kanban-empty">No candidates</div>';
+
+      return `<div class="kanban-col">
+        <div class="kanban-col-header">
+          <span class="kanban-col-title">${label}</span>
+          <span class="kanban-col-count">${cards.length}</span>
+        </div>
+        ${cardsHTML}
+      </div>`;
+    }).join('');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════════════════════
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-indexed
+window.calSource = 'pro';
+
+function setCalSource(src, btn) {
+  window.calSource = src;
+  document.querySelectorAll('#cal-source-tabs .pill-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderCalendar();
+}
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  if (label) label.textContent = new Date(calYear, calMonth, 1)
+    .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+
+  // Build event map: dateStr -> [{name, type}]
+  const events = {};
+  const addEv = (dateStr, name, type) => {
+    if (!dateStr) return;
+    const key = dateStr.substring(0, 10);
+    if (!events[key]) events[key] = [];
+    events[key].push({ name, type });
+  };
+
+  if (window.calSource === 'pro') {
+    proDB.forEach(r => {
+      addEv(r.travel,    r.name, 'travel');
+      addEv(r.ol,        r.name, 'ol');
+      addEv(r.mol,       r.name, 'mol');
+      addEv(r.visa,      r.name, 'visa');
+      addEv(r.interview, r.name, 'interview');
+    });
+  } else {
+    lbDB.forEach(r => {
+      addEv(r.travelDate || r.travel_date, r.name, 'lb');
+      addEv(r.r1Date || r.r1_date,         r.name, 'lb');
+      addEv(r.r2Date || r.r2_date,         r.name, 'lb');
+    });
+  }
+
+  const today = new Date();
+  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+  const typeClass = { travel:'cal-ev-travel', ol:'cal-ev-ol', mol:'cal-ev-mol', visa:'cal-ev-visa', interview:'cal-ev-interview', lb:'cal-ev-lb' };
+  const typeLabel = { travel:'Travel', ol:'Offer Letter', mol:'MOL', visa:'Visa', interview:'Interview', lb:'Travel/Refund' };
+
+  let dayCells = '';
+  for (let i = 0; i < totalCells; i++) {
+    let day, month = calMonth, year = calYear, isOther = false;
+    if (i < firstDay) {
+      day = prevDays - firstDay + i + 1;
+      month = calMonth - 1; isOther = true;
+      if (month < 0) { month = 11; year--; }
+    } else if (i >= firstDay + daysInMonth) {
+      day = i - firstDay - daysInMonth + 1;
+      month = calMonth + 1; isOther = true;
+      if (month > 11) { month = 0; year++; }
+    } else {
+      day = i - firstDay + 1;
+    }
+    const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const dayEvs  = (events[dateStr] || []).slice(0, 3);
+    const moreCount = (events[dateStr] || []).length - 3;
+
+    const evHTML = dayEvs.map(ev =>
+      `<div class="cal-event ${typeClass[ev.type] || ''}" title="${ev.name} — ${typeLabel[ev.type] || ev.type}">${ev.name.split(' ')[0]}</div>`
+    ).join('') + (moreCount > 0 ? `<div style="font-size:9px;color:var(--text-3);font-weight:600">+${moreCount} more</div>` : '');
+
+    dayCells += `<div class="cal-day${isOther ? ' other-month' : ''}${isToday ? ' today' : ''}">
+      <div class="cal-day-num">${day}</div>
+      ${evHTML}
+    </div>`;
+  }
+
+  const evTypeColors = [
+    { type:'travel',    label:'Travel Date',    cls:'cal-ev-travel' },
+    { type:'ol',        label:'Offer Letter',   cls:'cal-ev-ol' },
+    { type:'mol',       label:'MOL Date',       cls:'cal-ev-mol' },
+    { type:'visa',      label:'Visa Date',      cls:'cal-ev-visa' },
+    { type:'interview', label:'Interview',      cls:'cal-ev-interview' },
+  ];
+
+  const legendHTML = window.calSource === 'pro'
+    ? evTypeColors.map(e => `<div class="chart-legend-item"><span class="cal-event ${e.cls}" style="margin:0;border-radius:4px;padding:1px 7px">${e.label}</span></div>`).join('')
+    : `<div class="chart-legend-item"><span class="cal-event cal-ev-lb" style="margin:0;border-radius:4px;padding:1px 7px">Travel / Refund Date</span></div>`;
+
+  grid.innerHTML = `
+    <div class="cal-header-row">
+      ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-header-cell">${d}</div>`).join('')}
+    </div>
+    <div class="cal-grid-body">${dayCells}</div>
+    <div style="padding:10px 16px;border-top:1px solid var(--border);background:var(--gray-light);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      ${legendHTML}
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// REPORTS
+// ══════════════════════════════════════════════════════════
+function renderReports() {
+  const container = document.getElementById('reports-content');
+  if (!container) return;
+
+  // ── Pro metrics ──
+  const proTravelled   = proDB.filter(r => r.stage === 'TRAVELLED').length;
+  const proInProcess   = proDB.filter(isInProcessPro).length;
+  let   totalComm = 0, totalPaid = 0;
+  proDB.forEach(r => {
+    if (r.commission) totalComm += Number(r.commission);
+    if (r.paid)       totalPaid += Number(r.paid);
+  });
+
+  // ── Stage distribution bar chart ──
+  const stageCounts = proStages.map(s => ({ label: s.replace('PENDING ',''), count: proDB.filter(r => r.stage === s).length }));
+  const maxStage = Math.max(...stageCounts.map(s => s.count), 1);
+  const stageColors = ['#E3EEF9','#FDF3DC','#FDEAEA','#EEEDFE','#E3F5EE'];
+  const stageBarChart = stageCounts.map((s, i) => {
+    const pct = Math.round((s.count / maxStage) * 100);
+    return `<div class="bar-wrap">
+      <div class="bar-label-top">${s.count}</div>
+      <div class="bar-fill" style="height:${pct}%;background:${stageColors[i % stageColors.length]}"></div>
+      <div class="bar-label-bottom">${s.label}</div>
+    </div>`;
+  }).join('');
+
+  // ── Monthly trend (by travel date) ──
+  const monthCounts = Array(12).fill(0);
+  proDB.filter(r => r.stage === 'TRAVELLED' && r.travel).forEach(r => {
+    const d = new Date(r.travel);
+    if (!isNaN(d) && d.getFullYear() === new Date().getFullYear()) monthCounts[d.getMonth()]++;
+  });
+  const maxMonth = Math.max(...monthCounts, 1);
+  const monthLabels = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const monthBarChart = monthCounts.map((c, i) => {
+    const pct = Math.round((c / maxMonth) * 100);
+    return `<div class="bar-wrap">
+      <div class="bar-label-top">${c || ''}</div>
+      <div class="bar-fill" style="height:${Math.max(pct,3)}%;background:var(--sage-light)"></div>
+      <div class="bar-label-bottom">${monthLabels[i]}</div>
+    </div>`;
+  }).join('');
+
+  // ── Company breakdown ──
+  const companies = [...new Set(proDB.map(r => r.company).filter(Boolean))];
+  const maxComp = Math.max(...companies.map(c => proDB.filter(r => r.company === c).length), 1);
+  const compBarChart = companies.slice(0, 8).map(c => {
+    const cnt = proDB.filter(r => r.company === c).length;
+    const pct = Math.round((cnt / maxComp) * 100);
+    return `<div class="bar-wrap">
+      <div class="bar-label-top">${cnt}</div>
+      <div class="bar-fill" style="height:${Math.max(pct,3)}%;background:var(--accent)"></div>
+      <div class="bar-label-bottom">${c.substring(0,8)}</div>
+    </div>`;
+  }).join('');
+  const compLegend = companies.slice(0, 8).map(c =>
+    `<span style="font-size:10px;color:var(--text-3);font-weight:600">${c}: ${proDB.filter(r=>r.company===c).length}</span>`
+  ).join(' &nbsp;·&nbsp; ');
+
+  // ── Position-wise summary table ──
+  const positions = [...new Set(proDB.map(r => (r.position || '').trim().toUpperCase()).filter(Boolean))].sort();
+  const posRows = positions.map(pos => {
+    const group   = proDB.filter(r => (r.position || '').trim().toUpperCase() === pos);
+    const total   = group.length;
+    const trav    = group.filter(r => r.stage === 'TRAVELLED').length;
+    const inProc  = group.filter(isInProcessPro).length;
+    const billed  = group.reduce((s, r) => s + (Number(r.commission) || 0), 0);
+    const convPct = total > 0 ? Math.round((trav / total) * 100) : 0;
+    const convCls = convPct >= 50 ? 'conv-hi' : 'conv-0';
+    return `<tr>
+      <td style="font-weight:700">${pos}</td>
+      <td>${total}</td>
+      <td style="color:var(--green-dark);font-weight:700">${trav}</td>
+      <td style="color:#8C6200;font-weight:700">${inProc}</td>
+      <td>${billed ? 'KES ' + billed.toLocaleString() : '—'}</td>
+      <td><span class="conv-pill ${convCls}">${convPct}%</span></td>
+    </tr>`;
+  }).join('');
+
+  const convRate = proDB.length > 0 ? Math.round((proTravelled / proDB.length) * 100) : 0;
+
+  container.innerHTML = `
+    <div class="reports-grid">
+      <!-- Stage Distribution -->
+      <div class="report-card">
+        <div class="report-card-title"><i class="ti ti-chart-bar"></i> Stage Distribution</div>
+        <div class="bar-chart">${stageBarChart}</div>
+        <div class="chart-legend">
+          ${stageCounts.map((s,i)=>`<div class="chart-legend-item"><span class="legend-dot" style="background:${stageColors[i%stageColors.length]}"></span>${s.label}</div>`).join('')}
+        </div>
+      </div>
+      <!-- Company Breakdown -->
+      <div class="report-card">
+        <div class="report-card-title"><i class="ti ti-building"></i> Company Breakdown</div>
+        <div class="bar-chart">${compBarChart || '<div class="empty" style="width:100%">No data</div>'}</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:8px;line-height:1.6">${compLegend}</div>
+      </div>
+      <!-- Monthly Trend -->
+      <div class="report-card">
+        <div class="report-card-title"><i class="ti ti-trending-up"></i> Monthly Travel Trend (${new Date().getFullYear()})</div>
+        <div class="bar-chart">${monthBarChart}</div>
+      </div>
+      <!-- Revenue Summary -->
+      <div class="report-card">
+        <div class="report-card-title"><i class="ti ti-coin"></i> Revenue Summary</div>
+        <div class="rev-grid">
+          <div class="rev-cell">
+            <div class="rev-cell-val">KES ${totalComm.toLocaleString()}</div>
+            <div class="rev-cell-label">Total Commission Billed</div>
+          </div>
+          <div class="rev-cell">
+            <div class="rev-cell-val green">KES ${totalPaid.toLocaleString()}</div>
+            <div class="rev-cell-label">Commission Collected</div>
+          </div>
+          <div class="rev-cell">
+            <div class="rev-cell-val amber">KES ${(totalComm - totalPaid).toLocaleString()}</div>
+            <div class="rev-cell-label">Outstanding</div>
+          </div>
+          <div class="rev-cell">
+            <div class="rev-cell-val">${convRate}%</div>
+            <div class="rev-cell-label">Conversion Rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Position-wise Summary -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Position-wise Summary</span>
+        <span style="font-size:11px;color:var(--text-3)">${positions.length} position${positions.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="table-scroll">
+        <table class="pos-table">
+          <thead>
+            <tr>
+              <th>Position</th>
+              <th>Total</th>
+              <th>Travelled</th>
+              <th>In Process</th>
+              <th>Commission Billed</th>
+              <th>Conversion %</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${posRows || '<tr><td colspan="6"><div class="empty">No data</div></td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function exportReportPDF() {
+  showToast('Opening print dialog…', 'success');
+  setTimeout(() => window.print(), 300);
 }
