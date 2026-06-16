@@ -582,11 +582,11 @@ function renderPro(){
   proDB.forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
   const metricsEl=document.getElementById('pro-metrics');
   if(metricsEl) metricsEl.innerHTML=`
-    <div class="metric-card"><div class="metric-label">Total</div><div class="metric-val">${proDB.length}</div></div>
-    <div class="metric-card"><div class="metric-label">In process</div><div class="metric-val amber">${proDB.filter(isInProcessPro).length}</div></div>
-    <div class="metric-card"><div class="metric-label">Travelled</div><div class="metric-val green">${proDB.filter(r=>r.stage==='TRAVELLED').length}</div></div>
-    <div class="metric-card"><div class="metric-label">Commission billed</div><div class="metric-val sm">KES ${totalComm.toLocaleString()}</div></div>
-    <div class="metric-card"><div class="metric-label">Outstanding</div><div class="metric-val sm amber">KES ${(totalComm-totalPaid).toLocaleString()}</div></div>`;
+    <div class="metric-card mc-default"><div class="metric-label">Total</div><div class="metric-val">${proDB.length}</div></div>
+    <div class="metric-card mc-amber"><div class="metric-label">In process</div><div class="metric-val amber">${proDB.filter(isInProcessPro).length}</div></div>
+    <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${proDB.filter(r=>r.stage==='TRAVELLED').length}</div></div>
+    <div class="metric-card mc-ink"><div class="metric-label">Commission billed</div><div class="metric-val sm">KES ${totalComm.toLocaleString()}</div></div>
+    <div class="metric-card mc-sage"><div class="metric-label">Outstanding</div><div class="metric-val sm amber">KES ${(totalComm-totalPaid).toLocaleString()}</div></div>`;
 
   const companies=[...new Set(proDB.map(r=>r.company).filter(Boolean))].sort();
   const csel=document.getElementById('pro-company-f');
@@ -716,11 +716,11 @@ function renderLB(){
   const lbIncomplete=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED'&&getRefundStatus(r)==='incomplete').length;
   const metricsEl=document.getElementById('lb-metrics');
   if(metricsEl) metricsEl.innerHTML=`
-    <div class="metric-card"><div class="metric-label">Total</div><div class="metric-val">${lbDB.length}</div></div>
-    <div class="metric-card"><div class="metric-label">In process</div><div class="metric-val amber">${lbDB.filter(isInProcessLB).length}</div></div>
-    <div class="metric-card"><div class="metric-label">Travelled</div><div class="metric-val green">${lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
-    <div class="metric-card"><div class="metric-label">Fees collected</div><div class="metric-val sm green">$${lbFees}</div></div>
-    <div class="metric-card"><div class="metric-label">Incomplete refunds</div><div class="metric-val red">${lbIncomplete}</div></div>`;
+    <div class="metric-card mc-default"><div class="metric-label">Total</div><div class="metric-val">${lbDB.length}</div></div>
+    <div class="metric-card mc-amber"><div class="metric-label">In process</div><div class="metric-val amber">${lbDB.filter(isInProcessLB).length}</div></div>
+    <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
+    <div class="metric-card mc-ink"><div class="metric-label">Fees collected</div><div class="metric-val sm green">$${lbFees}</div></div>
+    <div class="metric-card mc-red"><div class="metric-label">Incomplete refunds</div><div class="metric-val red">${lbIncomplete}</div></div>`;
 
   const data=getFilteredLB();
   const totalPages=Math.max(1,Math.ceil(data.length/PER_PAGE));
