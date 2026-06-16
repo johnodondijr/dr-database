@@ -322,6 +322,12 @@ function ppBadge(s){
 // ══════════════════════════════════════════════════════════
 // TABS + MODALS
 // ══════════════════════════════════════════════════════════
+function setBottomNav(t) {
+  document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+  const bn = document.getElementById('bnav-' + t);
+  if (bn) bn.classList.add('active');
+}
+
 function switchTab(t){
   ['dash','pro','lb','kanban','calendar','reports'].forEach(x=>{
     const nav=document.getElementById('nav-'+x); if(nav) nav.classList.toggle('active',x===t);
@@ -329,6 +335,7 @@ function switchTab(t){
   });
   const titles={dash:'Dashboard',pro:'Professional',lb:'LB Jobs',kanban:'Kanban Board',calendar:'Calendar',reports:'Reports'};
   const titleEl=document.getElementById('topbar-title'); if(titleEl) titleEl.textContent=titles[t]||'';
+  setBottomNav(t);
   if(t==='dash')     renderDash();
   if(t==='pro')      { rebuildProPills(); renderPro(); }
   if(t==='lb')       renderLB();
