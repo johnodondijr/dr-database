@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════════
 // SUPABASE CONFIG — replace with your project values
 // ══════════════════════════════════════════════════════════
-const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';
+const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';       // e.g. https://abcxyz.supabase.co
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -548,11 +548,11 @@ function renderDash(){
       <div class="spotlight-amount">KES ${totalComm.toLocaleString()}</div>
       <div class="spotlight-sub">Total billed</div>
       <div class="spotlight-row"><span class="spotlight-row-label">Collected</span><span class="spotlight-row-val" style="color:#6FCF97">KES ${totalPaid.toLocaleString()}</span></div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val" style="color:var(--lime)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val" style="color:var(--gold)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
       <div class="spotlight-section">LB Jobs</div>
       <div class="spotlight-amount">$${lbFees}</div>
       <div class="spotlight-sub">Total fees collected</div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val" style="color:var(--lime)">$${lbOwed-lbPaid}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val" style="color:var(--gold)">$${lbOwed-lbPaid}</span></div>
       <div class="spotlight-row"><span class="spotlight-row-label">Incomplete refunds</span><span class="spotlight-row-val" style="color:#FC8181">${lbIncomplete}</span></div>
     </div>
     <div class="due-panel">
