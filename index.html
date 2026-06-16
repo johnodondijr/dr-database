@@ -3,868 +3,756 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dreco</title>
+  <title>Dreco | Enterprise Recruitment Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      /* ── NEW PALETTE (cp1): lime-yellow accent, near-black, sage green ── */
-      --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
-      --accent-light:#F7FDE0;--accent-lighter:#FBFEF2;
-      --ink:#18191B;--ink-2:#1E2023;
-      --sage:#7D8C76;--sage-dark:#5A6854;--sage-light:#EAF0E8;
-      --green:#22A06B;--green-dark:#197A52;--green-light:#E3F5EE;
-      --amber:#B07B10;--amber-light:#FDF3DC;
-      --blue:#1A6BB5;--blue-light:#E3EEF9;
-      --red:#B83232;--red-light:#FDEAEA;
-      --purple-light:#EEEDFE;--purple:#3C3489;
-      --pink-light:#FBEAF0;--pink:#993556;
-      --gray-light:#F3F3F3;--gray:#888;
-      /* ── SURFACES ── */
-      --bg:#F3F3F3;--surface:#FAFAFA;--surface-2:#FFFFFF;
-      --border:#E8E8E8;--border-2:#D4D4D4;
-      /* ── TEXT ── */
-      --text:#18191B;--text-2:#555;--text-3:#999;
-      /* ── SHAPE ── */
-      --radius:10px;--radius-lg:16px;--radius-xl:22px;--radius-pill:999px;
-      /* ── SHADOW ── */
-      --shadow-sm:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
-      --shadow:0 4px 12px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.04);
-      --shadow-lg:0 16px 48px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
-      --sidebar-w:224px;--sidebar-w-collapsed:64px;
+    /* ── SYSTEM DESIGN TOKENS ── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh;overflow:hidden}
 
-    /* ── LOADING ── */
-    .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:13px;color:var(--text-2)}
-    .loading-overlay.show{display:flex}
-    .spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    :root {
+      --bg-main: #0B0F19;
+      --bg-surface: #111827;
+      --bg-surface-hover: #1F2937;
+      --border-color: #1E293B;
+      
+      --text-main: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --text-dim: #6B7280;
 
-    /* ── LOGIN ── */
-    #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#EBEBEB;overflow:auto}
-    .lp-window{background:#fff;width:100%;max-width:1080px;height:700px;border-radius:28px;box-shadow:0 32px 80px rgba(0,0,0,.14),0 8px 24px rgba(0,0,0,.06);display:flex;overflow:hidden;border:1px solid var(--border)}
-    .lp-form-panel{flex:1.1;padding:52px 68px;display:flex;flex-direction:column;justify-content:space-between;background:#fff}
-    .lp-brand-tag{align-self:flex-start;display:flex;align-items:center;gap:10px}
-    .lp-logo-mark{width:36px;height:36px;background:var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .lp-logo-mark svg{width:22px;height:22px}
-    .lp-brand-name{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
-    .lp-brand-name span{color:var(--accent-dark)}
-    .lp-content-area{max-width:360px;width:100%;margin:0 auto}
-    .lp-header{margin-bottom:32px;text-align:center}
-    .lp-header h1{font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin-bottom:6px}
-    .lp-header p{font-size:14px;color:var(--text-3);font-weight:500}
-    .lp-input-group{margin-bottom:18px;text-align:left}
-    .lp-input-group label{display:block;font-size:11px;font-weight:700;color:var(--text-3);margin-left:4px;margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em}
-    .lp-input-wrap{position:relative;display:flex;align-items:center}
-    .lp-input-wrap input{width:100%;height:48px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:0 22px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;color:var(--ink);transition:all .2s}
-    .lp-input-wrap input:focus{outline:none;border-color:var(--accent-dark);box-shadow:0 0 0 4px rgba(200,214,32,.15);background:#fff}
-    .lp-pw-toggle{position:absolute;right:16px;background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;line-height:1}
-    .lp-forgot{display:block;text-align:right;font-size:12px;color:var(--text-3);margin-top:6px;margin-right:4px;font-weight:500;cursor:pointer}
-    .lp-forgot:hover{color:var(--ink);text-decoration:underline}
-    .lp-submit{width:100%;height:50px;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;letter-spacing:-.01em;transition:all .2s;box-shadow:0 4px 16px rgba(24,25,27,.18)}
-    .lp-submit:hover{background:#2a2b2e;transform:translateY(-1px);box-shadow:0 8px 24px rgba(24,25,27,.22)}
-    .lp-chips{display:flex;gap:10px;margin-top:16px}
-    .lp-chip{flex:1;height:40px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;font-size:12px;font-weight:600;color:var(--text-2);display:inline-flex;align-items:center;justify-content:center;gap:7px}
-    .lp-chip i{font-size:15px;color:var(--sage)}
-    .lp-footer{display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);font-weight:500}
-    .lp-footer a{color:var(--text-3);text-decoration:none;font-weight:600}
-    .lp-footer a:hover{color:var(--ink);text-decoration:underline}
-    .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
-    .recovery-result{background:var(--accent-light);border:1.5px solid var(--accent-dark);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
-    .lp-media{flex:1.1;margin:14px;border-radius:20px;background-size:cover;background-position:center;position:relative;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80')}
-    .lp-media-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(24,25,27,.18) 0%,rgba(24,25,27,.6) 100%)}
-    .lp-widget-task{position:absolute;top:32px;left:32px;background:var(--accent);padding:12px 18px;border-radius:16px;max-width:196px;z-index:2}
-    .lp-widget-task h4{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px}
-    .lp-widget-task p{font-size:10px;font-weight:500;color:rgba(0,0,0,.5)}
-    .lp-bottom{position:absolute;bottom:32px;left:32px;right:32px;display:flex;flex-direction:column;gap:14px}
-    .lp-cal{background:rgba(255,255,255,.14);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:12px 16px;display:flex;justify-content:space-between;color:#fff}
-    .lp-cal-day{text-align:center;flex:1}
-    .lp-cal-day .dl{font-size:10px;opacity:.6;text-transform:uppercase;font-weight:600;margin-bottom:4px;letter-spacing:.04em}
-    .lp-cal-day .dn{font-size:13px;font-weight:700}
-    .lp-cal-day.act{background:rgba(238,250,148,.25);border-radius:10px;padding:2px 0}
-    .lp-summary{background:#fff;border-radius:18px;padding:16px;max-width:240px}
-    .lp-summary h4{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px}
-    .lp-summary p{font-size:11px;color:var(--text-3);font-weight:500;margin-bottom:10px}
-    .lp-avatars{display:flex;align-items:center}
-    .lp-av{width:22px;height:22px;border-radius:50%;border:1.5px solid #fff;background-size:cover;margin-right:-6px}
-    @media(max-width:900px){.lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}.lp-media{display:none}.lp-form-panel{padding:40px 30px}}
+      --brand-accent: #A3E635;
+      --brand-accent-dim: rgba(163, 230, 53, 0.1);
+      
+      --status-success: #10B981;
+      --status-success-bg: rgba(16, 185, 129, 0.1);
+      --status-warning: #F59E0B;
+      --status-warning-bg: rgba(245, 158, 11, 0.1);
+      --status-danger: #EF4444;
+      --status-danger-bg: rgba(239, 68, 68, 0.1);
+      --status-info: #3B82F6;
+      --status-info-bg: rgba(59, 130, 246, 0.1);
 
-    /* ── APP SHELL ── */
-    #app{display:none;height:100vh}
-    .app-layout{display:flex;height:100vh;overflow:hidden}
-
-    /* ── SIDEBAR ── */
-    .sidebar{
-      width:var(--sidebar-w);background:var(--ink);
-      display:flex;flex-direction:column;padding:0;
-      flex-shrink:0;z-index:40;transition:width .25s cubic-bezier(.16,1,.3,1);overflow:hidden;
+      --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .sidebar.collapsed{width:var(--sidebar-w-collapsed)}
-    .sidebar-top{padding:16px 14px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:60px}
-    .sidebar-logo{display:flex;align-items:center;gap:10px;text-decoration:none;overflow:hidden}
-    .sidebar-logo-mark{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .sidebar-logo-mark svg{width:20px;height:20px}
-    .sidebar-logo-text{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.03em;white-space:nowrap;opacity:1;transition:opacity .2s}
-    .sidebar-logo-text span{color:var(--accent)}
-    .sidebar.collapsed .sidebar-logo-text{opacity:0;width:0;overflow:hidden}
-    .sidebar-toggle{background:rgba(255,255,255,.07);border:none;cursor:pointer;color:rgba(255,255,255,.4);width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s}
-    .sidebar-toggle:hover{background:rgba(255,255,255,.14);color:#fff}
-    .sidebar-toggle i{font-size:16px;transition:transform .25s}
-    .sidebar.collapsed .sidebar-toggle i{transform:rotate(180deg)}
-    .sidebar-divider{height:1px;background:rgba(255,255,255,.06);margin:4px 14px 8px}
-    .nav-section-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.12em;text-transform:uppercase;padding:0 18px;margin-bottom:4px;white-space:nowrap;overflow:hidden;transition:opacity .2s}
-    .sidebar.collapsed .nav-section-label{opacity:0}
-    .nav-item{display:flex;align-items:center;gap:11px;padding:9px 14px;margin:2px 8px;border-radius:10px;cursor:pointer;transition:all .18s;text-decoration:none;color:rgba(255,255,255,.38);white-space:nowrap;position:relative;overflow:hidden}
-    .nav-item i{font-size:19px;flex-shrink:0;transition:color .18s}
-    .nav-item-label{font-size:13px;font-weight:600;transition:opacity .2s;overflow:hidden}
-    .sidebar.collapsed .nav-item-label{opacity:0;width:0}
-    .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.75)}
-    .nav-item.active{background:var(--accent);color:var(--ink)}
-    .nav-item.active i{color:var(--ink)}
-    /* tooltip for collapsed state */
-    .sidebar.collapsed .nav-item:hover::after{content:attr(data-title);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;z-index:200;box-shadow:var(--shadow)}
-    .nav-spacer{flex:1}
-    .sidebar-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;overflow:hidden}
-    .sidebar-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink);flex-shrink:0}
-    .sidebar-user-info{overflow:hidden;transition:opacity .2s}
-    .sidebar.collapsed .sidebar-user-info{opacity:0;width:0}
-    .sidebar-user-name{font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
-    .sidebar-user-role{font-size:10px;color:rgba(255,255,255,.35);white-space:nowrap}
-    .sidebar-logout{margin-left:auto;background:rgba(255,255,255,.07);border:none;cursor:pointer;color:rgba(255,255,255,.35);width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s}
-    .sidebar.collapsed .sidebar-logout{display:none}
-    .sidebar-logout:hover{background:rgba(184,50,50,.3);color:#ffa0a0}
-    .sidebar-logout i{font-size:15px}
 
-    /* ── MAIN AREA ── */
-    .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-
-    /* ── TOPBAR ── */
-    .topbar{height:58px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;flex-shrink:0}
-    .topbar-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.02em;flex:1}
-    .topbar-search{flex:1;max-width:280px;position:relative}
-    .topbar-search input{width:100%;height:36px;background:var(--gray-light);border:1.5px solid transparent;border-radius:12px;padding:0 14px 0 34px;font-size:12px;color:var(--text);outline:none;font-family:inherit;transition:all .2s;font-weight:500}
-    .topbar-search input:focus{border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.14);background:#fff}
-    .topbar-search i{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text-3);pointer-events:none}
-    .save-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
-    .save-dot.saving{background:var(--accent-dark);animation:pulse 1s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-    .save-label{font-size:11px;color:var(--text-3);font-weight:500}
-    .topbar-user{display:flex;align-items:center;gap:8px;background:var(--gray-light);border-radius:12px;padding:5px 12px 5px 6px}
-    .topbar-avatar{width:26px;height:26px;border-radius:8px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--accent)}
-    .topbar-user-name{font-size:12px;font-weight:600;color:var(--text)}
-
-    /* ── WELCOME BANNER ── */
-    .welcome-banner{background:var(--ink);border-radius:var(--radius-xl);padding:22px 26px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
-    .welcome-banner::before{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:var(--accent);opacity:.07;pointer-events:none}
-    .welcome-banner::after{content:'';position:absolute;right:80px;bottom:-80px;width:180px;height:180px;border-radius:50%;background:var(--sage);opacity:.08;pointer-events:none}
-    .wb-left h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:3px;letter-spacing:-.03em}
-    .wb-left p{font-size:12px;color:rgba(255,255,255,.38);font-weight:500}
-    .wb-right{display:flex;gap:10px;align-items:center}
-    .wb-stat{text-align:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px}
-    .wb-stat-val{font-size:20px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.02em}
-    .wb-stat-label{font-size:10px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:600;white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
-
-    /* ── CONTENT ── */
-    .content-area{flex:1;overflow-y:auto;padding:22px 24px}
-    .content-area::-webkit-scrollbar{width:5px}
-    .content-area::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:4px}
-    .section-eyebrow{font-size:10px;font-weight:700;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
-
-    /* ── PIPELINE CARDS ── */
-    .pipeline-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-    .p-card{border-radius:var(--radius-xl);padding:20px 18px;cursor:pointer;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
-    .p-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
-    .p-card-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:12px}
-    .p-card-count{font-size:34px;font-weight:900;line-height:1;margin-bottom:5px;letter-spacing:-.03em}
-    .p-card-sub{font-size:11px;opacity:.6;font-weight:600}
-    .p-card-icon{position:absolute;bottom:-10px;right:-6px;font-size:58px;opacity:.1}
-    .card-gold{background:var(--accent);color:var(--ink)}
-    .card-dark{background:var(--ink);color:#fff}
-    .card-slate{background:var(--sage);color:#fff}
-
-    /* ── LAYOUT SPLITS ── */
-    .split-65-35{display:grid;grid-template-columns:1fr 300px;gap:14px}
-    .right-col{display:flex;flex-direction:column;gap:14px}
-    .dash-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-
-    /* ── PANEL ── */
-    .panel{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-sm)}
-    .panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-    .panel-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.01em}
-    .panel-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-
-    /* ── PILL TABS ── */
-    .pill-tabs{display:flex;gap:4px;flex-wrap:wrap}
-    .pill-tab{padding:5px 12px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-3);font-family:inherit;transition:all .15s}
-    .pill-tab.active{background:var(--ink);color:#fff}
-    .pill-tab:hover:not(.active){background:var(--gray-light);color:var(--text)}
-
-    /* ── TOOLBAR BTNS ── */
-    .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;font-size:11px;font-weight:600;font-family:inherit;border:1.5px solid var(--border);border-radius:10px;background:var(--surface-2);color:var(--text);cursor:pointer;white-space:nowrap;transition:all .18s}
-    .btn i{font-size:14px}
-    .btn:hover{background:var(--gray-light);border-color:var(--border-2)}
-    .btn.primary{background:var(--ink);color:var(--accent);border-color:var(--ink)}
-    .btn.primary:hover{background:#2a2b2e;transform:translateY(-1px);box-shadow:0 4px 12px rgba(24,25,27,.2)}
-    .btn.export{background:var(--sage-light);color:var(--sage-dark);border-color:#ccdbc9}
-    .btn.export:hover{background:#dbebd8}
-    .search-wrap{position:relative}
-    .search-wrap input{height:34px;background:var(--gray-light);border:1.5px solid transparent;border-radius:10px;padding:0 12px 0 30px;font-size:12px;font-family:inherit;color:var(--text);outline:none;transition:all .2s;min-width:180px;font-weight:500}
-    .search-wrap input:focus{border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.12);background:#fff}
-    .search-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-3);pointer-events:none}
-    .toolbar-select{height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:10px;font-size:11px;font-family:inherit;color:var(--text);background:var(--surface-2);cursor:pointer;font-weight:600;outline:none}
-    .toolbar-select:focus{border-color:var(--accent-dark)}
-
-    /* ── TABLE ── */
-    .table-scroll{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);background:var(--gray-light);border-bottom:1px solid var(--border);white-space:nowrap}
-    td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
-    tr:last-child td{border-bottom:none}
-    tbody tr{cursor:pointer;transition:background .12s}
-    tbody tr td:first-child{border-left:2px solid transparent;transition:border-color .12s}
-    tbody tr:hover td{background:var(--accent-lighter)}
-    tbody tr:hover td:first-child{border-left-color:var(--accent-dark)}
-    .name-cell{font-weight:700;font-size:12px}
-    .pp-cell{font-size:11px;color:var(--text-3);font-family:monospace;margin-top:1px}
-    .balance-owed{color:var(--amber);font-weight:700}
-    .click-hint{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3);padding:8px 14px;border-top:1px solid var(--border);background:var(--gray-light)}
-    .click-hint i{font-size:13px}
-
-    /* ── BADGES ── */
-    .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--radius-pill);font-size:10px;font-weight:700;white-space:nowrap;letter-spacing:.02em}
-    .b-pol{background:#E8F0FD;color:#1040A0}
-    .b-mol{background:var(--amber-light);color:#7A4500}
-    .b-visa{background:var(--pink-light);color:#6E1E3A}
-    .b-travel{background:var(--purple-light);color:#3C3489}
-    .b-travelled{background:var(--green-light);color:#0D5E3A}
-    .b-complete{background:var(--green-light);color:#0D5E3A}
-    .b-incomplete{background:var(--amber-light);color:#7A4500}
-    .b-returned{background:var(--red-light);color:#7A1E1E}
-    .b-na{background:var(--gray-light);color:#555}
-    .b-notyet{background:#E8F0FD;color:#1040A0}
-    .b-nottravelled{background:var(--red-light);color:#7A1E1E}
-    .b-applied{background:#E8F0FD;color:#1040A0}
-    .b-notapplied{background:var(--red-light);color:#7A1E1E}
-    .b-hadpp{background:var(--green-light);color:#0D5E3A}
-    .b-pushed{background:var(--amber-light);color:#7A4500}
-
-    /* ── ACTION BTNS ── */
-    .action-btn{background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px 6px;border-radius:8px;font-size:14px;line-height:1;transition:all .15s;display:inline-flex;align-items:center}
-    .action-btn:hover{color:var(--text);background:var(--gray-light)}
-    .action-btn.del:hover{color:var(--red);background:var(--red-light)}
-    .action-btn.docs{color:var(--blue)}.action-btn.docs:hover{background:var(--blue-light)}
-
-    /* ── PAGINATION ── */
-    .pagination{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-3);background:var(--gray-light)}
-    .page-btns{display:flex;gap:4px}
-    .page-btn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface-2);font-size:11px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:all .15s}
-    .page-btn.active{background:var(--ink);border-color:var(--ink);color:var(--accent)}
-    .page-btn:hover:not(.active){background:var(--surface);border-color:var(--border-2)}
-
-    /* ── EMPTY ── */
-    .empty{text-align:center;padding:3rem;color:var(--text-3);font-size:13px;font-weight:500}
-
-    /* ── METRICS STRIP ── */
-    .metrics-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
-    .metric-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:16px 18px;box-shadow:var(--shadow-sm)}
-    .metric-label{font-size:10px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-    .metric-val{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.02em}
-    .metric-val.green{color:var(--green)}.metric-val.amber{color:var(--amber)}.metric-val.red{color:var(--red)}.metric-val.blue{color:var(--blue)}.metric-val.sm{font-size:16px}
-
-    /* ── DASHBOARD CARDS ── */
-    .dash-card{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:18px;box-shadow:var(--shadow-sm)}
-    .dash-card h3{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
-    .dash-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
-    .dash-row:last-child{border-bottom:none}
-    .dash-row-label{font-size:12px;color:var(--text-2);font-weight:500}
-    .dash-row-val{font-size:12px;font-weight:700;color:var(--text)}
-    .dash-bar-wrap{height:4px;background:var(--accent-light);border-radius:3px;margin-top:4px;width:100%}
-    .dash-bar-fill{height:4px;background:var(--accent-dark);border-radius:3px}
-
-    /* ── RIGHT PANEL WIDGETS ── */
-    .spotlight{background:var(--ink);border-radius:var(--radius-xl);padding:20px;color:#fff;box-shadow:var(--shadow)}
-    .spotlight-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px}
-    .spotlight-section{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.25);margin:12px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)}
-    .spotlight-amount{font-size:24px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:2px;letter-spacing:-.02em}
-    .spotlight-sub{font-size:10px;color:rgba(255,255,255,.3);margin-bottom:10px}
-    .spotlight-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-    .spotlight-row:last-child{border-bottom:none}
-    .spotlight-row-label{font-size:11px;color:rgba(255,255,255,.45);font-weight:500}
-    .spotlight-row-val{font-size:11px;font-weight:700}
-    .due-panel{background:var(--accent-light);border-radius:var(--radius-xl);border:1px solid #DDE88A;overflow:hidden;box-shadow:var(--shadow-sm)}
-    .due-header{padding:12px 16px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #DDE88A}
-    .due-header i{font-size:15px;color:var(--accent-deeper)}
-    .due-header span{font-size:12px;font-weight:700;color:var(--text)}
-    .due-item{padding:10px 16px;border-bottom:1px solid #DDE88A;display:flex;justify-content:space-between;align-items:center}
-    .due-item:last-child{border-bottom:none}
-    .due-name{font-size:11px;font-weight:700;color:var(--text)}
-    .due-stage{font-size:10px;color:var(--text-3);margin-top:1px}
-    .due-date{font-size:10px;font-weight:700;color:var(--accent-deeper);background:#C8D620;padding:2px 8px;border-radius:8px}
-    .due-empty{padding:12px 16px;font-size:11px;color:var(--text-3);text-align:center}
-    .activity-panel{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-sm)}
-    .activity-header{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text)}
-    .tl-item{display:flex;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border)}
-    .tl-item:last-child{border-bottom:none}
-    .tl-dot{width:7px;height:7px;border-radius:50%;background:var(--accent-dark);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 3px rgba(200,214,32,.2)}
-    .tl-action{font-size:11px;font-weight:600;color:var(--text);line-height:1.3}
-    .tl-meta{font-size:10px;color:var(--text-3);margin-top:2px}
-    .tl-empty{padding:14px;font-size:11px;color:var(--text-3);text-align:center}
-
-    /* ── MODAL ── */
-    .modal-bg{display:none;position:fixed;inset:0;background:rgba(24,25,27,.45);backdrop-filter:blur(6px);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
-    .modal-bg.open{display:flex}
-    .modal{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:0;width:100%;max-width:560px;margin:auto;box-shadow:var(--shadow-lg);overflow:hidden}
-    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
-    .modal-header h3{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em}
-    .modal-close{background:var(--gray-light);border:none;cursor:pointer;color:var(--text-2);font-size:18px;line-height:1;padding:4px 9px;border-radius:var(--radius);transition:all .15s}
-    .modal-close:hover{background:var(--red-light);color:var(--red)}
-    .modal-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 22px}
-    .modal-tab{padding:11px 14px;font-size:12px;font-weight:600;font-family:inherit;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-    .modal-tab.active{color:var(--ink);border-bottom-color:var(--accent-dark)}
-    .modal-body{padding:22px}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
-    .form-full{grid-column:1/-1}
-    .field{display:flex;flex-direction:column;gap:5px}
-    .field label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
-    .field input,.field select,.field textarea{padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--gray-light);transition:all .2s;font-weight:500}
-    .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.12);background:#fff}
-    .field textarea{resize:vertical;min-height:60px}
-    .modal-footer{display:flex;gap:8px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--border);background:var(--gray-light)}
-    .tl-item-modal{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
-    .tl-item-modal:last-child{border-bottom:none}
-    .tl-dot-modal{width:8px;height:8px;border-radius:50%;background:var(--accent-dark);flex-shrink:0;margin-top:4px}
-    .tl-action-modal{font-weight:600;color:var(--text)}
-    .tl-meta-modal{font-size:11px;color:var(--text-3);margin-top:2px}
-
-    /* ── DOCS ── */
-    .doc-link-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--gray-light);font-weight:500}
-    .doc-link-input:focus{outline:none;border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.12);background:#fff}
-    .doc-open-btn{padding:9px 14px;background:var(--sage-light);color:var(--sage-dark);border:1.5px solid #ccdbc9;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
-    .doc-open-btn:hover{background:#dbebd8}
-    .doc-open-btn:disabled{opacity:.4;cursor:default}
-
-    /* ── SIDEBAR USER CARD ── */
-    .sidebar-user-card{margin:0 8px 8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:12px;display:flex;align-items:center;gap:10px;overflow:hidden;transition:opacity .2s,max-height .25s}
-    .sidebar.collapsed .sidebar-user-card{opacity:0;max-height:0;padding:0;margin:0;border:none}
-    .suc-avatar{width:36px;height:36px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0}
-    .suc-info{overflow:hidden;min-width:0}
-    .suc-name{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .suc-org{font-size:10px;color:rgba(255,255,255,.32);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-
-    /* ── PROFILE DROPDOWN ── */
-    .profile-wrap{position:relative}
-    .topbar-user{display:flex;align-items:center;gap:8px;background:var(--gray-light);border-radius:12px;padding:5px 12px 5px 6px;cursor:pointer;transition:background .15s;user-select:none}
-    .topbar-user:hover{background:var(--border)}
-    .topbar-user-caret{font-size:13px;color:var(--text-3);margin-left:2px}
-    .profile-dropdown{
-      display:none;position:absolute;top:calc(100% + 8px);right:0;
-      background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-xl);
-      box-shadow:var(--shadow-lg);width:280px;z-index:300;overflow:hidden;
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
-    .profile-dropdown.open{display:block}
-    .pd-header{padding:18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
-    .pd-avatar{width:42px;height:42px;border-radius:12px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
-    .pd-name{font-size:14px;font-weight:800;color:var(--text);letter-spacing:-.01em}
-    .pd-role-badge{display:inline-flex;align-items:center;gap:4px;margin-top:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--accent-light);color:var(--accent-deeper)}
-    .pd-role-badge.admin{background:var(--ink);color:var(--accent)}
-    .pd-role-badge i{font-size:10px}
-    .pd-section{padding:10px 8px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)}
-    .pd-field{padding:6px 12px;display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
-    .pd-field label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
-    .pd-field input{padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--gray-light);font-weight:500;width:100%}
-    .pd-field input:focus{outline:none;border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.12);background:#fff}
-    .pd-actions{padding:8px 12px 14px;display:flex;gap:8px}
-    .pd-save{flex:1;padding:10px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-radius:10px;background:var(--ink);color:var(--accent);cursor:pointer;transition:all .15s}
-    .pd-save:hover{background:#2a2b2e}
-    .pd-logout{padding:10px 14px;font-size:12px;font-weight:600;font-family:inherit;border:1.5px solid var(--border);border-radius:10px;background:transparent;color:var(--text-2);cursor:pointer;transition:all .15s}
-    .pd-logout:hover{background:var(--red-light);color:var(--red);border-color:#EFA3A3}
-    .pd-msg{font-size:11px;padding:4px 12px 8px;font-weight:500}
-    .pd-msg.ok{color:var(--green)}.pd-msg.err{color:var(--red)}
 
-    /* ── TOAST ── */
-    .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px}
-    .toast i{font-size:14px}
-    .toast.show{opacity:1;transform:translateY(0)}
-    .toast.success i{color:var(--accent)}
-    .toast.error{background:var(--red)}
-    .toast.error i{color:#fff}
+    /* ── AUTHENTICATION ENGINE ── */
+    .auth-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(163,230,53,0.03), transparent 40%), var(--bg-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 24px;
+      transition: var(--transition-smooth);
+    }
 
-    /* ── RESPONSIVE ── */
-    @media(max-width:1100px){.split-65-35{grid-template-columns:1fr}.right-col{display:none}}
-    @media(max-width:768px){.pipeline-cards{grid-template-columns:repeat(2,1fr)}.dash-2col{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.content-area{padding:14px}.sidebar{width:var(--sidebar-w-collapsed)}.sidebar-logo-text,.sidebar-user-info,.nav-item-label,.nav-section-label,.sidebar-logout{display:none}}
+    .auth-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    
+    .auth-logo span { color: var(--brand-accent); }
+
+    /* ── APP OVERALL WRAPPER ── */
+    .app-container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ARCHITECTURE ── */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .sidebar.collapsed {
+      width: 80px;
+    }
+
+    .sidebar-brand {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    
+    .sidebar-brand span { color: var(--brand-accent); margin-left: 2px; }
+
+    .sidebar-menu {
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--text-main);
+      background: var(--bg-surface-hover);
+    }
+
+    .nav-item.active {
+      border-left: 3px solid var(--brand-accent);
+      padding-left: 11px;
+      background: var(--brand-accent-dim);
+      color: var(--brand-accent);
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--border-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--brand-accent);
+    }
+
+    /* ── MAIN WORKSPACE CONTENT ── */
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .top-bar {
+      height: 70px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+
+    .workspace-view {
+      padding: 32px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* ── DATA VISUALIZATION GRID ── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .metric-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    /* ── MODERN COMPONENT CONTROL BAR ── */
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      max-width: 360px;
+      width: 100%;
+    }
+
+    .search-input-wrapper i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      font-size: 14px;
+      transition: var(--transition-smooth);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--brand-accent);
+      box-shadow: 0 0 0 2px var(--brand-accent-dim);
+    }
+
+    .search-input-wrapper .form-control {
+      padding-left: 40px;
+    }
+
+    /* ── COMPONENT BUTTON ENGINE ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      transition: var(--transition-smooth);
+    }
+
+    .btn:hover {
+      background: var(--bg-surface-hover);
+    }
+
+    .btn-primary {
+      background: var(--brand-accent);
+      color: var(--bg-main);
+      border: transparent;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: #b4f346;
+    }
+
+    /* ── HIGH LEGIBILITY TABLE COMPONENT ── */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background: #151F32;
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+      transition: var(--transition-smooth);
+      cursor: pointer;
+    }
+
+    .data-table tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* ── BADGE ARCHITECTURE ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    
+    .badge-success { background: var(--status-success-bg); color: var(--status-success); }
+    .badge-warning { background: var(--status-warning-bg); color: var(--status-warning); }
+    .badge-danger { background: var(--status-danger-bg); color: var(--status-danger); }
+    .badge-info { background: var(--status-info-bg); color: var(--status-info); }
+
+    /* ── DIALOG/MODAL COMPONENT ENGINE ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-window {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 640px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: modalSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlide {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 24px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      background: #161E2E;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── SYSTEM FEEDBACK INFRASTRUCTURE (TOAST) ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface);
+      border-left: 4px solid var(--brand-accent);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="spinner"></div>
-  <span id="loading-text">Loading…</span>
-</div>
-
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="lp-window">
-    <div class="lp-form-panel">
-      <div class="lp-brand-tag">
-        <div class="lp-logo-mark">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 6C3 4.34315 4.34315 3 6 3H10C11.6569 3 13 4.34315 13 6V10C13 11.6569 11.6569 13 10 13H6C4.34315 13 3 11.6569 3 10V6Z" fill="#EEFA94"/>
-            <path d="M14 14C14 12.8954 14.8954 12 16 12H20C21.1046 12 22 12.8954 22 14V20C22 21.1046 21.1046 22 20 22H16C14.8954 22 14 21.1046 14 20V14Z" fill="#EEFA94" opacity=".6"/>
-            <path d="M3 17C3 15.8954 3.89543 15 5 15H8C9.10457 15 10 15.8954 10 17V19C10 20.1046 9.10457 21 8 21H5C3.89543 21 3 20.1046 3 19V17Z" fill="#EEFA94" opacity=".35"/>
-            <path d="M16 3H20C21.1046 3 22 3.89543 22 5V8C22 9.10457 21.1046 10 20 10H16C14.8954 10 14 9.10457 14 8V5C14 3.89543 14.8954 3 16 3Z" fill="white" opacity=".25"/>
-          </svg>
-        </div>
-        <span class="lp-brand-name">dre<span>co</span></span>
+  <div class="auth-screen" id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo">Dre<span>co</span></div>
+        <p style="color: var(--text-muted); font-size: 14px;">Enterprise Identity Management</p>
       </div>
-      <div class="lp-content-area">
-        <div id="login-main">
-          <div class="lp-header">
-            <h1>Sign in to Portal</h1>
-            <p>Access active candidate pipelines</p>
-          </div>
-          <form onsubmit="event.preventDefault(); doLogin();">
-            <div class="lp-input-group">
-              <label for="username-input">Username</label>
-              <div class="lp-input-wrap">
-                <input type="text" id="username-input" placeholder="e.g. fred" required autocomplete="username">
-              </div>
-            </div>
-            <div class="lp-input-group">
-              <label for="pw-input">Password</label>
-              <div class="lp-input-wrap">
-                <input type="password" id="pw-input" placeholder="••••••••••••" required autocomplete="current-password">
-                <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
-              </div>
-              <span class="lp-forgot" onclick="showForgotPassword()">Forgot Password?</span>
-            </div>
-            <button type="submit" class="lp-submit">Sign In</button>
-          </form>
-          <div class="login-error" id="login-error">Incorrect username or password.</div>
-          <div class="lp-chips">
-            <div class="lp-chip"><i class="ti ti-building"></i> Office LAN</div>
-            <div class="lp-chip"><i class="ti ti-lock"></i> Secure SSL</div>
-          </div>
-        </div>
-        <div id="forgot-section" style="display:none">
-          <div class="lp-header">
-            <h1>Credentials Reset</h1>
-            <p>Enter the administrative recovery code</p>
-          </div>
-          <form onsubmit="event.preventDefault(); submitForgotPassword();">
-            <div class="lp-input-group">
-              <label for="recovery-code-input">Recovery Code</label>
-              <div class="lp-input-wrap">
-                <input type="text" id="recovery-code-input" placeholder="DR-RESET-2025" required>
-              </div>
-            </div>
-            <button type="submit" class="lp-submit">Verify</button>
-          </form>
-          <div class="login-error" id="forgot-error" style="display:none"></div>
-          <div class="recovery-result" id="forgot-result" style="display:none"></div>
-          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">← Back to login</span>
-        </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="auth-username" class="form-control" placeholder="Enter username...">
       </div>
-      <div class="lp-footer">
-        <span>Dreco v4.0</span>
-        <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label>Password</label>
+        <input type="password" id="auth-password" class="form-control" placeholder="••••••••">
       </div>
-    </div>
-    <div class="lp-media">
-      <div class="lp-media-overlay"></div>
-      <div class="lp-widget-task">
-        <h4>Professional Job Review</h4>
-        <p>Deployment Schedule: 09:30am</p>
-      </div>
-      <div class="lp-bottom">
-        <div class="lp-cal">
-          <div class="lp-cal-day"><div class="dl">Sun</div><div class="dn">22</div></div>
-          <div class="lp-cal-day"><div class="dl">Mon</div><div class="dn">23</div></div>
-          <div class="lp-cal-day act"><div class="dl">Tue</div><div class="dn">24</div></div>
-          <div class="lp-cal-day"><div class="dl">Wed</div><div class="dn">25</div></div>
-          <div class="lp-cal-day"><div class="dl">Thu</div><div class="dn">26</div></div>
-          <div class="lp-cal-day"><div class="dl">Fri</div><div class="dn">27</div></div>
-          <div class="lp-cal-day"><div class="dl">Sat</div><div class="dn">28</div></div>
-        </div>
-        <div class="lp-summary">
-          <h4>LB Candidate Processing</h4>
-          <p>Passports Tracked: 98 Active</p>
-          <div class="lp-avatars">
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80')"></div>
-          </div>
-        </div>
-      </div>
+      <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="handleAuthLogin()">
+        Authenticate <i class="ti ti-arrow-right"></i>
+      </button>
     </div>
   </div>
-</div>
 
-<!-- APP -->
-<div id="app">
-  <div class="app-layout">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-top">
-        <a class="sidebar-logo" href="#">
-          <div class="sidebar-logo-mark">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 6C3 4.34315 4.34315 3 6 3H10C11.6569 3 13 4.34315 13 6V10C13 11.6569 11.6569 13 10 13H6C4.34315 13 3 11.6569 3 10V6Z" fill="#18191B"/>
-              <path d="M14 14C14 12.8954 14.8954 12 16 12H20C21.1046 12 22 12.8954 22 14V20C22 21.1046 21.1046 22 20 22H16C14.8954 22 14 21.1046 14 20V14Z" fill="#18191B" opacity=".55"/>
-              <path d="M3 17C3 15.8954 3.89543 15 5 15H8C9.10457 15 10 15.8954 10 17V19C10 20.1046 9.10457 21 8 21H5C3.89543 21 3 20.1046 3 19V17Z" fill="#18191B" opacity=".3"/>
-              <path d="M16 3H20C21.1046 3 22 3.89543 22 5V8C22 9.10457 21.1046 10 20 10H16C14.8954 10 14 9.10457 14 8V5C14 3.89543 14.8954 3 16 3Z" fill="white" opacity=".4"/>
-            </svg>
-          </div>
-          <span class="sidebar-logo-text">dre<span>co</span></span>
-        </a>
-        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
-          <i class="ti ti-layout-sidebar-left-collapse"></i>
+  <div class="app-container">
+    
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-brand">Dre<span>co</span></div>
+      <nav class="sidebar-menu">
+        <div class="nav-item active" id="nav-candidates" onclick="switchView('candidates')">
+          <i class="ti ti-users"></i> <span>Pipeline View</span>
+        </div>
+        <div class="nav-item" id="nav-refunds" onclick="switchView('refunds')">
+          <i class="ti ti-receipt-refund"></i> <span>Accounting Ledger</span>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="avatar" id="user-avatar">--</div>
+        <div style="min-width: 0; flex: 1;">
+          <p style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="user-display-name">Guest Profile</p>
+          <p style="font-size: 11px; color: var(--text-muted);" id="user-display-role">Session Scope</p>
+        </div>
+        <button class="btn" style="padding: 6px; border: transparent;" onclick="logoutSession()" title="Logout">
+          <i class="ti ti-logout" style="color: var(--status-danger);"></i>
         </button>
-      </div>
-      <div class="sidebar-divider"></div>
-
-      <!-- USER CARD -->
-      <div class="sidebar-user-card">
-        <div class="suc-avatar" id="suc-avatar">—</div>
-        <div class="suc-info">
-          <div class="suc-name" id="suc-name">—</div>
-          <div class="suc-org">Destiny Recruit Consults</div>
-        </div>
-      </div>
-      <div class="sidebar-divider"></div>
-
-      <div class="nav-section-label">Main</div>
-      <a class="nav-item active" id="nav-dash" data-title="Dashboard" onclick="switchTab('dash')">
-        <i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span>
-      </a>
-      <a class="nav-item" id="nav-pro" data-title="Professional" onclick="switchTab('pro')">
-        <i class="ti ti-briefcase"></i><span class="nav-item-label">Professional</span>
-      </a>
-      <a class="nav-item" id="nav-lb" data-title="LB Jobs" onclick="switchTab('lb')">
-        <i class="ti ti-home"></i><span class="nav-item-label">LB Jobs</span>
-      </a>
-
-      <div class="nav-spacer"></div>
-
-      <div class="sidebar-user">
-        <div class="sidebar-avatar" id="sidebar-avatar">—</div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name" id="sidebar-user-name">—</div>
-          <div class="sidebar-user-role" id="sidebar-user-role">Staff</div>
-        </div>
-        <button class="sidebar-logout" onclick="doLogout()" title="Sign out"><i class="ti ti-logout"></i></button>
       </div>
     </aside>
 
-    <!-- MAIN -->
-    <div class="main-area">
-
-      <!-- TOPBAR -->
-      <div class="topbar">
-        <span class="topbar-title" id="topbar-title">Dashboard</span>
-        <div class="topbar-search">
-          <i class="ti ti-search"></i>
-          <input type="text" placeholder="Search candidates…" id="global-search" oninput="onGlobalSearch()">
+    <main class="main-workspace">
+      <header class="top-bar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <button class="btn" style="padding: 6px;" onclick="toggleSidebarCollapse()" title="Toggle Canvas Split">
+            <i class="ti ti-layout-sidebar"></i>
+          </button>
+          <h2 id="view-title" style="font-size: 18px; font-weight: 600;">Deployment Operations Matrix</h2>
         </div>
-        <div class="save-dot" id="save-dot"></div>
-        <span class="save-label" id="save-label">Saved</span>
-        <div class="profile-wrap">
-          <div class="topbar-user" onclick="toggleProfileDropdown(event)">
-            <div class="topbar-avatar" id="topbar-avatar">—</div>
-            <span class="topbar-user-name" id="user-chip">—</span>
-            <i class="ti ti-chevron-down topbar-user-caret" id="profile-caret"></i>
-          </div>
-          <div class="profile-dropdown" id="profile-dropdown">
-            <div class="pd-header">
-              <div class="pd-avatar" id="pd-avatar">—</div>
-              <div>
-                <div class="pd-name" id="pd-name">—</div>
-                <div class="pd-role-badge" id="pd-role-badge"><i class="ti ti-shield-check"></i> <span id="pd-role-text">Staff</span></div>
-              </div>
-            </div>
-            <div class="pd-section">Change username</div>
-            <div class="pd-field">
-              <label>New username</label>
-              <input type="text" id="pd-new-username" placeholder="e.g. fred_admin" autocomplete="off">
-            </div>
-            <div class="pd-section">Change password</div>
-            <div class="pd-field">
-              <label>Current password</label>
-              <input type="password" id="pd-current-pw" placeholder="Enter current password">
-            </div>
-            <div class="pd-field">
-              <label>New password</label>
-              <input type="password" id="pd-new-pw" placeholder="Enter new password">
-            </div>
-            <div class="pd-field">
-              <label>Confirm new password</label>
-              <input type="password" id="pd-confirm-pw" placeholder="Repeat new password">
-            </div>
-            <div class="pd-msg" id="pd-msg"></div>
-            <div class="pd-actions">
-              <button class="pd-save" onclick="saveProfileChanges()">Save changes</button>
-              <button class="pd-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Sign out</button>
-            </div>
-          </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn" onclick="syncCloudDatastore()"><i class="ti ti-refresh"></i> Synchronize</button>
         </div>
-      </div>
+      </header>
 
-      <!-- CONTENT -->
-      <div class="content-area">
-
-        <!-- ── DASHBOARD ── -->
-        <div id="dash-section">
-          <div class="welcome-banner" id="welcome-banner">
-            <div class="wb-left">
-              <h2 id="wb-greeting">Welcome back</h2>
-              <p>Here's what's happening in your pipelines today</p>
-            </div>
-            <div class="wb-right" id="wb-stats"></div>
+      <section class="workspace-view" id="view-candidates-ctx">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-title">Pipeline Envelope</div>
+            <div class="metric-value" id="m-total-candidates">0</div>
           </div>
-
-          <div class="section-eyebrow">Pipeline overview</div>
-          <div class="pipeline-cards" id="dash-pipeline-cards"></div>
-
-          <div class="split-65-35">
-            <div>
-              <div class="dash-2col" id="dash-cards-grid"></div>
-            </div>
-            <div class="right-col" id="dash-right-col"></div>
+          <div class="metric-card">
+            <div class="metric-title">Visa Issuances</div>
+            <div class="metric-value" id="m-visas-issued" style="color: var(--status-success);">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Departed Roster</div>
+            <div class="metric-value" id="m-departed" style="color: var(--brand-accent);">0</div>
           </div>
         </div>
 
-        <!-- ── PROFESSIONAL ── -->
-        <div id="pro-section" style="display:none">
-          <div class="metrics-strip" id="pro-metrics"></div>
-          <div class="panel">
-            <div class="panel-header">
-              <span class="panel-title">Professional candidates</span>
-              <div class="panel-actions">
-                <div class="pill-tabs" id="pro-stage-pills"></div>
-                <div class="search-wrap">
-                  <i class="ti ti-search"></i>
-                  <input type="text" id="pro-search" placeholder="Search…" oninput="renderPro()">
-                </div>
-                <select class="toolbar-select" id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
-                <button class="btn export" onclick="exportCSV('pro')"><i class="ti ti-download"></i> Export</button>
-                <button class="btn" onclick="addCustomStage('pro')" title="Add stage"><i class="ti ti-settings"></i></button>
-                <button class="btn primary" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
-              </div>
-            </div>
-            <div class="table-scroll">
-              <table>
-                <thead><tr>
-                  <th>#</th><th>Full name</th><th>Position</th><th>Company</th><th>Country</th>
-                  <th>Stage</th><th>Commission</th><th>Paid</th><th>Balance</th><th>Docs</th><th></th>
-                </tr></thead>
-                <tbody id="pro-tbody"><tr><td colspan="11"><div class="empty">Loading…</div></td></tr></tbody>
-              </table>
-            </div>
-            <div class="click-hint"><i class="ti ti-hand-click"></i> Click any row to edit that candidate</div>
-            <div class="pagination" id="pro-pagination"></div>
+        <div class="control-row">
+          <div class="search-input-wrapper">
+            <i class="ti ti-search"></i>
+            <input type="text" id="search-candidate" class="form-control" placeholder="Search parameters..." oninput="evaluateDatasetFilters()">
+          </div>
+          <button class="btn btn-primary" onclick="triggerCandidateCreation()"><i class="ti ti-plus"></i> Standard Entry</button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Candidate Profile</th>
+                <th>Passport ID</th>
+                <th>Assigned Position</th>
+                <th>Target Entity</th>
+                <th>Operational Stage</th>
+                <th>Status Flags</th>
+              </tr>
+            </thead>
+            <tbody id="candidate-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="workspace-view" id="view-refunds-ctx" style="display: none;">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-title">Aggregate Liabilities</div>
+            <div class="metric-value" id="m-refund-liabilities">0 AED</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Disbursed Balance</div>
+            <div class="metric-value" id="m-refund-disbursed" style="color: var(--status-info);">0 AED</div>
           </div>
         </div>
 
-        <!-- ── LB JOBS ── -->
-        <div id="lb-section" style="display:none">
-          <div class="metrics-strip" id="lb-metrics"></div>
-          <div class="panel">
-            <div class="panel-header">
-              <span class="panel-title">LB candidates</span>
-              <div class="panel-actions">
-                <div class="pill-tabs" id="lb-travel-pills">
-                  <button class="pill-tab active" onclick="setLBPill('travel','',this)">All</button>
-                  <button class="pill-tab" onclick="setLBPill('travel','TRAVELLED',this)">Travelled</button>
-                  <button class="pill-tab" onclick="setLBPill('travel','NOT YET',this)">Not yet</button>
-                  <button class="pill-tab" onclick="setLBPill('travel','NOT TRAVELLED',this)">Did not travel</button>
-                </div>
-              </div>
-            </div>
-            <!-- PP Status pill row -->
-            <div style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-              <span style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Passport:</span>
-              <div class="pill-tabs" id="lb-pp-pills">
-                <button class="pill-tab active" onclick="setLBPill('pp','',this)">All</button>
-                <button class="pill-tab" onclick="setLBPill('pp','APPLIED',this)">Applied</button>
-                <button class="pill-tab" onclick="setLBPill('pp','NOT APPLIED',this)">Not applied</button>
-                <button class="pill-tab" onclick="setLBPill('pp','HAD PP',this)">Had PP</button>
-                <button class="pill-tab" onclick="setLBPill('pp','PUSHED',this)">Pushed</button>
-              </div>
-              <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-                <div class="search-wrap">
-                  <i class="ti ti-search"></i>
-                  <input type="text" id="lb-search" placeholder="Search…" oninput="renderLB()">
-                </div>
-                <select class="toolbar-select" id="lb-refund-f" onchange="renderLB()">
-                  <option value="">All refund statuses</option>
-                  <option value="complete">Complete</option>
-                  <option value="incomplete">Incomplete</option>
-                  <option value="RETURNED">Returned</option>
-                  <option value="N/A">N/A (HAD PP)</option>
-                </select>
-                <button class="btn export" onclick="exportCSV('lb')"><i class="ti ti-download"></i> Export</button>
-                <button class="btn" onclick="addCustomStage('lb')" title="Add status"><i class="ti ti-settings"></i></button>
-                <button class="btn primary" onclick="openLBForm()"><i class="ti ti-plus"></i> Add</button>
-              </div>
-            </div>
-            <div class="table-scroll">
-              <table>
-                <thead><tr>
-                  <th>#</th><th>Full name</th><th>Phone</th><th>Passport</th>
-                  <th>Travel status</th><th>Travel date</th><th>To refund</th>
-                  <th>Refunded</th><th>Balance</th><th>Refund status</th><th>Docs</th><th></th>
-                </tr></thead>
-                <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loading…</div></td></tr></tbody>
-              </table>
-            </div>
-            <div class="click-hint"><i class="ti ti-hand-click"></i> Click any row to edit that candidate</div>
-            <div class="pagination" id="lb-pagination"></div>
+        <div class="control-row">
+          <div class="search-input-wrapper">
+            <i class="ti ti-search"></i>
+            <input type="text" id="search-refund" class="form-control" placeholder="Filter ledger elements..." oninput="evaluateDatasetFilters()">
           </div>
         </div>
 
-      </div><!-- /content-area -->
-    </div><!-- /main-area -->
-  </div><!-- /app-layout -->
-</div><!-- /app -->
-
-<!-- PRO MODAL -->
-<div class="modal-bg" id="pro-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="pro-modal-title">Add professional candidate</h3>
-      <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
-    </div>
-    <div class="modal-tabs">
-      <button class="modal-tab active" onclick="switchModalTab('pro','details',this)">Details</button>
-      <button class="modal-tab" onclick="switchModalTab('pro','pipeline',this)">Pipeline</button>
-      <button class="modal-tab" onclick="switchModalTab('pro','commission',this)">Commission</button>
-      <button class="modal-tab" onclick="switchModalTab('pro','timeline',this)">Timeline</button>
-    </div>
-    <div class="modal-body">
-      <div id="pro-tab-details">
-        <div class="form-grid">
-          <div class="field form-full"><label>Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
-          <div class="field"><label>Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
-          <div class="field"><label>Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
-          <div class="field"><label>Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
-          <div class="field"><label>Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
-          <div class="field"><label>Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
-          <div class="field"><label>Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
-          <div class="field"><label>Date submitted</label><input type="date" id="pf-submitted"></div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Beneficiary Identity</th>
+                <th>Passport Token</th>
+                <th>Liability Baseline</th>
+                <th>Tranche 1 Status</th>
+                <th>Tranche 2 Status</th>
+                <th>Residual Obligation</th>
+              </tr>
+            </thead>
+            <tbody id="refund-tbody"></tbody>
+          </table>
         </div>
-      </div>
-      <div id="pro-tab-pipeline" style="display:none">
-        <div class="form-grid">
-          <div class="field"><label>Interview / selection date</label><input type="date" id="pf-interview"></div>
-          <div class="field"><label>Offer letter date</label><input type="date" id="pf-ol"></div>
-          <div class="field"><label>MOL date</label><input type="date" id="pf-mol"></div>
-          <div class="field"><label>Visa date</label><input type="date" id="pf-visa"></div>
-          <div class="field form-full"><label>Travel date</label><input type="date" id="pf-travel"></div>
-        </div>
-      </div>
-      <div id="pro-tab-commission" style="display:none">
-        <div class="form-grid">
-          <div class="field"><label>Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
-          <div class="field"><label>Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
-        </div>
-      </div>
-      <div id="pro-tab-timeline" style="display:none">
-        <div id="pro-form-timeline"><div class="tl-empty">Save the candidate first to see timeline.</div></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('pro-modal')">Cancel</button>
-      <button class="btn primary" onclick="savePro()"><i class="ti ti-device-floppy"></i> Save candidate</button>
-    </div>
+      </section>
+    </main>
   </div>
-</div>
 
-<!-- LB MODAL -->
-<div class="modal-bg" id="lb-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="lb-modal-title">Add LB candidate</h3>
-      <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
-    </div>
-    <div class="modal-tabs">
-      <button class="modal-tab active" onclick="switchModalTab('lb','details',this)">Details</button>
-      <button class="modal-tab" onclick="switchModalTab('lb','refunds',this)">Refunds</button>
-      <button class="modal-tab" onclick="switchModalTab('lb','timeline',this)">Timeline</button>
-    </div>
-    <div class="modal-body">
-      <div id="lb-tab-details">
+  <div class="modal-overlay" id="candidate-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 style="font-weight: 600;" id="candidate-modal-title">Operational Dossier Form</h3>
+        <button class="btn" style="padding: 4px; border: transparent; background: transparent;" onclick="closeActiveModal('candidate-modal')">
+          <i class="ti ti-x" style="font-size: 20px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="f-cand-id">
         <div class="form-grid">
-          <div class="field form-full"><label>Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
-          <div class="field"><label>Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
-          <div class="field"><label>Passport status *</label>
-            <select id="lf-pp">
-              <option value="APPLIED">Applied</option>
-              <option value="HAD PP">Had PP</option>
-              <option value="NOT APPLIED">Not applied</option>
-              <option value="PUSHED">Pushed</option>
+          <div class="form-group full-width">
+            <label>Legal Identification Name</label>
+            <input type="text" id="f-cand-name" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Passport Serial Token</label>
+            <input type="text" id="f-cand-pp" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Contact Number Vector</label>
+            <input type="text" id="f-cand-phone" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Designated Operational Craft</label>
+            <input type="text" id="f-cand-position" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Employing Enterprise Grid</label>
+            <input type="text" id="f-cand-company" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Pipeline Milestone Group</label>
+            <select id="f-cand-stage" class="form-control">
+              <option value="PENDING OFFER LETTER">PENDING OFFER LETTER</option>
+              <option value="OFFER LETTER SIGNED">OFFER LETTER SIGNED</option>
+              <option value="MOL APPLIED">MOL APPLIED</option>
+              <option value="MOL ISSUED">MOL ISSUED</option>
+              <option value="VISA APPLIED">VISA APPLIED</option>
+              <option value="VISA ISSUED">VISA ISSUED</option>
+              <option value="TRAVELLED">TRAVELLED</option>
+              <option value="CANCELLED">CANCELLED</option>
             </select>
           </div>
-          <div class="field"><label>Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
-          <div class="field"><label>Travel date</label><input type="date" id="lf-tdate"></div>
-          <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+          <div class="form-group">
+            <label>Geographic Sector Target</label>
+            <input type="text" id="f-cand-country" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Offer Letter ID</label>
+            <input type="text" id="f-cand-ol" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>MOL Reference ID</label>
+            <input type="text" id="f-cand-mol" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Visa Allocation Token</label>
+            <input type="text" id="f-cand-visa" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Flight Tracking Coordinates</label>
+            <input type="text" id="f-cand-travel" class="form-control">
+          </div>
         </div>
       </div>
-      <div id="lb-tab-refunds" style="display:none">
+      <div class="modal-footer">
+        <button class="btn" onclick="closeActiveModal('candidate-modal')">Discard Changes</button>
+        <button class="btn btn-primary" onclick="commitCandidateMutation()">Commit Fields</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="refund-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 style="font-weight: 600;">Financial Liquidation Matrix</h3>
+        <button class="btn" style="padding: 4px; border: transparent; background: transparent;" onclick="closeActiveModal('refund-modal')">
+          <i class="ti ti-x" style="font-size: 20px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="f-ref-id">
         <div class="form-grid">
-          <div class="field form-full"><label>Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
-          <div class="field"><label>1st payment date</label><input type="date" id="lf-r1date"></div>
-          <div class="field"><label>1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
-          <div class="field"><label>2nd payment date</label><input type="date" id="lf-r2date"></div>
-          <div class="field"><label>2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+          <div class="form-group full-width">
+            <label>Beneficiary Baseline Matrix</label>
+            <input type="text" id="f-ref-name" class="form-control" readonly style="opacity: 0.6;">
+          </div>
+          <div class="form-group">
+            <label>Base Target Liability (AED)</label>
+            <input type="number" id="f-ref-torefund" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Passport State Flag</label>
+            <input type="text" id="f-ref-ppstatus" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Tranche 1 Settlement Timestamp</label>
+            <input type="text" id="f-ref-r1date" class="form-control" placeholder="YYYY-MM-DD">
+          </div>
+          <div class="form-group">
+            <label>Tranche 1 Quantum Apportioned</label>
+            <input type="number" id="f-ref-r1amt" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Tranche 2 Settlement Timestamp</label>
+            <input type="text" id="f-ref-r2date" class="form-control" placeholder="YYYY-MM-DD">
+          </div>
+          <div class="form-group">
+            <label>Tranche 2 Quantum Apportioned</label>
+            <input type="number" id="f-ref-r2amt" class="form-control">
+          </div>
+          <div class="form-group full-width">
+            <label>Audit Statement Log</label>
+            <input type="text" id="f-ref-notes" class="form-control">
+          </div>
         </div>
       </div>
-      <div id="lb-tab-timeline" style="display:none">
-        <div id="lb-form-timeline"><div class="tl-empty">Save candidate first to see timeline.</div></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('lb-modal')">Cancel</button>
-      <button class="btn primary" onclick="saveLB()"><i class="ti ti-device-floppy"></i> Save candidate</button>
-    </div>
-  </div>
-</div>
-
-<!-- DOCS MODAL -->
-<div class="modal-bg" id="docs-modal">
-  <div class="modal" style="max-width:460px">
-    <div class="modal-header">
-      <h3 id="docs-modal-title">Documents</h3>
-      <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:12px;color:var(--text-3);margin-bottom:14px">
-        Upload all of this candidate's documents into one Google Drive folder, then paste the share link below.
-        <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link →</a>
-      </p>
-      <div class="field">
-        <label>Documents folder link</label>
-        <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link…" oninput="onDocsLinkInput()">
-      </div>
-    </div>
-    <div class="modal-footer" style="justify-content:space-between">
-      <button class="doc-open-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()"><i class="ti ti-folder-open"></i> View documents</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn" onclick="closeModal('docs-modal')">Close</button>
-        <button class="btn primary" onclick="saveDocs()"><i class="ti ti-device-floppy"></i> Save</button>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeActiveModal('refund-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="commitRefundMutation()">Apply Ledger Correction</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toast-msg">Saved</span></div>
+  <div class="toast" id="system-toast-layer">
+    <i class="ti ti-info-circle" id="toast-icon-handle"></i>
+    <span id="toast-message-handle">Transaction completed cleanly.</span>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="data.js"></script>
-<script src="app.js"></script>
+  <script src="data (2).js"></script>
+  <script src="app (6).js"></script>
 </body>
 </html>
