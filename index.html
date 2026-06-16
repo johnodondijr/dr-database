@@ -40,7 +40,9 @@
       --shadow-lg:0 16px 48px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
       --sidebar-w:224px;--sidebar-w-collapsed:64px;
     }
-    body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh;overflow:hidden}
+    body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh}
+    /* The app shell itself clips to viewport; login screen can scroll freely */
+    #app{overflow:hidden}
 
     /* ── TYPOGRAPHY SYSTEM ── */
     /* Satoshi for all display/heading text */
@@ -113,8 +115,8 @@
     @media(max-width:900px){.lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}.lp-media{display:none}.lp-form-panel{padding:40px 30px}}
 
     /* ── APP SHELL ── */
-    #app{display:none;height:100vh}
-    .app-layout{display:flex;height:100vh;overflow:hidden}
+    #app{display:none;height:100vh;height:100dvh}
+    .app-layout{display:flex;height:100%;overflow:hidden}
 
     /* ── SIDEBAR ── */
     .sidebar{
@@ -159,7 +161,7 @@
     .sidebar-logout i{font-size:15px}
 
     /* ── MAIN AREA ── */
-    .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+    .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0}
 
     /* ── TOPBAR ── */
     .topbar{height:58px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;flex-shrink:0}
@@ -450,9 +452,172 @@
     .toast.error{background:var(--red)}
     .toast.error i{color:#fff}
 
-    /* ── RESPONSIVE ── */
-    @media(max-width:1100px){.split-65-35{grid-template-columns:1fr}.right-col{display:none}}
-    @media(max-width:768px){.pipeline-cards{grid-template-columns:repeat(2,1fr)}.dash-2col{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.content-area{padding:14px}.sidebar{width:var(--sidebar-w-collapsed)}.sidebar-logo-text,.sidebar-user-info,.nav-item-label,.nav-section-label,.sidebar-logout{display:none}}
+    /* ══════════════════════════════════════════════
+       RESPONSIVE — mobile-first progressive system
+       ══════════════════════════════════════════════ */
+
+    /* ── 1080px: collapse right sidebar panel into single column ── */
+    @media(max-width:1080px){
+      .split-65-35{grid-template-columns:1fr}
+      /* right-col becomes a horizontal scrollable strip below the main cards */
+      .right-col{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(220px,1fr));
+        gap:12px;
+        overflow-x:auto;
+        padding-bottom:4px;
+      }
+      .right-col::-webkit-scrollbar{height:4px}
+      .right-col::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:4px}
+    }
+
+    /* ── 860px: tablet — tighten spacing, 2-col dash, compress header ── */
+    @media(max-width:860px){
+      .content-area{padding:16px}
+      .pipeline-cards{grid-template-columns:repeat(2,1fr);gap:10px}
+      .dash-2col{grid-template-columns:1fr 1fr;gap:10px}
+      .metrics-strip{grid-template-columns:repeat(3,1fr);gap:10px}
+      .reports-grid{grid-template-columns:1fr}
+      /* panel header: stack pills + actions */
+      .panel-header{flex-direction:column;align-items:flex-start;gap:10px}
+      .panel-actions{width:100%;flex-wrap:wrap}
+      /* search inputs full width */
+      .search-wrap{flex:1;min-width:0}
+      .search-wrap input{min-width:0;width:100%}
+      /* topbar search hidden — use panel-level search instead */
+      .topbar-search{display:none}
+      /* topbar: keep title + user pill tight */
+      .topbar{padding:0 14px;gap:10px}
+      .topbar-title{font-size:14px}
+    }
+
+    /* ── 640px: mobile — bottom nav, full-width layouts ── */
+    @media(max-width:640px){
+      /* body must scroll on login but app uses its own scroll */
+      body{overflow-x:hidden}
+
+      /* hide desktop sidebar entirely */
+      .sidebar{display:none !important}
+
+      /* shrink topbar for mobile */
+      .topbar{height:52px;padding:0 14px;gap:8px}
+      .topbar-title{font-size:13px;font-weight:800;letter-spacing:-.02em}
+      .topbar-search{display:none}
+      .save-dot,.save-label{display:none}
+
+      /* content gets bottom padding for the nav bar */
+      .content-area{padding:14px 12px 80px}
+
+      /* pipeline cards: 1 col */
+      .pipeline-cards{grid-template-columns:1fr;gap:8px;margin-bottom:14px}
+
+      /* welcome banner: compact */
+      .welcome-banner{padding:16px;flex-direction:column;align-items:flex-start;gap:12px}
+      .wb-right{width:100%;justify-content:space-between}
+      .wb-stat{flex:1;padding:8px 10px}
+      .wb-stat-val{font-size:16px}
+      .wb-stat-label{font-size:9px}
+      .wb-left h2{font-size:18px}
+
+      /* metrics strip: 2 col grid */
+      .metrics-strip{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+      .metric-card{padding:12px 14px}
+      .metric-val{font-size:22px}
+      .metric-val.sm{font-size:14px}
+      .metric-label{font-size:9px;margin-bottom:4px}
+
+      /* dash cards: full width single col */
+      .dash-2col{grid-template-columns:1fr;gap:8px;margin-bottom:8px}
+
+      /* right col: vertical stack */
+      .right-col{display:flex;flex-direction:column;gap:8px;overflow-x:visible;padding-bottom:0}
+
+      /* split: single col */
+      .split-65-35{grid-template-columns:1fr;gap:8px}
+
+      /* panel header: stack */
+      .panel-header{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}
+      .panel-actions{width:100%;flex-wrap:wrap;gap:6px}
+      .search-wrap{flex:1 1 100%;order:1}
+      .search-wrap input{min-width:0;width:100%}
+      .pill-tabs{order:0;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}
+      .pill-tabs::-webkit-scrollbar{height:0}
+      .pill-tab{flex-shrink:0}
+
+      /* toolbar buttons: icon-only on small screens where needed */
+      .btn.export span,.btn.export-label{display:none}
+
+      /* table: allow scroll with sticky first column */
+      .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      table{min-width:480px}
+
+      /* modals: full-screen on mobile */
+      .modal-bg{padding:.5rem}
+      .modal{border-radius:16px;max-height:92vh;overflow-y:auto}
+      .modal-body{padding:14px}
+      .modal-header{padding:14px 16px}
+      .modal-footer{padding:10px 14px;flex-wrap:wrap}
+      .form-grid{grid-template-columns:1fr}
+
+      /* kanban: narrow cards */
+      .kanban-col{flex:0 0 200px}
+
+      /* reports grid: single col */
+      .reports-grid{grid-template-columns:1fr}
+      .rev-grid{grid-template-columns:1fr 1fr}
+
+      /* calendar: shrink day cells */
+      .cal-day{min-height:56px;padding:3px 4px}
+      .cal-day-num{font-size:10px;margin-bottom:2px}
+      .cal-event{font-size:8px;padding:1px 3px}
+      .cal-header-cell{font-size:8px;padding:7px 0}
+
+      /* profile dropdown: full width */
+      .profile-dropdown{width:calc(100vw - 28px);right:-10px}
+
+      /* pagination: compact */
+      .pagination{flex-direction:column;gap:6px;align-items:flex-start;padding:8px 12px}
+    }
+
+    /* ── BOTTOM NAV BAR (mobile only) ── */
+    .bottom-nav{
+      display:none;
+      position:fixed;bottom:0;left:0;right:0;
+      height:60px;background:var(--ink);
+      border-top:1px solid rgba(255,255,255,.08);
+      z-index:100;
+      align-items:stretch;
+      padding:0 4px;
+      /* safe area for notched phones */
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    @media(max-width:640px){
+      .bottom-nav{display:flex}
+    }
+    .bottom-nav-item{
+      flex:1;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:3px;
+      color:rgba(255,255,255,.35);
+      cursor:pointer;border:none;background:none;
+      font-family:inherit;font-size:9px;font-weight:700;
+      letter-spacing:.04em;text-transform:uppercase;
+      transition:color .15s;padding:6px 2px;
+      border-radius:0;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .bottom-nav-item i{font-size:20px;line-height:1}
+    .bottom-nav-item.active{color:var(--accent)}
+    .bottom-nav-item span{font-size:9px;line-height:1}
+
+    /* ── Login screen mobile ── */
+    @media(max-width:640px){
+      #login-screen{padding:0;background:#fff}
+      .lp-window{border-radius:0;height:100dvh;height:100vh;box-shadow:none;border:none}
+      .lp-media{display:none}
+      .lp-form-panel{padding:36px 24px 28px}
+      .lp-header h1{font-size:22px}
+      .lp-chips{flex-direction:column;gap:8px}
+    }
     /* ── KANBAN ── */
     .kanban-col{flex:0 0 240px;background:var(--gray-light);border-radius:var(--radius-xl);padding:12px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--border)}
     .kanban-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;padding:0 2px}
@@ -1108,6 +1273,28 @@
     </div>
   </div>
 </div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bottom-nav-item active" id="bnav-dash" onclick="switchTab('dash');setBottomNav('dash')">
+    <i class="ti ti-layout-dashboard"></i><span>Home</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-pro" onclick="switchTab('pro');setBottomNav('pro')">
+    <i class="ti ti-briefcase"></i><span>Pro</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-lb" onclick="switchTab('lb');setBottomNav('lb')">
+    <i class="ti ti-home"></i><span>LB</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-kanban" onclick="switchTab('kanban');setBottomNav('kanban')">
+    <i class="ti ti-layout-columns"></i><span>Board</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-calendar" onclick="switchTab('calendar');setBottomNav('calendar')">
+    <i class="ti ti-calendar"></i><span>Cal</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-reports" onclick="switchTab('reports');setBottomNav('reports')">
+    <i class="ti ti-chart-bar"></i><span>Reports</span>
+  </button>
+</nav>
 
 <!-- TOAST -->
 <div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toast-msg">Saved</span></div>
