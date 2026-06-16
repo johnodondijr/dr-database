@@ -548,11 +548,11 @@ function renderDash(){
       <div class="spotlight-amount">KES ${totalComm.toLocaleString()}</div>
       <div class="spotlight-sub">Total billed</div>
       <div class="spotlight-row"><span class="spotlight-row-label">Collected</span><span class="spotlight-row-val" style="color:#6FCF97">KES ${totalPaid.toLocaleString()}</span></div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val" style="color:var(--gold)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val" style="color:var(--lime)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
       <div class="spotlight-section">LB Jobs</div>
       <div class="spotlight-amount">$${lbFees}</div>
       <div class="spotlight-sub">Total fees collected</div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val" style="color:var(--gold)">$${lbOwed-lbPaid}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val" style="color:var(--lime)">$${lbOwed-lbPaid}</span></div>
       <div class="spotlight-row"><span class="spotlight-row-label">Incomplete refunds</span><span class="spotlight-row-val" style="color:#FC8181">${lbIncomplete}</span></div>
     </div>
     <div class="due-panel">
