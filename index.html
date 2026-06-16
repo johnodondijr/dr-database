@@ -5,11 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dreco</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Satoshi via Fontshare CDN -->
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,800,900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
+      --font-heading:'Satoshi',system-ui,sans-serif;
+      --font-body:'Inter',system-ui,sans-serif;
       /* ── NEW PALETTE (cp1): lime-yellow accent, near-black, sage green ── */
       --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
       --accent-light:#F7FDE0;--accent-lighter:#FBFEF2;
@@ -35,7 +40,20 @@
       --shadow-lg:0 16px 48px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
       --sidebar-w:224px;--sidebar-w-collapsed:64px;
     }
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh;overflow:hidden}
+    body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh;overflow:hidden}
+
+    /* ── TYPOGRAPHY SYSTEM ── */
+    /* Satoshi for all display/heading text */
+    h1,h2,h3,h4,h5,h6,
+    .lp-brand-name,.lp-header h1,.wb-left h2,
+    .topbar-title,.panel-title,.modal-header h3,
+    .metric-val,.p-card-count,.spotlight-amount,
+    .wb-stat-val,.rev-cell-val,.kanban-col-title,
+    .kanban-card-name,.report-card-title,
+    .sidebar-logo-text,.pd-name,
+    .suc-name,.nav-section-label {
+      font-family:var(--font-heading);
+    }
 
     /* ── LOADING ── */
     .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:13px;color:var(--text-2)}
@@ -50,21 +68,21 @@
     .lp-brand-tag{align-self:flex-start;display:flex;align-items:center;gap:10px}
     .lp-logo-mark{width:36px;height:36px;background:var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .lp-logo-mark svg{width:22px;height:22px}
-    .lp-brand-name{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+    .lp-brand-name{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.04em;font-family:var(--font-heading)}
     .lp-brand-name span{color:var(--accent-dark)}
     .lp-content-area{max-width:360px;width:100%;margin:0 auto}
     .lp-header{margin-bottom:32px;text-align:center}
-    .lp-header h1{font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin-bottom:6px}
+    .lp-header h1{font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-.04em;margin-bottom:6px;font-family:var(--font-heading)}
     .lp-header p{font-size:14px;color:var(--text-3);font-weight:500}
     .lp-input-group{margin-bottom:18px;text-align:left}
     .lp-input-group label{display:block;font-size:11px;font-weight:700;color:var(--text-3);margin-left:4px;margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em}
     .lp-input-wrap{position:relative;display:flex;align-items:center}
-    .lp-input-wrap input{width:100%;height:48px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:0 22px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;color:var(--ink);transition:all .2s}
+    .lp-input-wrap input{width:100%;height:48px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:0 22px;font-family:var(--font-body);font-size:14px;font-weight:500;color:var(--ink);transition:all .2s}
     .lp-input-wrap input:focus{outline:none;border-color:var(--accent-dark);box-shadow:0 0 0 4px rgba(200,214,32,.15);background:#fff}
     .lp-pw-toggle{position:absolute;right:16px;background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;line-height:1}
     .lp-forgot{display:block;text-align:right;font-size:12px;color:var(--text-3);margin-top:6px;margin-right:4px;font-weight:500;cursor:pointer}
     .lp-forgot:hover{color:var(--ink);text-decoration:underline}
-    .lp-submit{width:100%;height:50px;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;letter-spacing:-.01em;transition:all .2s;box-shadow:0 4px 16px rgba(24,25,27,.18)}
+    .lp-submit{width:100%;height:50px;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;letter-spacing:-.01em;transition:all .2s;box-shadow:0 4px 16px rgba(24,25,27,.18)}
     .lp-submit:hover{background:#2a2b2e;transform:translateY(-1px);box-shadow:0 8px 24px rgba(24,25,27,.22)}
     .lp-chips{display:flex;gap:10px;margin-top:16px}
     .lp-chip{flex:1;height:40px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;font-size:12px;font-weight:600;color:var(--text-2);display:inline-flex;align-items:center;justify-content:center;gap:7px}
@@ -74,19 +92,21 @@
     .lp-footer a:hover{color:var(--ink);text-decoration:underline}
     .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
     .recovery-result{background:var(--accent-light);border:1.5px solid var(--accent-dark);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
-    .lp-media{flex:1.1;margin:14px;border-radius:20px;background-size:cover;background-position:center;position:relative;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80')}
-    .lp-media-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(24,25,27,.18) 0%,rgba(24,25,27,.6) 100%)}
-    .lp-widget-task{position:absolute;top:32px;left:32px;background:var(--accent);padding:12px 18px;border-radius:16px;max-width:196px;z-index:2}
-    .lp-widget-task h4{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px}
+    .lp-media{flex:1.1;margin:14px;border-radius:20px;position:relative;overflow:hidden;background:linear-gradient(145deg,#1A1C20 0%,#12141A 60%,#0E1018 100%);border:1px solid rgba(255,255,255,.06)}
+    .lp-media-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(10,11,14,.92) 100%);z-index:0}
+    .lp-media::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(238,250,148,.08) 0%,transparent 70%);pointer-events:none;z-index:0}
+    .lp-media::after{content:'';position:absolute;bottom:-60px;left:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(125,140,118,.07) 0%,transparent 70%);pointer-events:none;z-index:0}
+    .lp-widget-task{position:absolute;top:32px;left:32px;background:var(--accent);padding:12px 18px;border-radius:16px;max-width:210px;z-index:3}
+    .lp-widget-task h4{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px;font-family:var(--font-heading)}
     .lp-widget-task p{font-size:10px;font-weight:500;color:rgba(0,0,0,.5)}
-    .lp-bottom{position:absolute;bottom:32px;left:32px;right:32px;display:flex;flex-direction:column;gap:14px}
+    .lp-bottom{position:absolute;bottom:32px;left:32px;right:32px;display:flex;flex-direction:column;gap:14px;z-index:2}
     .lp-cal{background:rgba(255,255,255,.14);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:12px 16px;display:flex;justify-content:space-between;color:#fff}
     .lp-cal-day{text-align:center;flex:1}
     .lp-cal-day .dl{font-size:10px;opacity:.6;text-transform:uppercase;font-weight:600;margin-bottom:4px;letter-spacing:.04em}
     .lp-cal-day .dn{font-size:13px;font-weight:700}
     .lp-cal-day.act{background:rgba(238,250,148,.25);border-radius:10px;padding:2px 0}
     .lp-summary{background:#fff;border-radius:18px;padding:16px;max-width:240px}
-    .lp-summary h4{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px}
+    .lp-summary h4{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;font-family:var(--font-heading)}
     .lp-summary p{font-size:11px;color:var(--text-3);font-weight:500;margin-bottom:10px}
     .lp-avatars{display:flex;align-items:center}
     .lp-av{width:22px;height:22px;border-radius:50%;border:1.5px solid #fff;background-size:cover;margin-right:-6px}
@@ -143,7 +163,7 @@
 
     /* ── TOPBAR ── */
     .topbar{height:58px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;flex-shrink:0}
-    .topbar-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.02em;flex:1}
+    .topbar-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.03em;flex:1;font-family:var(--font-heading)}
     .topbar-search{flex:1;max-width:280px;position:relative}
     .topbar-search input{width:100%;height:36px;background:var(--gray-light);border:1.5px solid transparent;border-radius:12px;padding:0 14px 0 34px;font-size:12px;color:var(--text);outline:none;font-family:inherit;transition:all .2s;font-weight:500}
     .topbar-search input:focus{border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.14);background:#fff}
@@ -160,11 +180,11 @@
     .welcome-banner{background:var(--ink);border-radius:var(--radius-xl);padding:22px 26px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
     .welcome-banner::before{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:var(--accent);opacity:.07;pointer-events:none}
     .welcome-banner::after{content:'';position:absolute;right:80px;bottom:-80px;width:180px;height:180px;border-radius:50%;background:var(--sage);opacity:.08;pointer-events:none}
-    .wb-left h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:3px;letter-spacing:-.03em}
+    .wb-left h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:3px;letter-spacing:-.04em;font-family:var(--font-heading)}
     .wb-left p{font-size:12px;color:rgba(255,255,255,.38);font-weight:500}
     .wb-right{display:flex;gap:10px;align-items:center}
     .wb-stat{text-align:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px}
-    .wb-stat-val{font-size:20px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.02em}
+    .wb-stat-val{font-size:20px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.03em;font-family:var(--font-heading)}
     .wb-stat-label{font-size:10px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:600;white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
 
     /* ── CONTENT ── */
@@ -178,7 +198,7 @@
     .p-card{border-radius:var(--radius-xl);padding:20px 18px;cursor:pointer;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
     .p-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
     .p-card-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:12px}
-    .p-card-count{font-size:34px;font-weight:900;line-height:1;margin-bottom:5px;letter-spacing:-.03em}
+    .p-card-count{font-size:34px;font-weight:900;line-height:1;margin-bottom:5px;letter-spacing:-.04em;font-family:var(--font-heading)}
     .p-card-sub{font-size:11px;opacity:.6;font-weight:600}
     .p-card-icon{position:absolute;bottom:-10px;right:-6px;font-size:58px;opacity:.1}
     .card-gold{background:var(--accent);color:var(--ink)}
@@ -193,7 +213,7 @@
     /* ── PANEL ── */
     .panel{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-sm)}
     .panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-    .panel-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+    .panel-title{font-size:13px;font-weight:800;color:var(--text);letter-spacing:-.02em;font-family:var(--font-heading)}
     .panel-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 
     /* ── PILL TABS ── */
@@ -309,7 +329,7 @@
 
     /* value colours still work inside themed cards */
     .metric-label{font-size:10px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-    .metric-val{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+    .metric-val{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.03em;font-family:var(--font-heading)}
     .metric-val.green{color:var(--green-dark)}.metric-val.amber{color:#8C6200}.metric-val.red{color:var(--red)}.metric-val.blue{color:var(--blue)}.metric-val.sm{font-size:16px}
 
     /* ── DASHBOARD CARDS ── */
@@ -326,7 +346,7 @@
     .spotlight{background:var(--ink);border-radius:var(--radius-xl);padding:20px;color:#fff;box-shadow:var(--shadow)}
     .spotlight-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px}
     .spotlight-section{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.25);margin:12px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)}
-    .spotlight-amount{font-size:24px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:2px;letter-spacing:-.02em}
+    .spotlight-amount{font-size:24px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:2px;letter-spacing:-.03em;font-family:var(--font-heading)}
     .spotlight-sub{font-size:10px;color:rgba(255,255,255,.3);margin-bottom:10px}
     .spotlight-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)}
     .spotlight-row:last-child{border-bottom:none}
@@ -356,7 +376,7 @@
     .modal-bg.open{display:flex}
     .modal{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:0;width:100%;max-width:560px;margin:auto;box-shadow:var(--shadow-lg);overflow:hidden}
     .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
-    .modal-header h3{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+    .modal-header h3{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.03em;font-family:var(--font-heading)}
     .modal-close{background:var(--gray-light);border:none;cursor:pointer;color:var(--text-2);font-size:18px;line-height:1;padding:4px 9px;border-radius:var(--radius);transition:all .15s}
     .modal-close:hover{background:var(--red-light);color:var(--red)}
     .modal-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 22px}
@@ -405,7 +425,7 @@
     .profile-dropdown.open{display:block}
     .pd-header{padding:18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
     .pd-avatar{width:42px;height:42px;border-radius:12px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
-    .pd-name{font-size:14px;font-weight:800;color:var(--text);letter-spacing:-.01em}
+    .pd-name{font-size:14px;font-weight:800;color:var(--text);letter-spacing:-.02em;font-family:var(--font-heading)}
     .pd-role-badge{display:inline-flex;align-items:center;gap:4px;margin-top:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--accent-light);color:var(--accent-deeper)}
     .pd-role-badge.admin{background:var(--ink);color:var(--accent)}
     .pd-role-badge i{font-size:10px}
@@ -475,7 +495,7 @@
     .report-card-title i{font-size:15px;color:var(--sage)}
     .rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .rev-cell{background:var(--gray-light);border-radius:14px;padding:14px 16px}
-    .rev-cell-val{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:2px}
+    .rev-cell-val{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:2px;font-family:var(--font-heading)}
     .rev-cell-val.green{color:var(--green-dark)}.rev-cell-val.amber{color:#8C6200}
     .rev-cell-label{font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
     /* bar chart */
@@ -575,28 +595,99 @@
       </div>
     </div>
     <div class="lp-media">
+      <!-- Illustrated panel — no photography, fully self-contained -->
       <div class="lp-media-overlay"></div>
+
+      <!-- Floating stat badge top-left -->
       <div class="lp-widget-task">
-        <h4>Professional Job Review</h4>
-        <p>Deployment Schedule: 09:30am</p>
+        <h4>Pipeline Overview</h4>
+        <p>Candidate Tracking — Active</p>
       </div>
+
+      <!-- Central SVG illustration -->
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;padding:60px 30px 140px">
+        <svg viewBox="0 0 340 260" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:320px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.3))">
+          <!-- Background card -->
+          <rect x="0" y="20" width="340" height="220" rx="20" fill="#22252A" opacity=".95"/>
+          <!-- Accent strip -->
+          <rect x="0" y="20" width="340" height="4" rx="2" fill="#EEFA94"/>
+          <!-- Stage columns -->
+          <!-- Col 1: Offer Letter -->
+          <rect x="18" y="42" width="60" height="16" rx="5" fill="#1E3A5A" opacity=".8"/>
+          <text x="28" y="54" fill="#6AABF7" font-size="7" font-family="system-ui" font-weight="700">OFFER</text>
+          <rect x="18" y="64" width="60" height="38" rx="6" fill="#1C2026"/>
+          <rect x="18" y="64" width="60" height="2" rx="1" fill="#1A6BB5"/>
+          <text x="26" y="78" fill="#fff" font-size="6.5" font-family="system-ui" font-weight="700">J. KAMAU</text>
+          <text x="26" y="88" fill="#6b7280" font-size="5.5" font-family="system-ui">Security Guard</text>
+          <rect x="18" y="108" width="60" height="38" rx="6" fill="#1C2026"/>
+          <rect x="18" y="108" width="60" height="2" rx="1" fill="#1A6BB5"/>
+          <text x="26" y="122" fill="#fff" font-size="6.5" font-family="system-ui" font-weight="700">A. WANJIKU</text>
+          <text x="26" y="132" fill="#6b7280" font-size="5.5" font-family="system-ui">Housekeeping</text>
+          <!-- Col 2: MOL -->
+          <rect x="88" y="42" width="60" height="16" rx="5" fill="#3B2D1A" opacity=".8"/>
+          <text x="98" y="54" fill="#F5C66A" font-size="7" font-family="system-ui" font-weight="700">MOL</text>
+          <rect x="88" y="64" width="60" height="38" rx="6" fill="#1C2026"/>
+          <rect x="88" y="64" width="60" height="2" rx="1" fill="#B07B10"/>
+          <text x="96" y="78" fill="#fff" font-size="6.5" font-family="system-ui" font-weight="700">P. ONDIEKI</text>
+          <text x="96" y="88" fill="#6b7280" font-size="5.5" font-family="system-ui">Driver</text>
+          <!-- Col 3: Visa -->
+          <rect x="158" y="42" width="60" height="16" rx="5" fill="#2D1B2E" opacity=".8"/>
+          <text x="168" y="54" fill="#C4A8F0" font-size="7" font-family="system-ui" font-weight="700">VISA</text>
+          <rect x="158" y="64" width="60" height="38" rx="6" fill="#1C2026"/>
+          <rect x="158" y="64" width="60" height="2" rx="1" fill="#7D8C76"/>
+          <text x="166" y="78" fill="#fff" font-size="6.5" font-family="system-ui" font-weight="700">M. NDUNGU</text>
+          <text x="166" y="88" fill="#6b7280" font-size="5.5" font-family="system-ui">Supervisor</text>
+          <rect x="158" y="108" width="60" height="38" rx="6" fill="#1C2026"/>
+          <rect x="158" y="108" width="60" height="2" rx="1" fill="#7D8C76"/>
+          <text x="166" y="122" fill="#fff" font-size="6.5" font-family="system-ui" font-weight="700">F. OTIENO</text>
+          <text x="166" y="132" fill="#6b7280" font-size="5.5" font-family="system-ui">Chef</text>
+          <!-- Col 4: Travelled -->
+          <rect x="228" y="42" width="94" height="16" rx="5" fill="#0F2A1E" opacity=".8"/>
+          <text x="238" y="54" fill="#6FCF97" font-size="7" font-family="system-ui" font-weight="700">TRAVELLED</text>
+          <rect x="228" y="64" width="94" height="38" rx="6" fill="#1C2026"/>
+          <rect x="228" y="64" width="94" height="2" rx="1" fill="#22A06B"/>
+          <text x="236" y="78" fill="#fff" font-size="6.5" font-family="system-ui" font-weight="700">C. NJERI</text>
+          <text x="236" y="88" fill="#6b7280" font-size="5.5" font-family="system-ui">Caregiver · UAE</text>
+          <rect x="236" y="94" width="44" height="5" rx="2.5" fill="#197A52" opacity=".7"/>
+          <text x="240" y="99" fill="#EEFA94" font-size="4.5" font-family="system-ui" font-weight="700">KES 140,000</text>
+          <rect x="228" y="108" width="94" height="38" rx="6" fill="#1C2026"/>
+          <rect x="228" y="108" width="94" height="2" rx="1" fill="#22A06B"/>
+          <text x="236" y="122" fill="#fff" font-size="6.5" font-family="system-ui" font-weight="700">T. WAWERU</text>
+          <text x="236" y="132" fill="#6b7280" font-size="5.5" font-family="system-ui">Nurse · Qatar</text>
+          <rect x="236" y="138" width="44" height="5" rx="2.5" fill="#197A52" opacity=".7"/>
+          <text x="240" y="143" fill="#EEFA94" font-size="4.5" font-family="system-ui" font-weight="700">KES 160,000</text>
+          <!-- Bottom metric bar -->
+          <rect x="18" y="170" width="304" height="52" rx="10" fill="#1A1C1F"/>
+          <text x="30" y="188" fill="#6b7280" font-size="6" font-family="system-ui" font-weight="600" text-transform="uppercase">TOTAL</text>
+          <text x="30" y="202" fill="#fff" font-size="13" font-family="system-ui" font-weight="800">134</text>
+          <text x="100" y="188" fill="#6b7280" font-size="6" font-family="system-ui" font-weight="600">IN PROCESS</text>
+          <text x="100" y="202" fill="#F5C66A" font-size="13" font-family="system-ui" font-weight="800">54</text>
+          <text x="168" y="188" fill="#6b7280" font-size="6" font-family="system-ui" font-weight="600">TRAVELLED</text>
+          <text x="168" y="202" fill="#6FCF97" font-size="13" font-family="system-ui" font-weight="800">77</text>
+          <text x="240" y="188" fill="#6b7280" font-size="6" font-family="system-ui" font-weight="600">COLLECTED</text>
+          <text x="240" y="202" fill="#EEFA94" font-size="10" font-family="system-ui" font-weight="800">KES 5.2M</text>
+        </svg>
+      </div>
+
       <div class="lp-bottom">
         <div class="lp-cal">
+          <div class="lp-cal-day"><div class="dl">Mon</div><div class="dn">16</div></div>
+          <div class="lp-cal-day"><div class="dl">Tue</div><div class="dn">17</div></div>
+          <div class="lp-cal-day act"><div class="dl">Wed</div><div class="dn">18</div></div>
+          <div class="lp-cal-day"><div class="dl">Thu</div><div class="dn">19</div></div>
+          <div class="lp-cal-day"><div class="dl">Fri</div><div class="dn">20</div></div>
+          <div class="lp-cal-day"><div class="dl">Sat</div><div class="dn">21</div></div>
           <div class="lp-cal-day"><div class="dl">Sun</div><div class="dn">22</div></div>
-          <div class="lp-cal-day"><div class="dl">Mon</div><div class="dn">23</div></div>
-          <div class="lp-cal-day act"><div class="dl">Tue</div><div class="dn">24</div></div>
-          <div class="lp-cal-day"><div class="dl">Wed</div><div class="dn">25</div></div>
-          <div class="lp-cal-day"><div class="dl">Thu</div><div class="dn">26</div></div>
-          <div class="lp-cal-day"><div class="dl">Fri</div><div class="dn">27</div></div>
-          <div class="lp-cal-day"><div class="dl">Sat</div><div class="dn">28</div></div>
         </div>
         <div class="lp-summary">
-          <h4>LB Candidate Processing</h4>
-          <p>Passports Tracked: 98 Active</p>
+          <h4>Pipeline Management</h4>
+          <p>Candidates Tracked: Active</p>
           <div class="lp-avatars">
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80')"></div>
-            <div class="lp-av" style="background-image:url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80')"></div>
+            <div class="lp-av" style="background:#EEFA94;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#18191B">JK</div>
+            <div class="lp-av" style="background:#7D8C76;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">AW</div>
+            <div class="lp-av" style="background:#1A6BB5;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">PO</div>
+            <div class="lp-av" style="background:#22A06B;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">CN</div>
+            <div class="lp-av" style="background:#18191B;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#EEFA94">+</div>
           </div>
         </div>
       </div>
