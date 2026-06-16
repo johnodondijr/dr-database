@@ -1,9 +1,8 @@
 // ══════════════════════════════════════════════════════════
 // SUPABASE CONFIG — replace with your project values
 // ══════════════════════════════════════════════════════════
-const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';       // e.g. https://abcxyz.supabase.co
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';  // long key from Supabase dashboard
-
+const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ══════════════════════════════════════════════════════════
@@ -913,4 +912,120 @@ function showToast(msg,type=''){
   t.innerHTML=`<i class="ti ${icon}"></i><span>${msg}</span>`;
   void t.offsetWidth; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════════════════════════
+// PROFILE DROPDOWN
+// ══════════════════════════════════════════════════════════
+function toggleProfileDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('profile-dropdown');
+  const open = dd.classList.toggle('open');
+  // clear messages when opening
+  if (open) {
+    const msg = document.getElementById('pd-msg');
+    if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
+    ['pd-new-username','pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    // pre-fill username field with current
+    const uEl = document.getElementById('pd-new-username');
+    if (uEl && currentUser) uEl.placeholder = currentUser.username;
+  }
+  // rotate caret
+  const caret = document.getElementById('profile-caret');
+  if (caret) caret.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+// close dropdown when clicking outside
+document.addEventListener('click', () => {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd && dd.classList.contains('open')) {
+    dd.classList.remove('open');
+    const caret = document.getElementById('profile-caret');
+    if (caret) caret.style.transform = '';
+  }
+});
+
+function saveProfileChanges() {
+  const msgEl = document.getElementById('pd-msg');
+  const newUsername = (document.getElementById('pd-new-username').value || '').trim().toLowerCase();
+  const currentPw   = document.getElementById('pd-current-pw').value;
+  const newPw       = document.getElementById('pd-new-pw').value;
+  const confirmPw   = document.getElementById('pd-confirm-pw').value;
+
+  const showMsg = (txt, type) => {
+    msgEl.textContent = txt;
+    msgEl.className = 'pd-msg ' + type;
+  };
+
+  let changed = false;
+
+  // ── Username change ──
+  if (newUsername && newUsername !== currentUser.username) {
+    if (STAFF_ACCOUNTS[newUsername] && newUsername !== currentUser.username) {
+      showMsg('That username is already taken.', 'err'); return;
+    }
+    // rename key in STAFF_ACCOUNTS
+    STAFF_ACCOUNTS[newUsername] = { ...STAFF_ACCOUNTS[currentUser.username] };
+    delete STAFF_ACCOUNTS[currentUser.username];
+    currentUser.username = newUsername;
+    sessionStorage.setItem('dr_user', JSON.stringify(currentUser));
+    changed = true;
+  }
+
+  // ── Password change ──
+  if (currentPw || newPw || confirmPw) {
+    if (!currentPw) { showMsg('Enter your current password.', 'err'); return; }
+    if (currentPw !== currentUser.password) { showMsg('Current password is incorrect.', 'err'); return; }
+    if (!newPw) { showMsg('Enter a new password.', 'err'); return; }
+    if (newPw.length < 6) { showMsg('New password must be at least 6 characters.', 'err'); return; }
+    if (newPw !== confirmPw) { showMsg('New passwords do not match.', 'err'); return; }
+    STAFF_ACCOUNTS[currentUser.username].password = newPw;
+    currentUser.password = newPw;
+    sessionStorage.setItem('dr_user', JSON.stringify(currentUser));
+    changed = true;
+  }
+
+  if (!changed) { showMsg('No changes to save.', 'err'); return; }
+  showMsg('✓ Changes saved successfully.', 'ok');
+  // clear sensitive fields
+  ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  // refresh display
+  setUserDisplay(currentUser.display, currentUser.role);
+}
+
+// ── Extended setUserDisplay to also fill profile dropdown ──
+const _baseSetUserDisplay = setUserDisplay;
+function setUserDisplay(display, role) {
+  // original fields
+  const parts = display.replace(/[^a-zA-Z ]/g, '').trim().split(' ');
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : display.substring(0, 2).toUpperCase();
+
+  ['user-chip','sidebar-user-name'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = display;
+  });
+  ['topbar-avatar','sidebar-avatar','pd-avatar','suc-avatar'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = initials;
+  });
+  // suc-name = first name only for card
+  const sucName = document.getElementById('suc-name');
+  if (sucName) sucName.textContent = display;
+  // sidebar role
+  const rEl = document.getElementById('sidebar-user-role');
+  if (rEl) rEl.textContent = role === 'admin' ? 'Administrator' : 'Staff';
+  // pd name + role badge
+  const pdName = document.getElementById('pd-name');
+  if (pdName) pdName.textContent = display;
+  const pdBadge = document.getElementById('pd-role-badge');
+  const pdRoleText = document.getElementById('pd-role-text');
+  if (pdBadge && pdRoleText) {
+    const isAdmin = role === 'admin';
+    pdBadge.className = 'pd-role-badge' + (isAdmin ? ' admin' : '');
+    pdRoleText.textContent = isAdmin ? 'Administrator' : 'Staff';
+  }
 }
