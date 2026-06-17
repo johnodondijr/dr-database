@@ -6,15 +6,16 @@
   <title>Dreco</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Satoshi via Fontshare CDN -->
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,800,900&display=swap" rel="stylesheet">
+  <!-- Geist & Geist Mono via Vercel CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist-sans/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist-mono/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --font-heading:'Satoshi',system-ui,sans-serif;
-      --font-body:'Inter',system-ui,sans-serif;
+      --font-heading:'Geist',system-ui,sans-serif;
+      --font-body:'Geist',system-ui,sans-serif;
+      --font-mono:'Geist Mono',ui-monospace,monospace;
       /* ── NEW PALETTE (cp1): lime-yellow accent, near-black, sage green ── */
       --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
       --accent-light:#F7FDE0;--accent-lighter:#FBFEF2;
@@ -149,16 +150,7 @@
     /* tooltip for collapsed state */
     .sidebar.collapsed .nav-item:hover::after{content:attr(data-title);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;z-index:200;box-shadow:var(--shadow)}
     .nav-spacer{flex:1}
-    .sidebar-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;overflow:hidden}
-    .sidebar-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink);flex-shrink:0}
-    .sidebar-user-info{overflow:hidden;transition:opacity .2s}
-    .sidebar.collapsed .sidebar-user-info{opacity:0;width:0}
-    .sidebar-user-name{font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
-    .sidebar-user-role{font-size:10px;color:rgba(255,255,255,.35);white-space:nowrap}
-    .sidebar-logout{margin-left:auto;background:rgba(255,255,255,.07);border:none;cursor:pointer;color:rgba(255,255,255,.35);width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s}
-    .sidebar.collapsed .sidebar-logout{display:none}
-    .sidebar-logout:hover{background:rgba(184,50,50,.3);color:#ffa0a0}
-    .sidebar-logout i{font-size:15px}
+    /* sidebar bottom utilities use nav-item styles — no extra rules needed */
 
     /* ── MAIN AREA ── */
     .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0}
@@ -176,7 +168,7 @@
     .save-label{font-size:11px;color:var(--text-3);font-weight:500}
     .topbar-user{display:flex;align-items:center;gap:8px;background:var(--gray-light);border-radius:12px;padding:5px 12px 5px 6px}
     .topbar-avatar{width:26px;height:26px;border-radius:8px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--accent)}
-    .topbar-user-name{font-size:12px;font-weight:600;color:var(--text)}
+    .topbar-user-caret{display:none} /* removed — icon-only button now */
 
     /* ── WELCOME BANNER ── */
     .welcome-banner{background:var(--ink);border-radius:var(--radius-xl);padding:22px 26px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
@@ -250,7 +242,7 @@
     tbody tr:hover td{background:var(--accent-lighter)}
     tbody tr:hover td:first-child{border-left-color:var(--accent-dark)}
     .name-cell{font-weight:700;font-size:12px}
-    .pp-cell{font-size:11px;color:var(--text-3);font-family:monospace;margin-top:1px}
+    .pp-cell{font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-top:1px}
     .balance-owed{color:var(--amber);font-weight:700}
     .click-hint{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3);padding:8px 14px;border-top:1px solid var(--border);background:var(--gray-light)}
     .click-hint i{font-size:13px}
@@ -406,42 +398,96 @@
     .doc-open-btn:hover{background:#dbebd8}
     .doc-open-btn:disabled{opacity:.4;cursor:default}
 
-    /* ── SIDEBAR USER CARD ── */
-    .sidebar-user-card{margin:0 8px 8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:12px;display:flex;align-items:center;gap:10px;overflow:hidden;transition:opacity .2s,max-height .25s}
-    .sidebar.collapsed .sidebar-user-card{opacity:0;max-height:0;padding:0;margin:0;border:none}
-    .suc-avatar{width:36px;height:36px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0}
-    .suc-info{overflow:hidden;min-width:0}
-    .suc-name{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .suc-org{font-size:10px;color:rgba(255,255,255,.32);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+    /* ── SIDEBAR VERSION TAG ── */
+    .sidebar-version{padding:8px 16px 12px;display:flex;align-items:center;gap:8px;overflow:hidden}
+    .sv-text{font-size:10px;color:rgba(255,255,255,.2);font-weight:500;white-space:nowrap;transition:opacity .2s}
+    .sidebar.collapsed .sv-text{opacity:0}
+
+    /* ── TOPBAR PROFILE BUTTON ── */
+    .topbar-profile-btn{
+      background:none;border:none;cursor:pointer;padding:0;
+      display:flex;align-items:center;
+      border-radius:50%;transition:box-shadow .18s;
+    }
+    .topbar-profile-btn:hover .topbar-avatar{box-shadow:0 0 0 3px rgba(200,214,32,.3)}
+    .topbar-avatar{
+      width:32px;height:32px;border-radius:50%;
+      background:var(--ink);border:2px solid var(--accent);
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;color:var(--accent);
+      transition:box-shadow .18s;flex-shrink:0;
+    }
 
     /* ── PROFILE DROPDOWN ── */
     .profile-wrap{position:relative}
-    .topbar-user{display:flex;align-items:center;gap:8px;background:var(--gray-light);border-radius:12px;padding:5px 12px 5px 6px;cursor:pointer;transition:background .15s;user-select:none}
-    .topbar-user:hover{background:var(--border)}
-    .topbar-user-caret{font-size:13px;color:var(--text-3);margin-left:2px}
     .profile-dropdown{
-      display:none;position:absolute;top:calc(100% + 8px);right:0;
-      background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-xl);
-      box-shadow:var(--shadow-lg);width:280px;z-index:300;overflow:hidden;
+      display:none;position:absolute;top:calc(100% + 10px);right:0;
+      background:var(--surface-2);border:1.5px solid var(--border);
+      border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);
+      width:260px;z-index:300;overflow:hidden;
     }
     .profile-dropdown.open{display:block}
-    .pd-header{padding:18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
-    .pd-avatar{width:42px;height:42px;border-radius:12px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
-    .pd-name{font-size:14px;font-weight:800;color:var(--text);letter-spacing:-.02em;font-family:var(--font-heading)}
-    .pd-role-badge{display:inline-flex;align-items:center;gap:4px;margin-top:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--accent-light);color:var(--accent-deeper)}
-    .pd-role-badge.admin{background:var(--ink);color:var(--accent)}
+    .pd-header{
+      padding:16px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:12px;
+      background:linear-gradient(135deg,var(--ink) 0%,#22252A 100%);
+    }
+    .pd-avatar{
+      width:40px;height:40px;border-radius:12px;
+      background:var(--accent);display:flex;align-items:center;
+      justify-content:center;font-size:14px;font-weight:700;
+      color:var(--ink);flex-shrink:0;
+    }
+    .pd-name{font-size:13px;font-weight:700;color:#fff;letter-spacing:-.01em;margin-bottom:4px}
+    .pd-role-badge{
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;
+      background:rgba(238,250,148,.15);color:var(--accent);
+    }
     .pd-role-badge i{font-size:10px}
-    .pd-section{padding:10px 8px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)}
-    .pd-field{padding:6px 12px;display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+    /* menu items */
+    .pd-menu-section{
+      padding:10px 14px 4px;font-size:9px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);
+    }
+    .pd-menu-item{
+      width:100%;display:flex;align-items:center;gap:10px;
+      padding:9px 14px;background:none;border:none;
+      font-family:inherit;font-size:12px;font-weight:500;
+      color:var(--text);cursor:pointer;transition:background .12s;
+      text-align:left;
+    }
+    .pd-menu-item i:first-child{font-size:16px;color:var(--text-3);flex-shrink:0}
+    .pd-menu-item span{flex:1}
+    .pd-menu-arrow{font-size:12px;color:var(--text-3);margin-left:auto}
+    .pd-menu-item:hover{background:var(--gray-light)}
+    .pd-menu-item:hover i:first-child{color:var(--text-2)}
+    .pd-menu-signout{color:var(--red)}
+    .pd-menu-signout i:first-child{color:var(--red)}
+    .pd-menu-signout:hover{background:var(--red-light)}
+    /* edit sub-panel */
+    .pd-edit-panel{border-top:1px solid var(--border)}
+    .pd-edit-header{
+      display:flex;align-items:center;gap:8px;
+      padding:12px 14px;border-bottom:1px solid var(--border);
+      font-size:12px;font-weight:700;color:var(--text);
+    }
+    .pd-back-btn{
+      background:none;border:none;cursor:pointer;
+      color:var(--text-3);font-size:12px;font-family:inherit;
+      display:flex;align-items:center;gap:4px;padding:0;
+      transition:color .15s;
+    }
+    .pd-back-btn:hover{color:var(--text)}
+    .pd-section{padding:10px 14px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)}
+    .pd-field{padding:4px 14px 6px;display:flex;flex-direction:column;gap:4px}
     .pd-field label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
-    .pd-field input{padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--gray-light);font-weight:500;width:100%}
+    .pd-field input{padding:8px 11px;border:1.5px solid var(--border);border-radius:9px;font-size:12px;font-family:inherit;color:var(--text);background:var(--gray-light);font-weight:500;width:100%}
     .pd-field input:focus{outline:none;border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.12);background:#fff}
-    .pd-actions{padding:8px 12px 14px;display:flex;gap:8px}
-    .pd-save{flex:1;padding:10px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-radius:10px;background:var(--ink);color:var(--accent);cursor:pointer;transition:all .15s}
+    .pd-actions{padding:8px 14px 14px;display:flex;gap:8px}
+    .pd-save{flex:1;padding:9px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-radius:9px;background:var(--ink);color:var(--accent);cursor:pointer;transition:all .15s}
     .pd-save:hover{background:#2a2b2e}
-    .pd-logout{padding:10px 14px;font-size:12px;font-weight:600;font-family:inherit;border:1.5px solid var(--border);border-radius:10px;background:transparent;color:var(--text-2);cursor:pointer;transition:all .15s}
-    .pd-logout:hover{background:var(--red-light);color:var(--red);border-color:#EFA3A3}
-    .pd-msg{font-size:11px;padding:4px 12px 8px;font-weight:500}
+    .pd-msg{font-size:11px;padding:2px 14px 4px;font-weight:500}
     .pd-msg.ok{color:var(--green)}.pd-msg.err{color:var(--red)}
 
     /* ── TOAST ── */
@@ -579,20 +625,19 @@
       .pagination{flex-direction:column;gap:6px;align-items:flex-start;padding:8px 12px}
     }
 
-    /* ── BOTTOM NAV BAR (mobile only) ── */
+    /* ── BOTTOM NAV BAR (mobile only, shown after login via JS) ── */
     .bottom-nav{
-      display:none;
+      display:none; /* hidden by default — JS adds .visible after login */
       position:fixed;bottom:0;left:0;right:0;
       height:60px;background:var(--ink);
       border-top:1px solid rgba(255,255,255,.08);
       z-index:100;
       align-items:stretch;
       padding:0 4px;
-      /* safe area for notched phones */
       padding-bottom:env(safe-area-inset-bottom);
     }
     @media(max-width:640px){
-      .bottom-nav{display:flex}
+      .bottom-nav.visible{display:flex}
     }
     .bottom-nav-item{
       flex:1;display:flex;flex-direction:column;align-items:center;
@@ -919,13 +964,19 @@
 
       <div class="nav-spacer"></div>
 
-      <div class="sidebar-user">
-        <div class="sidebar-avatar" id="sidebar-avatar">—</div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name" id="sidebar-user-name">—</div>
-          <div class="sidebar-user-role" id="sidebar-user-role">Staff</div>
-        </div>
-        <button class="sidebar-logout" onclick="doLogout()" title="Sign out"><i class="ti ti-logout"></i></button>
+      <!-- SIDEBAR BOTTOM UTILITIES -->
+      <div class="sidebar-divider"></div>
+      <a class="nav-item" id="nav-settings" data-title="Settings" onclick="openSettings()">
+        <i class="ti ti-settings"></i><span class="nav-item-label">Settings</span>
+      </a>
+      <a class="nav-item" id="nav-help" data-title="Help" onclick="openHelp()">
+        <i class="ti ti-help-circle"></i><span class="nav-item-label">Help & Support</span>
+      </a>
+      <div class="sidebar-divider"></div>
+
+      <!-- SIDEBAR VERSION TAG -->
+      <div class="sidebar-version">
+        <span class="sv-text">Dreco v4.0</span>
       </div>
     </aside>
 
@@ -942,42 +993,78 @@
         <div class="save-dot" id="save-dot"></div>
         <span class="save-label" id="save-label">Saved</span>
         <div class="profile-wrap">
-          <div class="topbar-user" onclick="toggleProfileDropdown(event)">
+          <!-- Icon-only profile button -->
+          <button class="topbar-profile-btn" id="topbar-profile-btn" onclick="toggleProfileDropdown(event)" title="Account">
             <div class="topbar-avatar" id="topbar-avatar">—</div>
-            <span class="topbar-user-name" id="user-chip">—</span>
-            <i class="ti ti-chevron-down topbar-user-caret" id="profile-caret"></i>
-          </div>
+          </button>
+
+          <!-- Rich profile dropdown -->
           <div class="profile-dropdown" id="profile-dropdown">
+            <!-- Header: avatar + name + role -->
             <div class="pd-header">
               <div class="pd-avatar" id="pd-avatar">—</div>
-              <div>
+              <div style="flex:1;min-width:0">
                 <div class="pd-name" id="pd-name">—</div>
-                <div class="pd-role-badge" id="pd-role-badge"><i class="ti ti-shield-check"></i> <span id="pd-role-text">Staff</span></div>
+                <div class="pd-role-badge" id="pd-role-badge"><i class="ti ti-shield-check"></i><span id="pd-role-text">Staff</span></div>
               </div>
             </div>
-            <div class="pd-section">Change username</div>
-            <div class="pd-field">
-              <label>New username</label>
-              <input type="text" id="pd-new-username" placeholder="e.g. fred_admin" autocomplete="off">
+
+            <!-- Account actions -->
+            <div class="pd-menu-section">Account</div>
+            <button class="pd-menu-item" onclick="openProfileEdit()">
+              <i class="ti ti-user-edit"></i><span>Edit Profile</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
+            </button>
+            <button class="pd-menu-item" onclick="openChangePassword()">
+              <i class="ti ti-lock"></i><span>Change Password</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
+            </button>
+
+            <!-- App actions -->
+            <div class="pd-menu-section">Application</div>
+            <button class="pd-menu-item" onclick="closeProfileDropdown();openSettings()">
+              <i class="ti ti-settings"></i><span>Settings</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
+            </button>
+            <button class="pd-menu-item" onclick="closeProfileDropdown();switchTab('reports')">
+              <i class="ti ti-chart-bar"></i><span>Reports</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
+            </button>
+            <button class="pd-menu-item" onclick="closeProfileDropdown();openHelp()">
+              <i class="ti ti-help-circle"></i><span>Help & Support</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
+            </button>
+
+            <!-- Edit profile panel (hidden by default) -->
+            <div class="pd-edit-panel" id="pd-edit-panel" style="display:none">
+              <div class="pd-edit-header">
+                <button class="pd-back-btn" onclick="closeProfileEdit()"><i class="ti ti-arrow-left"></i> Back</button>
+                <span>Edit Profile</span>
+              </div>
+              <div class="pd-section">Change username</div>
+              <div class="pd-field">
+                <label>New username</label>
+                <input type="text" id="pd-new-username" placeholder="e.g. fred_admin" autocomplete="off">
+              </div>
+              <div class="pd-section">Change password</div>
+              <div class="pd-field">
+                <label>Current password</label>
+                <input type="password" id="pd-current-pw" placeholder="Current password">
+              </div>
+              <div class="pd-field">
+                <label>New password</label>
+                <input type="password" id="pd-new-pw" placeholder="New password">
+              </div>
+              <div class="pd-field">
+                <label>Confirm new password</label>
+                <input type="password" id="pd-confirm-pw" placeholder="Repeat new password">
+              </div>
+              <div class="pd-msg" id="pd-msg"></div>
+              <div class="pd-actions">
+                <button class="pd-save" onclick="saveProfileChanges()">Save changes</button>
+              </div>
             </div>
-            <div class="pd-section">Change password</div>
-            <div class="pd-field">
-              <label>Current password</label>
-              <input type="password" id="pd-current-pw" placeholder="Enter current password">
-            </div>
-            <div class="pd-field">
-              <label>New password</label>
-              <input type="password" id="pd-new-pw" placeholder="Enter new password">
-            </div>
-            <div class="pd-field">
-              <label>Confirm new password</label>
-              <input type="password" id="pd-confirm-pw" placeholder="Repeat new password">
-            </div>
-            <div class="pd-msg" id="pd-msg"></div>
-            <div class="pd-actions">
-              <button class="pd-save" onclick="saveProfileChanges()">Save changes</button>
-              <button class="pd-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Sign out</button>
-            </div>
+
+            <!-- Divider + sign out -->
+            <div style="height:1px;background:var(--border);margin:4px 0"></div>
+            <button class="pd-menu-item pd-menu-signout" onclick="doLogout()">
+              <i class="ti ti-logout"></i><span>Sign out</span>
+            </button>
           </div>
         </div>
       </div>
