@@ -13,9 +13,10 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --font-heading:'Geist',system-ui,sans-serif;
-      --font-body:'Geist',system-ui,sans-serif;
-      --font-mono:'Geist Mono',ui-monospace,monospace;
+      /* Geist Sans exports as 'Geist Sans' from the jsDelivr package */
+      --font-heading:'Geist Sans','Geist',system-ui,sans-serif;
+      --font-body:'Geist Sans','Geist',system-ui,sans-serif;
+      --font-mono:'Geist Mono',ui-monospace,'Cascadia Code','Fira Code',monospace;
       /* ── NEW PALETTE (cp1): lime-yellow accent, near-black, sage green ── */
       --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
       --accent-light:#F7FDE0;--accent-lighter:#FBFEF2;
@@ -41,12 +42,19 @@
       --shadow-lg:0 16px 48px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
       --sidebar-w:224px;--sidebar-w-collapsed:64px;
     }
-    body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh}
+    body{
+      font-family:var(--font-body);
+      background:var(--bg);color:var(--text);
+      font-size:13px;line-height:1.5;min-height:100vh;
+      /* tabular figures prevent layout shift on updating numbers */
+      font-feature-settings:'tnum' 1,'kern' 1;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
     /* The app shell itself clips to viewport; login screen can scroll freely */
     #app{overflow:hidden}
 
-    /* ── TYPOGRAPHY SYSTEM ── */
-    /* Satoshi for all display/heading text */
+    /* ── TYPOGRAPHY SYSTEM — Geist Sans headings + display, Geist Mono data ── */
     h1,h2,h3,h4,h5,h6,
     .lp-brand-name,.lp-header h1,.wb-left h2,
     .topbar-title,.panel-title,.modal-header h3,
@@ -56,6 +64,14 @@
     .sidebar-logo-text,.pd-name,
     .suc-name,.nav-section-label {
       font-family:var(--font-heading);
+      /* proportional figures for display text */
+      font-feature-settings:'kern' 1;
+    }
+    /* numeric display elements: tight tracking + prop figures */
+    .metric-val,.p-card-count,.spotlight-amount,.wb-stat-val,.rev-cell-val {
+      font-variant-numeric:tabular-nums;
+      font-feature-settings:'tnum' 1,'kern' 1;
+      line-height:1;
     }
 
     /* ── LOADING ── */
@@ -178,7 +194,7 @@
     .wb-left p{font-size:12px;color:rgba(255,255,255,.38);font-weight:500}
     .wb-right{display:flex;gap:10px;align-items:center}
     .wb-stat{text-align:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px}
-    .wb-stat-val{font-size:20px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.03em;font-family:var(--font-heading)}
+    .wb-stat-val{font-size:22px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.03em;font-family:var(--font-heading);white-space:nowrap;font-variant-numeric:tabular-nums}
     .wb-stat-label{font-size:10px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:600;white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
 
     /* ── CONTENT ── */
@@ -282,14 +298,18 @@
     .empty{text-align:center;padding:3rem;color:var(--text-3);font-size:13px;font-weight:500}
 
     /* ── METRICS STRIP ── */
-    .metrics-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+    /* min 160px prevents cards crushing below the breakpoint */
+    .metrics-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
 
-    /* base card */
+    /* base card — more generous padding so numbers have room */
     .metric-card{
       position:relative;overflow:hidden;
       background:var(--surface-2);border:1px solid var(--border);
-      border-radius:var(--radius-xl);padding:16px 18px;
-      box-shadow:var(--shadow-sm);transition:transform .18s,box-shadow .18s;
+      border-radius:var(--radius-xl);
+      padding:20px 20px 18px;          /* top / sides / bottom */
+      box-shadow:var(--shadow-sm);
+      transition:transform .18s,box-shadow .18s;
+      min-height:100px;                /* consistent height across all 5 */
     }
     .metric-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 
@@ -300,31 +320,49 @@
       background:var(--border);
     }
 
-    /* ── CARD THEMES ── each adds a tinted gradient fill + accent bar colour */
+    /* ── CARD THEMES ── */
     .metric-card.mc-default::before{background:var(--border-2)}
-
     .metric-card.mc-amber{background:linear-gradient(160deg,#FFFDF5 0%,#FFF8E0 100%);border-color:#EFD97A}
     .metric-card.mc-amber::before{background:linear-gradient(90deg,var(--accent-dark),var(--accent))}
-
     .metric-card.mc-green{background:linear-gradient(160deg,#F4FCF8 0%,#E2F5EE 100%);border-color:#A8DCC5}
     .metric-card.mc-green::before{background:linear-gradient(90deg,var(--green-dark),var(--green))}
-
     .metric-card.mc-red{background:linear-gradient(160deg,#FFF5F5 0%,#FDEAEA 100%);border-color:#E8AAAA}
     .metric-card.mc-red::before{background:linear-gradient(90deg,#8B1A1A,var(--red))}
-
     .metric-card.mc-ink{background:linear-gradient(160deg,#22252A 0%,#18191B 100%);border-color:#333}
     .metric-card.mc-ink::before{background:linear-gradient(90deg,var(--accent-dark),var(--accent))}
-    .metric-card.mc-ink .metric-label{color:rgba(255,255,255,.4)}
+    .metric-card.mc-ink .metric-label{color:rgba(255,255,255,.45)}
     .metric-card.mc-ink .metric-val{color:#fff}
     .metric-card.mc-ink .metric-val.green{color:var(--accent)}
-
     .metric-card.mc-sage{background:linear-gradient(160deg,#F4F7F3 0%,#EAF0E8 100%);border-color:#BDD0BA}
     .metric-card.mc-sage::before{background:linear-gradient(90deg,var(--sage-dark),var(--sage))}
 
-    /* value colours still work inside themed cards */
-    .metric-label{font-size:10px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-    .metric-val{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.03em;font-family:var(--font-heading)}
-    .metric-val.green{color:var(--green-dark)}.metric-val.amber{color:#8C6200}.metric-val.red{color:var(--red)}.metric-val.blue{color:var(--blue)}.metric-val.sm{font-size:16px}
+    /* ── METRIC LABEL & VALUE — desktop defaults ── */
+    .metric-label{
+      font-size:10px;color:var(--text-3);
+      margin-bottom:10px;               /* more breathing room above the number */
+      text-transform:uppercase;letter-spacing:.09em;font-weight:700;
+    }
+    /* base value: plain integers like 36, 98 */
+    .metric-val{
+      font-size:30px;                   /* up from 26px */
+      font-weight:800;color:var(--text);
+      letter-spacing:-.02em;            /* less tight than -.03em — Geist reads better here */
+      white-space:nowrap;               /* never wrap mid-number */
+      font-family:var(--font-heading);
+    }
+    /* coloured modifiers */
+    .metric-val.green{color:var(--green-dark)}
+    .metric-val.amber{color:#8C6200}
+    .metric-val.red{color:var(--red)}
+    .metric-val.blue{color:var(--blue)}
+    /* .sm = currency / longer strings — never go below 18px on desktop */
+    .metric-val.sm{
+      font-size:18px;                   /* up from 16px */
+      letter-spacing:-.01em;
+      white-space:normal;               /* allow wrapping on very long KES strings */
+      word-break:break-word;
+      line-height:1.25;                 /* comfortable when it wraps to 2 lines */
+    }
 
     /* ── DASHBOARD CARDS ── */
     .dash-card{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:18px;box-shadow:var(--shadow-sm)}
@@ -340,7 +378,7 @@
     .spotlight{background:var(--ink);border-radius:var(--radius-xl);padding:20px;color:#fff;box-shadow:var(--shadow)}
     .spotlight-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px}
     .spotlight-section{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.25);margin:12px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)}
-    .spotlight-amount{font-size:24px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:2px;letter-spacing:-.03em;font-family:var(--font-heading)}
+    .spotlight-amount{font-size:26px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:4px;letter-spacing:-.03em;font-family:var(--font-heading);white-space:nowrap;font-variant-numeric:tabular-nums}
     .spotlight-sub{font-size:10px;color:rgba(255,255,255,.3);margin-bottom:10px}
     .spotlight-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)}
     .spotlight-row:last-child{border-bottom:none}
@@ -523,6 +561,9 @@
       .pipeline-cards{grid-template-columns:repeat(2,1fr);gap:10px}
       .dash-2col{grid-template-columns:1fr 1fr;gap:10px}
       .metrics-strip{grid-template-columns:repeat(3,1fr);gap:10px}
+      /* metric values: slightly tighter at tablet but still comfortable */
+      .metric-val{font-size:26px}
+      .metric-val.sm{font-size:16px}
       .reports-grid{grid-template-columns:1fr}
       /* panel header: stack pills + actions */
       .panel-header{flex-direction:column;align-items:flex-start;gap:10px}
@@ -565,12 +606,12 @@
       .wb-stat-label{font-size:9px}
       .wb-left h2{font-size:18px}
 
-      /* metrics strip: 2 col grid */
-      .metrics-strip{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-      .metric-card{padding:12px 14px}
-      .metric-val{font-size:22px}
-      .metric-val.sm{font-size:14px}
-      .metric-label{font-size:9px;margin-bottom:4px}
+      /* metrics strip: 2 col grid, more compact but still readable */
+      .metrics-strip{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+      .metric-card{padding:14px 14px 12px;min-height:84px}
+      .metric-label{font-size:9px;margin-bottom:6px}
+      .metric-val{font-size:22px}        /* down from 30px, still legible */
+      .metric-val.sm{font-size:14px;line-height:1.3}   /* currency strings */
 
       /* dash cards: full width single col */
       .dash-2col{grid-template-columns:1fr;gap:8px;margin-bottom:8px}
@@ -705,7 +746,7 @@
     .report-card-title i{font-size:15px;color:var(--sage)}
     .rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .rev-cell{background:var(--gray-light);border-radius:14px;padding:14px 16px}
-    .rev-cell-val{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:2px;font-family:var(--font-heading)}
+    .rev-cell-val{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:3px;font-family:var(--font-heading);white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1}
     .rev-cell-val.green{color:var(--green-dark)}.rev-cell-val.amber{color:#8C6200}
     .rev-cell-label{font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
     /* bar chart */
