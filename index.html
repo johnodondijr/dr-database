@@ -6,10 +6,14 @@
   <title>Dreco</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Geist & Geist Mono from Google Fonts — correct @font-face, vanilla CSS compatible -->
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Geist variable font: wght@100..900 is the correct range syntax for variable fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
+    /* ── FONT FALLBACK — fires before Google Fonts response, prevents FOUT ── */
+    /* Once Geist loads via the <link> above, the browser switches automatically */
+    html{font-family:'Geist',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       /* Geist & Geist Mono from Google Fonts — family names as registered */
