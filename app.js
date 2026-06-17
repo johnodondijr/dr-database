@@ -91,14 +91,7 @@ function submitForgotPassword() {
   resEl.style.display='block';
 }
 
-function setUserDisplay(display, role) {
-  const parts=display.replace(/[^a-zA-Z ]/g,'').trim().split(' ');
-  const initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():display.substring(0,2).toUpperCase();
-  ['user-chip','sidebar-user-name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=display; });
-  ['topbar-avatar','sidebar-avatar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=initials; });
-  const rEl=document.getElementById('sidebar-user-role');
-  if(rEl) rEl.textContent=(role==='admin'?'Administrator':'Staff');
-}
+// setUserDisplay is defined in the PROFILE DROPDOWN section below
 
 function doLogin() {
   const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
@@ -111,6 +104,7 @@ function doLogin() {
   sessionStorage.setItem('dr_user',JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
+  document.getElementById('bottom-nav').classList.add('visible');
   setUserDisplay(account.display, account.role);
   loadAllData();
 }
@@ -118,6 +112,7 @@ function doLogin() {
 function doLogout() {
   sessionStorage.removeItem('dr_user'); currentUser=null;
   document.getElementById('app').style.display='none';
+  document.getElementById('bottom-nav').classList.remove('visible');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('pw-input').value='';
   document.getElementById('username-input').value='';
@@ -132,6 +127,7 @@ window.addEventListener('DOMContentLoaded', () => {
       currentUser=JSON.parse(saved);
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='block';
+      document.getElementById('bottom-nav').classList.add('visible');
       setUserDisplay(currentUser.display, currentUser.role);
       loadAllData();
     } catch { sessionStorage.removeItem('dr_user'); }
@@ -928,34 +924,57 @@ function showToast(msg,type=''){
 // PROFILE DROPDOWN
 // ══════════════════════════════════════════════════════════
 function toggleProfileDropdown(e) {
-  e.stopPropagation();
+  if (e) e.stopPropagation();
   const dd = document.getElementById('profile-dropdown');
   const open = dd.classList.toggle('open');
-  // clear messages when opening
   if (open) {
+    // Reset to main menu view, clear fields
+    closeProfileEdit(true);
     const msg = document.getElementById('pd-msg');
     if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
     ['pd-new-username','pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
-    // pre-fill username field with current
     const uEl = document.getElementById('pd-new-username');
     if (uEl && currentUser) uEl.placeholder = currentUser.username;
   }
-  // rotate caret
-  const caret = document.getElementById('profile-caret');
-  if (caret) caret.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function closeProfileDropdown() {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd) dd.classList.remove('open');
+}
+
+function openProfileEdit() {
+  const panel = document.getElementById('pd-edit-panel');
+  if (panel) panel.style.display = 'block';
+}
+
+function openChangePassword() {
+  openProfileEdit(); // same panel has both username + password
+}
+
+function closeProfileEdit(silent) {
+  const panel = document.getElementById('pd-edit-panel');
+  if (panel) panel.style.display = 'none';
+  if (!silent) {
+    const msg = document.getElementById('pd-msg');
+    if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
+  }
+}
+
+function openSettings() {
+  closeProfileDropdown();
+  showToast('Settings coming soon', 'success');
+}
+
+function openHelp() {
+  closeProfileDropdown();
+  showToast('Help & Support coming soon', 'success');
 }
 
 // close dropdown when clicking outside
-document.addEventListener('click', () => {
-  const dd = document.getElementById('profile-dropdown');
-  if (dd && dd.classList.contains('open')) {
-    dd.classList.remove('open');
-    const caret = document.getElementById('profile-caret');
-    if (caret) caret.style.transform = '';
-  }
-});
+document.addEventListener('click', () => closeProfileDropdown());
 
 function saveProfileChanges() {
   const msgEl = document.getElementById('pd-msg');
@@ -971,12 +990,8 @@ function saveProfileChanges() {
 
   let changed = false;
 
-  // ── Username change ──
   if (newUsername && newUsername !== currentUser.username) {
-    if (STAFF_ACCOUNTS[newUsername] && newUsername !== currentUser.username) {
-      showMsg('That username is already taken.', 'err'); return;
-    }
-    // rename key in STAFF_ACCOUNTS
+    if (STAFF_ACCOUNTS[newUsername]) { showMsg('Username already taken.', 'err'); return; }
     STAFF_ACCOUNTS[newUsername] = { ...STAFF_ACCOUNTS[currentUser.username] };
     delete STAFF_ACCOUNTS[currentUser.username];
     currentUser.username = newUsername;
@@ -984,13 +999,12 @@ function saveProfileChanges() {
     changed = true;
   }
 
-  // ── Password change ──
   if (currentPw || newPw || confirmPw) {
-    if (!currentPw) { showMsg('Enter your current password.', 'err'); return; }
+    if (!currentPw) { showMsg('Enter current password.', 'err'); return; }
     if (currentPw !== currentUser.password) { showMsg('Current password is incorrect.', 'err'); return; }
     if (!newPw) { showMsg('Enter a new password.', 'err'); return; }
-    if (newPw.length < 6) { showMsg('New password must be at least 6 characters.', 'err'); return; }
-    if (newPw !== confirmPw) { showMsg('New passwords do not match.', 'err'); return; }
+    if (newPw.length < 6) { showMsg('Min. 6 characters required.', 'err'); return; }
+    if (newPw !== confirmPw) { showMsg('Passwords do not match.', 'err'); return; }
     STAFF_ACCOUNTS[currentUser.username].password = newPw;
     currentUser.password = newPw;
     sessionStorage.setItem('dr_user', JSON.stringify(currentUser));
@@ -998,46 +1012,35 @@ function saveProfileChanges() {
   }
 
   if (!changed) { showMsg('No changes to save.', 'err'); return; }
-  showMsg('✓ Changes saved successfully.', 'ok');
-  // clear sensitive fields
+  showMsg('✓ Saved successfully.', 'ok');
   ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  // refresh display
   setUserDisplay(currentUser.display, currentUser.role);
 }
 
-// ── Extended setUserDisplay to also fill profile dropdown ──
-const _baseSetUserDisplay = setUserDisplay;
+// ── Unified setUserDisplay ──
 function setUserDisplay(display, role) {
-  // original fields
   const parts = display.replace(/[^a-zA-Z ]/g, '').trim().split(' ');
   const initials = parts.length >= 2
     ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
     : display.substring(0, 2).toUpperCase();
 
-  ['user-chip','sidebar-user-name'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.textContent = display;
-  });
-  ['topbar-avatar','sidebar-avatar','pd-avatar','suc-avatar'].forEach(id => {
+  // topbar avatar (icon-only button)
+  ['topbar-avatar', 'pd-avatar', 'suc-avatar'].forEach(id => {
     const el = document.getElementById(id); if (el) el.textContent = initials;
   });
-  // suc-name = first name only for card
+
+  // sidebar user card
   const sucName = document.getElementById('suc-name');
   if (sucName) sucName.textContent = display;
-  // sidebar role
-  const rEl = document.getElementById('sidebar-user-role');
-  if (rEl) rEl.textContent = role === 'admin' ? 'Administrator' : 'Staff';
-  // pd name + role badge
+
+  // dropdown header
   const pdName = document.getElementById('pd-name');
   if (pdName) pdName.textContent = display;
-  const pdBadge = document.getElementById('pd-role-badge');
+
   const pdRoleText = document.getElementById('pd-role-text');
-  if (pdBadge && pdRoleText) {
-    const isAdmin = role === 'admin';
-    pdBadge.className = 'pd-role-badge' + (isAdmin ? ' admin' : '');
-    pdRoleText.textContent = isAdmin ? 'Administrator' : 'Staff';
-  }
+  if (pdRoleText) pdRoleText.textContent = role === 'admin' ? 'Administrator' : 'Staff';
 }
 
 // ══════════════════════════════════════════════════════════
