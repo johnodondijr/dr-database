@@ -1324,7 +1324,26 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
 .lp-brand-name span,.sidebar-logo-text span{color:var(--nexus-purple)!important}
 .sidebar-logo{gap:11px!important}
 .sidebar.collapsed .sidebar-logo-mark{border-radius:13px!important}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.settings-card{background:#fff;border:1px solid var(--nexus-line);border-radius:12px;padding:14px;display:flex;gap:11px;align-items:flex-start}
+.settings-card i{font-size:21px;color:var(--nexus-purple);margin-top:1px}
+.settings-card strong{display:block;font-size:13px;color:#111827;margin-bottom:3px}
+.settings-card span{display:block;font-size:11px;color:#6B7280;line-height:1.45}
+.settings-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.settings-kpi-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.settings-kpi{background:linear-gradient(145deg,#F7F6FF,#EEF6FF);border:1px solid #DDE4F8;border-radius:12px;padding:12px}
+.settings-kpi strong{display:block;font-size:22px;line-height:1;color:#111827}
+.settings-kpi span{display:block;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin-top:5px;font-weight:700}
+.help-list{display:grid;gap:10px}
+.help-item{background:#fff;border:1px solid var(--nexus-line);border-radius:12px;padding:13px 14px;display:grid;grid-template-columns:auto 1fr;gap:10px}
+.help-item i{font-size:19px;color:var(--nexus-blue)}
+.help-item strong{font-size:13px;color:#111827}
+.help-item p{font-size:11px;color:#6B7280;line-height:1.5;margin-top:2px}
+.support-box{margin-top:14px;background:linear-gradient(145deg,#EAFBFB,#F7F6FF);border:1px solid #DDE4F8;border-radius:12px;padding:14px}
+.support-box strong{display:block;color:#111827;margin-bottom:4px}
+.support-box span{display:block;color:#54617A;font-size:12px;line-height:1.5}
 @media(max-width:760px){.metric-card .metric-val.sm{font-size:22px!important}}
+@media(max-width:760px){.settings-grid,.settings-kpi-row{grid-template-columns:1fr}}
 
   </style>
 </head>
@@ -1940,6 +1959,76 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   </div>
 </div>
 
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <h3>Settings</h3>
+      <button class="modal-close" onclick="closeModal('settings-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-kpi-row" id="settings-kpis"></div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <i class="ti ti-database-export"></i>
+          <div><strong>Data backup</strong><span>Download a JSON backup of candidates, documents, timelines, stages, and local staff changes.</span></div>
+        </div>
+        <div class="settings-card">
+          <i class="ti ti-layout-list"></i>
+          <div><strong>Pipeline stages</strong><span>Manage Professional and LB stages from the table controls without leaving your workflow.</span></div>
+        </div>
+        <div class="settings-card">
+          <i class="ti ti-filter-off"></i>
+          <div><strong>Filters</strong><span>Clear active search text, stage pills, and table filters across both candidate lists.</span></div>
+        </div>
+        <div class="settings-card">
+          <i class="ti ti-cloud-check"></i>
+          <div><strong>Storage mode</strong><span id="settings-storage-mode">Checking storage…</span></div>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="btn primary" onclick="downloadBackup()"><i class="ti ti-download"></i> Download backup</button>
+        <button class="btn" onclick="resetAllFilters()"><i class="ti ti-filter-off"></i> Clear filters</button>
+        <button class="btn" onclick="closeModal('settings-modal');switchTab('pro')"><i class="ti ti-briefcase"></i> Professional settings</button>
+        <button class="btn" onclick="closeModal('settings-modal');switchTab('lb')"><i class="ti ti-home"></i> LB settings</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('settings-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-bg" id="help-modal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <h3>Help & Support</h3>
+      <button class="modal-close" onclick="closeModal('help-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="help-list">
+        <div class="help-item"><i class="ti ti-user-plus"></i><div><strong>Add or edit candidates</strong><p>Use the Add buttons in Professional or LB Jobs. Click any table row or kanban card to edit that candidate.</p></div></div>
+        <div class="help-item"><i class="ti ti-paperclip"></i><div><strong>Attach documents</strong><p>Click the document icon in a candidate row, paste a Google Drive folder link, then save it.</p></div></div>
+        <div class="help-item"><i class="ti ti-layout-columns"></i><div><strong>Track pipeline progress</strong><p>Use Kanban Board for stage views, Calendar for date-based follow-up, and Reports for summaries.</p></div></div>
+        <div class="help-item"><i class="ti ti-file-export"></i><div><strong>Export records</strong><p>Use table exports for CSV downloads. Use Reports export when you need a PDF-style printout.</p></div></div>
+      </div>
+      <div class="support-box">
+        <strong>Support note</strong>
+        <span>Dreco currently stores data locally unless Supabase credentials are configured in the file. For a live multi-user office workflow, configure Supabase before relying on shared data sync.</span>
+      </div>
+      <div class="settings-actions">
+        <button class="btn primary" onclick="closeModal('help-modal');switchTab('dash')"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+        <button class="btn" onclick="closeModal('help-modal');switchTab('reports')"><i class="ti ti-chart-bar"></i> Reports</button>
+        <button class="btn" onclick="closeModal('help-modal');openSettings()"><i class="ti ti-settings"></i> Settings</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('help-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bottom-nav" id="bottom-nav">
   <button class="bottom-nav-item active" id="bnav-dash" onclick="switchTab('dash');setBottomNav('dash')">
@@ -2328,10 +2417,11 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch { safeSessionRemove('dr_user'); }
   }
   rebuildStageSelects();
-  ['pro-modal','lb-modal','docs-modal'].forEach(id=>{
+  ['pro-modal','lb-modal','docs-modal','settings-modal','help-modal'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.addEventListener('click',e=>{ if(e.target===el) closeModal(id); });
   });
+  document.getElementById('profile-dropdown')?.addEventListener('click',e=>e.stopPropagation());
   bindModalSummaries();
 });
 
@@ -2764,8 +2854,54 @@ function exportReportPDF(){
   renderReports();
   window.print();
 }
-function openSettings(){ showToast('Use the stage settings buttons in each table for now.','success'); }
-function openHelp(){ showToast('Need help? Check login, filters, exports, and document links from each table.','success'); }
+function openSettings(){
+  closeProfileDropdown();
+  const kpis=document.getElementById('settings-kpis');
+  if(kpis) kpis.innerHTML=`
+    <div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div>
+    <div class="settings-kpi"><strong>${lbDB.length}</strong><span>LB records</span></div>
+    <div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`;
+  const mode=document.getElementById('settings-storage-mode');
+  if(mode) mode.textContent=db?'Supabase is configured. Records sync through your database.':'Local browser storage is active. Configure Supabase for shared cloud sync.';
+  document.getElementById('settings-modal')?.classList.add('open');
+}
+function openHelp(){
+  closeProfileDropdown();
+  document.getElementById('help-modal')?.classList.add('open');
+}
+function downloadBackup(){
+  const backup={
+    exportedAt:new Date().toISOString(),
+    storageMode:db?'supabase':'local',
+    pro:proDB,
+    lb:lbDB,
+    docs:allDocs,
+    timelines:allTimelines,
+    proStages,
+    lbStages,
+    staffAccounts:STAFF_ACCOUNTS,
+  };
+  const a=Object.assign(document.createElement('a'),{
+    href:URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'})),
+    download:`Dreco_Backup_${new Date().toISOString().split('T')[0]}.json`
+  });
+  a.click();
+  showToast('Backup downloaded','success');
+}
+function resetAllFilters(){
+  window.proStagePillFilter='';
+  window.lbTravelPillFilter='';
+  window.lbPPFilter='';
+  ['global-search','pro-search','lb-search'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['pro-company-f','pro-position-f','pro-action-f','lb-refund-f','lb-action-f'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.querySelectorAll('#pro-stage-pills .pill-tab,#lb-travel-pills .pill-tab,#lb-pp-pills .pill-tab').forEach(btn=>btn.classList.remove('active'));
+  document.querySelector('#lb-travel-pills .pill-tab')?.classList.add('active');
+  document.querySelector('#lb-pp-pills .pill-tab')?.classList.add('active');
+  rebuildProPills();
+  proPage=1; lbPage=1;
+  renderPro(); renderLB();
+  showToast('Filters cleared','success');
+}
 function switchModalTab(modal,tab,btn){
   const tabs=modal==='pro'?['details','pipeline','commission','timeline']:['details','refunds','timeline'];
   tabs.forEach(tt=>{ const el=document.getElementById(`${modal}-tab-${tt}`); if(el) el.style.display=tt===tab?'':'none'; });
@@ -3468,15 +3604,36 @@ function toggleProfileDropdown(e) {
   const caret = document.getElementById('profile-caret');
   if (caret) caret.style.transform = open ? 'rotate(180deg)' : '';
 }
+function closeProfileDropdown() {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd) dd.classList.remove('open');
+  const caret = document.getElementById('profile-caret');
+  if (caret) caret.style.transform = '';
+}
+function openProfileEdit() {
+  const panel=document.getElementById('pd-edit-panel');
+  if(panel) panel.style.display='block';
+  const msg=document.getElementById('pd-msg');
+  if(msg){ msg.textContent=''; msg.className='pd-msg'; }
+  const userInput=document.getElementById('pd-new-username');
+  if(userInput && currentUser){ userInput.value=currentUser.username; userInput.placeholder=currentUser.username; }
+  ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  setTimeout(()=>userInput?.focus(),0);
+}
+function closeProfileEdit() {
+  const panel=document.getElementById('pd-edit-panel');
+  if(panel) panel.style.display='none';
+  const msg=document.getElementById('pd-msg');
+  if(msg){ msg.textContent=''; msg.className='pd-msg'; }
+}
+function openChangePassword() {
+  openProfileEdit();
+  setTimeout(()=>document.getElementById('pd-current-pw')?.focus(),0);
+}
 
 // close dropdown when clicking outside
 document.addEventListener('click', () => {
-  const dd = document.getElementById('profile-dropdown');
-  if (dd && dd.classList.contains('open')) {
-    dd.classList.remove('open');
-    const caret = document.getElementById('profile-caret');
-    if (caret) caret.style.transform = '';
-  }
+  closeProfileDropdown();
 });
 
 function saveProfileChanges() {
