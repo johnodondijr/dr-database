@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dreco</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* ── FONT FALLBACK — fires before Google Fonts response, prevents FOUT ── */
@@ -1315,6 +1315,15 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
 .sidebar.collapsed .nav-item.active,.bottom-nav-item.active{background:#EFEEFF!important;color:var(--nexus-purple)!important}
 .sidebar.collapsed .nav-item.active i,.bottom-nav-item.active i{color:var(--nexus-purple)!important}
 .report-bar-count{background:transparent!important;border:0!important;padding:0!important;border-radius:0!important;bottom:calc(var(--bar-height,0%) + 12px)!important;color:#111827!important;font-size:12px!important;font-weight:800!important}
+.lp-logo-mark,.sidebar-logo-mark{background:linear-gradient(135deg,var(--nexus-purple) 0%,var(--nexus-lavender) 100%)!important;border-radius:11px!important;box-shadow:0 10px 22px rgba(83,71,206,.18)!important}
+.lp-logo-mark svg path,.sidebar-logo-mark svg path{fill:#fff!important}
+.lp-logo-mark svg path:nth-child(2),.sidebar-logo-mark svg path:nth-child(2){opacity:.68!important}
+.lp-logo-mark svg path:nth-child(3),.sidebar-logo-mark svg path:nth-child(3){opacity:.38!important}
+.lp-logo-mark svg path:nth-child(4),.sidebar-logo-mark svg path:nth-child(4){opacity:.28!important}
+.lp-brand-name,.sidebar-logo-text{font-family:'Manrope',var(--font-heading)!important;font-size:19px!important;font-weight:800!important;letter-spacing:-.045em!important;color:var(--nexus-purple)!important;text-transform:none!important}
+.lp-brand-name span,.sidebar-logo-text span{color:var(--nexus-purple)!important}
+.sidebar-logo{gap:11px!important}
+.sidebar.collapsed .sidebar-logo-mark{border-radius:13px!important}
 @media(max-width:760px){.metric-card .metric-val.sm{font-size:22px!important}}
 
   </style>
@@ -1340,7 +1349,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <path d="M16 3H20C21.1046 3 22 3.89543 22 5V8C22 9.10457 21.1046 10 20 10H16C14.8954 10 14 9.10457 14 8V5C14 3.89543 14.8954 3 16 3Z" fill="white" opacity=".25"/>
           </svg>
         </div>
-        <span class="lp-brand-name">dre<span>co</span></span>
+        <span class="lp-brand-name">Dreco</span>
       </div>
       <div class="lp-content-area">
         <div id="login-main">
@@ -1472,7 +1481,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
               <path d="M16 3H20C21.1046 3 22 3.89543 22 5V8C22 9.10457 21.1046 10 20 10H16C14.8954 10 14 9.10457 14 8V5C14 3.89543 14.8954 3 16 3Z" fill="white" opacity=".4"/>
             </svg>
           </div>
-          <span class="sidebar-logo-text">dre<span>co</span></span>
+          <span class="sidebar-logo-text">Dreco</span>
         </a>
         <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
           <i class="ti ti-layout-sidebar-left-collapse"></i>
