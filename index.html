@@ -4,23 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dreco</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* ── FONT FALLBACK — fires before Google Fonts response, prevents FOUT ── */
-    /* Once Geist loads via the <link> above, the browser switches automatically */
+    /* Once Poppins loads via the <link> above, the browser switches automatically */
     html{font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      /* Geist & Geist Mono from Google Fonts — family names as registered */
+      /* Poppins font family from Google Fonts */
       --font-heading: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --font-body: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --font-mono: 'Geist Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;      
       /* ── NEW PALETTE (cp1): lime-yellow accent, near-black, sage green ── */
       --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
       --accent-light:#F7FDE0;--accent-lighter:#FBFEF2;
-      --ink:#2D2F29;--ink-2:#3A3C35;
+      --ink:#18191B;--ink-2:#1E2023;
       --sage:#7D8C76;--sage-dark:#5A6854;--sage-light:#EAF0E8;
       --green:#22A06B;--green-dark:#197A52;--green-light:#E3F5EE;
       --amber:#B07B10;--amber-light:#FDF3DC;
@@ -33,7 +33,7 @@
       --bg:#F3F3F3;--surface:#FAFAFA;--surface-2:#FFFFFF;
       --border:#E8E8E8;--border-2:#D4D4D4;
       /* ── TEXT ── */
-      --text:#2D2F29;--text-2:#6D7068;--text-3:#9B9E95;
+      --text:#18191B;--text-2:#555;--text-3:#999;
       /* ── SHAPE ── */
       --radius:10px;--radius-lg:16px;--radius-xl:22px;--radius-pill:999px;
       /* ── SHADOW ── */
@@ -922,224 +922,178 @@ th{color:#77786D!important;background:transparent!important}td{background:#F3F2E
 
   
 
-    /* ─────────────────────────────────────────────
-       DRECO SOFT TYPOGRAPHY REFINEMENT v1.2
-       Matches the reference UI: rounded Poppins, softer charcoal,
-       lower weight hierarchy, premium warm-pastel balance.
-    ───────────────────────────────────────────── */
+    /* ──────────────────────────────────────────────────────────────
+       DRECO SOFT UI v1.2 — Typography refinement
+       Softer Poppins hierarchy inspired by the reference UI.
+       Keeps the existing vertical sidebar structure intact.
+    ────────────────────────────────────────────────────────────── */
     :root{
       --font-heading:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       --font-body:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      --ink:#2D2F29;
-      --ink-2:#3A3C35;
-      --text:#2D2F29;
-      --text-2:#6D7068;
-      --text-3:#9B9E95;
-      --heading:#303229;
-      --heading-soft:#41443B;
-      --value:#252720;
-      --muted-heading:#8C9086;
+      --font-mono:'Poppins',ui-monospace,'Cascadia Code',monospace;
+      --text:#34342D;
+      --text-strong:#24251F;
+      --text-soft:#5F6258;
+      --text-2:#686A60;
+      --text-3:#9A9A8E;
+      --heading:#303127;
+      --heading-soft:#45473D;
+      --ink:#23251F;
+      --ink-2:#2D2F28;
     }
 
-    html,body,input,button,select,textarea,table{
+    html,body,input,select,textarea,button,table{
       font-family:var(--font-body)!important;
       color:var(--text);
-      font-weight:400;
       letter-spacing:-.015em;
+      font-weight:400;
     }
 
     body{
       color:var(--text);
+      font-size:13px;
       font-weight:400;
-      -webkit-font-smoothing:antialiased;
-      text-rendering:geometricPrecision;
+      font-feature-settings:'kern' 1,'tnum' 1;
+      text-rendering:optimizeLegibility;
     }
 
     h1,h2,h3,h4,h5,h6,
     .lp-brand-name,.lp-header h1,.wb-left h2,
     .topbar-title,.panel-title,.modal-header h3,
-    .kanban-col-title,.kanban-card-name,.report-card-title,
-    .sidebar-logo-text,.pd-name,.suc-name,.nav-section-label,
-    .dash-card h3,.section-eyebrow,
-    .spotlight-label,.spotlight-section{
+    .metric-val,.p-card-count,.spotlight-amount,
+    .wb-stat-val,.rev-cell-val,.kanban-col-title,
+    .kanban-card-name,.report-card-title,
+    .sidebar-logo-text,.pd-name,.suc-name,
+    .nav-section-label{
       font-family:var(--font-heading)!important;
       color:var(--heading);
-      font-weight:600!important;
-      letter-spacing:-.025em!important;
+      letter-spacing:-.035em;
+      font-weight:600;
     }
 
+    /* Login title was visually too heavy */
     .lp-header h1{
-      font-size:27px;
-      font-weight:700!important;
-      color:var(--heading);
-      letter-spacing:-.055em!important;
+      font-size:28px;
+      font-weight:600!important;
+      color:var(--heading)!important;
+      letter-spacing:-.055em;
       line-height:1.08;
     }
+    .lp-header p{color:var(--text-3);font-weight:400;letter-spacing:-.01em}
+    .lp-brand-name{font-weight:600!important;color:var(--heading)!important;letter-spacing:-.045em}
+    .lp-input-group label{font-weight:500;color:var(--text-3);letter-spacing:.055em}
+    .lp-input-wrap input{font-weight:400;color:var(--text);letter-spacing:-.01em}
+    .lp-submit{font-weight:500;letter-spacing:-.01em}
 
-    .topbar-title,
-    .panel-title,
-    .modal-header h3{
+    /* Headings and panel titles */
+    .topbar-title,.panel-title,.dash-card h3,.modal-header h3,
+    .section-eyebrow,.report-card-title,.kanban-col-title{
       font-weight:600!important;
-      color:var(--heading-soft);
-    }
-
-    .section-eyebrow,
-    .dash-card h3,
-    .metric-label,
-    .p-card-label,
-    .wb-stat-label,
-    th,
-    .nav-section-label,
-    .spotlight-label,
-    .spotlight-section{
-      color:var(--muted-heading)!important;
-      font-weight:600!important;
-      letter-spacing:.055em!important;
-    }
-
-    .metric-val,
-    .p-card-count,
-    .spotlight-amount,
-    .wb-stat-val,
-    .rev-cell-val,
-    .dash-row-val{
-      font-family:var(--font-heading)!important;
-      color:var(--value);
-      font-weight:700!important;
-      letter-spacing:-.045em!important;
-      line-height:1.05;
-    }
-
-    .metric-val.sm,
-    .p-card-count[style],
-    .spotlight-amount{
-      font-weight:700!important;
-      letter-spacing:-.035em!important;
-    }
-
-    .metric-val.green,
-    .dash-row-val[style*="green"],
-    .spotlight-amount{
-      color:#5F8D22!important;
-    }
-
-    .metric-val.amber,
-    .balance-owed,
-    .dash-row-val[style*="amber"]{
-      color:#8D6C18!important;
-    }
-
-    .metric-val.red,
-    .dash-row-val[style*="red"]{
-      color:#A54848!important;
-    }
-
-    .metric-val.blue,
-    .dash-row-val[style*="blue"]{
-      color:#5579A8!important;
-    }
-
-    .p-card,
-    .metric-card,
-    .dash-card,
-    .panel,
-    .quick-link,
-    .meeting-card,
-    .kanban-card,
-    .modal-content{
-      color:var(--text);
-    }
-
-    .p-card.card-gold .p-card-count,
-    .p-card.card-gold .p-card-sub,
-    .p-card.card-gold .p-card-label,
-    .p-card.card-gold{color:#504D32!important;}
-    .p-card.card-blue .p-card-count,
-    .p-card.card-blue .p-card-sub,
-    .p-card.card-blue .p-card-label,
-    .p-card.card-blue{color:#3B4B64!important;}
-    .p-card.card-mint .p-card-count,
-    .p-card.card-mint .p-card-sub,
-    .p-card.card-mint .p-card-label,
-    .p-card.card-mint{color:#315C50!important;}
-
-    .p-card-sub,
-    .dash-row-label,
-    .lp-header p,
-    .click-hint,
-    .pp-cell,
-    .save-label,
-    .topbar-search input,
-    .search-wrap input,
-    td{
-      color:var(--text-2);
-      font-weight:400;
-    }
-
-    .name-cell,
-    .pd-name,
-    .kanban-card-name,
-    .tl-action-modal,
-    .report-card-title{
       color:var(--heading-soft)!important;
-      font-weight:600!important;
+      letter-spacing:-.025em;
+    }
+    .section-eyebrow,.dash-card h3,.metric-label,.p-card-label,
+    th,.nav-section-label,.spotlight-label,.spotlight-section{
+      font-weight:500!important;
+      color:var(--text-3)!important;
+      letter-spacing:.055em;
     }
 
-    .btn,
-    .pill-tab,
-    .toolbar-select,
-    .lp-submit,
-    .nav-item-label,
+    /* Dashboard cards: softer, premium number hierarchy */
+    .p-card-count{
+      font-weight:600!important;
+      color:var(--text-strong)!important;
+      letter-spacing:-.045em;
+      line-height:1.03;
+    }
+    .p-card-label,.p-card-sub{
+      color:var(--text-soft)!important;
+      font-weight:500!important;
+    }
+    .card-dark .p-card-count,.card-dark .p-card-label,.card-dark .p-card-sub{color:#F7F4E9!important}
+    .card-gold .p-card-icon,.card-slate .p-card-icon,.p-card-icon{opacity:.16;color:rgba(35,37,31,.42)}
+
+    .metric-val{
+      font-weight:600!important;
+      color:var(--text-strong)!important;
+      letter-spacing:-.04em;
+    }
+    .metric-val.sm{font-weight:600!important;letter-spacing:-.035em}
+    .metric-label{font-size:10px;color:var(--text-3)!important}
+    .metric-val.green{color:#268263!important}
+    .metric-val.amber{color:#8D6508!important}
+    .metric-val.red{color:#A13B38!important}
+    .metric-val.blue{color:#376994!important}
+
+    /* Tables and records */
+    th{font-weight:500!important;color:var(--text-3)!important;background:#F0EFEA}
+    td{font-weight:400;color:var(--text-soft)}
+    .name-cell,.pd-name,.kanban-card-name,.suc-name{
+      font-weight:500!important;
+      color:var(--heading)!important;
+      letter-spacing:-.025em;
+    }
+    .pp-cell,.dash-row-label,.click-hint,.save-label,.modal-subtitle{
+      color:var(--text-3)!important;
+      font-weight:400!important;
+    }
+    .dash-row-val,.balance-owed{font-weight:500!important;color:var(--heading-soft)!important}
+
+    /* Badges: less harsh text, consistent pastel feel */
     .badge{
       font-weight:500!important;
-      letter-spacing:-.01em!important;
+      letter-spacing:-.005em;
+      color:#3F4337;
+    }
+    .b-pol,.b-notyet,.b-applied{background:#DDE9FA!important;color:#385979!important}
+    .b-mol,.b-incomplete,.b-pushed{background:#FFF1BF!important;color:#75601F!important}
+    .b-visa{background:#F8D9EA!important;color:#704D62!important}
+    .b-travel{background:#E4E1F7!important;color:#565078!important}
+    .b-travelled,.b-complete,.b-hadpp{background:#D8F3E7!important;color:#356B55!important}
+    .b-returned,.b-nottravelled,.b-notapplied{background:#F7DAD8!important;color:#7A4743!important}
+    .b-na{background:#EFEDEA!important;color:#777568!important}
+
+    /* Buttons / navigation */
+    .btn,.pill-tab,.toolbar-select,.page-btn,.nav-item-label{
+      font-weight:500!important;
+      letter-spacing:-.01em;
+    }
+    .btn.primary{color:#F7F4E9!important;background:#282A24!important;border-color:#282A24!important}
+    .pill-tab.active,.page-btn.active{background:#282A24!important;color:#F7F4E9!important}
+    .sidebar-logo-text{font-weight:600!important;color:#F7F4E9!important;letter-spacing:-.04em}
+    .nav-item{color:#9EA196!important}
+    .nav-item.active{color:#252720!important;background:#F1F27D!important}
+    .nav-item.active i{color:#252720!important}
+
+    /* Right/user cards and activity components */
+    .topbar-user,.profile-card,.dash-card,.panel,.metric-card,
+    .kanban-card,.report-card,.calendar-event,.modal-content{
+      color:var(--text);
+    }
+    .topbar-user-name,.profile-name,.user-name{
+      font-weight:500!important;
+      color:var(--heading)!important;
+      letter-spacing:-.02em;
+    }
+    .topbar-user-role,.profile-role,.user-role{
+      font-weight:400!important;
+      color:var(--text-3)!important;
     }
 
-    .btn.primary,
-    .sidebar,
-    .lp-submit,
-    .nav-item.active{
-      background:#252720!important;
-    }
-
-    .btn.primary,
-    .lp-submit{
-      color:#F7F1E7!important;
-    }
-
-    .sidebar-logo-text,
-    .sidebar .nav-item,
-    .sidebar .nav-item i{
-      color:rgba(255,255,255,.68);
-    }
-
-    .sidebar .nav-item.active,
-    .sidebar .nav-item.active i{
-      color:#F7F1E7!important;
-    }
-
-    .badge{
-      color:#4A4D43;
-      font-size:10px;
-    }
-
-    .b-pol,.b-notyet,.b-applied{background:#DDEAF8!important;color:#4A6687!important;}
-    .b-mol,.b-incomplete,.b-pushed{background:#FFF1BC!important;color:#7A651F!important;}
-    .b-visa{background:#F8D9ED!important;color:#764D67!important;}
-    .b-travel{background:#E5E0F6!important;color:#5F5A80!important;}
-    .b-travelled,.b-complete,.b-hadpp{background:#DDF4EA!important;color:#3D705F!important;}
-    .b-returned,.b-nottravelled,.b-notapplied{background:#F6D9D5!important;color:#8A4D45!important;}
-    .b-na{background:#ECEBE6!important;color:#777A70!important;}
-
-    strong,b{font-weight:600;color:var(--heading-soft);}
+    /* Preserve soft color palette across common surfaces */
+    .panel,.dash-card,.metric-card,.modal-content{background:#FFFEFA;border-color:#E8E4DA}
+    .content-area{background:#F7F5EF}
+    .topbar{background:#FFFEFA;border-bottom-color:#E8E4DA}
+    .search-wrap input,.topbar-search input,.toolbar-select{background:#F2F0EA;color:var(--text-soft)}
+    .search-wrap input:focus,.topbar-search input:focus{background:#FFFEFA;border-color:#D7D66B;box-shadow:0 0 0 3px rgba(215,214,107,.16)}
 
     @media(max-width:700px){
-      .lp-header h1{font-size:24px;}
-      .metric-val{font-size:27px;}
-      .p-card-count{font-size:30px;}
+      .lp-header h1{font-size:25px}
+      .p-card-count{font-size:30px}
+      .metric-val{font-size:26px}
+      body{font-size:12.5px}
     }
-
-  </style>
+</style>
 </head>
 <body>
 
