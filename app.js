@@ -3,16 +3,8 @@
 // ══════════════════════════════════════════════════════════
 const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';       // e.g. https://abcxyz.supabase.co
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
-const HAS_SUPABASE_CONFIG =
-  SUPABASE_URL &&
-  SUPABASE_ANON_KEY &&
-  !SUPABASE_URL.includes('YOUR_') &&
-  !SUPABASE_ANON_KEY.includes('YOUR_');
-const db = HAS_SUPABASE_CONFIG && window.supabase
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
-const LOCAL_STORE_KEY = 'dreco_local_store_v1';
-const LOCAL_STAFF_KEY = 'dreco_staff_accounts_v1';
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ══════════════════════════════════════════════════════════
 // STAFF ACCOUNTS
@@ -26,33 +18,6 @@ const STAFF_ACCOUNTS = {
 };
 const RECOVERY_CODE = 'DR-RESET-2025';
 
-function loadStaffAccounts() {
-  try {
-    const saved = safeLocalGet(LOCAL_STAFF_KEY);
-    if (saved) Object.assign(STAFF_ACCOUNTS, JSON.parse(saved));
-  } catch (err) {
-    console.warn('Saved staff accounts could not be loaded:', err);
-  }
-}
-function saveStaffAccounts() {
-  safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
-}
-
-function safeLocalGet(key) {
-  try { return localStorage.getItem(key); } catch { return null; }
-}
-function safeLocalSet(key, value) {
-  try { localStorage.setItem(key, value); } catch { /* file pages may block storage */ }
-}
-function safeSessionGet(key) {
-  try { return sessionStorage.getItem(key); } catch { return null; }
-}
-function safeSessionSet(key, value) {
-  try { sessionStorage.setItem(key, value); } catch { /* login still works without session restore */ }
-}
-function safeSessionRemove(key) {
-  try { sessionStorage.removeItem(key); } catch { /* ignore */ }
-}
 
 // ══════════════════════════════════════════════════════════
 // STATE
