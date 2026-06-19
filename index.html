@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dreco</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* ── FONT FALLBACK — fires before Google Fonts response, prevents FOUT ── */
@@ -20,7 +20,7 @@
       /* ── NEW PALETTE (cp1): lime-yellow accent, near-black, sage green ── */
       --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
       --accent-light:#F7FDE0;--accent-lighter:#FBFEF2;
-      --ink:#18191B;--ink-2:#1E2023;
+      --ink:#2D2F29;--ink-2:#3A3C35;
       --sage:#7D8C76;--sage-dark:#5A6854;--sage-light:#EAF0E8;
       --green:#22A06B;--green-dark:#197A52;--green-light:#E3F5EE;
       --amber:#B07B10;--amber-light:#FDF3DC;
@@ -33,7 +33,7 @@
       --bg:#F3F3F3;--surface:#FAFAFA;--surface-2:#FFFFFF;
       --border:#E8E8E8;--border-2:#D4D4D4;
       /* ── TEXT ── */
-      --text:#18191B;--text-2:#555;--text-3:#999;
+      --text:#2D2F29;--text-2:#6D7068;--text-3:#9B9E95;
       /* ── SHAPE ── */
       --radius:10px;--radius-lg:16px;--radius-xl:22px;--radius-pill:999px;
       /* ── SHADOW ── */
@@ -919,6 +919,225 @@ th{color:#77786D!important;background:transparent!important}td{background:#F3F2E
 .due-item{color:var(--ink)!important}.due-item:nth-child(4n+1){background:var(--yellow-pastel)!important}.due-item:nth-child(4n+2){background:var(--pink-pastel)!important}.due-item:nth-child(4n+3){background:var(--blue-pastel)!important}.due-item:nth-child(4n){background:var(--mint-pastel)!important}.due-stage,.due-date,.tl-meta{color:#5F6257!important}.tl-item{background:#F3F2EC!important}.tl-action{color:var(--ink)!important}
 
 @media(max-width:760px){.sidebar{display:none!important}.bottom-nav{background:#0D0E0C!important}.bottom-nav-item{color:rgba(255,255,255,.58)!important}.bottom-nav-item.active{color:var(--accent)!important}}
+
+  
+
+    /* ─────────────────────────────────────────────
+       DRECO SOFT TYPOGRAPHY REFINEMENT v1.2
+       Matches the reference UI: rounded Poppins, softer charcoal,
+       lower weight hierarchy, premium warm-pastel balance.
+    ───────────────────────────────────────────── */
+    :root{
+      --font-heading:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --font-body:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --ink:#2D2F29;
+      --ink-2:#3A3C35;
+      --text:#2D2F29;
+      --text-2:#6D7068;
+      --text-3:#9B9E95;
+      --heading:#303229;
+      --heading-soft:#41443B;
+      --value:#252720;
+      --muted-heading:#8C9086;
+    }
+
+    html,body,input,button,select,textarea,table{
+      font-family:var(--font-body)!important;
+      color:var(--text);
+      font-weight:400;
+      letter-spacing:-.015em;
+    }
+
+    body{
+      color:var(--text);
+      font-weight:400;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:geometricPrecision;
+    }
+
+    h1,h2,h3,h4,h5,h6,
+    .lp-brand-name,.lp-header h1,.wb-left h2,
+    .topbar-title,.panel-title,.modal-header h3,
+    .kanban-col-title,.kanban-card-name,.report-card-title,
+    .sidebar-logo-text,.pd-name,.suc-name,.nav-section-label,
+    .dash-card h3,.section-eyebrow,
+    .spotlight-label,.spotlight-section{
+      font-family:var(--font-heading)!important;
+      color:var(--heading);
+      font-weight:600!important;
+      letter-spacing:-.025em!important;
+    }
+
+    .lp-header h1{
+      font-size:27px;
+      font-weight:700!important;
+      color:var(--heading);
+      letter-spacing:-.055em!important;
+      line-height:1.08;
+    }
+
+    .topbar-title,
+    .panel-title,
+    .modal-header h3{
+      font-weight:600!important;
+      color:var(--heading-soft);
+    }
+
+    .section-eyebrow,
+    .dash-card h3,
+    .metric-label,
+    .p-card-label,
+    .wb-stat-label,
+    th,
+    .nav-section-label,
+    .spotlight-label,
+    .spotlight-section{
+      color:var(--muted-heading)!important;
+      font-weight:600!important;
+      letter-spacing:.055em!important;
+    }
+
+    .metric-val,
+    .p-card-count,
+    .spotlight-amount,
+    .wb-stat-val,
+    .rev-cell-val,
+    .dash-row-val{
+      font-family:var(--font-heading)!important;
+      color:var(--value);
+      font-weight:700!important;
+      letter-spacing:-.045em!important;
+      line-height:1.05;
+    }
+
+    .metric-val.sm,
+    .p-card-count[style],
+    .spotlight-amount{
+      font-weight:700!important;
+      letter-spacing:-.035em!important;
+    }
+
+    .metric-val.green,
+    .dash-row-val[style*="green"],
+    .spotlight-amount{
+      color:#5F8D22!important;
+    }
+
+    .metric-val.amber,
+    .balance-owed,
+    .dash-row-val[style*="amber"]{
+      color:#8D6C18!important;
+    }
+
+    .metric-val.red,
+    .dash-row-val[style*="red"]{
+      color:#A54848!important;
+    }
+
+    .metric-val.blue,
+    .dash-row-val[style*="blue"]{
+      color:#5579A8!important;
+    }
+
+    .p-card,
+    .metric-card,
+    .dash-card,
+    .panel,
+    .quick-link,
+    .meeting-card,
+    .kanban-card,
+    .modal-content{
+      color:var(--text);
+    }
+
+    .p-card.card-gold .p-card-count,
+    .p-card.card-gold .p-card-sub,
+    .p-card.card-gold .p-card-label,
+    .p-card.card-gold{color:#504D32!important;}
+    .p-card.card-blue .p-card-count,
+    .p-card.card-blue .p-card-sub,
+    .p-card.card-blue .p-card-label,
+    .p-card.card-blue{color:#3B4B64!important;}
+    .p-card.card-mint .p-card-count,
+    .p-card.card-mint .p-card-sub,
+    .p-card.card-mint .p-card-label,
+    .p-card.card-mint{color:#315C50!important;}
+
+    .p-card-sub,
+    .dash-row-label,
+    .lp-header p,
+    .click-hint,
+    .pp-cell,
+    .save-label,
+    .topbar-search input,
+    .search-wrap input,
+    td{
+      color:var(--text-2);
+      font-weight:400;
+    }
+
+    .name-cell,
+    .pd-name,
+    .kanban-card-name,
+    .tl-action-modal,
+    .report-card-title{
+      color:var(--heading-soft)!important;
+      font-weight:600!important;
+    }
+
+    .btn,
+    .pill-tab,
+    .toolbar-select,
+    .lp-submit,
+    .nav-item-label,
+    .badge{
+      font-weight:500!important;
+      letter-spacing:-.01em!important;
+    }
+
+    .btn.primary,
+    .sidebar,
+    .lp-submit,
+    .nav-item.active{
+      background:#252720!important;
+    }
+
+    .btn.primary,
+    .lp-submit{
+      color:#F7F1E7!important;
+    }
+
+    .sidebar-logo-text,
+    .sidebar .nav-item,
+    .sidebar .nav-item i{
+      color:rgba(255,255,255,.68);
+    }
+
+    .sidebar .nav-item.active,
+    .sidebar .nav-item.active i{
+      color:#F7F1E7!important;
+    }
+
+    .badge{
+      color:#4A4D43;
+      font-size:10px;
+    }
+
+    .b-pol,.b-notyet,.b-applied{background:#DDEAF8!important;color:#4A6687!important;}
+    .b-mol,.b-incomplete,.b-pushed{background:#FFF1BC!important;color:#7A651F!important;}
+    .b-visa{background:#F8D9ED!important;color:#764D67!important;}
+    .b-travel{background:#E5E0F6!important;color:#5F5A80!important;}
+    .b-travelled,.b-complete,.b-hadpp{background:#DDF4EA!important;color:#3D705F!important;}
+    .b-returned,.b-nottravelled,.b-notapplied{background:#F6D9D5!important;color:#8A4D45!important;}
+    .b-na{background:#ECEBE6!important;color:#777A70!important;}
+
+    strong,b{font-weight:600;color:var(--heading-soft);}
+
+    @media(max-width:700px){
+      .lp-header h1{font-size:24px;}
+      .metric-val{font-size:27px;}
+      .p-card-count{font-size:30px;}
+    }
 
   </style>
 </head>
