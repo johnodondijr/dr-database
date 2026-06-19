@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dreco</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* ── FONT FALLBACK — fires before Google Fonts response, prevents FOUT ── */
@@ -938,6 +938,64 @@ th{color:#77786D!important;background:transparent!important}td{background:#F3F2E
 .due-item{color:var(--ink)!important}.due-item:nth-child(4n+1){background:var(--yellow-pastel)!important}.due-item:nth-child(4n+2){background:var(--pink-pastel)!important}.due-item:nth-child(4n+3){background:var(--blue-pastel)!important}.due-item:nth-child(4n){background:var(--mint-pastel)!important}.due-stage,.due-date,.tl-meta{color:#5F6257!important}.tl-item{background:#F3F2EC!important}.tl-action{color:var(--ink)!important}
 
 @media(max-width:760px){.sidebar{display:none!important}.bottom-nav{background:#0D0E0C!important}.bottom-nav-item{color:rgba(255,255,255,.58)!important}.bottom-nav-item.active{color:var(--accent)!important}}
+
+/* ═════════════════════════════════════════════════════════════
+   DRECO TYPOGRAPHY + REPORTS REFINEMENT
+   Cleaner database feel: Inter for UI, IBM Plex Mono for identifiers.
+   ═════════════════════════════════════════════════════════════ */
+:root{
+  --font-heading:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','Cascadia Code','SFMono-Regular',ui-monospace,monospace;
+}
+html,body,button,input,select,textarea{font-family:var(--font-body)!important;letter-spacing:0}
+body{font-size:13px;font-weight:400}
+h1,h2,h3,h4,h5,h6,
+.lp-brand-name,.lp-header h1,.wb-left h2,.topbar-title,.panel-title,.modal-header h3,
+.metric-val,.p-card-count,.spotlight-amount,.wb-stat-val,.rev-cell-val,.kanban-col-title,
+.kanban-card-name,.report-card-title,.sidebar-logo-text,.pd-name,.suc-name{
+  font-family:var(--font-heading)!important;
+  letter-spacing:0!important;
+}
+.sidebar-logo-text{font-weight:800!important}
+.topbar-title,.panel-title,.modal-header h3{font-weight:700!important}
+.metric-val,.p-card-count,.spotlight-amount,.wb-stat-val,.rev-cell-val{font-weight:800!important}
+.nav-item-label,.btn,.pill-tab,.toolbar-select,.field label,.metric-label,.dash-card h3,
+.section-eyebrow,.report-card-title,th{font-weight:600!important}
+.name-cell,.kanban-card-name{font-weight:700!important}
+.pp-cell,code,.mono,.report-kpi-value{font-family:var(--font-mono)!important}
+th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,.wb-stat-label{letter-spacing:.04em!important}
+
+.reports-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;margin-bottom:18px!important}
+.report-card{background:#fff!important;border:1px solid var(--line,var(--border))!important;border-radius:14px!important;padding:18px!important;box-shadow:none!important}
+.report-card.report-wide{grid-column:1 / -1}
+.report-card-title{font-size:12px!important;color:var(--ink)!important;text-transform:none!important;margin-bottom:16px!important;gap:8px!important}
+.report-card-title i{font-size:15px!important;color:var(--accent-deeper)!important}
+.report-subtitle{margin-top:-8px;margin-bottom:14px;color:#77786D;font-size:11px;font-weight:500}
+.report-chart{height:190px;display:flex;align-items:flex-end;gap:10px;padding:22px 4px 28px;position:relative;border-bottom:1px solid #DFDED2}
+.report-chart::before,.report-chart::after{content:'';position:absolute;left:0;right:0;border-top:1px dashed #E4E2D6}
+.report-chart::before{top:28%}.report-chart::after{top:58%}
+.report-bar-wrap{min-width:0;flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center;position:relative;z-index:1}
+.report-bar{width:100%;max-width:86px;min-height:8px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--bar-color,#C9F03C),color-mix(in srgb,var(--bar-color,#C9F03C) 72%,#111));box-shadow:inset 0 -1px 0 rgba(0,0,0,.08)}
+.report-bar-count{position:absolute;bottom:calc(var(--bar-height,0%) + 8px);font-size:11px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.report-bar-label{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);max-width:100%;font-size:10px;font-weight:600;color:#77786D;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.chart-legend{display:flex!important;flex-wrap:wrap;gap:9px 14px;margin-top:14px!important}
+.chart-legend-item{font-size:10px!important;font-weight:500!important;color:#66685F!important}
+.legend-dot{width:9px!important;height:9px!important;border-radius:3px!important}
+.report-note{margin-top:12px;color:#6F7066;font-size:11px;line-height:1.5}
+.rev-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+.rev-cell{background:#F5F5EF!important;border:1px solid #E5E2D7!important;border-radius:12px!important;padding:16px!important;text-align:center}
+.rev-cell-val{font-size:23px!important;line-height:1.05!important;color:var(--ink)!important}
+.rev-cell-val.green{color:#16813D!important}.rev-cell-val.amber{color:#8C6200!important}
+.rev-cell-label{font-size:10px!important;letter-spacing:.03em!important;color:#77786D!important;font-weight:500!important;margin-top:6px}
+.report-table{width:100%;border-collapse:collapse!important;border-spacing:0!important;padding:0!important}
+.report-table th{background:#F3F2EC!important;color:#77786D!important;padding:11px 12px!important}
+.report-table td{background:#fff!important;border-bottom:1px solid #E5E2D7!important;padding:12px!important}
+.report-table tbody tr:hover td{background:#FAFAF4!important}
+.conversion-pill{display:inline-flex;align-items:center;justify-content:center;min-width:42px;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700}
+.conversion-pill.low{background:#FFF3BD;color:#7A5B00}.conversion-pill.high{background:#DDF7E8;color:#176B3C}
+@media(max-width:900px){.reports-grid{grid-template-columns:1fr!important}.rev-grid{grid-template-columns:1fr!important}.report-chart{gap:6px}}
+@media print{#app{padding:0!important}.sidebar,.topbar,.bottom-nav,.btn.export{display:none!important}.app-layout{box-shadow:none!important;border:0!important}.content-area{overflow:visible!important}.reports-grid{grid-template-columns:1fr 1fr!important}}
 
   </style>
 </head>
@@ -2241,11 +2299,106 @@ function renderReports(){
   const totalComm=proDB.reduce((sum,r)=>sum+(Number(r.commission)||0),0);
   const totalPaid=proDB.reduce((sum,r)=>sum+(Number(r.paid)||0),0);
   const refundOpen=lbDB.filter(r=>getRefundStatus(r)==='incomplete').length;
+  const money=n=>'KES '+Number(n||0).toLocaleString();
+  const short=s=>{
+    const v=String(s||'—').replace(/^PENDING\s+/,'').trim();
+    return v.length>11?v.slice(0,10)+'…':v;
+  };
+  const palette=['#DDEBFF','#FFE7A8','#FFE0F8','#E5DEFF','#DDF7E8','#E6F8F3','#EFE7FF','#FFE8E6'];
+  const chartBars=(items,max,colorFn)=>items.map((item,i)=>{
+    const pct=max?Math.max(8,Math.round((item.value/max)*100)):8;
+    const color=colorFn?colorFn(item,i):palette[i%palette.length];
+    return `<div class="report-bar-wrap" title="${item.label}: ${item.value}">
+      <div class="report-bar" style="height:${pct}%;--bar-height:${pct}%;--bar-color:${color}"></div>
+      <div class="report-bar-count">${item.value}</div>
+      <div class="report-bar-label">${short(item.short||item.label)}</div>
+    </div>`;
+  }).join('');
+  const legend=items=>`<div class="chart-legend">${items.map((item,i)=>`<span class="chart-legend-item"><span class="legend-dot" style="background:${item.color||palette[i%palette.length]}"></span>${item.label}</span>`).join('')}</div>`;
+
+  const stageData=proStages.map((stage,i)=>({
+    label:stage,
+    short:stage.replace('PENDING ',''),
+    value:proDB.filter(r=>r.stage===stage).length,
+    color:palette[i%palette.length]
+  })).filter(x=>x.value>0);
+  const maxStage=Math.max(1,...stageData.map(x=>x.value));
+
+  const positionMap={};
+  proDB.forEach(r=>{
+    const key=(r.position||'Unassigned').trim()||'Unassigned';
+    if(!positionMap[key]) positionMap[key]={position:key,total:0,travelled:0,inProcess:0,billed:0,paid:0};
+    positionMap[key].total++;
+    if(r.stage==='TRAVELLED') positionMap[key].travelled++;
+    else positionMap[key].inProcess++;
+    positionMap[key].billed+=Number(r.commission)||0;
+    positionMap[key].paid+=Number(r.paid)||0;
+  });
+  const positionStats=Object.values(positionMap).sort((a,b)=>b.total-a.total||a.position.localeCompare(b.position));
+  const positionChart=positionStats.slice(0,8).map((row,i)=>({label:row.position,short:row.position,value:row.total,color:i%2?'#DFF666':'#C9F03C'}));
+  const maxPosition=Math.max(1,...positionChart.map(x=>x.value));
+
+  const monthLabels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthData=monthLabels.map((m,i)=>({label:m,short:m,value:0,color:'#DDE8D8'}));
+  proDB.forEach(r=>{
+    const raw=toInput(r.travel||r.visa||r.ol||r.submitted);
+    if(raw){
+      const d=new Date(raw);
+      if(!Number.isNaN(d.getTime())) monthData[d.getMonth()].value++;
+    }
+  });
+  const maxMonth=Math.max(1,...monthData.map(x=>x.value));
+  const conversion=proDB.length?Math.round((proTravelled/proDB.length)*100):0;
+  const tableRows=positionStats.length?positionStats.map(row=>{
+    const conv=row.total?Math.round((row.travelled/row.total)*100):0;
+    return `<tr>
+      <td class="name-cell">${row.position}</td>
+      <td>${row.total}</td>
+      <td>${row.travelled}</td>
+      <td>${row.inProcess}</td>
+      <td>${money(row.billed)}</td>
+      <td>${money(row.paid)}</td>
+      <td><span class="conversion-pill ${conv>=50?'high':'low'}">${conv}%</span></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="7"><div class="empty">No position data yet</div></td></tr>`;
+
   wrap.innerHTML=`<div class="reports-grid">
-    <div class="report-card"><div class="report-card-title"><i class="ti ti-briefcase"></i>Professional</div><div class="metric-val">${proDB.length}</div><p class="dash-row-label">${proTravelled} travelled · ${proDB.filter(isInProcessPro).length} in process</p></div>
-    <div class="report-card"><div class="report-card-title"><i class="ti ti-home"></i>LB Jobs</div><div class="metric-val">${lbDB.length}</div><p class="dash-row-label">${lbTravelled} travelled · ${refundOpen} refunds open</p></div>
-    <div class="report-card"><div class="report-card-title"><i class="ti ti-cash"></i>Commission</div><div class="metric-val sm">KES ${totalPaid.toLocaleString()}</div><p class="dash-row-label">Outstanding KES ${(totalComm-totalPaid).toLocaleString()}</p></div>
-    <div class="report-card"><div class="report-card-title"><i class="ti ti-chart-bar"></i>Conversion</div><div class="metric-val">${proDB.length?Math.round((proTravelled/proDB.length)*100):0}%</div><p class="dash-row-label">Professional candidates travelled</p></div>
+    <div class="report-card">
+      <div class="report-card-title"><i class="ti ti-chart-pie"></i>Stage Distribution</div>
+      <div class="report-subtitle">Professional candidates by current placement stage</div>
+      <div class="report-chart">${chartBars(stageData.length?stageData:[{label:'No data',value:0,color:'#ECEDE6'}],maxStage,(item)=>item.color)}</div>
+      ${legend(stageData)}
+    </div>
+    <div class="report-card">
+      <div class="report-card-title"><i class="ti ti-briefcase"></i>Position Breakdown</div>
+      <div class="report-subtitle">Top positions by candidate volume</div>
+      <div class="report-chart">${chartBars(positionChart.length?positionChart:[{label:'No data',value:0,color:'#ECEDE6'}],maxPosition,(item)=>item.color)}</div>
+      <div class="report-note">${positionStats.slice(0,5).map(r=>`${r.position}: ${r.total}`).join(' · ')||'No position records yet'}</div>
+    </div>
+    <div class="report-card">
+      <div class="report-card-title"><i class="ti ti-trending-up"></i>Monthly Trend</div>
+      <div class="report-subtitle">Activity by month using travel, visa, offer, or submitted dates</div>
+      <div class="report-chart">${chartBars(monthData,maxMonth,(item)=>item.value?'#DDE8D8':'#F0EFE7')}</div>
+    </div>
+    <div class="report-card">
+      <div class="report-card-title"><i class="ti ti-coin"></i>Revenue Summary</div>
+      <div class="rev-grid">
+        <div class="rev-cell"><div class="rev-cell-val">${money(totalComm)}</div><div class="rev-cell-label">Total Commission Billed</div></div>
+        <div class="rev-cell"><div class="rev-cell-val green">${money(totalPaid)}</div><div class="rev-cell-label">Commission Collected</div></div>
+        <div class="rev-cell"><div class="rev-cell-val amber">${money(totalComm-totalPaid)}</div><div class="rev-cell-label">Outstanding</div></div>
+        <div class="rev-cell"><div class="rev-cell-val">${conversion}%</div><div class="rev-cell-label">Conversion Rate</div></div>
+      </div>
+      <div class="report-note">${lbTravelled} LB travelled · ${refundOpen} incomplete refunds</div>
+    </div>
+    <div class="report-card report-wide">
+      <div class="report-card-title"><i class="ti ti-table"></i>Position-Wise Summary</div>
+      <div class="table-scroll">
+        <table class="report-table">
+          <thead><tr><th>Position</th><th>Total</th><th>Travelled</th><th>In Process</th><th>Commission Billed</th><th>Commission Collected</th><th>Conversion %</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>
   </div>`;
 }
 function exportReportPDF(){
