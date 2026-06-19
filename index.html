@@ -1013,8 +1013,37 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
 .action-card strong{display:block;font-size:18px;line-height:1;color:var(--ink);font-weight:800;margin-bottom:5px}
 .action-card span{display:block;font-size:11px;color:#6F7066;line-height:1.45}
 .action-card.warn{background:#FFF7CF;border-color:#EEDC9B}.action-card.danger{background:#FFE8E6;border-color:#F1BDB8}.action-card.good{background:#E6F7E0;border-color:#BDE6B1}
+
+/* Candidate edit modal polish */
+.modal-bg{background:rgba(20,22,18,.42)!important;backdrop-filter:blur(10px)!important;padding:28px 16px!important;align-items:center!important}
+.modal{background:#fff!important;border:1px solid rgba(255,255,255,.85)!important;border-radius:22px!important;max-width:620px!important;box-shadow:0 28px 80px rgba(13,14,12,.28)!important;overflow:hidden!important}
+.modal-header{padding:18px 22px 14px!important;background:#fff!important;border-bottom:0!important}
+.modal-header h3{font-size:16px!important;font-weight:800!important;color:#20221C!important}
+.modal-close{width:32px!important;height:32px!important;padding:0!important;border-radius:50%!important;background:#F2F2EC!important;color:#6F7066!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:18px!important}
+.modal-close:hover{background:#0D0E0C!important;color:#fff!important}
+.candidate-summary{margin:0 22px 16px!important;padding:13px 14px!important;background:#F8F8F3!important;border:1px solid #E5E2D7!important;border-radius:16px!important;grid-template-columns:minmax(0,1fr) auto!important}
+.candidate-summary-name{font-size:15px!important;font-weight:800!important;letter-spacing:0!important}
+.candidate-summary-meta{gap:6px!important;margin-top:9px!important}
+.candidate-summary-meta span{background:#fff!important;border-color:#E2DFD1!important;border-radius:999px!important;padding:5px 9px!important}
+.candidate-summary-kpis{grid-template-columns:repeat(2,88px)!important}
+.candidate-kpi{padding:10px!important;border-radius:13px!important;background:#fff!important;border-color:#E2DFD1!important}
+.candidate-kpi strong{font-size:14px!important}.candidate-kpi span{font-size:9px!important}
+.modal-tabs{padding:0 22px!important;background:#fff!important;border-top:1px solid #EEECE2!important;border-bottom:1px solid #E5E2D7!important;gap:6px!important}
+.modal-tab{margin:8px 0!important;padding:9px 13px!important;border-radius:10px!important;border-bottom:0!important;color:#77786D!important;font-weight:700!important}
+.modal-tab:hover{background:#F3F3EA!important;color:#20221C!important}
+.modal-tab.active{background:#0D0E0C!important;color:#fff!important;border-bottom:0!important}
+.modal-body{padding:20px 22px 22px!important;background:#FAFAF6!important}
+.form-grid{gap:14px 16px!important}
+.field{gap:6px!important}
+.field label{font-size:10px!important;color:#77786D!important;font-weight:700!important;letter-spacing:.04em!important}
+.field input,.field select,.field textarea{height:40px!important;background:#fff!important;border:1px solid #DCD9CB!important;border-radius:11px!important;padding:0 13px!important;color:#20221C!important;font-weight:500!important;box-shadow:none!important}
+.field textarea{height:auto!important;min-height:76px!important;padding:11px 13px!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#AFCB25!important;box-shadow:0 0 0 4px rgba(201,240,60,.2)!important;background:#fff!important}
+.modal-footer{padding:14px 22px!important;background:#fff!important;border-top:1px solid #E5E2D7!important}
+.modal-footer .btn{height:36px!important;border-radius:10px!important}
+.modal-footer .btn.primary{background:#0D0E0C!important;color:#DFF666!important}
 @media(max-width:900px){.reports-grid{grid-template-columns:1fr!important}.rev-grid{grid-template-columns:1fr!important}.report-chart{gap:6px}}
-@media(max-width:760px){.candidate-summary{grid-template-columns:1fr;margin:0 12px 12px}.candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.action-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.modal-bg{padding:10px!important;align-items:flex-start!important}.modal{border-radius:18px!important;max-height:calc(100vh - 20px)!important;overflow-y:auto!important}.candidate-summary{grid-template-columns:1fr!important;margin:0 14px 12px!important}.candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.modal-tabs{padding:0 14px!important;overflow-x:auto!important}.modal-body{padding:16px 14px!important}.modal-footer{padding:12px 14px!important}.action-grid{grid-template-columns:1fr}}
 @media print{#app{padding:0!important}.sidebar,.topbar,.bottom-nav,.btn.export{display:none!important}.app-layout{box-shadow:none!important;border:0!important}.content-area{overflow:visible!important}.reports-grid{grid-template-columns:1fr 1fr!important}}
 
   </style>
