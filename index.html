@@ -1042,6 +1042,32 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
 .modal-footer{padding:14px 22px!important;background:#fff!important;border-top:1px solid #E5E2D7!important}
 .modal-footer .btn{height:36px!important;border-radius:10px!important}
 .modal-footer .btn.primary{background:#0D0E0C!important;color:#DFF666!important}
+
+/* Highlight cleanup: use color for meaning, not noise */
+.welcome-banner{background:linear-gradient(135deg,#FFE0F8 0%,#DDEBFF 100%)!important;border:1px solid #E5D8EA!important;border-radius:16px!important;margin:0 0 18px!important;box-shadow:none!important}
+.welcome-banner .wb-left h2{color:#171814!important}
+.welcome-banner .wb-left p{color:#5F6257!important}
+.welcome-banner .wb-stat{background:rgba(255,255,255,.72)!important;border:1px solid rgba(255,255,255,.85)!important;border-radius:12px!important}
+.welcome-banner .wb-stat-val{color:#171814!important}.welcome-banner .wb-stat-label{color:#686A60!important}
+.card-gold{background:#FFF7CF!important;border-color:#EEDC9B!important}
+.card-dark{background:#DDEBFF!important;border-color:#BCD5F8!important;color:#20221C!important}
+.card-slate{background:#FFE0F8!important;border-color:#F3C3E8!important;color:#20221C!important}
+.card-dark .p-card-sub,.card-slate .p-card-sub{color:#5F6257!important;opacity:1!important}
+.spotlight{background:linear-gradient(180deg,#F8FBFF 0%,#FFF4FB 100%)!important;border:1px solid #DDE7F6!important;color:#20221C!important}
+.spotlight-label{color:#61708A!important}.spotlight-section{color:#7B6478!important;border-top-color:#E8DCE9!important}
+.spotlight-amount,.spotlight-row-val{color:#20221C!important}.spotlight-sub,.spotlight-row-label{color:#5F6257!important}
+.spotlight-row{border-top:1px dashed #E3DDE6!important;border-bottom:0!important}
+.due-item,.due-item:nth-child(4n+1),.due-item:nth-child(4n+2),.due-item:nth-child(4n+3),.due-item:nth-child(4n){
+  background:#fff!important;border:1px solid #E5E2D7!important;border-radius:12px!important;margin-top:9px!important
+}
+.due-date{background:#F3F3EA!important;color:#5F6257!important;border:1px solid #E1DED0!important}
+.candidate-summary-meta span{background:#fff!important;border:1px solid #E1DED0!important;color:#5F6257!important;box-shadow:none!important}
+.candidate-summary-meta .badge{border:0!important;background:transparent!important;padding:0!important;border-radius:0!important;font-weight:800!important}
+.candidate-summary-meta .b-applied{color:#25568E!important}.candidate-summary-meta .b-travelled,.candidate-summary-meta .b-complete{color:#16813D!important}.candidate-summary-meta .b-incomplete{color:#8C6200!important}
+.candidate-summary-meta .b-notyet,.candidate-summary-meta .b-na{color:#696A61!important}
+.candidate-summary-meta .summary-status{padding:5px 10px!important}
+.metric-card.mc-ink{background:#FFE0F8!important;border-color:#F3C3E8!important}
+.metric-card.mc-sage{background:#DDEBFF!important;border-color:#BCD5F8!important}
 @media(max-width:900px){.reports-grid{grid-template-columns:1fr!important}.rev-grid{grid-template-columns:1fr!important}.report-chart{gap:6px}}
 @media(max-width:760px){.modal-bg{padding:10px!important;align-items:flex-start!important}.modal{border-radius:18px!important;max-height:calc(100vh - 20px)!important;overflow-y:auto!important}.candidate-summary{grid-template-columns:1fr!important;margin:0 14px 12px!important}.candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.modal-tabs{padding:0 14px!important;overflow-x:auto!important}.modal-body{padding:16px 14px!important}.modal-footer{padding:12px 14px!important}.action-grid{grid-template-columns:1fr}}
 @media print{#app{padding:0!important}.sidebar,.topbar,.bottom-nav,.btn.export{display:none!important}.app-layout{box-shadow:none!important;border:0!important}.content-area{overflow:visible!important}.reports-grid{grid-template-columns:1fr 1fr!important}}
@@ -2514,7 +2540,7 @@ function renderProSummary(r){
       <span><i class="ti ti-id"></i>${rec.pp||'No passport'}</span>
       <span><i class="ti ti-briefcase"></i>${rec.position||'No position'}</span>
       <span><i class="ti ti-building"></i>${rec.company||'No company'}</span>
-      <span>${stageBadge(rec.stage||'PENDING OFFER LETTER')}</span>
+      <span class="summary-status">${stageBadge(rec.stage||'PENDING OFFER LETTER')}</span>
     </div>
   </div>
   <div class="candidate-summary-kpis">
@@ -2532,9 +2558,9 @@ function renderLBSummary(r){
     <div class="candidate-summary-name">${rec.name||'New LB candidate'}</div>
     <div class="candidate-summary-meta">
       <span><i class="ti ti-phone"></i>${rec.phone||'No phone'}</span>
-      <span>${ppBadge(rec.ppStatus||rec.pp_status||'APPLIED')}</span>
-      <span>${travelBadge(rec.travelStatus||rec.travel_status||'NOT YET')}</span>
-      <span>${refundBadge(isNew?'N/A':getRefundStatus(rec))}</span>
+      <span class="summary-status">${ppBadge(rec.ppStatus||rec.pp_status||'APPLIED')}</span>
+      <span class="summary-status">${travelBadge(rec.travelStatus||rec.travel_status||'NOT YET')}</span>
+      <span class="summary-status">${refundBadge(isNew?'N/A':getRefundStatus(rec))}</span>
     </div>
   </div>
   <div class="candidate-summary-kpis">
@@ -2779,13 +2805,13 @@ function renderDash(){
       <div class="spotlight-section">Professional Jobs</div>
       <div class="spotlight-amount">KES ${totalComm.toLocaleString()}</div>
       <div class="spotlight-sub">Total billed</div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Collected</span><span class="spotlight-row-val" style="color:var(--accent)">KES ${totalPaid.toLocaleString()}</span></div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val" style="color:var(--accent)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Collected</span><span class="spotlight-row-val">KES ${totalPaid.toLocaleString()}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
       <div class="spotlight-section">LB Jobs</div>
       <div class="spotlight-amount">${lbFees}</div>
       <div class="spotlight-sub">Total fees collected</div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val" style="color:var(--accent)">${lbOwed-lbPaid}</span></div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Incomplete refunds</span><span class="spotlight-row-val" style="color:var(--red-light)">${lbIncomplete}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val">${lbOwed-lbPaid}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Incomplete refunds</span><span class="spotlight-row-val">${lbIncomplete}</span></div>
     </div>
     <div class="due-panel">
       <div class="due-header"><i class="ti ti-plane"></i><span>Pending travel</span></div>
