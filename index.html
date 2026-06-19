@@ -1260,13 +1260,13 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
 .pd-role-badge{background:rgba(255,255,255,.18)!important;color:#fff!important}
 .welcome-banner{background:linear-gradient(135deg,#F7F6FF 0%,#EEF6FF 54%,#EAFBFB 100%)!important;border-color:#DDE4F8!important}
 .welcome-banner .wb-stat{background:#fff!important;border-color:#DDE4F8!important}
-.p-card{position:relative!important;overflow:hidden!important}
-.p-card::before{content:'';position:absolute;inset:0 0 auto 0;height:4px;background:var(--card-accent,var(--nexus-purple))}
-.p-card::after{content:'';position:absolute;right:-24px;bottom:-28px;width:92px;height:92px;border-radius:50%;background:var(--card-glow,rgba(83,71,206,.12));pointer-events:none}
-.p-card.card-gold{--card-accent:var(--nexus-purple);--card-glow:rgba(83,71,206,.13);background:linear-gradient(160deg,#FFFFFF 0%,#F7F6FF 100%)!important;border-color:#DDD9FF!important}
-.p-card.card-dark{--card-accent:var(--nexus-blue);--card-glow:rgba(72,150,254,.14);background:linear-gradient(160deg,#FFFFFF 0%,#EEF6FF 100%)!important;border-color:#D6E8FF!important;color:#111827!important}
-.p-card.card-slate{--card-accent:var(--nexus-cyan);--card-glow:rgba(22,200,199,.14);background:linear-gradient(160deg,#FFFFFF 0%,#EAFBFB 100%)!important;border-color:#CCF0EF!important;color:#111827!important}
-.p-card-icon{color:var(--card-accent)!important;opacity:.22!important}
+.p-card{position:relative!important;overflow:hidden!important;padding:18px 18px 18px 66px!important;min-height:116px!important}
+.p-card::before{display:none!important}
+.p-card::after{display:none!important}
+.p-card.card-gold{--card-accent:var(--nexus-purple);background:linear-gradient(145deg,#F7F6FF 0%,#ECEAFF 100%)!important;border-color:#DDD9FF!important}
+.p-card.card-dark{--card-accent:var(--nexus-blue);background:linear-gradient(145deg,#EEF6FF 0%,#DDEBFF 100%)!important;border-color:#C9E0FF!important;color:#111827!important}
+.p-card.card-slate{--card-accent:var(--nexus-cyan);background:linear-gradient(145deg,#EAFBFB 0%,#D7F7F6 100%)!important;border-color:#BEEFED!important;color:#111827!important}
+.p-card-icon{position:absolute!important;left:18px!important;top:18px!important;right:auto!important;bottom:auto!important;width:34px!important;height:34px!important;border-radius:10px!important;background:#fff!important;color:var(--card-accent)!important;opacity:1!important;font-size:18px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 8px 18px rgba(58,72,92,.08)!important}
 .metric-card.mc-default{background:linear-gradient(160deg,#fff 0%,#F8FAFC 100%)!important}
 .metric-card.mc-amber{background:linear-gradient(160deg,#fff 0%,#F7F6FF 100%)!important;border-color:#DDD9FF!important}
 .metric-card.mc-green{background:linear-gradient(160deg,#fff 0%,#EEF6FF 100%)!important;border-color:#D6E8FF!important}
@@ -1290,6 +1290,12 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
 .btn.primary,.modal-tab.active,.modal-footer .btn.primary{background:var(--nexus-purple)!important;border-color:var(--nexus-purple)!important;color:#fff!important}
 .bottom-nav-item.active{color:var(--nexus-purple)!important}
 .bottom-nav-item.active i{color:var(--nexus-purple)!important}
+.report-chart{padding-top:34px!important}
+.report-bar-count{bottom:calc(var(--bar-height,0%) + 14px)!important;background:#fff!important;border:1px solid var(--nexus-line)!important;border-radius:999px!important;padding:2px 7px!important;line-height:1!important;color:#111827!important;z-index:2!important}
+.report-bar-label{top:calc(100% + 9px)!important}
+.report-bar{border-radius:9px 9px 3px 3px!important}
+.metric-card::before{display:none!important}
+.kanban-col-count,.page-btn.active{background:#EFEEFF!important;color:var(--nexus-purple)!important;border:1px solid #DCD8FF!important}
 
   </style>
 </head>
@@ -2545,7 +2551,7 @@ function renderKanban(){
         : `${r.ppStatus||r.pp_status||'Passport'} · ${getRefundStatus(r)}`;
       const footer=kanbanSource==='pro'
         ? `<span class="kanban-card-country">${r.country||'—'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
-        : `<span class="kanban-card-country">${r.phone||'—'}</span><span class="kanban-card-comm">${Number(r.toRefund||r.to_refund)||0}</span>`;
+        : `<span class="kanban-card-country">${r.phone||'—'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.toRefund||r.to_refund)||0)}</span>`;
       return `<div class="kanban-card" onclick="${kanbanSource==='pro'?'editPro':'editLB'}(${r.id})">
         <div class="kanban-card-name">${r.name}</div>
         <div class="kanban-card-meta"><i class="ti ti-id"></i>${meta}</div>
@@ -2740,6 +2746,7 @@ function switchModalTab(modal,tab,btn){
 function closeModal(id){ const el=document.getElementById(id); if(el) el.classList.remove('open'); }
 
 function moneyKES(v){ return 'KES '+Number(v||0).toLocaleString(); }
+function moneyUSD(v){ return '$'+Number(v||0).toLocaleString(); }
 function proBalance(r){ return (Number(r.commission)||0)-(Number(r.paid)||0); }
 function proNeedsAction(r){
   const stage=r.stage||'';
@@ -2783,8 +2790,8 @@ function renderLBSummary(r){
     </div>
   </div>
   <div class="candidate-summary-kpis">
-    <div class="candidate-kpi"><strong>${isNew?'—':owed}</strong><span>To refund</span></div>
-    <div class="candidate-kpi"><strong>${isNew?'—':Math.max(0,owed-paid)}</strong><span>Balance</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'—':moneyUSD(owed)}</strong><span>To refund</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'—':moneyUSD(Math.max(0,owed-paid))}</strong><span>Balance</span></div>
   </div>`;
 }
 function readProFormSummary(){
@@ -2982,8 +2989,8 @@ function renderDash(){
       <div class="dash-row"><span class="dash-row-label">Total candidates</span><span class="dash-row-val">${lbDB.length}</span></div>
       <div class="dash-row"><span class="dash-row-label">In process</span><span class="dash-row-val" style="color:var(--amber)">${lbInProcess}</span></div>
       <div class="dash-row"><span class="dash-row-label">Travelled</span><span class="dash-row-val" style="color:var(--green)">${lbTravelled}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Total fees collected</span><span class="dash-row-val" style="color:var(--green)">${lbFees}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Pending refund balance</span><span class="dash-row-val" style="color:var(--amber)">${lbOwed-lbPaid}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Total fees collected</span><span class="dash-row-val" style="color:var(--green)">${moneyUSD(lbFees)}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Pending refund balance</span><span class="dash-row-val" style="color:var(--amber)">${moneyUSD(lbOwed-lbPaid)}</span></div>
       <div class="dash-row"><span class="dash-row-label">Incomplete refunds</span><span class="dash-row-val" style="color:var(--red)">${lbIncomplete}</span></div>
     </div>
     <div class="dash-card">
@@ -3027,9 +3034,9 @@ function renderDash(){
       <div class="spotlight-row"><span class="spotlight-row-label">Collected</span><span class="spotlight-row-val">KES ${totalPaid.toLocaleString()}</span></div>
       <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
       <div class="spotlight-section">LB Jobs</div>
-      <div class="spotlight-amount">${lbFees}</div>
+      <div class="spotlight-amount">${moneyUSD(lbFees)}</div>
       <div class="spotlight-sub">Total fees collected</div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val">${lbOwed-lbPaid}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val">${moneyUSD(lbOwed-lbPaid)}</span></div>
       <div class="spotlight-row"><span class="spotlight-row-label">Incomplete refunds</span><span class="spotlight-row-val">${lbIncomplete}</span></div>
     </div>
     <div class="due-panel">
@@ -3213,7 +3220,7 @@ function renderLB(){
     <div class="metric-card mc-default"><div class="metric-label">Total</div><div class="metric-val">${lbDB.length}</div></div>
     <div class="metric-card mc-amber"><div class="metric-label">In process</div><div class="metric-val amber">${lbDB.filter(isInProcessLB).length}</div></div>
     <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
-    <div class="metric-card mc-ink"><div class="metric-label">Fees collected</div><div class="metric-val sm green">${lbFees}</div></div>
+    <div class="metric-card mc-ink"><div class="metric-label">Fees collected</div><div class="metric-val sm green">${moneyUSD(lbFees)}</div></div>
     <div class="metric-card mc-red"><div class="metric-label">Incomplete refunds</div><div class="metric-val red">${lbIncomplete}</div></div>`;
 
   const data=getFilteredLB();
@@ -3229,7 +3236,7 @@ function renderLB(){
       const ps=r.ppStatus||r.pp_status||'';
       const toR=Number(r.toRefund||r.to_refund)||0;
       const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
-      const bal=(rs==='N/A'||rs==='RETURNED')?'—':(toR-paid);
+      const bal=(rs==='N/A'||rs==='RETURNED')?'—':moneyUSD(toR-paid);
       const td=r.travelDate||r.travel_date;
       const hd=hasDocs('lb',r.id);
       return `<tr onclick="editLB(${r.id})">
@@ -3239,8 +3246,8 @@ function renderLB(){
         <td>${ppBadge(ps)}</td>
         <td>${travelBadge(ts)}</td>
         <td>${fmtDate(td)}</td>
-        <td>${rs==='N/A'?'—':toR}</td>
-        <td>${rs==='N/A'?'—':paid}</td>
+        <td>${rs==='N/A'?'—':moneyUSD(toR)}</td>
+        <td>${rs==='N/A'?'—':moneyUSD(paid)}</td>
         <td class="${rs==='incomplete'?'balance-owed':''}">${bal}</td>
         <td>${refundBadge(rs)}</td>
         <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${r.name.replace(/'/g,"\\'")}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
