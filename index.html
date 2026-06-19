@@ -994,7 +994,27 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
 .report-table tbody tr:hover td{background:#FAFAF4!important}
 .conversion-pill{display:inline-flex;align-items:center;justify-content:center;min-width:42px;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700}
 .conversion-pill.low{background:#FFF3BD;color:#7A5B00}.conversion-pill.high{background:#DDF7E8;color:#176B3C}
+.candidate-summary{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin:0 18px 14px;padding:14px;background:#F7F7F0;border:1px solid #E5E2D7;border-radius:14px}
+.candidate-summary-main{min-width:0}
+.candidate-summary-name{font-size:15px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.candidate-summary-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;color:#6F7066;font-size:11px;font-weight:500}
+.candidate-summary-meta span{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #E5E2D7;border-radius:999px;padding:4px 8px}
+.candidate-summary-kpis{display:grid;grid-template-columns:repeat(2,minmax(92px,1fr));gap:8px}
+.candidate-kpi{background:#fff;border:1px solid #E5E2D7;border-radius:11px;padding:9px 10px;text-align:right}
+.candidate-kpi strong{display:block;font-size:13px;color:var(--ink);font-weight:800}
+.candidate-kpi span{display:block;font-size:9px;color:#77786D;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.security-note{display:flex;gap:9px;margin:8px 10px 10px;padding:10px;border:1px solid #EEDC9B;background:#FFF7CF;border-radius:12px;color:#5F4B06}
+.security-note i{font-size:18px;flex-shrink:0;margin-top:1px}
+.security-note strong{display:block;font-size:11px;font-weight:800;color:#493800}
+.security-note span{display:block;font-size:10px;line-height:1.35;color:#6E5300;margin-top:2px}
+.action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.action-card{background:#fff;border:1px solid #E5E2D7;border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start}
+.action-card i{font-size:20px;color:var(--accent-deeper)}
+.action-card strong{display:block;font-size:18px;line-height:1;color:var(--ink);font-weight:800;margin-bottom:5px}
+.action-card span{display:block;font-size:11px;color:#6F7066;line-height:1.45}
+.action-card.warn{background:#FFF7CF;border-color:#EEDC9B}.action-card.danger{background:#FFE8E6;border-color:#F1BDB8}.action-card.good{background:#E6F7E0;border-color:#BDE6B1}
 @media(max-width:900px){.reports-grid{grid-template-columns:1fr!important}.rev-grid{grid-template-columns:1fr!important}.report-chart{gap:6px}}
+@media(max-width:760px){.candidate-summary{grid-template-columns:1fr;margin:0 12px 12px}.candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.action-grid{grid-template-columns:1fr}}
 @media print{#app{padding:0!important}.sidebar,.topbar,.bottom-nav,.btn.export{display:none!important}.app-layout{box-shadow:none!important;border:0!important}.content-area{overflow:visible!important}.reports-grid{grid-template-columns:1fr 1fr!important}}
 
   </style>
@@ -1251,6 +1271,10 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
 
             <!-- App actions -->
             <div class="pd-menu-section">Application</div>
+            <div class="security-note">
+              <i class="ti ti-shield-lock"></i>
+              <div><strong>Local staff login</strong><span>Move staff access to Supabase Auth before using this as a public production system.</span></div>
+            </div>
             <button class="pd-menu-item" onclick="closeProfileDropdown();openSettings()">
               <i class="ti ti-settings"></i><span>Settings</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
             </button>
@@ -1337,6 +1361,13 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
                   <input type="text" id="pro-search" placeholder="Search…" oninput="renderPro()">
                 </div>
                 <select class="toolbar-select" id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
+                <select class="toolbar-select" id="pro-position-f" onchange="renderPro()"><option value="">All positions</option></select>
+                <select class="toolbar-select" id="pro-action-f" onchange="renderPro()">
+                  <option value="">All records</option>
+                  <option value="needs-action">Needs action</option>
+                  <option value="outstanding">Outstanding balance</option>
+                  <option value="no-docs">Missing docs link</option>
+                </select>
                 <button class="btn export" onclick="exportCSV('pro')"><i class="ti ti-download"></i> Export</button>
                 <button class="btn" onclick="addCustomStage('pro')" title="Add stage"><i class="ti ti-settings"></i></button>
                 <button class="btn primary" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
@@ -1392,6 +1423,12 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
                   <option value="incomplete">Incomplete</option>
                   <option value="RETURNED">Returned</option>
                   <option value="N/A">N/A (HAD PP)</option>
+                </select>
+                <select class="toolbar-select" id="lb-action-f" onchange="renderLB()">
+                  <option value="">All records</option>
+                  <option value="needs-action">Needs action</option>
+                  <option value="incomplete-refund">Incomplete refund</option>
+                  <option value="no-docs">Missing docs link</option>
                 </select>
                 <button class="btn export" onclick="exportCSV('lb')"><i class="ti ti-download"></i> Export</button>
                 <button class="btn" onclick="addCustomStage('lb')" title="Add status"><i class="ti ti-settings"></i></button>
@@ -1470,6 +1507,7 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
       <h3 id="pro-modal-title">Add professional candidate</h3>
       <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
     </div>
+    <div class="candidate-summary" id="pro-summary"></div>
     <div class="modal-tabs">
       <button class="modal-tab active" onclick="switchModalTab('pro','details',this)">Details</button>
       <button class="modal-tab" onclick="switchModalTab('pro','pipeline',this)">Pipeline</button>
@@ -1522,6 +1560,7 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
       <h3 id="lb-modal-title">Add LB candidate</h3>
       <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
     </div>
+    <div class="candidate-summary" id="lb-summary"></div>
     <div class="modal-tabs">
       <button class="modal-tab active" onclick="switchModalTab('lb','details',this)">Details</button>
       <button class="modal-tab" onclick="switchModalTab('lb','refunds',this)">Refunds</button>
@@ -1984,6 +2023,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const el=document.getElementById(id);
     if(el) el.addEventListener('click',e=>{ if(e.target===el) closeModal(id); });
   });
+  bindModalSummaries();
 });
 
 // ══════════════════════════════════════════════════════════
@@ -2061,7 +2101,7 @@ function setSaveStatus(s) {
   const lbl=document.getElementById('save-label');
   if (!dot||!lbl) return;
   dot.className='save-dot'+(s==='saving'?' saving':'');
-  lbl.textContent=s==='saving'?'Saving…':'Saved';
+  lbl.textContent=s==='saving'?'Saving…':`Saved ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2299,6 +2339,10 @@ function renderReports(){
   const totalComm=proDB.reduce((sum,r)=>sum+(Number(r.commission)||0),0);
   const totalPaid=proDB.reduce((sum,r)=>sum+(Number(r.paid)||0),0);
   const refundOpen=lbDB.filter(r=>getRefundStatus(r)==='incomplete').length;
+  const proActionCount=proDB.filter(proNeedsAction).length;
+  const lbActionCount=lbDB.filter(lbNeedsAction).length;
+  const missingDocs=proDB.filter(r=>!hasDocs('pro',r.id)).length+lbDB.filter(r=>!hasDocs('lb',r.id)).length;
+  const stalledStages=proStages.map(stage=>({stage,count:proDB.filter(r=>r.stage===stage).length})).sort((a,b)=>b.count-a.count)[0];
   const money=n=>'KES '+Number(n||0).toLocaleString();
   const short=s=>{
     const v=String(s||'—').replace(/^PENDING\s+/,'').trim();
@@ -2362,12 +2406,18 @@ function renderReports(){
     </tr>`;
   }).join(''):`<tr><td colspan="7"><div class="empty">No position data yet</div></td></tr>`;
 
-  wrap.innerHTML=`<div class="reports-grid">
+  wrap.innerHTML=`<div class="action-grid">
+    <div class="action-card warn"><i class="ti ti-alert-triangle"></i><div><strong>${proActionCount}</strong><span>Professional records need attention: missing docs, pending travel, or outstanding balance.</span></div></div>
+    <div class="action-card danger"><i class="ti ti-receipt-refund"></i><div><strong>${lbActionCount}</strong><span>LB records need attention, including ${refundOpen} incomplete refunds.</span></div></div>
+    <div class="action-card good"><i class="ti ti-file-check"></i><div><strong>${missingDocs}</strong><span>Candidate records are missing document links across both pipelines.</span></div></div>
+  </div>
+  <div class="reports-grid">
     <div class="report-card">
       <div class="report-card-title"><i class="ti ti-chart-pie"></i>Stage Distribution</div>
       <div class="report-subtitle">Professional candidates by current placement stage</div>
       <div class="report-chart">${chartBars(stageData.length?stageData:[{label:'No data',value:0,color:'#ECEDE6'}],maxStage,(item)=>item.color)}</div>
       ${legend(stageData)}
+      <div class="report-note">Largest stage: ${stalledStages?`${stalledStages.stage} (${stalledStages.count})`:'No stage data yet'}</div>
     </div>
     <div class="report-card">
       <div class="report-card-title"><i class="ti ti-briefcase"></i>Position Breakdown</div>
@@ -2414,6 +2464,85 @@ function switchModalTab(modal,tab,btn){
   btn.classList.add('active');
 }
 function closeModal(id){ const el=document.getElementById(id); if(el) el.classList.remove('open'); }
+
+function moneyKES(v){ return 'KES '+Number(v||0).toLocaleString(); }
+function proBalance(r){ return (Number(r.commission)||0)-(Number(r.paid)||0); }
+function proNeedsAction(r){
+  const stage=r.stage||'';
+  return !hasDocs('pro',r.id) || (stage!=='TRAVELLED'&&!toInput(r.travel)) || proBalance(r)>0;
+}
+function lbNeedsAction(r){
+  return !hasDocs('lb',r.id) || getRefundStatus(r)==='incomplete' || ((r.travelStatus||r.travel_status)==='NOT YET');
+}
+function renderProSummary(r){
+  const el=document.getElementById('pro-summary'); if(!el) return;
+  const isNew=!r;
+  const rec=r||{name:'New professional candidate',pp:'Passport pending',position:'Position not set',company:'Company not set',stage:proStages[0]||'PENDING OFFER LETTER',commission:0,paid:0};
+  const bal=proBalance(rec);
+  el.innerHTML=`<div class="candidate-summary-main">
+    <div class="candidate-summary-name">${rec.name||'New professional candidate'}</div>
+    <div class="candidate-summary-meta">
+      <span><i class="ti ti-id"></i>${rec.pp||'No passport'}</span>
+      <span><i class="ti ti-briefcase"></i>${rec.position||'No position'}</span>
+      <span><i class="ti ti-building"></i>${rec.company||'No company'}</span>
+      <span>${stageBadge(rec.stage||'PENDING OFFER LETTER')}</span>
+    </div>
+  </div>
+  <div class="candidate-summary-kpis">
+    <div class="candidate-kpi"><strong>${isNew?'—':moneyKES(rec.commission)}</strong><span>Billed</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'—':moneyKES(Math.max(0,bal))}</strong><span>Balance</span></div>
+  </div>`;
+}
+function renderLBSummary(r){
+  const el=document.getElementById('lb-summary'); if(!el) return;
+  const isNew=!r;
+  const rec=r||{name:'New LB candidate',phone:'No phone',ppStatus:'APPLIED',travelStatus:lbStages[0]||'NOT YET',toRefund:0,r1Amt:0,r2Amt:0};
+  const paid=(Number(rec.r1Amt||rec.r1_amt)||0)+(Number(rec.r2Amt||rec.r2_amt)||0);
+  const owed=Number(rec.toRefund||rec.to_refund)||0;
+  el.innerHTML=`<div class="candidate-summary-main">
+    <div class="candidate-summary-name">${rec.name||'New LB candidate'}</div>
+    <div class="candidate-summary-meta">
+      <span><i class="ti ti-phone"></i>${rec.phone||'No phone'}</span>
+      <span>${ppBadge(rec.ppStatus||rec.pp_status||'APPLIED')}</span>
+      <span>${travelBadge(rec.travelStatus||rec.travel_status||'NOT YET')}</span>
+      <span>${refundBadge(isNew?'N/A':getRefundStatus(rec))}</span>
+    </div>
+  </div>
+  <div class="candidate-summary-kpis">
+    <div class="candidate-kpi"><strong>${isNew?'—':owed}</strong><span>To refund</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'—':Math.max(0,owed-paid)}</strong><span>Balance</span></div>
+  </div>`;
+}
+function readProFormSummary(){
+  return {
+    name:document.getElementById('pf-name')?.value||'New professional candidate',
+    pp:document.getElementById('pf-pp')?.value||'',
+    position:document.getElementById('pf-position')?.value||'',
+    company:document.getElementById('pf-company')?.value||'',
+    stage:document.getElementById('pf-stage')?.value||proStages[0],
+    commission:Number(document.getElementById('pf-comm')?.value)||0,
+    paid:Number(document.getElementById('pf-paid')?.value)||0,
+  };
+}
+function readLBFormSummary(){
+  return {
+    name:document.getElementById('lf-name')?.value||'New LB candidate',
+    phone:document.getElementById('lf-phone')?.value||'',
+    ppStatus:document.getElementById('lf-pp')?.value||'APPLIED',
+    travelStatus:document.getElementById('lf-travel')?.value||lbStages[0],
+    toRefund:Number(document.getElementById('lf-torefund')?.value)||0,
+    r1Amt:Number(document.getElementById('lf-r1amt')?.value)||0,
+    r2Amt:Number(document.getElementById('lf-r2amt')?.value)||0,
+  };
+}
+function bindModalSummaries(){
+  ['pf-name','pf-pp','pf-position','pf-company','pf-stage','pf-comm','pf-paid'].forEach(id=>{
+    const el=document.getElementById(id); if(el){ el.addEventListener('input',()=>renderProSummary(readProFormSummary())); el.addEventListener('change',()=>renderProSummary(readProFormSummary())); }
+  });
+  ['lf-name','lf-phone','lf-pp','lf-travel','lf-torefund','lf-r1amt','lf-r2amt'].forEach(id=>{
+    const el=document.getElementById(id); if(el){ el.addEventListener('input',()=>renderLBSummary(readLBFormSummary())); el.addEventListener('change',()=>renderLBSummary(readLBFormSummary())); }
+  });
+}
 
 // ══════════════════════════════════════════════════════════
 // STAGES + PILLS
@@ -2646,9 +2775,16 @@ function getFilteredPro(){
   const q=(document.getElementById('pro-search')?.value||'').toLowerCase();
   const stage=window.proStagePillFilter||'';
   const comp=document.getElementById('pro-company-f')?.value||'';
+  const pos=document.getElementById('pro-position-f')?.value||'';
+  const action=document.getElementById('pro-action-f')?.value||'';
   return proDB.filter(r=>{
     const text=`${r.name} ${r.pp||''} ${r.company||''} ${r.position||''}`.toLowerCase();
-    return (!q||text.includes(q))&&(!stage||r.stage===stage)&&(!comp||r.company===comp);
+    const outstanding=proBalance(r)>0;
+    const actionMatch=!action ||
+      (action==='needs-action'&&proNeedsAction(r)) ||
+      (action==='outstanding'&&outstanding) ||
+      (action==='no-docs'&&!hasDocs('pro',r.id));
+    return (!q||text.includes(q))&&(!stage||r.stage===stage)&&(!comp||r.company===comp)&&(!pos||r.position===pos)&&actionMatch;
   });
 }
 function renderPro(){
@@ -2665,6 +2801,9 @@ function renderPro(){
   const companies=[...new Set(proDB.map(r=>r.company).filter(Boolean))].sort();
   const csel=document.getElementById('pro-company-f');
   if(csel){ const ccur=csel.value; csel.innerHTML='<option value="">All companies</option>'+companies.map(c=>`<option value="${c}"${c===ccur?' selected':''}>${c}</option>`).join(''); }
+  const positions=[...new Set(proDB.map(r=>r.position).filter(Boolean))].sort();
+  const psel=document.getElementById('pro-position-f');
+  if(psel){ const pcur=psel.value; psel.innerHTML='<option value="">All positions</option>'+positions.map(p=>`<option value="${p}"${p===pcur?' selected':''}>${p}</option>`).join(''); }
 
   const data=getFilteredPro();
   const totalPages=Math.max(1,Math.ceil(data.length/PER_PAGE));
@@ -2702,6 +2841,7 @@ function openProForm(){
   ['pf-name','pf-pp','pf-phone','pf-position','pf-company','pf-country','pf-submitted','pf-interview','pf-ol','pf-mol','pf-visa','pf-travel','pf-comm','pf-paid']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const stEl=document.getElementById('pf-stage'); if(stEl){ stEl.value=proStages[0]||'PENDING OFFER LETTER'; stEl.dataset.prev=stEl.value; }
+  renderProSummary(null);
   document.getElementById('pro-form-timeline').innerHTML='<div class="tl-empty">Save candidate first to see timeline.</div>';
   document.getElementById('pro-tab-details').style.display='';
   ['pipeline','commission','timeline'].forEach(t=>{ const el=document.getElementById(`pro-tab-${t}`); if(el) el.style.display='none'; });
@@ -2720,6 +2860,7 @@ function editPro(id){
   document.getElementById('pf-submitted').value=toInput(r.submitted); document.getElementById('pf-interview').value=toInput(r.interview);
   document.getElementById('pf-ol').value=toInput(r.ol); document.getElementById('pf-mol').value=toInput(r.mol);
   document.getElementById('pf-visa').value=toInput(r.visa); document.getElementById('pf-travel').value=toInput(r.travel);
+  renderProSummary(r);
   document.getElementById('pro-form-timeline').innerHTML=renderTimelineHTML('pro',id);
   document.getElementById('pro-tab-details').style.display='';
   ['pipeline','commission','timeline'].forEach(t=>{ const el=document.getElementById(`pro-tab-${t}`); if(el) el.style.display='none'; });
@@ -2767,12 +2908,17 @@ function getFilteredLB(){
   const travel=window.lbTravelPillFilter||'';
   const pp=window.lbPPFilter||'';
   const refund=document.getElementById('lb-refund-f')?.value||'';
+  const action=document.getElementById('lb-action-f')?.value||'';
   return lbDB.filter(r=>{
     const text=`${r.name} ${r.phone||''}`.toLowerCase();
     const ts=r.travelStatus||r.travel_status||'';
     const ps=r.ppStatus||r.pp_status||'';
     const rs=getRefundStatus(r);
-    return (!q||text.includes(q))&&(!travel||ts===travel)&&(!pp||ps===pp)&&(!refund||rs===refund);
+    const actionMatch=!action ||
+      (action==='needs-action'&&lbNeedsAction(r)) ||
+      (action==='incomplete-refund'&&rs==='incomplete') ||
+      (action==='no-docs'&&!hasDocs('lb',r.id));
+    return (!q||text.includes(q))&&(!travel||ts===travel)&&(!pp||ps===pp)&&(!refund||rs===refund)&&actionMatch;
   });
 }
 function renderLB(){
@@ -2838,6 +2984,7 @@ function openLBForm(){
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('lf-pp').value='APPLIED';
   const tvEl=document.getElementById('lf-travel'); if(tvEl){ tvEl.value=lbStages[0]||'NOT YET'; tvEl.dataset.prev=tvEl.value; }
+  renderLBSummary(null);
   document.getElementById('lb-form-timeline').innerHTML='<div class="tl-empty">Save candidate first to see timeline.</div>';
   document.getElementById('lb-tab-details').style.display='';
   ['refunds','timeline'].forEach(t=>{ const el=document.getElementById(`lb-tab-${t}`); if(el) el.style.display='none'; });
@@ -2858,6 +3005,7 @@ function editLB(id){
   document.getElementById('lf-r2date').value=toInput(r.r2Date||r.r2_date);
   document.getElementById('lf-r2amt').value=r.r2Amt||r.r2_amt||'';
   document.getElementById('lf-notes').value=r.notes||'';
+  renderLBSummary(r);
   document.getElementById('lb-form-timeline').innerHTML=renderTimelineHTML('lb',id);
   document.getElementById('lb-tab-details').style.display='';
   ['refunds','timeline'].forEach(t=>{ const el=document.getElementById(`lb-tab-${t}`); if(el) el.style.display='none'; });
