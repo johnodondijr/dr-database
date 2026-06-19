@@ -2656,10 +2656,7 @@ function renderLB(){
       const ps=r.ppStatus||r.pp_status||'';
       const toR=Number(r.toRefund||r.to_refund)||0;
       const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
-      const bal=(rs==='N/A'||rs==='RETURNED')?'—':'
-</body>
-</html>
-+(toR-paid);
+      const bal=(rs==='N/A'||rs==='RETURNED')?'—':(toR-paid);
       const td=r.travelDate||r.travel_date;
       const hd=hasDocs('lb',r.id);
       return `<tr onclick="editLB(${r.id})">
@@ -2669,14 +2666,8 @@ function renderLB(){
         <td>${ppBadge(ps)}</td>
         <td>${travelBadge(ts)}</td>
         <td>${fmtDate(td)}</td>
-        <td>${rs==='N/A'?'—':'
-</body>
-</html>
-+toR}</td>
-        <td>${rs==='N/A'?'—':'
-</body>
-</html>
-+paid}</td>
+        <td>${rs==='N/A'?'—':toR}</td>
+        <td>${rs==='N/A'?'—':paid}</td>
         <td class="${rs==='incomplete'?'balance-owed':''}">${bal}</td>
         <td>${refundBadge(rs)}</td>
         <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${r.name.replace(/'/g,"\\'")}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
