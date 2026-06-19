@@ -1599,10 +1599,6 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
 
             <!-- App actions -->
             <div class="pd-menu-section">Application</div>
-            <div class="security-note">
-              <i class="ti ti-shield-lock"></i>
-              <div><strong>Local staff login</strong><span>Move staff access to Supabase Auth before using this as a public production system.</span></div>
-            </div>
             <button class="pd-menu-item" onclick="closeProfileDropdown();openSettings()">
               <i class="ti ti-settings"></i><span>Settings</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
             </button>
@@ -2013,10 +2009,6 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
         <div class="help-item"><i class="ti ti-layout-columns"></i><div><strong>Track pipeline progress</strong><p>Use Kanban Board for stage views, Calendar for date-based follow-up, and Reports for summaries.</p></div></div>
         <div class="help-item"><i class="ti ti-file-export"></i><div><strong>Export records</strong><p>Use table exports for CSV downloads. Use Reports export when you need a PDF-style printout.</p></div></div>
       </div>
-      <div class="support-box">
-        <strong>Support note</strong>
-        <span>Dreco currently stores data locally unless Supabase credentials are configured in the file. For a live multi-user office workflow, configure Supabase before relying on shared data sync.</span>
-      </div>
       <div class="settings-actions">
         <button class="btn primary" onclick="closeModal('help-modal');switchTab('dash')"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
         <button class="btn" onclick="closeModal('help-modal');switchTab('reports')"><i class="ti ti-chart-bar"></i> Reports</button>
@@ -2203,8 +2195,8 @@ const LB_SEED = [
 // ══════════════════════════════════════════════════════════
 // SUPABASE CONFIG — replace with your project values
 // ══════════════════════════════════════════════════════════
-const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
 const HAS_SUPABASE_CONFIG =
   SUPABASE_URL &&
   SUPABASE_ANON_KEY &&
