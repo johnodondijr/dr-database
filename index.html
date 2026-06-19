@@ -1068,6 +1068,79 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
 .candidate-summary-meta .summary-status{padding:5px 10px!important}
 .metric-card.mc-ink{background:#FFE0F8!important;border-color:#F3C3E8!important}
 .metric-card.mc-sage{background:#DDEBFF!important;border-color:#BCD5F8!important}
+
+/* Mobile table + profile responsiveness */
+@media(max-width:760px){
+  .topbar{position:sticky!important;top:0!important;z-index:120!important}
+  .profile-wrap{position:static!important}
+  .profile-dropdown{
+    position:fixed!important;
+    top:62px!important;
+    left:12px!important;
+    right:12px!important;
+    width:auto!important;
+    max-height:calc(100dvh - 92px)!important;
+    overflow-y:auto!important;
+    border-radius:18px!important;
+    z-index:500!important;
+  }
+  .pd-header{position:sticky;top:0;z-index:1}
+  .pd-menu-item{min-height:42px}
+  .content-area{padding-bottom:82px!important}
+  .panel{overflow:hidden!important}
+  .panel-header{gap:10px!important}
+  .table-scroll{
+    width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding:0 0 8px!important;
+    background:#fff!important;
+  }
+  .table-scroll::after{
+    content:'Swipe table sideways';
+    display:block;
+    padding:8px 12px 0;
+    font-size:10px;
+    font-weight:600;
+    color:#77786D;
+  }
+  .table-scroll table,
+  .table-scroll .report-table{
+    display:table!important;
+    width:max-content!important;
+    min-width:860px!important;
+    border-collapse:separate!important;
+    border-spacing:0 7px!important;
+    padding:0 10px 8px!important;
+  }
+  .table-scroll thead{display:table-header-group!important}
+  .table-scroll tbody{display:table-row-group!important;width:auto!important}
+  .table-scroll tr{display:table-row!important;width:auto!important;background:transparent!important;border-radius:0!important;margin:0!important;padding:0!important}
+  .table-scroll th,
+  .table-scroll td{
+    display:table-cell!important;
+    width:auto!important;
+    max-width:190px!important;
+    min-width:92px!important;
+    white-space:nowrap!important;
+    padding:11px 10px!important;
+    border-radius:0!important;
+  }
+  .table-scroll td:first-child{display:table-cell!important;border-radius:10px 0 0 10px!important}
+  .table-scroll td:last-child{border-radius:0 10px 10px 0!important}
+  .table-scroll .name-cell{min-width:170px!important}
+  #reports-section .table-scroll .report-table{min-width:760px!important}
+  #reports-section .report-table th:first-child,
+  #reports-section .report-table td:first-child{min-width:190px!important}
+  #reports-section .report-table th:nth-child(5),
+  #reports-section .report-table td:nth-child(5),
+  #reports-section .report-table th:nth-child(6),
+  #reports-section .report-table td:nth-child(6){min-width:150px!important}
+  #reports-section .report-card.report-wide{overflow:hidden!important}
+  #reports-section .reports-grid{gap:12px!important}
+  #reports-section .report-card{padding:14px!important}
+}
 @media(max-width:900px){.reports-grid{grid-template-columns:1fr!important}.rev-grid{grid-template-columns:1fr!important}.report-chart{gap:6px}}
 @media(max-width:760px){.modal-bg{padding:10px!important;align-items:flex-start!important}.modal{border-radius:18px!important;max-height:calc(100vh - 20px)!important;overflow-y:auto!important}.candidate-summary{grid-template-columns:1fr!important;margin:0 14px 12px!important}.candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.modal-tabs{padding:0 14px!important;overflow-x:auto!important}.modal-body{padding:16px 14px!important}.modal-footer{padding:12px 14px!important}.action-grid{grid-template-columns:1fr}}
 @media print{#app{padding:0!important}.sidebar,.topbar,.bottom-nav,.btn.export{display:none!important}.app-layout{box-shadow:none!important;border:0!important}.content-area{overflow:visible!important}.reports-grid{grid-template-columns:1fr 1fr!important}}
