@@ -1984,6 +1984,8 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
       </div>
       <div class="settings-actions">
         <button class="btn primary" onclick="downloadBackup()"><i class="ti ti-download"></i> Download backup</button>
+        <button class="btn" onclick="document.getElementById('backup-restore-input').click()"><i class="ti ti-upload"></i> Restore backup</button>
+        <input type="file" id="backup-restore-input" accept="application/json,.json" style="display:none" onchange="restoreBackupFromFile(this.files[0]);this.value=''">
         <button class="btn" onclick="resetAllFilters()"><i class="ti ti-filter-off"></i> Clear filters</button>
         <button class="btn" onclick="closeModal('settings-modal');switchTab('pro')"><i class="ti ti-briefcase"></i> Professional settings</button>
         <button class="btn" onclick="closeModal('settings-modal');switchTab('lb')"><i class="ti ti-home"></i> LB settings</button>
@@ -2273,22 +2275,70 @@ window.lbPPFilter         = '';
 let kanbanSource = 'pro';
 let calSource = 'pro';
 let calDate = new Date();
+let appStorageMode = db ? 'cloud' : 'local';
+let lastSyncError = '';
 
 function getDefaultLocalStore() {
   return {
-    pro: JSON.parse(JSON.stringify(PRO_SEED)),
-    lb: JSON.parse(JSON.stringify(LB_SEED)),
+    pro: JSON.parse(JSON.stringify(PRO_SEED)).map(normalizeProRecord),
+    lb: JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord),
     docs: {},
     timelines: {},
     proStages: [...proStages],
     lbStages: [...lbStages],
   };
 }
+function toNumOrNull(v) {
+  return v===''||v===null||v===undefined ? null : Number(v);
+}
+function normalizeProRecord(r={}) {
+  return {
+    id:r.id,
+    name:(r.name||'').toString().toUpperCase(),
+    pp:(r.pp||'').toString().toUpperCase(),
+    phone:r.phone||'',
+    position:(r.position||'').toString().toUpperCase(),
+    company:(r.company||'').toString().toUpperCase(),
+    country:r.country||'',
+    stage:r.stage||proStages[0],
+    submitted:normalizeDateField(r.submitted),
+    interview:r.interview||null,
+    ol:normalizeDateField(r.ol),
+    mol:normalizeDateField(r.mol),
+    visa:normalizeDateField(r.visa),
+    travel:normalizeDateField(r.travel),
+    commission:toNumOrNull(r.commission),
+    paid:toNumOrNull(r.paid),
+  };
+}
+function normalizeLBRecord(r={}) {
+  return {
+    id:r.id,
+    name:(r.name||'').toString().toUpperCase(),
+    phone:r.phone||'',
+    ppStatus:r.ppStatus||r.pp_status||'APPLIED',
+    travelStatus:r.travelStatus||r.travel_status||lbStages[0],
+    travelDate:normalizeDateField(r.travelDate||r.travel_date),
+    toRefund:Number(r.toRefund||r.to_refund)||0,
+    r1Date:normalizeDateField(r.r1Date||r.r1_date),
+    r1Amt:Number(r.r1Amt||r.r1_amt)||0,
+    r2Date:normalizeDateField(r.r2Date||r.r2_date),
+    r2Amt:Number(r.r2Amt||r.r2_amt)||0,
+    notes:r.notes||'',
+  };
+}
+function getStorageLabel() {
+  if (appStorageMode === 'cloud') return 'Supabase cloud sync';
+  return lastSyncError ? 'Local mode - cloud unavailable' : 'Local browser storage';
+}
 function loadLocalStore() {
   try {
     const raw = safeLocalGet(LOCAL_STORE_KEY);
     if (!raw) return getDefaultLocalStore();
-    return { ...getDefaultLocalStore(), ...JSON.parse(raw) };
+    const parsed={ ...getDefaultLocalStore(), ...JSON.parse(raw) };
+    parsed.pro=(parsed.pro||[]).map(normalizeProRecord);
+    parsed.lb=(parsed.lb||[]).map(normalizeLBRecord);
+    return parsed;
   } catch (err) {
     console.warn('Local store could not be read, using seed data:', err);
     return getDefaultLocalStore();
@@ -2421,7 +2471,8 @@ window.addEventListener('DOMContentLoaded', () => {
 // DATA LOADING
 // ══════════════════════════════════════════════════════════
 async function loadAllData() {
-  if (!db) {
+  if (!useCloud()) {
+    appStorageMode='local';
     const local = loadLocalStore();
     proDB = local.pro;
     lbDB = local.lb;
@@ -2443,8 +2494,10 @@ async function loadAllData() {
       db.from('timelines').select('*'),
       db.from('app_settings').select('*'),
     ]);
-    if (proRes.data&&proRes.data.length>0) proDB=proRes.data; else await seedProData();
-    if (lbRes.data&&lbRes.data.length>0)   lbDB=lbRes.data;   else await seedLBData();
+    appStorageMode='cloud';
+    lastSyncError='';
+    if (proRes.data&&proRes.data.length>0) proDB=proRes.data.map(normalizeProRecord); else await seedProData();
+    if (lbRes.data&&lbRes.data.length>0)   lbDB=lbRes.data.map(normalizeLBRecord);   else await seedLBData();
     if (docsRes.data)   docsRes.data.forEach(r=>{ allDocs[r.key]=r.data; });
     if (tlRes.data)     tlRes.data.forEach(r=>{ allTimelines[r.key]=r.entries; });
     if (stagesRes.data) {
@@ -2454,9 +2507,17 @@ async function loadAllData() {
       if (ls) lbStages=ls.value;
     }
   } catch(err) {
-    console.warn('Supabase error, falling back to seed data:',err);
-    if (proDB.length===0) proDB=JSON.parse(JSON.stringify(PRO_SEED));
-    if (lbDB.length===0)  lbDB=JSON.parse(JSON.stringify(LB_SEED));
+    console.warn('Supabase error, falling back to local data:',err);
+    appStorageMode='local';
+    lastSyncError=err.message||'Supabase connection failed';
+    const local=loadLocalStore();
+    proDB=local.pro;
+    lbDB=local.lb;
+    allDocs=local.docs;
+    allTimelines=local.timelines;
+    proStages=local.proStages;
+    lbStages=local.lbStages;
+    showToast('Cloud sync unavailable. Using local mode.','error');
   }
   rebuildStageSelects();
   hideLoading();
@@ -2474,14 +2535,14 @@ async function seedProData() {
     if(r.commission==='') r.commission=null; if(r.paid==='') r.paid=null; delete r.id; return r;
   });
   const {data,error}=await db.from('pro_candidates').insert(seed).select();
-  if(data&&data.length) proDB=data; else { console.warn('Seed insert failed',error); proDB=JSON.parse(JSON.stringify(PRO_SEED)); }
+  if(data&&data.length) proDB=data.map(normalizeProRecord); else { console.warn('Seed insert failed',error); proDB=JSON.parse(JSON.stringify(PRO_SEED)).map(normalizeProRecord); }
 }
 async function seedLBData() {
   const seed=JSON.parse(JSON.stringify(LB_SEED)).map(r=>{
     ['travelDate','r1Date','r2Date'].forEach(f=>r[f]=normalizeDateField(r[f])); delete r.id; return r;
   });
   const {data,error}=await db.from('lb_candidates').insert(seed).select();
-  if(data&&data.length) lbDB=data; else { console.warn('Seed insert failed',error); lbDB=JSON.parse(JSON.stringify(LB_SEED)); }
+  if(data&&data.length) lbDB=data.map(normalizeLBRecord); else { console.warn('Seed insert failed',error); lbDB=JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord); }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2492,15 +2553,38 @@ function setSaveStatus(s) {
   const lbl=document.getElementById('save-label');
   if (!dot||!lbl) return;
   dot.className='save-dot'+(s==='saving'?' saving':'');
-  lbl.textContent=s==='saving'?'Saving…':`Saved ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
+  lbl.textContent=s==='saving'?'Saving...':`${appStorageMode==='cloud'?'Cloud saved':'Local saved'} ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
 }
 
 // ══════════════════════════════════════════════════════════
 // SUPABASE WRITES
 // ══════════════════════════════════════════════════════════
+function useCloud() { return db && appStorageMode==='cloud'; }
+async function dbInsert(table, rec) {
+  const ts={...rec}; delete ts.id;
+  const {data,error}=await db.from(table).insert(ts).select().single();
+  if(error) throw error;
+  return data;
+}
+async function dbUpdate(table, id, rec) {
+  const ts={...rec}; delete ts.id;
+  const {error}=await db.from(table).update(ts).eq('id',id);
+  if(error) throw error;
+}
+async function dbDelete(table, id) {
+  const {error}=await db.from(table).delete().eq('id',id);
+  if(error) throw error;
+}
+function fallBackToLocal(err) {
+  console.error(err);
+  appStorageMode='local';
+  lastSyncError=err.message||'Supabase write failed';
+  saveLocalStore();
+  showToast('Cloud save failed. Saved locally instead.','error');
+}
 async function saveProRecord(rec) {
   setSaveStatus('saving');
-  if (!db) {
+  if (!useCloud()) {
     saveLocalStore();
     setSaveStatus('saved');
     return;
@@ -2508,24 +2592,24 @@ async function saveProRecord(rec) {
   const tempId=rec.id;
   try {
     if (editingProId) {
-      const ts={...rec}; delete ts.id;
-      await db.from('pro_candidates').update(ts).eq('id',rec.id);
+      await dbUpdate('pro_candidates',rec.id,rec);
     } else {
-      const ts={...rec}; delete ts.id;
-      const {data,error}=await db.from('pro_candidates').insert(ts).select().single();
+      const data=await dbInsert('pro_candidates',rec);
       if (data) {
+        const oldId=rec.id;
         rec.id=data.id;
+        const i=proDB.findIndex(x=>x.id==oldId); if(i>-1) proDB[i].id=data.id;
         if(allTimelines[`pro_${tempId}`]){allTimelines[`pro_${rec.id}`]=allTimelines[`pro_${tempId}`];delete allTimelines[`pro_${tempId}`];}
         renderPro();
-      } else console.warn('Insert failed',error);
+      }
     }
     await saveTimeline(`pro_${rec.id}`);
     setSaveStatus('saved');
-  } catch(e){ console.error(e); showToast('Save failed — check connection','error'); setSaveStatus('saved'); }
+  } catch(e){ fallBackToLocal(e); setSaveStatus('saved'); }
 }
 async function saveLBRecord(rec) {
   setSaveStatus('saving');
-  if (!db) {
+  if (!useCloud()) {
     saveLocalStore();
     setSaveStatus('saved');
     return;
@@ -2533,30 +2617,30 @@ async function saveLBRecord(rec) {
   const tempId=rec.id;
   try {
     if (editingLbId) {
-      const ts={...rec}; delete ts.id;
-      await db.from('lb_candidates').update(ts).eq('id',rec.id);
+      await dbUpdate('lb_candidates',rec.id,rec);
     } else {
-      const ts={...rec}; delete ts.id;
-      const {data,error}=await db.from('lb_candidates').insert(ts).select().single();
+      const data=await dbInsert('lb_candidates',rec);
       if (data) {
+        const oldId=rec.id;
         rec.id=data.id;
+        const i=lbDB.findIndex(x=>x.id==oldId); if(i>-1) lbDB[i].id=data.id;
         if(allTimelines[`lb_${tempId}`]){allTimelines[`lb_${rec.id}`]=allTimelines[`lb_${tempId}`];delete allTimelines[`lb_${tempId}`];}
         renderLB();
-      } else console.warn('Insert failed',error);
+      }
     }
     await saveTimeline(`lb_${rec.id}`);
     setSaveStatus('saved');
-  } catch(e){ console.error(e); showToast('Save failed — check connection','error'); setSaveStatus('saved'); }
+  } catch(e){ fallBackToLocal(e); setSaveStatus('saved'); }
 }
-async function deleteProRecord(id){ setSaveStatus('saving'); if(!db){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await db.from('pro_candidates').delete().eq('id',id); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
-async function deleteLBRecord(id){ setSaveStatus('saving'); if(!db){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await db.from('lb_candidates').delete().eq('id',id); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
-async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!db){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await db.from('documents').upsert({key,data},{onConflict:'key'}); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
-async function saveTimeline(key){ if(!allTimelines[key]) return; if(!db){ saveLocalStore(); return; } try{ await db.from('timelines').upsert({key,entries:allTimelines[key]},{onConflict:'key'}); }catch(e){console.error(e);} }
+async function deleteProRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('pro_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
+async function deleteLBRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('lb_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
+async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ const {error}=await db.from('documents').upsert({key,data},{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
+async function saveTimeline(key){ if(!allTimelines[key]) return; if(!useCloud()){ saveLocalStore(); return; } try{ const {error}=await db.from('timelines').upsert({key,entries:allTimelines[key]},{onConflict:'key'}); if(error) throw error; }catch(e){fallBackToLocal(e);} }
 async function saveStages(){
   setSaveStatus('saving');
-  if(!db){ saveLocalStore(); setSaveStatus('saved'); return; }
-  try{ await db.from('app_settings').upsert([{key:'pro_stages',value:proStages},{key:'lb_stages',value:lbStages}],{onConflict:'key'}); setSaveStatus('saved'); }
-  catch(e){console.error(e);setSaveStatus('saved');}
+  if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; }
+  try{ const {error}=await db.from('app_settings').upsert([{key:'pro_stages',value:proStages},{key:'lb_stages',value:lbStages}],{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }
+  catch(e){fallBackToLocal(e);setSaveStatus('saved');}
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2854,7 +2938,7 @@ function openSettings(){
     <div class="settings-kpi"><strong>${lbDB.length}</strong><span>LB records</span></div>
     <div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`;
   const mode=document.getElementById('settings-storage-mode');
-  if(mode) mode.textContent=db?'Supabase is configured. Records sync through your database.':'Local browser storage is active. Configure Supabase for shared cloud sync.';
+  if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel();
   document.getElementById('settings-modal')?.classList.add('open');
 }
 function openHelp(){
@@ -2864,7 +2948,7 @@ function openHelp(){
 function downloadBackup(){
   const backup={
     exportedAt:new Date().toISOString(),
-    storageMode:db?'supabase':'local',
+    storageMode:appStorageMode,
     pro:proDB,
     lb:lbDB,
     docs:allDocs,
@@ -2879,6 +2963,38 @@ function downloadBackup(){
   });
   a.click();
   showToast('Backup downloaded','success');
+}
+function restoreBackupFromFile(file){
+  if(!file) return;
+  if(!confirm('Restore this backup into the current browser workspace? This replaces the records currently loaded in Dreco.')) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      proDB=(data.pro||[]).map(normalizeProRecord);
+      lbDB=(data.lb||[]).map(normalizeLBRecord);
+      allDocs=data.docs||{};
+      allTimelines=data.timelines||{};
+      proStages=Array.isArray(data.proStages)&&data.proStages.length?data.proStages:[...proStages];
+      lbStages=Array.isArray(data.lbStages)&&data.lbStages.length?data.lbStages:[...lbStages];
+      if(data.staffAccounts&&typeof data.staffAccounts==='object'){
+        Object.assign(STAFF_ACCOUNTS,data.staffAccounts);
+        saveStaffAccounts();
+      }
+      appStorageMode='local';
+      lastSyncError='Backup restored locally. Download a new backup or reconnect cloud sync when ready.';
+      saveLocalStore();
+      rebuildStageSelects(); rebuildProPills();
+      closeModal('settings-modal');
+      switchTab('dash');
+      setSaveStatus('saved');
+      showToast('Backup restored locally','success');
+    }catch(err){
+      console.error(err);
+      showToast('Backup restore failed. Check the JSON file.','error');
+    }
+  };
+  reader.readAsText(file);
 }
 function resetAllFilters(){
   window.proStagePillFilter='';
@@ -2911,6 +3027,27 @@ function proNeedsAction(r){
 }
 function lbNeedsAction(r){
   return !hasDocs('lb',r.id) || getRefundStatus(r)==='incomplete' || ((r.travelStatus||r.travel_status)==='NOT YET');
+}
+function validateProRecord(rec) {
+  if(!rec.name) return 'Full name is required.';
+  if(!rec.stage) return 'Current stage is required.';
+  if(rec.commission!==null && rec.commission<0) return 'Commission cannot be negative.';
+  if(rec.paid!==null && rec.paid<0) return 'Amount paid cannot be negative.';
+  if(rec.commission!==null && rec.paid!==null && rec.paid>rec.commission) return 'Amount paid cannot exceed commission billed.';
+  return '';
+}
+function validateLBRecord(rec) {
+  if(!rec.name) return 'Full name is required.';
+  if(!rec.ppStatus) return 'Passport status is required.';
+  if(!rec.travelStatus) return 'Travel status is required.';
+  if(rec.toRefund<0 || rec.r1Amt<0 || rec.r2Amt<0) return 'Refund amounts cannot be negative.';
+  if(rec.r1Amt+rec.r2Amt>rec.toRefund && rec.ppStatus!=='HAD PP') return 'Refunded amount cannot exceed amount to refund.';
+  return '';
+}
+function recordChanges(before={},after={},fields=[]) {
+  return fields
+    .filter(([key])=>String(before[key]??'')!==String(after[key]??''))
+    .map(([key,label])=>`${label}: "${before[key]??'—'}" to "${after[key]??'—'}"`);
 }
 function renderProSummary(r){
   const el=document.getElementById('pro-summary'); if(!el) return;
@@ -3308,7 +3445,8 @@ function editPro(id){
 async function savePro(){
   const name=document.getElementById('pf-name').value.trim();
   if(!name){ showToast('Full name is required','error'); return; }
-  const oldStage=editingProId?(proDB.find(x=>x.id==editingProId)||{}).stage:null;
+  const oldRec=editingProId?{...(proDB.find(x=>x.id==editingProId)||{})}:null;
+  const oldStage=oldRec?oldRec.stage:null;
   const newStage=document.getElementById('pf-stage').value;
   const rec={
     name:name.toUpperCase(), pp:document.getElementById('pf-pp').value.trim().toUpperCase(),
@@ -3321,9 +3459,12 @@ async function savePro(){
     commission:document.getElementById('pf-comm').value?Number(document.getElementById('pf-comm').value):null,
     paid:document.getElementById('pf-paid').value?Number(document.getElementById('pf-paid').value):null,
   };
+  const validationError=validateProRecord(rec);
+  if(validationError){ showToast(validationError,'error'); return; }
   if(editingProId){
     rec.id=editingProId; const i=proDB.findIndex(x=>x.id==editingProId); proDB[i]={...proDB[i],...rec};
-    addTimeline('pro',editingProId,oldStage!==newStage?`Stage: "${oldStage}" → "${newStage}"` :'Details updated');
+    const changes=recordChanges(oldRec,rec,[['name','Name'],['pp','Passport'],['phone','Phone'],['position','Position'],['company','Company'],['country','Country'],['stage','Stage'],['commission','Commission'],['paid','Paid'],['travel','Travel date']]);
+    addTimeline('pro',editingProId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
     showToast('Candidate updated ✓','success');
   } else {
     rec.id=Date.now(); proDB.push(rec);
@@ -3455,7 +3596,8 @@ async function saveLB(){
   if(!name){ showToast('Full name is required','error'); return; }
   const ppStatus=document.getElementById('lf-pp').value;
   const isHadPP=ppStatus==='HAD PP';
-  const oldTravel=editingLbId?((lbDB.find(x=>x.id==editingLbId)||{}).travelStatus||''):null;
+  const oldRec=editingLbId?{...(lbDB.find(x=>x.id==editingLbId)||{})}:null;
+  const oldTravel=oldRec?oldRec.travelStatus:null;
   const newTravel=document.getElementById('lf-travel').value;
   const rec={
     name:name.toUpperCase(), phone:document.getElementById('lf-phone').value.trim(),
@@ -3468,9 +3610,12 @@ async function saveLB(){
     r2Amt:isHadPP?0:(Number(document.getElementById('lf-r2amt').value)||0),
     notes:document.getElementById('lf-notes').value.trim(),
   };
+  const validationError=validateLBRecord(rec);
+  if(validationError){ showToast(validationError,'error'); return; }
   if(editingLbId){
     rec.id=editingLbId; const i=lbDB.findIndex(x=>x.id==editingLbId); lbDB[i]={...lbDB[i],...rec};
-    addTimeline('lb',editingLbId,oldTravel!==newTravel?`Travel: "${oldTravel}" → "${newTravel}"` :'Details updated');
+    const changes=recordChanges(oldRec,rec,[['name','Name'],['phone','Phone'],['ppStatus','Passport'],['travelStatus','Travel'],['travelDate','Travel date'],['toRefund','To refund'],['r1Amt','1st refund'],['r2Amt','2nd refund'],['notes','Notes']]);
+    addTimeline('lb',editingLbId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
     showToast('Candidate updated ✓','success');
   } else {
     rec.id=Date.now(); lbDB.push(rec);
