@@ -1,9 +1,18 @@
-// ══════════════════════════════════════════════════════════
+﻿// ══════════════════════════════════════════════════════════
 // SUPABASE CONFIG — replace with your project values
 // ══════════════════════════════════════════════════════════
 const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';       // e.g. https://abcxyz.supabase.co
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const HAS_SUPABASE_CONFIG =
+  SUPABASE_URL &&
+  SUPABASE_ANON_KEY &&
+  !SUPABASE_URL.includes('YOUR_') &&
+  !SUPABASE_ANON_KEY.includes('YOUR_');
+const db = HAS_SUPABASE_CONFIG && window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+const LOCAL_STORE_KEY = 'dreco_local_store_v1';
+const LOCAL_STAFF_KEY = 'dreco_staff_accounts_v1';
 
 // ══════════════════════════════════════════════════════════
 // STAFF ACCOUNTS
@@ -16,6 +25,34 @@ const STAFF_ACCOUNTS = {
   consolata: { password: 'Consol@2025',  role: 'staff', display: 'Consolata' },
 };
 const RECOVERY_CODE = 'DR-RESET-2025';
+
+function loadStaffAccounts() {
+  try {
+    const saved = safeLocalGet(LOCAL_STAFF_KEY);
+    if (saved) Object.assign(STAFF_ACCOUNTS, JSON.parse(saved));
+  } catch (err) {
+    console.warn('Saved staff accounts could not be loaded:', err);
+  }
+}
+function saveStaffAccounts() {
+  safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
+}
+
+function safeLocalGet(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function safeLocalSet(key, value) {
+  try { localStorage.setItem(key, value); } catch { /* file pages may block storage */ }
+}
+function safeSessionGet(key) {
+  try { return sessionStorage.getItem(key); } catch { return null; }
+}
+function safeSessionSet(key, value) {
+  try { sessionStorage.setItem(key, value); } catch { /* login still works without session restore */ }
+}
+function safeSessionRemove(key) {
+  try { sessionStorage.removeItem(key); } catch { /* ignore */ }
+}
 
 // ══════════════════════════════════════════════════════════
 // STATE
@@ -39,6 +76,43 @@ const EXCEL_EPOCH = new Date(1899, 11, 30);
 window.proStagePillFilter = '';
 window.lbTravelPillFilter = '';
 window.lbPPFilter         = '';
+let kanbanSource = 'pro';
+let calSource = 'pro';
+let calDate = new Date();
+
+function getDefaultLocalStore() {
+  return {
+    pro: JSON.parse(JSON.stringify(PRO_SEED)),
+    lb: JSON.parse(JSON.stringify(LB_SEED)),
+    docs: {},
+    timelines: {},
+    proStages: [...proStages],
+    lbStages: [...lbStages],
+  };
+}
+function loadLocalStore() {
+  try {
+    const raw = safeLocalGet(LOCAL_STORE_KEY);
+    if (!raw) return getDefaultLocalStore();
+    return { ...getDefaultLocalStore(), ...JSON.parse(raw) };
+  } catch (err) {
+    console.warn('Local store could not be read, using seed data:', err);
+    return getDefaultLocalStore();
+  }
+}
+function saveLocalStore() {
+  safeLocalSet(LOCAL_STORE_KEY, JSON.stringify({
+    pro: proDB,
+    lb: lbDB,
+    docs: allDocs,
+    timelines: allTimelines,
+    proStages,
+    lbStages,
+  }));
+}
+function nextLocalId(rows) {
+  return rows.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1;
+}
 
 // ══════════════════════════════════════════════════════════
 // LOADING
@@ -91,9 +165,17 @@ function submitForgotPassword() {
   resEl.style.display='block';
 }
 
-// setUserDisplay is defined in the PROFILE DROPDOWN section below
+function setUserDisplay(display, role) {
+  const parts=display.replace(/[^a-zA-Z ]/g,'').trim().split(' ');
+  const initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():display.substring(0,2).toUpperCase();
+  ['user-chip','sidebar-user-name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=display; });
+  ['topbar-avatar','sidebar-avatar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=initials; });
+  const rEl=document.getElementById('sidebar-user-role');
+  if(rEl) rEl.textContent=(role==='admin'?'Administrator':'Staff');
+}
 
 function doLogin() {
+  loadStaffAccounts();
   const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
   const password=(document.getElementById('pw-input').value||'').trim();
   const errEl=document.getElementById('login-error');
@@ -101,18 +183,17 @@ function doLogin() {
   if (!account||account.password!==password) { errEl.style.display='block'; return; }
   errEl.style.display='none';
   currentUser={username,...account};
-  sessionStorage.setItem('dr_user',JSON.stringify(currentUser));
+  safeSessionSet('dr_user',JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
-  document.getElementById('bottom-nav').classList.add('visible');
+  document.getElementById('bottom-nav')?.classList.add('visible');
   setUserDisplay(account.display, account.role);
   loadAllData();
 }
-
 function doLogout() {
-  sessionStorage.removeItem('dr_user'); currentUser=null;
+  safeSessionRemove('dr_user'); currentUser=null;
   document.getElementById('app').style.display='none';
-  document.getElementById('bottom-nav').classList.remove('visible');
+  document.getElementById('bottom-nav')?.classList.remove('visible');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('pw-input').value='';
   document.getElementById('username-input').value='';
@@ -121,16 +202,17 @@ function doLogout() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  const saved=sessionStorage.getItem('dr_user');
+  loadStaffAccounts();
+  const saved=safeSessionGet('dr_user');
   if (saved) {
     try {
       currentUser=JSON.parse(saved);
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='block';
-      document.getElementById('bottom-nav').classList.add('visible');
+      document.getElementById('bottom-nav')?.classList.add('visible');
       setUserDisplay(currentUser.display, currentUser.role);
       loadAllData();
-    } catch { sessionStorage.removeItem('dr_user'); }
+    } catch { safeSessionRemove('dr_user'); }
   }
   rebuildStageSelects();
   ['pro-modal','lb-modal','docs-modal'].forEach(id=>{
@@ -143,6 +225,19 @@ window.addEventListener('DOMContentLoaded', () => {
 // DATA LOADING
 // ══════════════════════════════════════════════════════════
 async function loadAllData() {
+  if (!db) {
+    const local = loadLocalStore();
+    proDB = local.pro;
+    lbDB = local.lb;
+    allDocs = local.docs;
+    allTimelines = local.timelines;
+    proStages = local.proStages;
+    lbStages = local.lbStages;
+    rebuildStageSelects();
+    hideLoading();
+    switchTab('dash');
+    return;
+  }
   showLoading('Loading candidates…');
   try {
     const [proRes,lbRes,docsRes,tlRes,stagesRes]=await Promise.all([
@@ -209,6 +304,11 @@ function setSaveStatus(s) {
 // ══════════════════════════════════════════════════════════
 async function saveProRecord(rec) {
   setSaveStatus('saving');
+  if (!db) {
+    saveLocalStore();
+    setSaveStatus('saved');
+    return;
+  }
   const tempId=rec.id;
   try {
     if (editingProId) {
@@ -229,6 +329,11 @@ async function saveProRecord(rec) {
 }
 async function saveLBRecord(rec) {
   setSaveStatus('saving');
+  if (!db) {
+    saveLocalStore();
+    setSaveStatus('saved');
+    return;
+  }
   const tempId=rec.id;
   try {
     if (editingLbId) {
@@ -247,12 +352,13 @@ async function saveLBRecord(rec) {
     setSaveStatus('saved');
   } catch(e){ console.error(e); showToast('Save failed — check connection','error'); setSaveStatus('saved'); }
 }
-async function deleteProRecord(id){ setSaveStatus('saving'); try{ await db.from('pro_candidates').delete().eq('id',id); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
-async function deleteLBRecord(id){ setSaveStatus('saving'); try{ await db.from('lb_candidates').delete().eq('id',id); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
-async function saveDocsToDB(key,data){ setSaveStatus('saving'); try{ await db.from('documents').upsert({key,data},{onConflict:'key'}); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
-async function saveTimeline(key){ if(!allTimelines[key]) return; try{ await db.from('timelines').upsert({key,entries:allTimelines[key]},{onConflict:'key'}); }catch(e){console.error(e);} }
+async function deleteProRecord(id){ setSaveStatus('saving'); if(!db){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await db.from('pro_candidates').delete().eq('id',id); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
+async function deleteLBRecord(id){ setSaveStatus('saving'); if(!db){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await db.from('lb_candidates').delete().eq('id',id); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
+async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!db){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await db.from('documents').upsert({key,data},{onConflict:'key'}); setSaveStatus('saved'); }catch(e){console.error(e);setSaveStatus('saved');} }
+async function saveTimeline(key){ if(!allTimelines[key]) return; if(!db){ saveLocalStore(); return; } try{ await db.from('timelines').upsert({key,entries:allTimelines[key]},{onConflict:'key'}); }catch(e){console.error(e);} }
 async function saveStages(){
   setSaveStatus('saving');
+  if(!db){ saveLocalStore(); setSaveStatus('saved'); return; }
   try{ await db.from('app_settings').upsert([{key:'pro_stages',value:proStages},{key:'lb_stages',value:lbStages}],{onConflict:'key'}); setSaveStatus('saved'); }
   catch(e){console.error(e);setSaveStatus('saved');}
 }
@@ -318,27 +424,129 @@ function ppBadge(s){
 // ══════════════════════════════════════════════════════════
 // TABS + MODALS
 // ══════════════════════════════════════════════════════════
-function setBottomNav(t) {
-  document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
-  const bn = document.getElementById('bnav-' + t);
-  if (bn) bn.classList.add('active');
-}
-
 function switchTab(t){
   ['dash','pro','lb','kanban','calendar','reports'].forEach(x=>{
     const nav=document.getElementById('nav-'+x); if(nav) nav.classList.toggle('active',x===t);
     const sec=document.getElementById(x+'-section'); if(sec) sec.style.display=x===t?'':'none';
   });
+  setBottomNav(t);
   const titles={dash:'Dashboard',pro:'Professional',lb:'LB Jobs',kanban:'Kanban Board',calendar:'Calendar',reports:'Reports'};
   const titleEl=document.getElementById('topbar-title'); if(titleEl) titleEl.textContent=titles[t]||'';
-  setBottomNav(t);
-  if(t==='dash')     renderDash();
-  if(t==='pro')      { rebuildProPills(); renderPro(); }
-  if(t==='lb')       renderLB();
-  if(t==='kanban')   renderKanban();
+  if(t==='dash') renderDash();
+  if(t==='pro')  { rebuildProPills(); renderPro(); }
+  if(t==='lb')   renderLB();
+  if(t==='kanban') renderKanban();
   if(t==='calendar') renderCalendar();
-  if(t==='reports')  renderReports();
+  if(t==='reports') renderReports();
 }
+function setBottomNav(t){
+  document.querySelectorAll('.bottom-nav-item').forEach(btn=>btn.classList.remove('active'));
+  const active=document.getElementById('bnav-'+t);
+  if(active) active.classList.add('active');
+}
+function setKanbanSource(src,btn){
+  kanbanSource=src;
+  document.querySelectorAll('#kanban-source-tabs .pill-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const title=document.getElementById('kanban-title');
+  const addBtn=document.getElementById('kanban-add-btn');
+  if(title) title.textContent=src==='pro'?'Professional Pipeline Board':'LB Jobs Board';
+  if(addBtn) addBtn.setAttribute('onclick',src==='pro'?'openProForm()':'openLBForm()');
+  renderKanban();
+}
+function renderKanban(){
+  const board=document.getElementById('kanban-board'); if(!board) return;
+  const stages=kanbanSource==='pro'?proStages:lbStages;
+  const rows=kanbanSource==='pro'?proDB:lbDB;
+  board.innerHTML=stages.map(stage=>{
+    const items=rows.filter(r=>(kanbanSource==='pro'?r.stage:(r.travelStatus||r.travel_status))===stage);
+    const cards=items.length?items.map(r=>{
+      const meta=kanbanSource==='pro'
+        ? `${r.position||'No position'} · ${r.company||'No company'}`
+        : `${r.ppStatus||r.pp_status||'Passport'} · ${getRefundStatus(r)}`;
+      const footer=kanbanSource==='pro'
+        ? `<span class="kanban-card-country">${r.country||'—'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
+        : `<span class="kanban-card-country">${r.phone||'—'}</span><span class="kanban-card-comm">$${Number(r.toRefund||r.to_refund)||0}</span>`;
+      return `<div class="kanban-card" onclick="${kanbanSource==='pro'?'editPro':'editLB'}(${r.id})">
+        <div class="kanban-card-name">${r.name}</div>
+        <div class="kanban-card-meta"><i class="ti ti-id"></i>${meta}</div>
+        <div class="kanban-card-footer">${footer}</div>
+      </div>`;
+    }).join(''):'<div class="kanban-empty">No candidates</div>';
+    return `<div class="kanban-col">
+      <div class="kanban-col-header"><div class="kanban-col-title">${stage}</div><div class="kanban-col-count">${items.length}</div></div>
+      ${cards}
+    </div>`;
+  }).join('');
+}
+function setCalSource(src,btn){
+  calSource=src;
+  document.querySelectorAll('#cal-source-tabs .pill-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderCalendar();
+}
+function calNav(delta){
+  calDate=new Date(calDate.getFullYear(),calDate.getMonth()+delta,1);
+  renderCalendar();
+}
+function collectCalendarEvents(){
+  const events=[];
+  if(calSource==='pro'){
+    proDB.forEach(r=>{
+      [['interview','Interview','cal-ev-interview'],['ol','Offer letter','cal-ev-ol'],['mol','MOL','cal-ev-mol'],['visa','Visa','cal-ev-visa'],['travel','Travel','cal-ev-travel']].forEach(([field,label,cls])=>{
+        const date=toInput(r[field]);
+        if(date) events.push({date,label:`${label}: ${r.name}`,cls,open:`editPro(${r.id})`});
+      });
+    });
+  } else {
+    lbDB.forEach(r=>{
+      const date=toInput(r.travelDate||r.travel_date);
+      if(date) events.push({date,label:`Travel: ${r.name}`,cls:'cal-ev-lb',open:`editLB(${r.id})`});
+    });
+  }
+  return events;
+}
+function renderCalendar(){
+  const grid=document.getElementById('cal-grid'); if(!grid) return;
+  const label=document.getElementById('cal-month-label');
+  const year=calDate.getFullYear(), month=calDate.getMonth();
+  if(label) label.textContent=calDate.toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+  const first=new Date(year,month,1);
+  const start=new Date(year,month,1-((first.getDay()+6)%7));
+  const today=new Date().toISOString().split('T')[0];
+  const events=collectCalendarEvents();
+  let days='';
+  for(let i=0;i<42;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    const iso=d.toISOString().split('T')[0];
+    const dayEvents=events.filter(e=>e.date===iso).slice(0,3);
+    days+=`<div class="cal-day ${d.getMonth()!==month?'other-month':''} ${iso===today?'today':''}">
+      <div class="cal-day-num">${d.getDate()}</div>
+      ${dayEvents.map(e=>`<div class="cal-event ${e.cls}" onclick="${e.open}">${e.label}</div>`).join('')}
+    </div>`;
+  }
+  grid.innerHTML=`<div class="cal-header-row">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="cal-header-cell">${d}</div>`).join('')}</div><div class="cal-grid-body">${days}</div>`;
+}
+function renderReports(){
+  const wrap=document.getElementById('reports-content'); if(!wrap) return;
+  const proTravelled=proDB.filter(r=>r.stage==='TRAVELLED').length;
+  const lbTravelled=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
+  const totalComm=proDB.reduce((sum,r)=>sum+(Number(r.commission)||0),0);
+  const totalPaid=proDB.reduce((sum,r)=>sum+(Number(r.paid)||0),0);
+  const refundOpen=lbDB.filter(r=>getRefundStatus(r)==='incomplete').length;
+  wrap.innerHTML=`<div class="reports-grid">
+    <div class="report-card"><div class="report-card-title"><i class="ti ti-briefcase"></i>Professional</div><div class="metric-val">${proDB.length}</div><p class="dash-row-label">${proTravelled} travelled · ${proDB.filter(isInProcessPro).length} in process</p></div>
+    <div class="report-card"><div class="report-card-title"><i class="ti ti-home"></i>LB Jobs</div><div class="metric-val">${lbDB.length}</div><p class="dash-row-label">${lbTravelled} travelled · ${refundOpen} refunds open</p></div>
+    <div class="report-card"><div class="report-card-title"><i class="ti ti-cash"></i>Commission</div><div class="metric-val sm">KES ${totalPaid.toLocaleString()}</div><p class="dash-row-label">Outstanding KES ${(totalComm-totalPaid).toLocaleString()}</p></div>
+    <div class="report-card"><div class="report-card-title"><i class="ti ti-chart-bar"></i>Conversion</div><div class="metric-val">${proDB.length?Math.round((proTravelled/proDB.length)*100):0}%</div><p class="dash-row-label">Professional candidates travelled</p></div>
+  </div>`;
+}
+function exportReportPDF(){
+  renderReports();
+  window.print();
+}
+function openSettings(){ showToast('Use the stage settings buttons in each table for now.','success'); }
+function openHelp(){ showToast('Need help? Check login, filters, exports, and document links from each table.','success'); }
 function switchModalTab(modal,tab,btn){
   const tabs=modal==='pro'?['details','pipeline','commission','timeline']:['details','refunds','timeline'];
   tabs.forEach(tt=>{ const el=document.getElementById(`${modal}-tab-${tt}`); if(el) el.style.display=tt===tab?'':'none'; });
@@ -924,57 +1132,57 @@ function showToast(msg,type=''){
 // PROFILE DROPDOWN
 // ══════════════════════════════════════════════════════════
 function toggleProfileDropdown(e) {
-  if (e) e.stopPropagation();
+  e.stopPropagation();
   const dd = document.getElementById('profile-dropdown');
   const open = dd.classList.toggle('open');
+  // clear messages when opening
   if (open) {
-    // Reset to main menu view, clear fields
-    closeProfileEdit(true);
     const msg = document.getElementById('pd-msg');
     if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
     ['pd-new-username','pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
+    // pre-fill username field with current
     const uEl = document.getElementById('pd-new-username');
     if (uEl && currentUser) uEl.placeholder = currentUser.username;
   }
+  // rotate caret
+  const caret = document.getElementById('profile-caret');
+  if (caret) caret.style.transform = open ? 'rotate(180deg)' : '';
 }
-
 function closeProfileDropdown() {
   const dd = document.getElementById('profile-dropdown');
   if (dd) dd.classList.remove('open');
+  const caret = document.getElementById('profile-caret');
+  if (caret) caret.style.transform = '';
 }
-
 function openProfileEdit() {
   const panel = document.getElementById('pd-edit-panel');
   if (panel) panel.style.display = 'block';
+  const msg = document.getElementById('pd-msg');
+  if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
+  const uEl = document.getElementById('pd-new-username');
+  if (uEl && currentUser) uEl.placeholder = currentUser.username;
 }
-
 function openChangePassword() {
-  openProfileEdit(); // same panel has both username + password
+  openProfileEdit();
+  const el = document.getElementById('pd-current-pw');
+  if (el) el.focus();
 }
-
-function closeProfileEdit(silent) {
+function closeProfileEdit() {
   const panel = document.getElementById('pd-edit-panel');
   if (panel) panel.style.display = 'none';
-  if (!silent) {
-    const msg = document.getElementById('pd-msg');
-    if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
-  }
-}
-
-function openSettings() {
-  closeProfileDropdown();
-  showToast('Settings coming soon', 'success');
-}
-
-function openHelp() {
-  closeProfileDropdown();
-  showToast('Help & Support coming soon', 'success');
 }
 
 // close dropdown when clicking outside
-document.addEventListener('click', () => closeProfileDropdown());
+document.addEventListener('click', () => {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd && dd.classList.contains('open')) {
+    dd.classList.remove('open');
+    const caret = document.getElementById('profile-caret');
+    if (caret) caret.style.transform = '';
+  }
+});
 
 function saveProfileChanges() {
   const msgEl = document.getElementById('pd-msg');
@@ -990,418 +1198,72 @@ function saveProfileChanges() {
 
   let changed = false;
 
+  // ── Username change ──
   if (newUsername && newUsername !== currentUser.username) {
-    if (STAFF_ACCOUNTS[newUsername]) { showMsg('Username already taken.', 'err'); return; }
+    if (STAFF_ACCOUNTS[newUsername] && newUsername !== currentUser.username) {
+      showMsg('That username is already taken.', 'err'); return;
+    }
+    // rename key in STAFF_ACCOUNTS
     STAFF_ACCOUNTS[newUsername] = { ...STAFF_ACCOUNTS[currentUser.username] };
     delete STAFF_ACCOUNTS[currentUser.username];
     currentUser.username = newUsername;
-    sessionStorage.setItem('dr_user', JSON.stringify(currentUser));
+    safeSessionSet('dr_user', JSON.stringify(currentUser));
     changed = true;
   }
 
+  // ── Password change ──
   if (currentPw || newPw || confirmPw) {
-    if (!currentPw) { showMsg('Enter current password.', 'err'); return; }
+    if (!currentPw) { showMsg('Enter your current password.', 'err'); return; }
     if (currentPw !== currentUser.password) { showMsg('Current password is incorrect.', 'err'); return; }
     if (!newPw) { showMsg('Enter a new password.', 'err'); return; }
-    if (newPw.length < 6) { showMsg('Min. 6 characters required.', 'err'); return; }
-    if (newPw !== confirmPw) { showMsg('Passwords do not match.', 'err'); return; }
+    if (newPw.length < 6) { showMsg('New password must be at least 6 characters.', 'err'); return; }
+    if (newPw !== confirmPw) { showMsg('New passwords do not match.', 'err'); return; }
     STAFF_ACCOUNTS[currentUser.username].password = newPw;
     currentUser.password = newPw;
-    sessionStorage.setItem('dr_user', JSON.stringify(currentUser));
+    safeSessionSet('dr_user', JSON.stringify(currentUser));
     changed = true;
   }
 
   if (!changed) { showMsg('No changes to save.', 'err'); return; }
-  showMsg('✓ Saved successfully.', 'ok');
+  saveStaffAccounts();
+  showMsg('✓ Changes saved successfully.', 'ok');
+  // clear sensitive fields
   ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  // refresh display
   setUserDisplay(currentUser.display, currentUser.role);
 }
 
-// ── Unified setUserDisplay ──
+// ── Extended setUserDisplay to also fill profile dropdown ──
+const _baseSetUserDisplay = setUserDisplay;
 function setUserDisplay(display, role) {
+  // original fields
   const parts = display.replace(/[^a-zA-Z ]/g, '').trim().split(' ');
   const initials = parts.length >= 2
     ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
     : display.substring(0, 2).toUpperCase();
 
-  // topbar avatar (icon-only button)
-  ['topbar-avatar', 'pd-avatar', 'suc-avatar'].forEach(id => {
+  ['user-chip','sidebar-user-name'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = display;
+  });
+  ['topbar-avatar','sidebar-avatar','pd-avatar','suc-avatar'].forEach(id => {
     const el = document.getElementById(id); if (el) el.textContent = initials;
   });
-
-  // sidebar user card
+  // suc-name = first name only for card
   const sucName = document.getElementById('suc-name');
   if (sucName) sucName.textContent = display;
-
-  // dropdown header
+  // sidebar role
+  const rEl = document.getElementById('sidebar-user-role');
+  if (rEl) rEl.textContent = role === 'admin' ? 'Administrator' : 'Staff';
+  // pd name + role badge
   const pdName = document.getElementById('pd-name');
   if (pdName) pdName.textContent = display;
-
+  const pdBadge = document.getElementById('pd-role-badge');
   const pdRoleText = document.getElementById('pd-role-text');
-  if (pdRoleText) pdRoleText.textContent = role === 'admin' ? 'Administrator' : 'Staff';
-}
-
-// ══════════════════════════════════════════════════════════
-// KANBAN BOARD
-// ══════════════════════════════════════════════════════════
-window.kanbanSource = 'pro';
-
-function setKanbanSource(src, btn) {
-  window.kanbanSource = src;
-  document.querySelectorAll('#kanban-source-tabs .pill-tab').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  const titleEl = document.getElementById('kanban-title');
-  const addBtn  = document.getElementById('kanban-add-btn');
-  if (titleEl) titleEl.textContent = src === 'pro' ? 'Professional Pipeline Board' : 'LB Jobs Board';
-  if (addBtn)  { addBtn.onclick = src === 'pro' ? openProForm : openLBForm; }
-  renderKanban();
-}
-
-function renderKanban() {
-  const board = document.getElementById('kanban-board');
-  if (!board) return;
-
-  if (window.kanbanSource === 'pro') {
-    // One column per stage
-    board.innerHTML = proStages.map(stage => {
-      const cards = proDB.filter(r => r.stage === stage);
-      const cardsHTML = cards.length
-        ? cards.map(r => {
-            const comm = r.commission ? `KES ${Number(r.commission).toLocaleString()}` : '—';
-            return `<div class="kanban-card" onclick="editPro(${r.id})">
-              <div class="kanban-card-name">${r.name}</div>
-              <div class="kanban-card-meta"><i class="ti ti-briefcase"></i>${r.position || '—'}</div>
-              <div class="kanban-card-meta"><i class="ti ti-building"></i>${r.company || '—'}</div>
-              <div class="kanban-card-footer">
-                <span class="kanban-card-country">${r.country || '—'}</span>
-                <span class="kanban-card-comm">${comm}</span>
-              </div>
-            </div>`;
-          }).join('')
-        : '<div class="kanban-empty">No candidates</div>';
-
-      const stageShort = stage.replace('PENDING ', '');
-      return `<div class="kanban-col">
-        <div class="kanban-col-header">
-          <span class="kanban-col-title">${stageShort}</span>
-          <span class="kanban-col-count">${cards.length}</span>
-        </div>
-        ${cardsHTML}
-      </div>`;
-    }).join('');
-
-  } else {
-    // LB: group by travel status
-    const cols = [
-      { key: 'NOT YET',       label: 'Not Yet' },
-      { key: 'TRAVELLED',     label: 'Travelled' },
-      { key: 'NOT TRAVELLED', label: 'Did Not Travel' },
-    ];
-    // include any custom lb stages
-    lbStages.filter(s => !cols.find(c => c.key === s)).forEach(s => cols.push({ key: s, label: s }));
-
-    board.innerHTML = cols.map(({ key, label }) => {
-      const cards = lbDB.filter(r => (r.travelStatus || r.travel_status) === key);
-      const cardsHTML = cards.length
-        ? cards.map(r => {
-            const pp = r.ppStatus || r.pp_status || '—';
-            const rs = getRefundStatus(r);
-            const rsColor = rs === 'complete' ? 'var(--green-dark)' : rs === 'incomplete' ? '#8C6200' : rs === 'RETURNED' ? 'var(--red)' : 'var(--text-3)';
-            return `<div class="kanban-card" onclick="editLB(${r.id})">
-              <div class="kanban-card-name">${r.name}</div>
-              <div class="kanban-card-meta"><i class="ti ti-passport"></i>${pp}</div>
-              <div class="kanban-card-meta"><i class="ti ti-phone"></i>${r.phone || '—'}</div>
-              <div class="kanban-card-footer">
-                <span class="kanban-card-country">${r.travelDate || r.travel_date ? fmtDate(r.travelDate || r.travel_date) : '—'}</span>
-                <span style="font-size:10px;font-weight:800;color:${rsColor}">${rs}</span>
-              </div>
-            </div>`;
-          }).join('')
-        : '<div class="kanban-empty">No candidates</div>';
-
-      return `<div class="kanban-col">
-        <div class="kanban-col-header">
-          <span class="kanban-col-title">${label}</span>
-          <span class="kanban-col-count">${cards.length}</span>
-        </div>
-        ${cardsHTML}
-      </div>`;
-    }).join('');
+  if (pdBadge && pdRoleText) {
+    const isAdmin = role === 'admin';
+    pdBadge.className = 'pd-role-badge' + (isAdmin ? ' admin' : '');
+    pdRoleText.textContent = isAdmin ? 'Administrator' : 'Staff';
   }
-}
-
-// ══════════════════════════════════════════════════════════
-// CALENDAR
-// ══════════════════════════════════════════════════════════
-let calYear  = new Date().getFullYear();
-let calMonth = new Date().getMonth(); // 0-indexed
-window.calSource = 'pro';
-
-function setCalSource(src, btn) {
-  window.calSource = src;
-  document.querySelectorAll('#cal-source-tabs .pill-tab').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderCalendar();
-}
-
-function calNav(dir) {
-  calMonth += dir;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0)  { calMonth = 11; calYear--; }
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const label = document.getElementById('cal-month-label');
-  if (label) label.textContent = new Date(calYear, calMonth, 1)
-    .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-
-  const grid = document.getElementById('cal-grid');
-  if (!grid) return;
-
-  // Build event map: dateStr -> [{name, type}]
-  const events = {};
-  const addEv = (dateStr, name, type) => {
-    if (!dateStr) return;
-    const key = dateStr.substring(0, 10);
-    if (!events[key]) events[key] = [];
-    events[key].push({ name, type });
-  };
-
-  if (window.calSource === 'pro') {
-    proDB.forEach(r => {
-      addEv(r.travel,    r.name, 'travel');
-      addEv(r.ol,        r.name, 'ol');
-      addEv(r.mol,       r.name, 'mol');
-      addEv(r.visa,      r.name, 'visa');
-      addEv(r.interview, r.name, 'interview');
-    });
-  } else {
-    lbDB.forEach(r => {
-      addEv(r.travelDate || r.travel_date, r.name, 'lb');
-      addEv(r.r1Date || r.r1_date,         r.name, 'lb');
-      addEv(r.r2Date || r.r2_date,         r.name, 'lb');
-    });
-  }
-
-  const today = new Date();
-  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const prevDays = new Date(calYear, calMonth, 0).getDate();
-  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
-
-  const typeClass = { travel:'cal-ev-travel', ol:'cal-ev-ol', mol:'cal-ev-mol', visa:'cal-ev-visa', interview:'cal-ev-interview', lb:'cal-ev-lb' };
-  const typeLabel = { travel:'Travel', ol:'Offer Letter', mol:'MOL', visa:'Visa', interview:'Interview', lb:'Travel/Refund' };
-
-  let dayCells = '';
-  for (let i = 0; i < totalCells; i++) {
-    let day, month = calMonth, year = calYear, isOther = false;
-    if (i < firstDay) {
-      day = prevDays - firstDay + i + 1;
-      month = calMonth - 1; isOther = true;
-      if (month < 0) { month = 11; year--; }
-    } else if (i >= firstDay + daysInMonth) {
-      day = i - firstDay - daysInMonth + 1;
-      month = calMonth + 1; isOther = true;
-      if (month > 11) { month = 0; year++; }
-    } else {
-      day = i - firstDay + 1;
-    }
-    const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-    const dayEvs  = (events[dateStr] || []).slice(0, 3);
-    const moreCount = (events[dateStr] || []).length - 3;
-
-    const evHTML = dayEvs.map(ev =>
-      `<div class="cal-event ${typeClass[ev.type] || ''}" title="${ev.name} — ${typeLabel[ev.type] || ev.type}">${ev.name.split(' ')[0]}</div>`
-    ).join('') + (moreCount > 0 ? `<div style="font-size:9px;color:var(--text-3);font-weight:600">+${moreCount} more</div>` : '');
-
-    dayCells += `<div class="cal-day${isOther ? ' other-month' : ''}${isToday ? ' today' : ''}">
-      <div class="cal-day-num">${day}</div>
-      ${evHTML}
-    </div>`;
-  }
-
-  const evTypeColors = [
-    { type:'travel',    label:'Travel Date',    cls:'cal-ev-travel' },
-    { type:'ol',        label:'Offer Letter',   cls:'cal-ev-ol' },
-    { type:'mol',       label:'MOL Date',       cls:'cal-ev-mol' },
-    { type:'visa',      label:'Visa Date',      cls:'cal-ev-visa' },
-    { type:'interview', label:'Interview',      cls:'cal-ev-interview' },
-  ];
-
-  const legendHTML = window.calSource === 'pro'
-    ? evTypeColors.map(e => `<div class="chart-legend-item"><span class="cal-event ${e.cls}" style="margin:0;border-radius:4px;padding:1px 7px">${e.label}</span></div>`).join('')
-    : `<div class="chart-legend-item"><span class="cal-event cal-ev-lb" style="margin:0;border-radius:4px;padding:1px 7px">Travel / Refund Date</span></div>`;
-
-  grid.innerHTML = `
-    <div class="cal-header-row">
-      ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-header-cell">${d}</div>`).join('')}
-    </div>
-    <div class="cal-grid-body">${dayCells}</div>
-    <div style="padding:10px 16px;border-top:1px solid var(--border);background:var(--gray-light);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      ${legendHTML}
-    </div>`;
-}
-
-// ══════════════════════════════════════════════════════════
-// REPORTS
-// ══════════════════════════════════════════════════════════
-function renderReports() {
-  const container = document.getElementById('reports-content');
-  if (!container) return;
-
-  // ── Pro metrics ──
-  const proTravelled   = proDB.filter(r => r.stage === 'TRAVELLED').length;
-  const proInProcess   = proDB.filter(isInProcessPro).length;
-  let   totalComm = 0, totalPaid = 0;
-  proDB.forEach(r => {
-    if (r.commission) totalComm += Number(r.commission);
-    if (r.paid)       totalPaid += Number(r.paid);
-  });
-
-  // ── Stage distribution bar chart ──
-  const stageCounts = proStages.map(s => ({ label: s.replace('PENDING ',''), count: proDB.filter(r => r.stage === s).length }));
-  const maxStage = Math.max(...stageCounts.map(s => s.count), 1);
-  const stageColors = ['#E3EEF9','#FDF3DC','#FDEAEA','#EEEDFE','#E3F5EE'];
-  const stageBarChart = stageCounts.map((s, i) => {
-    const pct = Math.round((s.count / maxStage) * 100);
-    return `<div class="bar-wrap">
-      <div class="bar-label-top">${s.count}</div>
-      <div class="bar-fill" style="height:${pct}%;background:${stageColors[i % stageColors.length]}"></div>
-      <div class="bar-label-bottom">${s.label}</div>
-    </div>`;
-  }).join('');
-
-  // ── Monthly trend (by travel date) ──
-  const monthCounts = Array(12).fill(0);
-  proDB.filter(r => r.stage === 'TRAVELLED' && r.travel).forEach(r => {
-    const d = new Date(r.travel);
-    if (!isNaN(d) && d.getFullYear() === new Date().getFullYear()) monthCounts[d.getMonth()]++;
-  });
-  const maxMonth = Math.max(...monthCounts, 1);
-  const monthLabels = ['J','F','M','A','M','J','J','A','S','O','N','D'];
-  const monthBarChart = monthCounts.map((c, i) => {
-    const pct = Math.round((c / maxMonth) * 100);
-    return `<div class="bar-wrap">
-      <div class="bar-label-top">${c || ''}</div>
-      <div class="bar-fill" style="height:${Math.max(pct,3)}%;background:var(--sage-light)"></div>
-      <div class="bar-label-bottom">${monthLabels[i]}</div>
-    </div>`;
-  }).join('');
-
-  // ── Company breakdown ──
-  const companies = [...new Set(proDB.map(r => r.company).filter(Boolean))];
-  const maxComp = Math.max(...companies.map(c => proDB.filter(r => r.company === c).length), 1);
-  const compBarChart = companies.slice(0, 8).map(c => {
-    const cnt = proDB.filter(r => r.company === c).length;
-    const pct = Math.round((cnt / maxComp) * 100);
-    return `<div class="bar-wrap">
-      <div class="bar-label-top">${cnt}</div>
-      <div class="bar-fill" style="height:${Math.max(pct,3)}%;background:var(--accent)"></div>
-      <div class="bar-label-bottom">${c.substring(0,8)}</div>
-    </div>`;
-  }).join('');
-  const compLegend = companies.slice(0, 8).map(c =>
-    `<span style="font-size:10px;color:var(--text-3);font-weight:600">${c}: ${proDB.filter(r=>r.company===c).length}</span>`
-  ).join(' &nbsp;·&nbsp; ');
-
-  // ── Position-wise summary table ──
-  const positions = [...new Set(proDB.map(r => (r.position || '').trim().toUpperCase()).filter(Boolean))].sort();
-  const posRows = positions.map(pos => {
-    const group   = proDB.filter(r => (r.position || '').trim().toUpperCase() === pos);
-    const total   = group.length;
-    const trav    = group.filter(r => r.stage === 'TRAVELLED').length;
-    const inProc  = group.filter(isInProcessPro).length;
-    const billed  = group.reduce((s, r) => s + (Number(r.commission) || 0), 0);
-    const convPct = total > 0 ? Math.round((trav / total) * 100) : 0;
-    const convCls = convPct >= 50 ? 'conv-hi' : 'conv-0';
-    return `<tr>
-      <td style="font-weight:700">${pos}</td>
-      <td>${total}</td>
-      <td style="color:var(--green-dark);font-weight:700">${trav}</td>
-      <td style="color:#8C6200;font-weight:700">${inProc}</td>
-      <td>${billed ? 'KES ' + billed.toLocaleString() : '—'}</td>
-      <td><span class="conv-pill ${convCls}">${convPct}%</span></td>
-    </tr>`;
-  }).join('');
-
-  const convRate = proDB.length > 0 ? Math.round((proTravelled / proDB.length) * 100) : 0;
-
-  container.innerHTML = `
-    <div class="reports-grid">
-      <!-- Stage Distribution -->
-      <div class="report-card">
-        <div class="report-card-title"><i class="ti ti-chart-bar"></i> Stage Distribution</div>
-        <div class="bar-chart">${stageBarChart}</div>
-        <div class="chart-legend">
-          ${stageCounts.map((s,i)=>`<div class="chart-legend-item"><span class="legend-dot" style="background:${stageColors[i%stageColors.length]}"></span>${s.label}</div>`).join('')}
-        </div>
-      </div>
-      <!-- Company Breakdown -->
-      <div class="report-card">
-        <div class="report-card-title"><i class="ti ti-building"></i> Company Breakdown</div>
-        <div class="bar-chart">${compBarChart || '<div class="empty" style="width:100%">No data</div>'}</div>
-        <div style="font-size:10px;color:var(--text-3);margin-top:8px;line-height:1.6">${compLegend}</div>
-      </div>
-      <!-- Monthly Trend -->
-      <div class="report-card">
-        <div class="report-card-title"><i class="ti ti-trending-up"></i> Monthly Travel Trend (${new Date().getFullYear()})</div>
-        <div class="bar-chart">${monthBarChart}</div>
-      </div>
-      <!-- Revenue Summary -->
-      <div class="report-card">
-        <div class="report-card-title"><i class="ti ti-coin"></i> Revenue Summary</div>
-        <div class="rev-grid">
-          <div class="rev-cell">
-            <div class="rev-cell-val">KES ${totalComm.toLocaleString()}</div>
-            <div class="rev-cell-label">Total Commission Billed</div>
-          </div>
-          <div class="rev-cell">
-            <div class="rev-cell-val green">KES ${totalPaid.toLocaleString()}</div>
-            <div class="rev-cell-label">Commission Collected</div>
-          </div>
-          <div class="rev-cell">
-            <div class="rev-cell-val amber">KES ${(totalComm - totalPaid).toLocaleString()}</div>
-            <div class="rev-cell-label">Outstanding</div>
-          </div>
-          <div class="rev-cell">
-            <div class="rev-cell-val">${convRate}%</div>
-            <div class="rev-cell-label">Conversion Rate</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Position-wise Summary -->
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">Position-wise Summary</span>
-        <span style="font-size:11px;color:var(--text-3)">${positions.length} position${positions.length !== 1 ? 's' : ''}</span>
-      </div>
-      <div class="table-scroll">
-        <table class="pos-table">
-          <thead>
-            <tr>
-              <th>Position</th>
-              <th>Total</th>
-              <th>Travelled</th>
-              <th>In Process</th>
-              <th>Commission Billed</th>
-              <th>Conversion %</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${posRows || '<tr><td colspan="6"><div class="empty">No data</div></td></tr>'}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-}
-
-function exportReportPDF() {
-  showToast('Opening print dialog…', 'success');
-  setTimeout(() => window.print(), 300);
 }
