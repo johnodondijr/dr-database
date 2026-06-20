@@ -1345,6 +1345,21 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
 @media(max-width:760px){.metric-card .metric-val.sm{font-size:22px!important}}
 @media(max-width:760px){.settings-grid,.settings-kpi-row{grid-template-columns:1fr}}
 
+/* Stabilization pass: safer scrolling, focus states, and tap targets */
+:focus-visible{outline:3px solid rgba(83,71,206,.28)!important;outline-offset:2px!important}
+.table-scroll{max-width:100%;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+.table-scroll table{min-width:980px}
+#lb-section .table-scroll table{min-width:1040px}
+.action-btn{min-width:32px!important;min-height:32px!important;align-items:center!important;justify-content:center!important}
+.modal{max-height:calc(100vh - 40px);display:flex;flex-direction:column}
+.modal-body{overflow:auto}
+.recovery-result{line-height:1.45}
+@media(max-width:760px){
+  .table-scroll table{min-width:920px!important}
+  #lb-section .table-scroll table{min-width:1000px!important}
+  .lp-content-area{max-width:420px}
+}
+
   </style>
 </head>
 <body>
@@ -1386,7 +1401,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <div class="lp-input-group">
               <label for="pw-input">Password</label>
               <div class="lp-input-wrap">
-                <input type="password" id="pw-input" placeholder="••••••••••••" required autocomplete="current-password">
+                <input type="password" id="pw-input" placeholder="Password" required autocomplete="current-password">
                 <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
               </div>
               <span class="lp-forgot" onclick="showForgotPassword()">Forgot Password?</span>
@@ -1401,21 +1416,21 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
         </div>
         <div id="forgot-section" style="display:none">
           <div class="lp-header">
-            <h1>Credentials Reset</h1>
+            <h1>Recovery Request</h1>
             <p>Enter the administrative recovery code</p>
           </div>
           <form onsubmit="event.preventDefault(); submitForgotPassword();">
             <div class="lp-input-group">
               <label for="recovery-code-input">Recovery Code</label>
               <div class="lp-input-wrap">
-                <input type="text" id="recovery-code-input" placeholder="DR-RESET-2025" required>
+                <input type="password" id="recovery-code-input" placeholder="Recovery code" required autocomplete="off">
               </div>
             </div>
-            <button type="submit" class="lp-submit">Verify</button>
+            <button type="submit" class="lp-submit">Request Help</button>
           </form>
           <div class="login-error" id="forgot-error" style="display:none"></div>
           <div class="recovery-result" id="forgot-result" style="display:none"></div>
-          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">← Back to login</span>
+          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">Back to login</span>
         </div>
       </div>
       <div class="lp-footer">
@@ -2402,10 +2417,8 @@ function submitForgotPassword() {
     errEl.textContent='Incorrect recovery code.'; errEl.style.display='block'; resEl.style.display='none'; return;
   }
   errEl.style.display='none';
-  resEl.innerHTML='<strong style="color:var(--green)">✓ Verified. Staff credentials:</strong>'+
-    Object.entries(STAFF_ACCOUNTS).map(([u,s])=>
-      `<div style="padding:6px 0;border-bottom:1px solid var(--border)"><b>${s.display}</b> — username: <code>${u}</code> · password: <code>${s.password}</code></div>`
-    ).join('');
+  resEl.innerHTML='<strong style="color:var(--green)">Recovery code accepted.</strong>'+
+    '<div style="margin-top:6px;color:var(--text-2)">For security, staff passwords are no longer displayed in the browser. Ask the administrator to reset the account from the profile/settings workflow or update the staff account list directly.</div>';
   resEl.style.display='block';
 }
 
@@ -2426,7 +2439,7 @@ function doLogin() {
   const account=STAFF_ACCOUNTS[username];
   if (!account||account.password!==password) { errEl.style.display='block'; return; }
   errEl.style.display='none';
-  currentUser={username,...account};
+  currentUser={username,role:account.role,display:account.display};
   safeSessionSet('dr_user',JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
@@ -2450,7 +2463,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const saved=safeSessionGet('dr_user');
   if (saved) {
     try {
-      currentUser=JSON.parse(saved);
+      const parsed=JSON.parse(saved);
+      const account=STAFF_ACCOUNTS[parsed.username];
+      if(!account) throw new Error('Unknown saved user');
+      currentUser={username:parsed.username,role:account.role,display:account.display};
+      safeSessionSet('dr_user',JSON.stringify(currentUser));
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='block';
       document.getElementById('bottom-nav')?.classList.add('visible');
@@ -2659,7 +2676,7 @@ function renderTimelineHTML(type,id){
     const d=new Date(item.ts);
     const ds=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
     const ts=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    return `<div class="tl-item-modal"><div class="tl-dot-modal"></div><div><div class="tl-action-modal">${item.action}</div><div class="tl-meta-modal">${item.user} · ${ds} ${ts}</div></div></div>`;
+    return `<div class="tl-item-modal"><div class="tl-dot-modal"></div><div><div class="tl-action-modal">${escHTML(item.action)}</div><div class="tl-meta-modal">${escHTML(item.user)} &middot; ${ds} ${ts}</div></div></div>`;
   }).join('');
 }
 
@@ -2667,10 +2684,16 @@ function renderTimelineHTML(type,id){
 // HELPERS
 // ══════════════════════════════════════════════════════════
 function xlToISO(n){ if(!n||isNaN(n)) return ''; return new Date(EXCEL_EPOCH.getTime()+n*86400000).toISOString().split('T')[0]; }
+function escHTML(v){
+  return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function escJSString(v){
+  return String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/[\r\n]+/g,' ');
+}
 function fmtDate(v){
-  if(!v) return '—';
-  const s=typeof v==='number'?xlToISO(v):v; if(!s) return '—';
-  try{ const d=new Date(s); if(isNaN(d)) return s; return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}); }catch{return s;}
+  if(!v) return '&mdash;';
+  const s=typeof v==='number'?xlToISO(v):v; if(!s) return '&mdash;';
+  try{ const d=new Date(s); if(isNaN(d)) return escHTML(s); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}); }catch{return escHTML(s);}
 }
 function toInput(v){ if(!v) return ''; return typeof v==='number'?xlToISO(v):v; }
 function getRefundStatus(r){
@@ -2686,19 +2709,19 @@ function isInProcessPro(r){ return ['PENDING OFFER LETTER','PENDING MOL','PENDIN
 function isInProcessLB(r){ return (r.ppStatus||r.pp_status)!=='HAD PP'&&(r.travelStatus||r.travel_status)==='NOT YET'; }
 function stageBadge(s){
   const map={'PENDING OFFER LETTER':'b-pol','PENDING MOL':'b-mol','PENDING VISA':'b-visa','PENDING TRAVEL':'b-travel','TRAVELLED':'b-travelled'};
-  return `<span class="badge ${map[s]||'b-na'}">${s}</span>`;
+  return `<span class="badge ${map[s]||'b-na'}">${escHTML(s)}</span>`;
 }
 function travelBadge(s){
   const map={'TRAVELLED':'b-travelled','NOT YET':'b-notyet','NOT TRAVELLED':'b-nottravelled'};
-  return `<span class="badge ${map[s]||'b-na'}">${s}</span>`;
+  return `<span class="badge ${map[s]||'b-na'}">${escHTML(s)}</span>`;
 }
 function refundBadge(s){
   const map={complete:'b-complete',incomplete:'b-incomplete',RETURNED:'b-returned','N/A':'b-na'};
-  return `<span class="badge ${map[s]||'b-na'}">${s}</span>`;
+  return `<span class="badge ${map[s]||'b-na'}">${escHTML(s)}</span>`;
 }
 function ppBadge(s){
   const map={'APPLIED':'b-applied','NOT APPLIED':'b-notapplied','HAD PP':'b-hadpp','PUSHED':'b-pushed'};
-  return `<span class="badge ${map[s]||'b-na'}">${s||'—'}</span>`;
+  return `<span class="badge ${map[s]||'b-na'}">${s ? escHTML(s) : '&mdash;'}</span>`;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -3388,21 +3411,27 @@ function renderPro(){
   if(!slice.length){ tbody.innerHTML=`<tr><td colspan="11"><div class="empty">No candidates found</div></td></tr>`; }
   else {
     tbody.innerHTML=slice.map((r,i)=>{
-      const comm=r.commission?'KES '+Number(r.commission).toLocaleString():'—';
-      const paid=r.paid?'KES '+Number(r.paid).toLocaleString():'—';
+      const comm=r.commission?'KES '+Number(r.commission).toLocaleString():'&mdash;';
+      const paid=r.paid?'KES '+Number(r.paid).toLocaleString():'&mdash;';
       const bal=(r.commission&&r.paid)?Number(r.commission)-Number(r.paid):null;
-      const balTxt=bal!==null?'KES '+bal.toLocaleString():'—';
+      const balTxt=bal!==null?'KES '+bal.toLocaleString():'&mdash;';
       const hd=hasDocs('pro',r.id);
+      const name=escHTML(r.name);
+      const pp=escHTML(r.pp||'');
+      const position=r.position ? escHTML(r.position) : '&mdash;';
+      const company=r.company ? escHTML(r.company) : '&mdash;';
+      const country=r.country ? escHTML(r.country) : '&mdash;';
+      const docsName=escJSString(r.name);
       return `<tr onclick="editPro(${r.id})">
         <td>${(proPage-1)*PER_PAGE+i+1}</td>
-        <td><div class="name-cell">${r.name}</div><div class="pp-cell">${r.pp||''}</div></td>
-        <td style="color:var(--text-2)">${r.position||'—'}</td>
-        <td style="color:var(--text-2)">${r.company||'—'}</td>
-        <td style="color:var(--text-2)">${r.country||'—'}</td>
+        <td><div class="name-cell">${name}</div><div class="pp-cell">${pp}</div></td>
+        <td style="color:var(--text-2)">${position}</td>
+        <td style="color:var(--text-2)">${company}</td>
+        <td style="color:var(--text-2)">${country}</td>
         <td>${stageBadge(r.stage)}</td>
         <td>${comm}</td><td>${paid}</td>
         <td class="${bal&&bal>0?'balance-owed':''}">${balTxt}</td>
-        <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('pro',${r.id},'${r.name.replace(/'/g,"\\'")}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
+        <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('pro',${r.id},'${docsName}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
         <td onclick="event.stopPropagation()"><button class="action-btn del" onclick="deletePro(${r.id})"><i class="ti ti-trash"></i></button></td>
       </tr>`;
     }).join('');
@@ -3534,21 +3563,24 @@ function renderLB(){
       const ps=r.ppStatus||r.pp_status||'';
       const toR=Number(r.toRefund||r.to_refund)||0;
       const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
-      const bal=(rs==='N/A'||rs==='RETURNED')?'—':moneyUSD(toR-paid);
+      const bal=(rs==='N/A'||rs==='RETURNED')?'&mdash;':moneyUSD(toR-paid);
       const td=r.travelDate||r.travel_date;
       const hd=hasDocs('lb',r.id);
+      const name=escHTML(r.name);
+      const phone=r.phone ? escHTML(r.phone) : '&mdash;';
+      const docsName=escJSString(r.name);
       return `<tr onclick="editLB(${r.id})">
         <td>${(lbPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell">${r.name}</td>
-        <td>${r.phone||'—'}</td>
+        <td class="name-cell">${name}</td>
+        <td>${phone}</td>
         <td>${ppBadge(ps)}</td>
         <td>${travelBadge(ts)}</td>
         <td>${fmtDate(td)}</td>
-        <td>${rs==='N/A'?'—':moneyUSD(toR)}</td>
-        <td>${rs==='N/A'?'—':moneyUSD(paid)}</td>
+        <td>${rs==='N/A'?'&mdash;':moneyUSD(toR)}</td>
+        <td>${rs==='N/A'?'&mdash;':moneyUSD(paid)}</td>
         <td class="${rs==='incomplete'?'balance-owed':''}">${bal}</td>
         <td>${refundBadge(rs)}</td>
-        <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${r.name.replace(/'/g,"\\'")}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
+        <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${docsName}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
         <td onclick="event.stopPropagation()"><button class="action-btn del" onclick="deleteLB(${r.id})"><i class="ti ti-trash"></i></button></td>
       </tr>`;
     }).join('');
@@ -3803,12 +3835,12 @@ function saveProfileChanges() {
   // ── Password change ──
   if (currentPw || newPw || confirmPw) {
     if (!currentPw) { showMsg('Enter your current password.', 'err'); return; }
-    if (currentPw !== currentUser.password) { showMsg('Current password is incorrect.', 'err'); return; }
+    const account = STAFF_ACCOUNTS[currentUser.username];
+    if (!account || currentPw !== account.password) { showMsg('Current password is incorrect.', 'err'); return; }
     if (!newPw) { showMsg('Enter a new password.', 'err'); return; }
     if (newPw.length < 6) { showMsg('New password must be at least 6 characters.', 'err'); return; }
     if (newPw !== confirmPw) { showMsg('New passwords do not match.', 'err'); return; }
     STAFF_ACCOUNTS[currentUser.username].password = newPw;
-    currentUser.password = newPw;
     safeSessionSet('dr_user', JSON.stringify(currentUser));
     changed = true;
   }
