@@ -53,8 +53,8 @@ function hideLoading() {
 function togglePassword() {
   const inp = document.getElementById('pw-input');
   const btn = document.getElementById('pw-toggle');
-  if (inp.type === 'password') { inp.type = 'text';     btn.textContent = '🙈'; }
-  else                         { inp.type = 'password'; btn.textContent = '👁'; }
+  if (inp.type === 'password') { inp.type = 'text';     btn.innerHTML = '<i class="ti ti-eye-off"></i>'; }
+  else                         { inp.type = 'password'; btn.innerHTML = '<i class="ti ti-eye"></i>'; }
 }
 
 function showForgotPassword() {
@@ -79,10 +79,8 @@ function submitForgotPassword() {
     return;
   }
   errEl.style.display = 'none';
-  resEl.innerHTML = '<strong style="color:var(--green)">✓ Verified. Staff credentials:</strong>' +
-    Object.entries(STAFF_ACCOUNTS).map(([u,s]) =>
-      `<div style="padding:5px 0;border-bottom:1px solid var(--border)"><b>${s.display}</b> — username: <code>${u}</code> · password: <code>${s.password}</code></div>`
-    ).join('');
+  resEl.innerHTML = '<strong style="color:var(--green)">Recovery code accepted.</strong>' +
+    '<div style="margin-top:6px;color:var(--text-2)">For security, staff passwords are no longer displayed in the browser. Ask the administrator to reset the account from the profile/settings workflow or update the staff account list directly.</div>';
   resEl.style.display = 'block';
 }
 
@@ -96,7 +94,7 @@ function doLogin() {
     return;
   }
   errEl.style.display = 'none';
-  currentUser = { username, ...account };
+  currentUser = { username, role: account.role, display: account.display };
   sessionStorage.setItem('dr_user', JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display          = 'block';
@@ -120,7 +118,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const saved = sessionStorage.getItem('dr_user');
   if (saved) {
     try {
-      currentUser = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      const account = STAFF_ACCOUNTS[parsed.username];
+      if (!account) throw new Error('Unknown saved user');
+      currentUser = { username: parsed.username, role: account.role, display: account.display };
+      sessionStorage.setItem('dr_user', JSON.stringify(currentUser));
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display          = 'block';
       document.getElementById('user-chip').textContent      = currentUser.display;
