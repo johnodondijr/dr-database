@@ -1409,10 +1409,52 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <button type="submit" class="lp-submit">Sign In</button>
           </form>
           <div class="login-error" id="login-error">Incorrect username or password.</div>
+          <span class="lp-forgot" style="text-align:center;margin-top:14px;display:block" onclick="showSignup()">Create a company workspace</span>
           <div class="lp-chips">
             <div class="lp-chip"><i class="ti ti-building"></i> Office LAN</div>
             <div class="lp-chip"><i class="ti ti-lock"></i> Secure SSL</div>
           </div>
+        </div>
+        <div id="signup-section" style="display:none">
+          <div class="lp-header">
+            <h1>Create Workspace</h1>
+            <p>Set up Dreco for your recruitment company</p>
+          </div>
+          <form onsubmit="event.preventDefault(); doSignup();">
+            <div class="lp-input-group">
+              <label for="signup-company">Company Name</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="signup-company" placeholder="e.g. Apex Recruitment" required autocomplete="organization">
+              </div>
+            </div>
+            <div class="lp-input-group">
+              <label for="signup-country">General Jobs Destination</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="signup-country" placeholder="e.g. Qatar, Saudi Arabia, Lebanon" autocomplete="country-name">
+              </div>
+            </div>
+            <div class="lp-input-group">
+              <label for="signup-name">Your Name</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="signup-name" placeholder="Account owner" required autocomplete="name">
+              </div>
+            </div>
+            <div class="lp-input-group">
+              <label for="signup-username">Username</label>
+              <div class="lp-input-wrap">
+                <input type="text" id="signup-username" placeholder="e.g. admin" required autocomplete="username">
+              </div>
+            </div>
+            <div class="lp-input-group">
+              <label for="signup-password">Password</label>
+              <div class="lp-input-wrap">
+                <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password">
+              </div>
+            </div>
+            <button type="submit" class="lp-submit">Create Workspace</button>
+          </form>
+          <div class="login-error" id="signup-error" style="display:none"></div>
+          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideSignup()">Back to login</span>
         </div>
         <div id="forgot-section" style="display:none">
           <div class="lp-header">
@@ -1528,7 +1570,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
         <div class="suc-avatar" id="suc-avatar">—</div>
         <div class="suc-info">
           <div class="suc-name" id="suc-name">—</div>
-          <div class="suc-org">Destiny Recruit Consults</div>
+          <div class="suc-org">Destiny Recruitment Consults</div>
         </div>
       </div>
       <div class="sidebar-divider"></div>
@@ -1540,8 +1582,8 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
       <a class="nav-item" id="nav-pro" data-title="Professional" onclick="switchTab('pro')">
         <i class="ti ti-briefcase"></i><span class="nav-item-label">Professional</span>
       </a>
-      <a class="nav-item" id="nav-lb" data-title="LB Jobs" onclick="switchTab('lb')">
-        <i class="ti ti-home"></i><span class="nav-item-label">LB Jobs</span>
+      <a class="nav-item" id="nav-lb" data-title="Lebanon Jobs" onclick="switchTab('lb')">
+        <i class="ti ti-home"></i><span class="nav-item-label" data-general-jobs-label>Lebanon Jobs</span>
       </a>
 
       <div class="sidebar-divider" style="margin-top:4px"></div>
@@ -1731,7 +1773,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
           <div class="metrics-strip" id="lb-metrics"></div>
           <div class="panel">
             <div class="panel-header">
-              <span class="panel-title">LB candidates</span>
+              <span class="panel-title" data-general-jobs-candidates>Lebanon Jobs candidates</span>
               <div class="panel-actions">
                 <div class="pill-tabs" id="lb-travel-pills">
                   <button class="pill-tab active" onclick="setLBPill('travel','',this)">All</button>
@@ -1798,7 +1840,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <div style="display:flex;gap:8px;align-items:center">
               <div class="pill-tabs" id="kanban-source-tabs">
                 <button class="pill-tab active" onclick="setKanbanSource('pro',this)">Professional</button>
-                <button class="pill-tab" onclick="setKanbanSource('lb',this)">LB Jobs</button>
+                <button class="pill-tab" onclick="setKanbanSource('lb',this)" data-general-jobs-label>Lebanon Jobs</button>
               </div>
               <button class="btn" onclick="switchTab('pro')"><i class="ti ti-table"></i> Table View</button>
               <button class="btn primary" id="kanban-add-btn" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
@@ -1817,7 +1859,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             </div>
             <div class="pill-tabs" id="cal-source-tabs">
               <button class="pill-tab active" onclick="setCalSource('pro',this)">Professional</button>
-              <button class="pill-tab" onclick="setCalSource('lb',this)">LB Jobs</button>
+              <button class="pill-tab" onclick="setCalSource('lb',this)" data-general-jobs-label>Lebanon Jobs</button>
             </div>
           </div>
           <div class="panel" style="overflow:hidden">
@@ -1896,7 +1938,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
 <div class="modal-bg" id="lb-modal">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="lb-modal-title">Add LB candidate</h3>
+      <h3 id="lb-modal-title">Add Lebanon Jobs candidate</h3>
       <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
     </div>
     <div class="candidate-summary" id="lb-summary"></div>
@@ -1979,6 +2021,18 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
     </div>
     <div class="modal-body">
       <div class="settings-kpi-row" id="settings-kpis"></div>
+      <div class="settings-card" style="margin-bottom:14px;align-items:flex-start">
+        <i class="ti ti-building"></i>
+        <div style="width:100%">
+          <strong>Workspace</strong>
+          <span>Set the company name and destination label shown across this Dreco workspace.</span>
+          <div class="form-grid" style="margin-top:12px">
+            <div class="field"><label>Company name</label><input type="text" id="settings-company-name"></div>
+            <div class="field"><label>General jobs destination</label><input type="text" id="settings-general-country" placeholder="e.g. Qatar"></div>
+          </div>
+          <button class="btn primary" style="margin-top:10px" onclick="saveWorkspaceSettings()"><i class="ti ti-device-floppy"></i> Save workspace</button>
+        </div>
+      </div>
       <div class="settings-grid">
         <div class="settings-card">
           <i class="ti ti-database-export"></i>
@@ -1986,7 +2040,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
         </div>
         <div class="settings-card">
           <i class="ti ti-layout-list"></i>
-          <div><strong>Pipeline stages</strong><span>Manage Professional and LB stages from the table controls without leaving your workflow.</span></div>
+          <div><strong>Pipeline stages</strong><span>Manage Professional and General Jobs stages from the table controls without leaving your workflow.</span></div>
         </div>
         <div class="settings-card">
           <i class="ti ti-filter-off"></i>
@@ -2021,7 +2075,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
     </div>
     <div class="modal-body">
       <div class="help-list">
-        <div class="help-item"><i class="ti ti-user-plus"></i><div><strong>Add or edit candidates</strong><p>Use the Add buttons in Professional or LB Jobs. Click any table row or kanban card to edit that candidate.</p></div></div>
+        <div class="help-item"><i class="ti ti-user-plus"></i><div><strong>Add or edit candidates</strong><p>Use the Add buttons in Professional or <span data-general-jobs-label>Lebanon Jobs</span>. Click any table row or kanban card to edit that candidate.</p></div></div>
         <div class="help-item"><i class="ti ti-paperclip"></i><div><strong>Attach documents</strong><p>Click the document icon in a candidate row, paste a Google Drive folder link, then save it.</p></div></div>
         <div class="help-item"><i class="ti ti-layout-columns"></i><div><strong>Track pipeline progress</strong><p>Use Kanban Board for stage views, Calendar for date-based follow-up, and Reports for summaries.</p></div></div>
         <div class="help-item"><i class="ti ti-file-export"></i><div><strong>Export records</strong><p>Use table exports for CSV downloads. Use Reports export when you need a PDF-style printout.</p></div></div>
@@ -2047,7 +2101,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
     <i class="ti ti-briefcase"></i><span>Pro</span>
   </button>
   <button class="bottom-nav-item" id="bnav-lb" onclick="switchTab('lb');setBottomNav('lb')">
-    <i class="ti ti-home"></i><span>LB</span>
+    <i class="ti ti-home"></i><span>Lebanon</span>
   </button>
   <button class="bottom-nav-item" id="bnav-kanban" onclick="switchTab('kanban');setBottomNav('kanban')">
     <i class="ti ti-layout-columns"></i><span>Board</span>
@@ -2224,29 +2278,84 @@ const db = HAS_SUPABASE_CONFIG && window.supabase
   : null;
 const LOCAL_STORE_KEY = 'dreco_local_store_v1';
 const LOCAL_STAFF_KEY = 'dreco_staff_accounts_v1';
+const CLOUD_ACCOUNTS_KEY = 'dreco_accounts_v2';
+const DEFAULT_COMPANY = {
+  id: 'destiny-recruitment-consults',
+  name: 'Destiny Recruitment Consults',
+  generalJobsLabel: 'Lebanon Jobs',
+  generalJobsCountry: 'Lebanon',
+};
 
 // ══════════════════════════════════════════════════════════
 // STAFF ACCOUNTS
 // ══════════════════════════════════════════════════════════
 const STAFF_ACCOUNTS = {
-  fred:      { password: 'Destiny@2025', role: 'admin', display: 'Fred'      },
-  robert:    { password: 'Robert@2025',  role: 'staff', display: 'Robert'    },
-  doreen:    { password: 'Doreen@2025',  role: 'staff', display: 'Doreen'    },
-  maxwell:   { password: 'Maxwell@2025', role: 'staff', display: 'Maxwell'   },
-  consolata: { password: 'Consol@2025',  role: 'staff', display: 'Consolata' },
+  fred:      { password: 'Destiny@2025', role: 'admin', display: 'Fred',      companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsLabel: DEFAULT_COMPANY.generalJobsLabel, generalJobsCountry: DEFAULT_COMPANY.generalJobsCountry },
+  robert:    { password: 'Robert@2025',  role: 'staff', display: 'Robert',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsLabel: DEFAULT_COMPANY.generalJobsLabel, generalJobsCountry: DEFAULT_COMPANY.generalJobsCountry },
+  doreen:    { password: 'Doreen@2025',  role: 'staff', display: 'Doreen',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsLabel: DEFAULT_COMPANY.generalJobsLabel, generalJobsCountry: DEFAULT_COMPANY.generalJobsCountry },
+  maxwell:   { password: 'Maxwell@2025', role: 'staff', display: 'Maxwell',   companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsLabel: DEFAULT_COMPANY.generalJobsLabel, generalJobsCountry: DEFAULT_COMPANY.generalJobsCountry },
+  consolata: { password: 'Consol@2025',  role: 'staff', display: 'Consolata', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsLabel: DEFAULT_COMPANY.generalJobsLabel, generalJobsCountry: DEFAULT_COMPANY.generalJobsCountry },
 };
 const RECOVERY_CODE = 'DR-RESET-2025';
 
-function loadStaffAccounts() {
+function normalizeAccount(username, account = {}) {
+  const companyName = (account.companyName || DEFAULT_COMPANY.name).trim();
+  const companyId = account.companyId || slugify(companyName) || DEFAULT_COMPANY.id;
+  const generalJobsCountry = (account.generalJobsCountry || DEFAULT_COMPANY.generalJobsCountry).trim();
+  const generalJobsLabel = (account.generalJobsLabel || buildGeneralJobsLabel(generalJobsCountry)).trim();
+  return {
+    password: account.password || '',
+    role: account.role || 'staff',
+    display: account.display || username,
+    companyId,
+    companyName,
+    generalJobsLabel,
+    generalJobsCountry,
+  };
+}
+function normalizeAllAccounts() {
+  Object.keys(STAFF_ACCOUNTS).forEach(username => {
+    STAFF_ACCOUNTS[username] = normalizeAccount(username, STAFF_ACCOUNTS[username]);
+  });
+}
+function slugify(value) {
+  return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);
+}
+function buildGeneralJobsLabel(country) {
+  const c = String(country || '').trim();
+  return c ? `${c} Jobs` : 'General Jobs';
+}
+async function loadStaffAccounts() {
+  normalizeAllAccounts();
   try {
     const saved = safeLocalGet(LOCAL_STAFF_KEY);
     if (saved) Object.assign(STAFF_ACCOUNTS, JSON.parse(saved));
+    normalizeAllAccounts();
   } catch (err) {
     console.warn('Saved staff accounts could not be loaded:', err);
   }
+  if (db) {
+    try {
+      const { data, error } = await db.from('app_settings').select('value').eq('key', CLOUD_ACCOUNTS_KEY).maybeSingle();
+      if (error) throw error;
+      if (data?.value) Object.assign(STAFF_ACCOUNTS, data.value);
+      normalizeAllAccounts();
+      safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
+    } catch (err) {
+      console.warn('Cloud staff accounts could not be loaded:', err);
+    }
+  }
 }
-function saveStaffAccounts() {
+async function saveStaffAccounts() {
+  normalizeAllAccounts();
   safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
+  if (db) {
+    try {
+      await db.from('app_settings').upsert({ key: CLOUD_ACCOUNTS_KEY, value: STAFF_ACCOUNTS }, { onConflict: 'key' });
+    } catch (err) {
+      console.warn('Cloud staff accounts could not be saved:', err);
+    }
+  }
 }
 
 function safeLocalGet(key) {
@@ -2269,6 +2378,7 @@ function safeSessionRemove(key) {
 // STATE
 // ══════════════════════════════════════════════════════════
 let currentUser   = null;
+let currentCompany = { ...DEFAULT_COMPANY };
 let proDB         = [];
 let lbDB          = [];
 let allDocs       = {};
@@ -2293,10 +2403,55 @@ let calDate = new Date();
 let appStorageMode = db ? 'cloud' : 'local';
 let lastSyncError = '';
 
+function getCompanyId() {
+  return currentUser?.companyId || currentCompany.id || DEFAULT_COMPANY.id;
+}
+function getCompanyName() {
+  return currentUser?.companyName || currentCompany.name || DEFAULT_COMPANY.name;
+}
+function getGeneralJobsLabel() {
+  return currentUser?.generalJobsLabel || currentCompany.generalJobsLabel || 'General Jobs';
+}
+function getCompanyScopedKey(key) {
+  return `${getCompanyId()}:${key}`;
+}
+function stripCompanyScopedKey(key) {
+  const prefix = `${getCompanyId()}:`;
+  return String(key || '').startsWith(prefix) ? String(key).slice(prefix.length) : key;
+}
+function setCurrentWorkspace(account) {
+  const normalized = normalizeAccount('', account || {});
+  currentCompany = {
+    id: normalized.companyId,
+    name: normalized.companyName,
+    generalJobsLabel: normalized.generalJobsLabel,
+    generalJobsCountry: normalized.generalJobsCountry,
+  };
+}
+function updateWorkspaceLabels() {
+  const label = getGeneralJobsLabel();
+  const shortLabel = label.replace(/\s+Jobs$/i,'');
+  const mappings = [
+    ['#nav-lb .nav-item-label', label],
+    ['#nav-lb', label, 'data-title'],
+    ['#bnav-lb span', shortLabel],
+    ['#lb-section .panel-title', `${label} candidates`],
+    ['#lb-modal-title', `Add ${label.toLowerCase()} candidate`],
+  ];
+  mappings.forEach(([selector, value, attr]) => {
+    const el = document.querySelector(selector);
+    if (!el) return;
+    if (attr) el.setAttribute(attr, value); else el.textContent = value;
+  });
+  document.querySelectorAll('[data-general-jobs-label]').forEach(el => { el.textContent = label; });
+  document.querySelectorAll('[data-general-jobs-candidates]').forEach(el => { el.textContent = `${label} candidates`; });
+}
+
 function getDefaultLocalStore() {
+  const isDefaultCompany = getCompanyId() === DEFAULT_COMPANY.id;
   return {
-    pro: JSON.parse(JSON.stringify(PRO_SEED)).map(normalizeProRecord),
-    lb: JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord),
+    pro: isDefaultCompany ? JSON.parse(JSON.stringify(PRO_SEED)).map(normalizeProRecord) : [],
+    lb: isDefaultCompany ? JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord) : [],
     docs: {},
     timelines: {},
     proStages: [...proStages],
@@ -2309,6 +2464,7 @@ function toNumOrNull(v) {
 function normalizeProRecord(r={}) {
   return {
     id:r.id,
+    company_id:r.company_id||r.companyId||getCompanyId(),
     name:(r.name||'').toString().toUpperCase(),
     pp:(r.pp||'').toString().toUpperCase(),
     phone:r.phone||'',
@@ -2329,6 +2485,7 @@ function normalizeProRecord(r={}) {
 function normalizeLBRecord(r={}) {
   return {
     id:r.id,
+    company_id:r.company_id||r.companyId||getCompanyId(),
     name:(r.name||'').toString().toUpperCase(),
     phone:r.phone||'',
     ppStatus:r.ppStatus||r.pp_status||'APPLIED',
@@ -2348,7 +2505,7 @@ function getStorageLabel() {
 }
 function loadLocalStore() {
   try {
-    const raw = safeLocalGet(LOCAL_STORE_KEY);
+    const raw = safeLocalGet(`${LOCAL_STORE_KEY}_${getCompanyId()}`);
     if (!raw) return getDefaultLocalStore();
     const parsed={ ...getDefaultLocalStore(), ...JSON.parse(raw) };
     parsed.pro=(parsed.pro||[]).map(normalizeProRecord);
@@ -2360,7 +2517,7 @@ function loadLocalStore() {
   }
 }
 function saveLocalStore() {
-  safeLocalSet(LOCAL_STORE_KEY, JSON.stringify({
+  safeLocalSet(`${LOCAL_STORE_KEY}_${getCompanyId()}`, JSON.stringify({
     pro: proDB,
     lb: lbDB,
     docs: allDocs,
@@ -2400,10 +2557,12 @@ function togglePassword() {
 }
 function showForgotPassword() {
   document.getElementById('login-main').style.display='none';
+  document.getElementById('signup-section').style.display='none';
   document.getElementById('forgot-section').style.display='block';
 }
 function hideForgotPassword() {
   document.getElementById('forgot-section').style.display='none';
+  document.getElementById('signup-section').style.display='none';
   document.getElementById('login-main').style.display='block';
   const ri=document.getElementById('recovery-code-input'); if(ri) ri.value='';
   const fe=document.getElementById('forgot-error'); if(fe) fe.style.display='none';
@@ -2421,6 +2580,17 @@ function submitForgotPassword() {
     '<div style="margin-top:6px;color:var(--text-2)">For security, staff passwords are no longer displayed in the browser. Ask the administrator to reset the account from the profile/settings workflow or update the staff account list directly.</div>';
   resEl.style.display='block';
 }
+function showSignup() {
+  document.getElementById('login-main').style.display='none';
+  document.getElementById('forgot-section').style.display='none';
+  document.getElementById('signup-section').style.display='block';
+  const err=document.getElementById('signup-error'); if(err) err.style.display='none';
+}
+function hideSignup() {
+  document.getElementById('signup-section').style.display='none';
+  document.getElementById('forgot-section').style.display='none';
+  document.getElementById('login-main').style.display='block';
+}
 
 function setUserDisplay(display, role) {
   const parts=display.replace(/[^a-zA-Z ]/g,'').trim().split(' ');
@@ -2429,22 +2599,57 @@ function setUserDisplay(display, role) {
   ['topbar-avatar','sidebar-avatar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=initials; });
   const rEl=document.getElementById('sidebar-user-role');
   if(rEl) rEl.textContent=(role==='admin'?'Administrator':'Staff');
+  const orgEl=document.querySelector('.suc-org');
+  if(orgEl) orgEl.textContent=getCompanyName();
+  updateWorkspaceLabels();
 }
 
-function doLogin() {
-  loadStaffAccounts();
+async function doSignup() {
+  await loadStaffAccounts();
+  const companyName=(document.getElementById('signup-company').value||'').trim();
+  const country=(document.getElementById('signup-country').value||'').trim();
+  const display=(document.getElementById('signup-name').value||'').trim();
+  const username=(document.getElementById('signup-username').value||'').trim().toLowerCase();
+  const password=(document.getElementById('signup-password').value||'').trim();
+  const errEl=document.getElementById('signup-error');
+  const fail=msg=>{ errEl.textContent=msg; errEl.style.display='block'; };
+  if(!companyName) return fail('Company name is required.');
+  if(!display) return fail('Your name is required.');
+  if(!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
+  if(STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
+  if(password.length<6) return fail('Password must be at least 6 characters.');
+  const companyId=slugify(companyName);
+  const generalJobsLabel=buildGeneralJobsLabel(country);
+  STAFF_ACCOUNTS[username]=normalizeAccount(username,{password,role:'admin',display,companyId,companyName,generalJobsCountry:country,generalJobsLabel});
+  await saveStaffAccounts();
+  errEl.style.display='none';
+  currentUser={username,role:'admin',display,companyId,companyName,generalJobsLabel,generalJobsCountry:country};
+  setCurrentWorkspace(currentUser);
+  safeSessionSet('dr_user',JSON.stringify(currentUser));
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('bottom-nav')?.classList.add('visible');
+  setUserDisplay(display,'admin');
+  appStorageMode = db ? 'cloud' : 'local';
+  loadAllData();
+}
+
+async function doLogin() {
+  await loadStaffAccounts();
   const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
   const password=(document.getElementById('pw-input').value||'').trim();
   const errEl=document.getElementById('login-error');
   const account=STAFF_ACCOUNTS[username];
   if (!account||account.password!==password) { errEl.style.display='block'; return; }
   errEl.style.display='none';
-  currentUser={username,role:account.role,display:account.display};
+  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsLabel:account.generalJobsLabel,generalJobsCountry:account.generalJobsCountry};
+  setCurrentWorkspace(currentUser);
   safeSessionSet('dr_user',JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('bottom-nav')?.classList.add('visible');
   setUserDisplay(account.display, account.role);
+  appStorageMode = db ? 'cloud' : 'local';
   loadAllData();
 }
 function doLogout() {
@@ -2458,20 +2663,22 @@ function doLogout() {
   hideForgotPassword();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  loadStaffAccounts();
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadStaffAccounts();
   const saved=safeSessionGet('dr_user');
   if (saved) {
     try {
       const parsed=JSON.parse(saved);
       const account=STAFF_ACCOUNTS[parsed.username];
       if(!account) throw new Error('Unknown saved user');
-      currentUser={username:parsed.username,role:account.role,display:account.display};
+      currentUser={username:parsed.username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsLabel:account.generalJobsLabel,generalJobsCountry:account.generalJobsCountry};
+      setCurrentWorkspace(currentUser);
       safeSessionSet('dr_user',JSON.stringify(currentUser));
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='block';
       document.getElementById('bottom-nav')?.classList.add('visible');
       setUserDisplay(currentUser.display, currentUser.role);
+      appStorageMode = db ? 'cloud' : 'local';
       loadAllData();
     } catch { safeSessionRemove('dr_user'); }
   }
@@ -2504,22 +2711,38 @@ async function loadAllData() {
   }
   showLoading('Loading candidates…');
   try {
+    const companyId = getCompanyId();
+    const proQuery = db.from('pro_candidates').select('*').order('id');
+    const lbQuery = db.from('lb_candidates').select('*').order('id');
+    const docsQuery = db.from('documents').select('*');
+    const timelinesQuery = db.from('timelines').select('*');
+    if (companyId === DEFAULT_COMPANY.id) {
+      proQuery.or(`company_id.eq.${companyId},company_id.is.null`);
+      lbQuery.or(`company_id.eq.${companyId},company_id.is.null`);
+    } else {
+      proQuery.eq('company_id', companyId);
+      lbQuery.eq('company_id', companyId);
+      docsQuery.like('key', `${companyId}:%`);
+      timelinesQuery.like('key', `${companyId}:%`);
+    }
     const [proRes,lbRes,docsRes,tlRes,stagesRes]=await Promise.all([
-      db.from('pro_candidates').select('*').order('id'),
-      db.from('lb_candidates').select('*').order('id'),
-      db.from('documents').select('*'),
-      db.from('timelines').select('*'),
+      proQuery,
+      lbQuery,
+      docsQuery,
+      timelinesQuery,
       db.from('app_settings').select('*'),
     ]);
     appStorageMode='cloud';
     lastSyncError='';
-    if (proRes.data&&proRes.data.length>0) proDB=proRes.data.map(normalizeProRecord); else await seedProData();
-    if (lbRes.data&&lbRes.data.length>0)   lbDB=lbRes.data.map(normalizeLBRecord);   else await seedLBData();
-    if (docsRes.data)   docsRes.data.forEach(r=>{ allDocs[r.key]=r.data; });
-    if (tlRes.data)     tlRes.data.forEach(r=>{ allTimelines[r.key]=r.entries; });
+    if (proRes.data&&proRes.data.length>0) proDB=proRes.data.map(normalizeProRecord); else if(companyId===DEFAULT_COMPANY.id) await seedProData(); else proDB=[];
+    if (lbRes.data&&lbRes.data.length>0)   lbDB=lbRes.data.map(normalizeLBRecord);   else if(companyId===DEFAULT_COMPANY.id) await seedLBData(); else lbDB=[];
+    allDocs={};
+    allTimelines={};
+    if (docsRes.data)   docsRes.data.forEach(r=>{ if(companyId===DEFAULT_COMPANY.id&&!String(r.key).includes(':')) allDocs[r.key]=r.data; else if(String(r.key).startsWith(`${companyId}:`)) allDocs[stripCompanyScopedKey(r.key)]=r.data; });
+    if (tlRes.data)     tlRes.data.forEach(r=>{ if(companyId===DEFAULT_COMPANY.id&&!String(r.key).includes(':')) allTimelines[r.key]=r.entries; else if(String(r.key).startsWith(`${companyId}:`)) allTimelines[stripCompanyScopedKey(r.key)]=r.entries; });
     if (stagesRes.data) {
-      const ps=stagesRes.data.find(r=>r.key==='pro_stages');
-      const ls=stagesRes.data.find(r=>r.key==='lb_stages');
+      const ps=stagesRes.data.find(r=>r.key===getCompanyScopedKey('pro_stages')) || stagesRes.data.find(r=>r.key==='pro_stages'&&companyId===DEFAULT_COMPANY.id);
+      const ls=stagesRes.data.find(r=>r.key===getCompanyScopedKey('lb_stages')) || stagesRes.data.find(r=>r.key==='lb_stages'&&companyId===DEFAULT_COMPANY.id);
       if (ps) proStages=ps.value;
       if (ls) lbStages=ls.value;
     }
@@ -2549,14 +2772,14 @@ function normalizeDateField(v) {
 async function seedProData() {
   const seed=JSON.parse(JSON.stringify(PRO_SEED)).map(r=>{
     ['submitted','interview','ol','mol','visa','travel'].forEach(f=>r[f]=normalizeDateField(r[f]));
-    if(r.commission==='') r.commission=null; if(r.paid==='') r.paid=null; delete r.id; return r;
+    if(r.commission==='') r.commission=null; if(r.paid==='') r.paid=null; r.company_id=getCompanyId(); delete r.id; return r;
   });
   const {data,error}=await db.from('pro_candidates').insert(seed).select();
   if(data&&data.length) proDB=data.map(normalizeProRecord); else { console.warn('Seed insert failed',error); proDB=JSON.parse(JSON.stringify(PRO_SEED)).map(normalizeProRecord); }
 }
 async function seedLBData() {
   const seed=JSON.parse(JSON.stringify(LB_SEED)).map(r=>{
-    ['travelDate','r1Date','r2Date'].forEach(f=>r[f]=normalizeDateField(r[f])); delete r.id; return r;
+    ['travelDate','r1Date','r2Date'].forEach(f=>r[f]=normalizeDateField(r[f])); r.company_id=getCompanyId(); delete r.id; return r;
   });
   const {data,error}=await db.from('lb_candidates').insert(seed).select();
   if(data&&data.length) lbDB=data.map(normalizeLBRecord); else { console.warn('Seed insert failed',error); lbDB=JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord); }
@@ -2578,18 +2801,18 @@ function setSaveStatus(s) {
 // ══════════════════════════════════════════════════════════
 function useCloud() { return db && appStorageMode==='cloud'; }
 async function dbInsert(table, rec) {
-  const ts={...rec}; delete ts.id;
+  const ts={...rec, company_id:getCompanyId()}; delete ts.id;
   const {data,error}=await db.from(table).insert(ts).select().single();
   if(error) throw error;
   return data;
 }
 async function dbUpdate(table, id, rec) {
-  const ts={...rec}; delete ts.id;
-  const {error}=await db.from(table).update(ts).eq('id',id);
+  const ts={...rec, company_id:getCompanyId()}; delete ts.id;
+  const {error}=await db.from(table).update(ts).eq('id',id).eq('company_id',getCompanyId());
   if(error) throw error;
 }
 async function dbDelete(table, id) {
-  const {error}=await db.from(table).delete().eq('id',id);
+  const {error}=await db.from(table).delete().eq('id',id).eq('company_id',getCompanyId());
   if(error) throw error;
 }
 function fallBackToLocal(err) {
@@ -2651,12 +2874,12 @@ async function saveLBRecord(rec) {
 }
 async function deleteProRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('pro_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
 async function deleteLBRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('lb_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
-async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ const {error}=await db.from('documents').upsert({key,data},{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
-async function saveTimeline(key){ if(!allTimelines[key]) return; if(!useCloud()){ saveLocalStore(); return; } try{ const {error}=await db.from('timelines').upsert({key,entries:allTimelines[key]},{onConflict:'key'}); if(error) throw error; }catch(e){fallBackToLocal(e);} }
+async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ const {error}=await db.from('documents').upsert({key:getCompanyScopedKey(key),data},{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
+async function saveTimeline(key){ if(!allTimelines[key]) return; if(!useCloud()){ saveLocalStore(); return; } try{ const {error}=await db.from('timelines').upsert({key:getCompanyScopedKey(key),entries:allTimelines[key]},{onConflict:'key'}); if(error) throw error; }catch(e){fallBackToLocal(e);} }
 async function saveStages(){
   setSaveStatus('saving');
   if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; }
-  try{ const {error}=await db.from('app_settings').upsert([{key:'pro_stages',value:proStages},{key:'lb_stages',value:lbStages}],{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }
+  try{ const {error}=await db.from('app_settings').upsert([{key:getCompanyScopedKey('pro_stages'),value:proStages},{key:getCompanyScopedKey('lb_stages'),value:lbStages}],{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }
   catch(e){fallBackToLocal(e);setSaveStatus('saved');}
 }
 
@@ -2733,7 +2956,7 @@ function switchTab(t){
     const sec=document.getElementById(x+'-section'); if(sec) sec.style.display=x===t?'':'none';
   });
   setBottomNav(t);
-  const titles={dash:'Dashboard',pro:'Professional',lb:'LB Jobs',kanban:'Kanban Board',calendar:'Calendar',reports:'Reports'};
+  const titles={dash:'Dashboard',pro:'Professional',lb:getGeneralJobsLabel(),kanban:'Kanban Board',calendar:'Calendar',reports:'Reports'};
   const titleEl=document.getElementById('topbar-title'); if(titleEl) titleEl.textContent=titles[t]||'';
   if(t==='dash') renderDash();
   if(t==='pro')  { rebuildProPills(); renderPro(); }
@@ -2753,7 +2976,7 @@ function setKanbanSource(src,btn){
   if(btn) btn.classList.add('active');
   const title=document.getElementById('kanban-title');
   const addBtn=document.getElementById('kanban-add-btn');
-  if(title) title.textContent=src==='pro'?'Professional Pipeline Board':'LB Jobs Board';
+  if(title) title.textContent=src==='pro'?'Professional Pipeline Board':`${getGeneralJobsLabel()} Board`;
   if(addBtn) addBtn.setAttribute('onclick',src==='pro'?'openProForm()':'openLBForm()');
   renderKanban();
 }
@@ -2906,7 +3129,7 @@ function renderReports(){
 
   wrap.innerHTML=`<div class="action-grid">
     <div class="action-card warn"><i class="ti ti-alert-triangle"></i><div><strong>${proActionCount}</strong><span>Professional records need attention: missing docs, pending travel, or outstanding balance.</span></div></div>
-    <div class="action-card danger"><i class="ti ti-receipt-refund"></i><div><strong>${lbActionCount}</strong><span>LB records need attention, including ${refundOpen} incomplete refunds.</span></div></div>
+    <div class="action-card danger"><i class="ti ti-receipt-refund"></i><div><strong>${lbActionCount}</strong><span>${getGeneralJobsLabel()} records need attention, including ${refundOpen} incomplete refunds.</span></div></div>
     <div class="action-card good"><i class="ti ti-file-check"></i><div><strong>${missingDocs}</strong><span>Candidate records are missing document links across both pipelines.</span></div></div>
   </div>
   <div class="reports-grid">
@@ -2936,7 +3159,7 @@ function renderReports(){
         <div class="rev-cell"><div class="rev-cell-val amber">${money(totalComm-totalPaid)}</div><div class="rev-cell-label">Outstanding</div></div>
         <div class="rev-cell"><div class="rev-cell-val">${conversion}%</div><div class="rev-cell-label">Conversion Rate</div></div>
       </div>
-      <div class="report-note">${lbTravelled} LB travelled · ${refundOpen} incomplete refunds</div>
+      <div class="report-note">${lbTravelled} ${getGeneralJobsLabel().toLowerCase()} travelled · ${refundOpen} incomplete refunds</div>
     </div>
     <div class="report-card report-wide">
       <div class="report-card-title"><i class="ti ti-table"></i>Position-Wise Summary</div>
@@ -2958,11 +3181,36 @@ function openSettings(){
   const kpis=document.getElementById('settings-kpis');
   if(kpis) kpis.innerHTML=`
     <div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div>
-    <div class="settings-kpi"><strong>${lbDB.length}</strong><span>LB records</span></div>
+    <div class="settings-kpi"><strong>${lbDB.length}</strong><span>${getGeneralJobsLabel()} records</span></div>
     <div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`;
   const mode=document.getElementById('settings-storage-mode');
   if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel();
+  const companyInput=document.getElementById('settings-company-name');
+  const countryInput=document.getElementById('settings-general-country');
+  if(companyInput) companyInput.value=getCompanyName();
+  if(countryInput) countryInput.value=currentCompany.generalJobsCountry||'';
   document.getElementById('settings-modal')?.classList.add('open');
+}
+async function saveWorkspaceSettings(){
+  const companyName=(document.getElementById('settings-company-name')?.value||'').trim();
+  const country=(document.getElementById('settings-general-country')?.value||'').trim();
+  if(!companyName){ showToast('Company name is required','error'); return; }
+  const label=buildGeneralJobsLabel(country);
+  const companyId=getCompanyId();
+  Object.keys(STAFF_ACCOUNTS).forEach(username=>{
+    if((STAFF_ACCOUNTS[username].companyId||DEFAULT_COMPANY.id)===companyId){
+      STAFF_ACCOUNTS[username].companyName=companyName;
+      STAFF_ACCOUNTS[username].generalJobsCountry=country;
+      STAFF_ACCOUNTS[username].generalJobsLabel=label;
+    }
+  });
+  currentUser={...currentUser,companyName,generalJobsCountry:country,generalJobsLabel:label};
+  setCurrentWorkspace(currentUser);
+  safeSessionSet('dr_user',JSON.stringify(currentUser));
+  await saveStaffAccounts();
+  setUserDisplay(currentUser.display,currentUser.role);
+  renderDash(); renderLB(); renderReports();
+  showToast('Workspace updated','success');
 }
 function openHelp(){
   closeProfileDropdown();
@@ -3094,11 +3342,11 @@ function renderProSummary(r){
 function renderLBSummary(r){
   const el=document.getElementById('lb-summary'); if(!el) return;
   const isNew=!r;
-  const rec=r||{name:'New LB candidate',phone:'No phone',ppStatus:'APPLIED',travelStatus:lbStages[0]||'NOT YET',toRefund:0,r1Amt:0,r2Amt:0};
+  const rec=r||{name:`New ${getGeneralJobsLabel()} candidate`,phone:'No phone',ppStatus:'APPLIED',travelStatus:lbStages[0]||'NOT YET',toRefund:0,r1Amt:0,r2Amt:0};
   const paid=(Number(rec.r1Amt||rec.r1_amt)||0)+(Number(rec.r2Amt||rec.r2_amt)||0);
   const owed=Number(rec.toRefund||rec.to_refund)||0;
   el.innerHTML=`<div class="candidate-summary-main">
-    <div class="candidate-summary-name">${rec.name||'New LB candidate'}</div>
+    <div class="candidate-summary-name">${rec.name||`New ${getGeneralJobsLabel()} candidate`}</div>
     <div class="candidate-summary-meta">
       <span><i class="ti ti-phone"></i>${rec.phone||'No phone'}</span>
       <span class="summary-status">${ppBadge(rec.ppStatus||rec.pp_status||'APPLIED')}</span>
@@ -3124,7 +3372,7 @@ function readProFormSummary(){
 }
 function readLBFormSummary(){
   return {
-    name:document.getElementById('lf-name')?.value||'New LB candidate',
+    name:document.getElementById('lf-name')?.value||`New ${getGeneralJobsLabel()} candidate`,
     phone:document.getElementById('lf-phone')?.value||'',
     ppStatus:document.getElementById('lf-pp')?.value||'APPLIED',
     travelStatus:document.getElementById('lf-travel')?.value||lbStages[0],
@@ -3267,7 +3515,7 @@ function renderDash(){
     <div class="p-card card-dark" onclick="switchTab('lb')">
       <div class="p-card-label">In process</div>
       <div class="p-card-count">${lbInProcess}</div>
-      <div class="p-card-sub">LB candidates</div>
+      <div class="p-card-sub">${getGeneralJobsLabel()} candidates</div>
       <i class="ti ti-home p-card-icon"></i>
     </div>
     <div class="p-card card-slate">
@@ -3302,7 +3550,7 @@ function renderDash(){
       <div class="dash-row"><span class="dash-row-label">Outstanding</span><span class="dash-row-val" style="color:var(--amber)">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
     </div>
     <div class="dash-card">
-      <h3>LB Jobs</h3>
+      <h3>${getGeneralJobsLabel()}</h3>
       <div class="dash-row"><span class="dash-row-label">Total candidates</span><span class="dash-row-val">${lbDB.length}</span></div>
       <div class="dash-row"><span class="dash-row-label">In process</span><span class="dash-row-val" style="color:var(--amber)">${lbInProcess}</span></div>
       <div class="dash-row"><span class="dash-row-label">Travelled</span><span class="dash-row-val" style="color:var(--green)">${lbTravelled}</span></div>
@@ -3350,7 +3598,7 @@ function renderDash(){
       <div class="spotlight-sub">Total billed</div>
       <div class="spotlight-row"><span class="spotlight-row-label">Collected</span><span class="spotlight-row-val">KES ${totalPaid.toLocaleString()}</span></div>
       <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
-      <div class="spotlight-section">LB Jobs</div>
+      <div class="spotlight-section">${getGeneralJobsLabel()}</div>
       <div class="spotlight-amount">${moneyUSD(lbFees)}</div>
       <div class="spotlight-sub">Total fees collected</div>
       <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val">${moneyUSD(lbOwed-lbPaid)}</span></div>
@@ -3478,6 +3726,7 @@ async function savePro(){
   const oldStage=oldRec?oldRec.stage:null;
   const newStage=document.getElementById('pf-stage').value;
   const rec={
+    company_id:getCompanyId(),
     name:name.toUpperCase(), pp:document.getElementById('pf-pp').value.trim().toUpperCase(),
     phone:document.getElementById('pf-phone').value.trim(), position:document.getElementById('pf-position').value.trim().toUpperCase(),
     company:document.getElementById('pf-company').value.trim().toUpperCase(), country:document.getElementById('pf-country').value.trim(),
@@ -3590,7 +3839,7 @@ function renderLB(){
 
 function openLBForm(){
   editingLbId=null;
-  document.getElementById('lb-modal-title').textContent='Add LB candidate';
+  document.getElementById('lb-modal-title').textContent=`Add ${getGeneralJobsLabel()} candidate`;
   ['lf-name','lf-phone','lf-tdate','lf-torefund','lf-r1date','lf-r1amt','lf-r2date','lf-r2amt','lf-notes']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('lf-pp').value='APPLIED';
@@ -3632,6 +3881,7 @@ async function saveLB(){
   const oldTravel=oldRec?oldRec.travelStatus:null;
   const newTravel=document.getElementById('lf-travel').value;
   const rec={
+    company_id:getCompanyId(),
     name:name.toUpperCase(), phone:document.getElementById('lf-phone').value.trim(),
     ppStatus, travelStatus:newTravel,
     travelDate:document.getElementById('lf-tdate').value||null,
@@ -3805,7 +4055,7 @@ document.addEventListener('click', () => {
   closeProfileDropdown();
 });
 
-function saveProfileChanges() {
+async function saveProfileChanges() {
   const msgEl = document.getElementById('pd-msg');
   const newUsername = (document.getElementById('pd-new-username').value || '').trim().toLowerCase();
   const currentPw   = document.getElementById('pd-current-pw').value;
@@ -3846,7 +4096,7 @@ function saveProfileChanges() {
   }
 
   if (!changed) { showMsg('No changes to save.', 'err'); return; }
-  saveStaffAccounts();
+  await saveStaffAccounts();
   showMsg('✓ Changes saved successfully.', 'ok');
   // clear sensitive fields
   ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
