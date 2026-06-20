@@ -1654,23 +1654,16 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
               <i class="ti ti-lock"></i><span>Change Password</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
             </button>
 
-            <!-- App actions -->
-            <div class="pd-menu-section">Application</div>
-            <button class="pd-menu-item" onclick="closeProfileDropdown();openSettings()">
-              <i class="ti ti-settings"></i><span>Settings</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
-            </button>
-            <button class="pd-menu-item" onclick="closeProfileDropdown();switchTab('reports')">
-              <i class="ti ti-chart-bar"></i><span>Reports</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
-            </button>
-            <button class="pd-menu-item" onclick="closeProfileDropdown();openHelp()">
-              <i class="ti ti-help-circle"></i><span>Help & Support</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
-            </button>
-
             <!-- Edit profile panel (hidden by default) -->
             <div class="pd-edit-panel" id="pd-edit-panel" style="display:none">
               <div class="pd-edit-header">
                 <button class="pd-back-btn" onclick="closeProfileEdit()"><i class="ti ti-arrow-left"></i> Back</button>
                 <span>Edit Profile</span>
+              </div>
+              <div class="pd-section">Display name</div>
+              <div class="pd-field">
+                <label>Name shown in Dreco</label>
+                <input type="text" id="pd-display-name" placeholder="e.g. Fred">
               </div>
               <div class="pd-section">Change username</div>
               <div class="pd-field">
@@ -3174,7 +3167,7 @@ function renderReports(){
 
   wrap.innerHTML=`<div class="action-grid">
     <div class="action-card warn"><i class="ti ti-alert-triangle"></i><div><strong>${proActionCount}</strong><span>Professional records need attention: missing docs, pending travel, or outstanding balance.</span></div></div>
-    <div class="action-card danger"><i class="ti ti-receipt-refund"></i><div><strong>${lbActionCount}</strong><span>General Jobs records need attention, including ${refundOpen} incomplete refunds.</span></div></div>
+    <div class="action-card danger"><i class="ti ti-receipt-refund"></i><div><strong>${lbActionCount}</strong><span>General Jobs records need attention, including ${refundOpen} open balances.</span></div></div>
     <div class="action-card good"><i class="ti ti-file-check"></i><div><strong>${missingDocs}</strong><span>Candidate records are missing document links across both pipelines.</span></div></div>
   </div>
   <div class="reports-grid">
@@ -3204,7 +3197,7 @@ function renderReports(){
         <div class="rev-cell"><div class="rev-cell-val amber">${money(totalComm-totalPaid)}</div><div class="rev-cell-label">Outstanding</div></div>
         <div class="rev-cell"><div class="rev-cell-val">${conversion}%</div><div class="rev-cell-label">Conversion Rate</div></div>
       </div>
-      <div class="report-note">${lbTravelled} General Jobs travelled · ${refundOpen} incomplete refunds</div>
+      <div class="report-note">${lbTravelled} General Jobs travelled · ${refundOpen} open balances</div>
     </div>
     <div class="report-card report-wide">
       <div class="report-card-title"><i class="ti ti-table"></i>Position-Wise Summary</div>
@@ -3512,7 +3505,7 @@ function renderDash(){
   // LB numbers
   const lbTravelled=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
   const lbInProcess=lbDB.filter(isInProcessLB).length;
-  // Incomplete refunds = ONLY travelled, not HAD PP, not RETURNED, and not fully refunded
+  // Open balances = travelled candidates with a remaining amount to clear.
   const lbIncomplete=lbDB.filter(r=>{
     const ts=r.travelStatus||r.travel_status;
     if(ts!=='TRAVELLED') return false;
@@ -3558,7 +3551,7 @@ function renderDash(){
       <i class="ti ti-home p-card-icon"></i>
     </div>
     <div class="p-card card-slate">
-      <div class="p-card-label">Commission collected</div>
+      <div class="p-card-label">Professional collected</div>
       <div class="p-card-count" style="font-size:20px">KES ${totalPaid.toLocaleString()}</div>
       <div class="p-card-sub">of KES ${totalComm.toLocaleString()} billed</div>
       <i class="ti ti-coin p-card-icon"></i>
@@ -3593,20 +3586,20 @@ function renderDash(){
       <div class="dash-row"><span class="dash-row-label">Total candidates</span><span class="dash-row-val">${lbDB.length}</span></div>
       <div class="dash-row"><span class="dash-row-label">In process</span><span class="dash-row-val" style="color:var(--amber)">${lbInProcess}</span></div>
       <div class="dash-row"><span class="dash-row-label">Travelled</span><span class="dash-row-val" style="color:var(--green)">${lbTravelled}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Total fees collected</span><span class="dash-row-val" style="color:var(--green)">${moneyUSD(lbFees)}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Pending refund balance</span><span class="dash-row-val" style="color:var(--amber)">${moneyUSD(lbOwed-lbPaid)}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Incomplete refunds</span><span class="dash-row-val" style="color:var(--red)">${lbIncomplete}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Collected</span><span class="dash-row-val" style="color:var(--green)">${moneyUSD(lbFees)}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Outstanding</span><span class="dash-row-val" style="color:var(--amber)">${moneyUSD(lbOwed-lbPaid)}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Open balances</span><span class="dash-row-val" style="color:var(--red)">${lbIncomplete}</span></div>
     </div>
     <div class="dash-card">
       <h3>Stage Breakdown</h3>
       ${stageBreakdown}
     </div>
     <div class="dash-card">
-      <h3>Refund Overview</h3>
-      <div class="dash-row"><span class="dash-row-label">Complete</span><span class="dash-row-val" style="color:var(--green)">${lbComplete}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Incomplete</span><span class="dash-row-val" style="color:var(--amber)">${lbIncomplete}</span></div>
+      <h3>General Jobs Payments</h3>
+      <div class="dash-row"><span class="dash-row-label">Cleared</span><span class="dash-row-val" style="color:var(--green)">${lbComplete}</span></div>
+      <div class="dash-row"><span class="dash-row-label">Outstanding</span><span class="dash-row-val" style="color:var(--amber)">${lbIncomplete}</span></div>
       <div class="dash-row"><span class="dash-row-label">Returned</span><span class="dash-row-val" style="color:var(--red)">${lbReturned}</span></div>
-      <div class="dash-row"><span class="dash-row-label">N/A (Had PP)</span><span class="dash-row-val">${lbNA}</span></div>
+      <div class="dash-row"><span class="dash-row-label">No balance</span><span class="dash-row-val">${lbNA}</span></div>
       <div class="dash-row"><span class="dash-row-label">Not yet travelled</span><span class="dash-row-val" style="color:var(--blue)">${lbDB.filter(r=>(r.travelStatus||r.travel_status)==='NOT YET').length}</span></div>
     </div>`;
 
@@ -3631,7 +3624,7 @@ function renderDash(){
   const rightCol=document.getElementById('dash-right-col');
   if(rightCol) rightCol.innerHTML=`
     <div class="spotlight">
-      <div class="spotlight-label">Commission summary</div>
+      <div class="spotlight-label">Financial summary</div>
       <div class="spotlight-section">Professional Jobs</div>
       <div class="spotlight-amount">KES ${totalComm.toLocaleString()}</div>
       <div class="spotlight-sub">Total billed</div>
@@ -3639,9 +3632,9 @@ function renderDash(){
       <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
       <div class="spotlight-section">General Jobs</div>
       <div class="spotlight-amount">${moneyUSD(lbFees)}</div>
-      <div class="spotlight-sub">Total fees collected</div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Pending refund balance</span><span class="spotlight-row-val">${moneyUSD(lbOwed-lbPaid)}</span></div>
-      <div class="spotlight-row"><span class="spotlight-row-label">Incomplete refunds</span><span class="spotlight-row-val">${lbIncomplete}</span></div>
+      <div class="spotlight-sub">Collected</div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Outstanding</span><span class="spotlight-row-val">${moneyUSD(lbOwed-lbPaid)}</span></div>
+      <div class="spotlight-row"><span class="spotlight-row-label">Open balances</span><span class="spotlight-row-val">${lbIncomplete}</span></div>
     </div>
     <div class="due-panel">
       <div class="due-header"><i class="ti ti-plane"></i><span>Pending travel</span></div>
@@ -3840,8 +3833,8 @@ function renderLB(){
     <div class="metric-card mc-default"><div class="metric-label">${escHTML(country)} total</div><div class="metric-val">${countryRows.length}</div></div>
     <div class="metric-card mc-amber"><div class="metric-label">In process</div><div class="metric-val amber">${countryRows.filter(isInProcessLB).length}</div></div>
     <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${countryRows.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
-    <div class="metric-card mc-ink"><div class="metric-label">Fees collected</div><div class="metric-val sm green">${moneyUSD(lbFees)}</div></div>
-    <div class="metric-card mc-red"><div class="metric-label">Incomplete refunds</div><div class="metric-val red">${lbIncomplete}</div></div>`;
+    <div class="metric-card mc-ink"><div class="metric-label">Collected</div><div class="metric-val sm green">${moneyUSD(lbFees)}</div></div>
+    <div class="metric-card mc-red"><div class="metric-label">Outstanding</div><div class="metric-val sm red">${moneyUSD(lbOwed-lbPaid)}</div></div>`;
 
   const data=getFilteredLB();
   const totalPages=Math.max(1,Math.ceil(data.length/PER_PAGE));
@@ -4057,12 +4050,14 @@ function toggleProfileDropdown(e) {
   if (open) {
     const msg = document.getElementById('pd-msg');
     if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
-    ['pd-new-username','pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
+    ['pd-display-name','pd-new-username','pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
     // pre-fill username field with current
     const uEl = document.getElementById('pd-new-username');
     if (uEl && currentUser) uEl.placeholder = currentUser.username;
+    const nameEl = document.getElementById('pd-display-name');
+    if (nameEl && currentUser) nameEl.value = currentUser.display || '';
   }
   // rotate caret
   const caret = document.getElementById('profile-caret');
@@ -4081,6 +4076,8 @@ function openProfileEdit() {
   if(msg){ msg.textContent=''; msg.className='pd-msg'; }
   const userInput=document.getElementById('pd-new-username');
   if(userInput && currentUser){ userInput.value=currentUser.username; userInput.placeholder=currentUser.username; }
+  const displayInput=document.getElementById('pd-display-name');
+  if(displayInput && currentUser){ displayInput.value=currentUser.display || ''; }
   ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   setTimeout(()=>userInput?.focus(),0);
 }
@@ -4102,6 +4099,7 @@ document.addEventListener('click', () => {
 
 async function saveProfileChanges() {
   const msgEl = document.getElementById('pd-msg');
+  const newDisplay = (document.getElementById('pd-display-name').value || '').trim();
   const newUsername = (document.getElementById('pd-new-username').value || '').trim().toLowerCase();
   const currentPw   = document.getElementById('pd-current-pw').value;
   const newPw       = document.getElementById('pd-new-pw').value;
@@ -4114,16 +4112,30 @@ async function saveProfileChanges() {
 
   let changed = false;
 
+  const originalUsername = currentUser.username;
+  const originalAccount = STAFF_ACCOUNTS[originalUsername];
+  if (!originalAccount) {
+    showMsg('Current account could not be found. Sign in again.', 'err'); return;
+  }
+
+  if (newDisplay && newDisplay !== currentUser.display) {
+    originalAccount.display = newDisplay;
+    currentUser.display = newDisplay;
+    changed = true;
+  }
+
   // ── Username change ──
   if (newUsername && newUsername !== currentUser.username) {
+    if (!/^[a-z0-9._-]{3,32}$/.test(newUsername)) {
+      showMsg('Use 3-32 letters, numbers, dots, dashes, or underscores for username.', 'err'); return;
+    }
     if (STAFF_ACCOUNTS[newUsername] && newUsername !== currentUser.username) {
       showMsg('That username is already taken.', 'err'); return;
     }
     // rename key in STAFF_ACCOUNTS
-    STAFF_ACCOUNTS[newUsername] = { ...STAFF_ACCOUNTS[currentUser.username] };
-    delete STAFF_ACCOUNTS[currentUser.username];
+    STAFF_ACCOUNTS[newUsername] = { ...originalAccount };
+    delete STAFF_ACCOUNTS[originalUsername];
     currentUser.username = newUsername;
-    safeSessionSet('dr_user', JSON.stringify(currentUser));
     changed = true;
   }
 
@@ -4136,13 +4148,13 @@ async function saveProfileChanges() {
     if (newPw.length < 6) { showMsg('New password must be at least 6 characters.', 'err'); return; }
     if (newPw !== confirmPw) { showMsg('New passwords do not match.', 'err'); return; }
     STAFF_ACCOUNTS[currentUser.username].password = newPw;
-    safeSessionSet('dr_user', JSON.stringify(currentUser));
     changed = true;
   }
 
   if (!changed) { showMsg('No changes to save.', 'err'); return; }
+  safeSessionSet('dr_user', JSON.stringify(currentUser));
   await saveStaffAccounts();
-  showMsg('✓ Changes saved successfully.', 'ok');
+  showMsg('Changes saved successfully.', 'ok');
   // clear sensitive fields
   ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -4182,6 +4194,9 @@ function setUserDisplay(display, role) {
     pdBadge.className = 'pd-role-badge' + (isAdmin ? ' admin' : '');
     pdRoleText.textContent = isAdmin ? 'Administrator' : 'Staff';
   }
+  const sucOrg = document.querySelector('.suc-org');
+  if (sucOrg) sucOrg.textContent = getCompanyName();
+  updateWorkspaceLabels();
 }
 
 </script>
