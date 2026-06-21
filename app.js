@@ -24,11 +24,11 @@ const DEFAULT_COMPANY = {
 // STAFF ACCOUNTS
 // ══════════════════════════════════════════════════════════
 const STAFF_ACCOUNTS = {
-  fred:      { password: 'Destiny@2025', role: 'admin', display: 'Fred',      companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  robert:    { password: 'Robert@2025',  role: 'staff', display: 'Robert',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  doreen:    { password: 'Doreen@2025',  role: 'staff', display: 'Doreen',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  maxwell:   { password: 'Maxwell@2025', role: 'staff', display: 'Maxwell',   companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  consolata: { password: 'Consol@2025',  role: 'staff', display: 'Consolata', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
+  fred:      { passwordSalt: 'd66ed843dec2214091d4dcc1723179ef', passwordHash: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49', role: 'admin', display: 'Fred',      companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
+  robert:    { passwordSalt: '321f2fc6c7cfab32aff4b9a94092bec9', passwordHash: '0dfd05497b2dfbe6c66f70a108aae220eae2fc5259b1b9c3902d4df58d9b9004', role: 'staff', display: 'Robert',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
+  doreen:    { passwordSalt: 'e9dc170827136a345edbf4457af8f4fe', passwordHash: 'd11a421078a81e9751c62a48627b340d68f5d760647293f8719963ff44b2b327', role: 'staff', display: 'Doreen',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
+  maxwell:   { passwordSalt: '0cc65cda8acac3c875c22e4d5f20a1b1', passwordHash: '97ba06b052118b7bd451b7b0bdc8d6aa9aad347fe2f4768f93c25c0a0d181050', role: 'staff', display: 'Maxwell',   companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
+  consolata: { passwordSalt: '3b2e99aa49600f0a97ba764a2799cce5', passwordHash: 'b0a93dc7415fc8bb713a780060bd8796aeacd1814fc712d49868ba25674e0643', role: 'staff', display: 'Consolata', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
 };
 const RECOVERY_CODE = 'DR-RESET-2025';
 
@@ -39,14 +39,17 @@ function normalizeAccount(username, account = {}) {
   const generalJobsCountries = Array.isArray(account.generalJobsCountries) && account.generalJobsCountries.length
     ? account.generalJobsCountries
     : (legacyCountry ? [legacyCountry] : DEFAULT_COMPANY.generalJobsCountries);
-  return {
-    password: account.password || '',
+  const normalized = {
     role: account.role || 'staff',
     display: account.display || username,
     companyId,
     companyName,
+    passwordHash: account.passwordHash || '',
+    passwordSalt: account.passwordSalt || '',
     generalJobsCountries: [...new Set(generalJobsCountries.map(c => String(c || '').trim()).filter(Boolean))],
   };
+  if (account.password && !normalized.passwordHash) normalized.password = account.password;
+  return normalized;
 }
 function normalizeAllAccounts() {
   Object.keys(STAFF_ACCOUNTS).forEach(username => {
@@ -55,6 +58,39 @@ function normalizeAllAccounts() {
 }
 function slugify(value) {
   return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);
+}
+function makePasswordSalt() {
+  const bytes = new Uint8Array(16);
+  if (window.crypto?.getRandomValues) {
+    window.crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+async function sha256Hex(value) {
+  if (!window.crypto?.subtle) throw new Error('Secure password hashing requires HTTPS or localhost.');
+  const data = new TextEncoder().encode(value);
+  const digest = await window.crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+async function setAccountPassword(account, password) {
+  const salt = makePasswordSalt();
+  account.passwordSalt = salt;
+  account.passwordHash = await sha256Hex(`${salt}:${password}`);
+  delete account.password;
+}
+async function verifyAccountPassword(account, password) {
+  if (!account) return { ok: false, migrated: false };
+  if (account.passwordHash && account.passwordSalt) {
+    const hash = await sha256Hex(`${account.passwordSalt}:${password}`);
+    return { ok: hash === account.passwordHash, migrated: false };
+  }
+  if (account.password && account.password === password) {
+    await setAccountPassword(account, password);
+    return { ok: true, migrated: true };
+  }
+  return { ok: false, migrated: false };
 }
 async function loadStaffAccounts() {
   normalizeAllAccounts();
@@ -396,7 +432,13 @@ async function doSignup() {
   if(password.length<6) return fail('Password must be at least 6 characters.');
   const companyId=slugify(companyName);
   const generalJobsCountries=['Lebanon','Oman','Saudi Arabia'];
-  STAFF_ACCOUNTS[username]=normalizeAccount(username,{password,role:'admin',display,companyId,companyName,generalJobsCountries});
+  STAFF_ACCOUNTS[username]=normalizeAccount(username,{role:'admin',display,companyId,companyName,generalJobsCountries});
+  try {
+    await setAccountPassword(STAFF_ACCOUNTS[username], password);
+  } catch (err) {
+    delete STAFF_ACCOUNTS[username];
+    return fail(err.message || 'Password could not be secured. Use HTTPS and try again.');
+  }
   await saveStaffAccounts();
   errEl.style.display='none';
   currentUser={username,role:'admin',display,companyId,companyName,generalJobsCountries};
@@ -416,7 +458,16 @@ async function doLogin() {
   const password=(document.getElementById('pw-input').value||'').trim();
   const errEl=document.getElementById('login-error');
   const account=STAFF_ACCOUNTS[username];
-  if (!account||account.password!==password) { errEl.style.display='block'; return; }
+  let passwordCheck = { ok: false, migrated: false };
+  try {
+    passwordCheck = await verifyAccountPassword(account, password);
+  } catch (err) {
+    errEl.textContent = err.message || 'Login failed.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!passwordCheck.ok) { errEl.textContent='Incorrect username or password.'; errEl.style.display='block'; return; }
+  if (passwordCheck.migrated) await saveStaffAccounts();
   errEl.style.display='none';
   currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
   setCurrentWorkspace(currentUser);
@@ -1885,11 +1936,21 @@ async function saveProfileChanges() {
   if (currentPw || newPw || confirmPw) {
     if (!currentPw) { showMsg('Enter your current password.', 'err'); return; }
     const account = STAFF_ACCOUNTS[currentUser.username];
-    if (!account || currentPw !== account.password) { showMsg('Current password is incorrect.', 'err'); return; }
+    let passwordCheck = { ok: false };
+    try {
+      passwordCheck = await verifyAccountPassword(account, currentPw);
+    } catch (err) {
+      showMsg(err.message || 'Current password could not be verified.', 'err'); return;
+    }
+    if (!passwordCheck.ok) { showMsg('Current password is incorrect.', 'err'); return; }
     if (!newPw) { showMsg('Enter a new password.', 'err'); return; }
     if (newPw.length < 6) { showMsg('New password must be at least 6 characters.', 'err'); return; }
     if (newPw !== confirmPw) { showMsg('New passwords do not match.', 'err'); return; }
-    STAFF_ACCOUNTS[currentUser.username].password = newPw;
+    try {
+      await setAccountPassword(STAFF_ACCOUNTS[currentUser.username], newPw);
+    } catch (err) {
+      showMsg(err.message || 'New password could not be secured.', 'err'); return;
+    }
     changed = true;
   }
 
