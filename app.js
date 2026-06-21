@@ -507,10 +507,11 @@ async function doSignup() {
   if(!companyName) return fail('Company name is required.');
   if(!display) return fail('Your name is required.');
   if(!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
-  if(STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
-  if(password.length<6) return fail('Password must be at least 6 characters.');
   const companyId=slugify(companyName);
   const generalJobsCountries=['Lebanon','Oman','Saudi Arabia'];
+  const isDefaultAdminBootstrap = username === DEFAULT_ADMIN_USERNAME && companyId === DEFAULT_COMPANY.id && !STAFF_ACCOUNTS[username]?.authUserId;
+  if(STAFF_ACCOUNTS[username] && !isDefaultAdminBootstrap) return fail('That username is already taken.');
+  if(password.length<6) return fail('Password must be at least 6 characters.');
   let authBacked = false;
   if (db?.auth) {
     try {
