@@ -1,4 +1,6 @@
 const AUTH_EMAIL_DOMAIN = 'dreco.local';
+const DEFAULT_COMPANY_ID = 'destiny-recruitment-consults';
+const DEFAULT_COMPANY_NAME = 'Destiny Recruit Consults';
 
 function slugify(value) {
   return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 64);
@@ -106,9 +108,10 @@ module.exports = async function handler(req, res) {
     if (password.length < 6) throw new Error('Password must be at least 6 characters.');
 
     if (action === 'create_workspace') {
-      const companyName = String(body.companyName || '').trim();
+      let companyName = String(body.companyName || '').trim();
       if (!companyName) throw new Error('Company name is required.');
       const companyId = slugify(companyName);
+      if (companyId === DEFAULT_COMPANY_ID) companyName = DEFAULT_COMPANY_NAME;
       const account = await createAuthUser({
         username,
         password,
