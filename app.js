@@ -461,19 +461,61 @@ function setLoginBusy(isBusy) {
   if (!btn) return;
   btn.disabled = isBusy;
   btn.classList.toggle('is-loading', isBusy);
+  btn.classList.remove('is-success');
   if (label) label.textContent = isBusy ? 'Signing in...' : 'Sign in';
+}
+function setLoginSuccessState() {
+  const btn = document.getElementById('login-submit');
+  const label = btn?.querySelector('.lp-submit-label');
+  if (!btn) return;
+  btn.classList.remove('is-loading');
+  btn.classList.add('is-success');
+  if (label) label.textContent = 'Signed in';
 }
 function initLoginInteractions() {
   const pw = document.getElementById('pw-input');
   const hint = document.getElementById('caps-lock-hint');
-  if (!pw || !hint) return;
-  const updateCapsHint = e => {
-    const isOn = !!e.getModifierState?.('CapsLock');
-    hint.classList.toggle('show', isOn);
-  };
-  pw.addEventListener('keydown', updateCapsHint);
-  pw.addEventListener('keyup', updateCapsHint);
-  pw.addEventListener('blur', () => hint.classList.remove('show'));
+  if (pw && hint) {
+    const updateCapsHint = e => {
+      const isOn = !!e.getModifierState?.('CapsLock');
+      hint.classList.toggle('show', isOn);
+    };
+    pw.addEventListener('keydown', updateCapsHint);
+    pw.addEventListener('keyup', updateCapsHint);
+    pw.addEventListener('blur', () => hint.classList.remove('show'));
+  }
+  const media = document.querySelector('.lp-media');
+  const hero = document.querySelector('.lp-hero-object');
+  if (media && hero) {
+    media.addEventListener('mousemove', e => {
+      const rect = media.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - .5) * 8;
+      const y = ((e.clientY - rect.top) / rect.height - .5) * 8;
+      hero.style.setProperty('--hero-x', `${x.toFixed(1)}px`);
+      hero.style.setProperty('--hero-y', `${y.toFixed(1)}px`);
+    });
+    media.addEventListener('mouseleave', () => {
+      hero.style.setProperty('--hero-x', '0px');
+      hero.style.setProperty('--hero-y', '0px');
+    });
+  }
+  document.querySelectorAll('.lp-preview-kpi strong').forEach(el => {
+    const raw = (el.textContent || '').trim();
+    const numeric = Number(raw.replace(/[^\d.]/g, ''));
+    if (!Number.isFinite(numeric) || !/^\d+(\.\d+)?[MK]?$/.test(raw)) return;
+    const suffix = raw.replace(/[\d.]/g, '');
+    const start = performance.now();
+    const duration = 650;
+    const render = now => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = numeric * eased;
+      el.textContent = suffix ? `${value.toFixed(1)}${suffix}` : String(Math.round(value));
+      if (progress < 1) requestAnimationFrame(render);
+      else el.textContent = raw;
+    };
+    requestAnimationFrame(render);
+  });
 }
 function showForgotPassword() {
   document.getElementById('login-main').style.display='none';
@@ -596,6 +638,7 @@ async function doLogin() {
       STAFF_ACCOUNTS[username]=normalizeAccount(username, authLogin.account);
       await saveStaffAccounts();
       errEl.style.display='none';
+      setLoginSuccessState();
       currentUser={username,role:authLogin.account.role,display:authLogin.account.display,companyId:authLogin.account.companyId,companyName:authLogin.account.companyName,generalJobsCountries:authLogin.account.generalJobsCountries,authUserId:authLogin.account.authUserId};
       setCurrentWorkspace(currentUser);
       safeSessionSet('dr_user',JSON.stringify(currentUser));
@@ -621,6 +664,7 @@ async function doLogin() {
   if (!passwordCheck.ok) { fail('Incorrect username or password.'); return; }
   if (passwordCheck.migrated) await saveStaffAccounts();
   errEl.style.display='none';
+  setLoginSuccessState();
   currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
   setCurrentWorkspace(currentUser);
   safeSessionSet('dr_user',JSON.stringify(currentUser));
