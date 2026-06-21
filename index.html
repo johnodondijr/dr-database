@@ -2019,11 +2019,24 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
         <i class="ti ti-building"></i>
         <div style="width:100%">
           <strong>Workspace</strong>
-          <span>Set the company name and destination label shown across this Dreco workspace.</span>
+          <span>Set the company name shown across this Dreco workspace.</span>
           <div class="form-grid" style="margin-top:12px">
             <div class="field"><label>Company name</label><input type="text" id="settings-company-name"></div>
           </div>
           <button class="btn primary" style="margin-top:10px" onclick="saveWorkspaceSettings()"><i class="ti ti-device-floppy"></i> Save workspace</button>
+        </div>
+      </div>
+      <div class="settings-card" id="settings-countries-card" style="margin-bottom:14px;align-items:flex-start">
+        <i class="ti ti-world"></i>
+        <div style="width:100%">
+          <strong>General Jobs countries</strong>
+          <span>Manage the destination country tabs used in General Jobs for this company.</span>
+          <div id="settings-countries-list" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"></div>
+          <div class="form-grid" style="margin-top:12px">
+            <div class="field"><label>Add country</label><input type="text" id="settings-new-country" placeholder="e.g. Qatar"></div>
+          </div>
+          <div class="login-error" id="settings-country-error" style="display:none;text-align:left"></div>
+          <button class="btn primary" style="margin-top:10px" onclick="addSettingsCountry()"><i class="ti ti-plus"></i> Add country</button>
         </div>
       </div>
       <div class="settings-card" id="settings-users-card" style="margin-bottom:14px;align-items:flex-start">
