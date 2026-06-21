@@ -324,6 +324,7 @@ async function addGeneralCountry() {
   window.generalCountryFilter = countries.find(c => c.toLowerCase() === name.toLowerCase()) || name;
   await persistWorkspaceCountries(countries);
   renderGeneralCountryTabs();
+  renderSettingsCountries();
   renderLB();
   renderDash();
 }
@@ -1141,8 +1142,62 @@ function openSettings(){
   if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel();
   const companyInput=document.getElementById('settings-company-name');
   if(companyInput) companyInput.value=getCompanyName();
+  renderSettingsCountries();
   renderCompanyUsers();
   document.getElementById('settings-modal')?.classList.add('open');
+}
+function renderSettingsCountries() {
+  const card = document.getElementById('settings-countries-card');
+  const list = document.getElementById('settings-countries-list');
+  const err = document.getElementById('settings-country-error');
+  if (err) { err.textContent = ''; err.style.display = 'none'; }
+  if (!card || !list) return;
+  const isAdmin = currentUser?.role === 'admin';
+  card.style.display = isAdmin ? 'flex' : 'none';
+  if (!isAdmin) return;
+  const countries = getGeneralCountries();
+  list.innerHTML = countries.map(country => `
+    <span style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;background:#F8FAFC;padding:7px 9px;font-size:12px;font-weight:800;color:var(--ink)">
+      ${escHTML(country)}
+      <button type="button" onclick="removeSettingsCountry('${escJSString(country)}')" title="Remove ${escHTML(country)}" style="border:0;background:transparent;color:var(--text-3);cursor:pointer;padding:0;display:inline-flex;align-items:center">
+        <i class="ti ti-x"></i>
+      </button>
+    </span>
+  `).join('') || '<div class="empty" style="padding:12px">No countries configured</div>';
+}
+async function addSettingsCountry() {
+  if (currentUser?.role !== 'admin') { showToast('Only admins can manage countries','error'); return; }
+  const input = document.getElementById('settings-new-country');
+  const err = document.getElementById('settings-country-error');
+  const name = (input?.value || '').trim();
+  const fail = msg => { if (err) { err.textContent = msg; err.style.display = 'block'; } };
+  if (!name) return fail('Country name is required.');
+  const countries = getGeneralCountries();
+  if (countries.some(c => c.toLowerCase() === name.toLowerCase())) return fail('That country already exists.');
+  const next = [...countries, name];
+  window.generalCountryFilter = name;
+  await persistWorkspaceCountries(next);
+  if (input) input.value = '';
+  renderSettingsCountries();
+  renderGeneralCountryTabs();
+  renderLB();
+  renderDash();
+  showToast('Country added','success');
+}
+async function removeSettingsCountry(country) {
+  if (currentUser?.role !== 'admin') { showToast('Only admins can manage countries','error'); return; }
+  const countries = getGeneralCountries();
+  if (countries.length <= 1) { showToast('Keep at least one country','error'); return; }
+  const hasRecords = lbDB.some(r => (r.country || DEFAULT_COMPANY.generalJobsCountries[0] || 'Lebanon') === country);
+  if (hasRecords && !confirm(`${country} has General Jobs records. Remove the tab anyway? Records will not be deleted.`)) return;
+  const next = countries.filter(c => c !== country);
+  if (window.generalCountryFilter === country) window.generalCountryFilter = next[0] || '';
+  await persistWorkspaceCountries(next);
+  renderSettingsCountries();
+  renderGeneralCountryTabs();
+  renderLB();
+  renderDash();
+  showToast('Country removed','success');
 }
 function getCompanyUsers() {
   const companyId = getCompanyId();
