@@ -111,18 +111,49 @@
     .lp-footer a:hover{color:var(--ink);text-decoration:underline}
     .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;background:var(--red-light);padding:8px 12px;border-radius:var(--radius);text-align:center}
     .recovery-result{background:var(--accent-light);border:1.5px solid var(--accent-dark);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;text-align:left}
-    .lp-media{flex:1.1;margin:14px;border-radius:20px;position:relative;overflow:hidden;background:#111316;border:1px solid rgba(255,255,255,.08);padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}
-    .lp-media::before{content:'';position:absolute;inset:0;background:linear-gradient(145deg,rgba(238,250,148,.08),transparent 42%),linear-gradient(20deg,rgba(34,160,107,.12),transparent 45%);pointer-events:none}
-    .lp-media-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.8),transparent 92%);pointer-events:none}
+    .lp-media{flex:1.1;margin:14px;border-radius:20px;position:relative;overflow:hidden;background:linear-gradient(155deg,#F7F9FF 0%,#F0F4FF 42%,#EDF8F2 100%);border:1px solid #DDE4F8;padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+    .lp-media::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 12% 16%,rgba(238,250,148,.65),transparent 24%),radial-gradient(circle at 84% 18%,rgba(26,107,181,.12),transparent 28%),linear-gradient(145deg,rgba(255,255,255,.76),transparent 45%);pointer-events:none}
+    .lp-media-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(83,71,206,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(83,71,206,.06) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 96%);pointer-events:none}
     .lp-media-head{position:relative;z-index:1;display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
-    .lp-kicker{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--ink);border-radius:14px;padding:10px 14px;font-size:11px;font-weight:800}
+    .lp-kicker{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);border:1px solid #E1E6F4;border-radius:14px;padding:10px 14px;font-size:11px;font-weight:800;box-shadow:0 10px 26px rgba(49,57,87,.08)}
     .lp-kicker i{font-size:15px}
     .lp-media-copy{max-width:280px;margin-top:14px}
-    .lp-media-copy h2{font-size:28px;line-height:1.05;letter-spacing:-.04em;color:#fff;font-weight:900;margin-bottom:8px}
-    .lp-media-copy p{font-size:12px;color:rgba(255,255,255,.55);font-weight:500;line-height:1.55}
-    .lp-live-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
+    .lp-media-copy h2{font-size:28px;line-height:1.05;letter-spacing:-.04em;color:#111827;font-weight:900;margin-bottom:8px}
+    .lp-media-copy p{font-size:12px;color:#5E677B;font-weight:600;line-height:1.55}
+    .lp-live-pill{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E1E6F4;border-radius:999px;padding:8px 12px;color:#111827;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 10px 26px rgba(49,57,87,.08)}
     .lp-live-dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 0 5px rgba(34,160,107,.16)}
     .lp-visual{position:relative;z-index:1;min-height:360px;display:flex;align-items:center;justify-content:center}
+    .lp-illustration{position:relative;width:min(100%,410px);height:350px}
+    .lp-orbit{position:absolute;border-radius:50%;border:1px dashed rgba(83,71,206,.24)}
+    .lp-orbit.one{width:300px;height:300px;left:54px;top:22px}
+    .lp-orbit.two{width:210px;height:210px;left:98px;top:66px;border-color:rgba(34,160,107,.24)}
+    .lp-hero-card{position:absolute;left:76px;top:74px;width:250px;background:#fff;border:1px solid #DDE4F8;border-radius:22px;padding:16px;box-shadow:0 28px 60px rgba(49,57,87,.16)}
+    .lp-hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .lp-hero-title{font-size:12px;font-weight:900;color:#111827}
+    .lp-hero-badge{font-size:9px;font-weight:900;color:#22A06B;background:#EAF8F0;border-radius:999px;padding:5px 8px}
+    .lp-progress-row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:9px;margin-bottom:10px}
+    .lp-progress-icon{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px}
+    .lp-progress-icon.blue{background:#1A6BB5}.lp-progress-icon.green{background:#22A06B}.lp-progress-icon.gold{background:#B07B10}
+    .lp-progress-copy strong{display:block;font-size:11px;color:#111827;margin-bottom:4px}
+    .lp-progress-bar{height:6px;background:#EEF1F7;border-radius:999px;overflow:hidden}
+    .lp-progress-fill{height:100%;border-radius:999px;background:#5347CE}
+    .lp-progress-fill.green{background:#22A06B}.lp-progress-fill.gold{background:#EEFA94}
+    .lp-progress-count{font-size:14px;font-weight:900;color:#111827}
+    .lp-float-card{position:absolute;background:#fff;border:1px solid #DDE4F8;border-radius:18px;padding:13px 14px;box-shadow:0 18px 42px rgba(49,57,87,.14)}
+    .lp-float-card strong{display:block;font-size:12px;color:#111827;margin-bottom:4px}
+    .lp-float-card span{display:block;font-size:10px;color:#6B7280;font-weight:700}
+    .lp-float-icon{width:36px;height:36px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#111827;background:#EEFA94;font-size:20px;margin-bottom:9px}
+    .lp-finance-card{right:0;top:12px;width:132px}
+    .lp-docs-card{left:0;bottom:34px;width:138px}
+    .lp-report-card{right:8px;bottom:24px;width:146px}
+    .lp-mini-chart{display:flex;align-items:flex-end;gap:5px;height:42px;margin-top:10px}
+    .lp-mini-chart span{display:block;width:11px;border-radius:999px;background:#5347CE}
+    .lp-mini-chart span:nth-child(2){height:32px;background:#1A6BB5}.lp-mini-chart span:nth-child(3){height:22px;background:#22A06B}.lp-mini-chart span:nth-child(4){height:38px;background:#EEFA94}
+    .lp-plane-path{position:absolute;left:170px;bottom:88px;width:120px;height:38px;border-top:2px dashed rgba(26,107,181,.45);border-radius:70% 70% 0 0;transform:rotate(-8deg)}
+    .lp-plane{position:absolute;right:-6px;top:-13px;width:34px;height:34px;border-radius:12px;background:#111827;color:#EEFA94;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px rgba(17,24,39,.22)}
+    .lp-plus{position:absolute;width:28px;height:28px;border-radius:10px;background:#fff;color:#5347CE;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px rgba(49,57,87,.12);font-weight:900}
+    .lp-plus.a{left:36px;top:54px}.lp-plus.b{right:48px;top:156px;color:#B07B10}.lp-plus.c{left:164px;bottom:14px;color:#22A06B}
+    .lp-visual>.lp-board,.lp-visual>.lp-doc-card,.lp-visual>.lp-route{display:none}
     .lp-board{position:relative;width:min(100%,390px);background:#202327;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:14px;box-shadow:0 24px 70px rgba(0,0,0,.38)}
     .lp-board-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
     .lp-board-title{color:#fff;font-size:12px;font-weight:800}
@@ -144,9 +175,9 @@
     .lp-doc-card strong{display:block;font-size:12px;color:var(--ink);margin-bottom:3px}
     .lp-doc-card span{font-size:10px;color:rgba(0,0,0,.58);font-weight:700}
     .lp-metrics{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .lp-metric{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 14px}
-    .lp-metric span{display:block;font-size:9px;color:rgba(255,255,255,.42);font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-    .lp-metric strong{display:block;font-size:18px;line-height:1;color:#fff;font-weight:900}
+    .lp-metric{background:#fff;border:1px solid #E1E6F4;border-radius:14px;padding:12px 14px;box-shadow:0 10px 24px rgba(49,57,87,.08)}
+    .lp-metric span{display:block;font-size:9px;color:#788196;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    .lp-metric strong{display:block;font-size:18px;line-height:1;color:#111827;font-weight:900}
     .lp-metric.accent strong{color:var(--accent)}
     @media(max-width:900px){.lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}.lp-media{display:none}.lp-form-panel{padding:40px 30px}}
 
@@ -1486,14 +1517,58 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
         <div>
           <div class="lp-kicker"><i class="ti ti-briefcase"></i>Recruitment command center</div>
           <div class="lp-media-copy">
-            <h2>Move every candidate from documents to departure.</h2>
-            <p>Track offers, MOL, visa, travel, refunds, documents, and payments in one focused workspace.</p>
+            <h2>Track every candidate from signup to departure.</h2>
+            <p>Pipeline progress, finance tracking, documents, reports, and travel status stay connected in one workspace.</p>
           </div>
         </div>
         <div class="lp-live-pill"><span class="lp-live-dot"></span>Live pipeline</div>
       </div>
 
       <div class="lp-visual">
+        <div class="lp-illustration">
+          <div class="lp-orbit one"></div>
+          <div class="lp-orbit two"></div>
+          <div class="lp-plus a">+</div>
+          <div class="lp-plus b">+</div>
+          <div class="lp-plus c">+</div>
+          <div class="lp-hero-card">
+            <div class="lp-hero-top">
+              <div class="lp-hero-title">Candidate progress</div>
+              <div class="lp-hero-badge">Live</div>
+            </div>
+            <div class="lp-progress-row">
+              <div class="lp-progress-icon blue"><i class="ti ti-file-cv"></i></div>
+              <div class="lp-progress-copy"><strong>Offer letter</strong><div class="lp-progress-bar"><div class="lp-progress-fill" style="width:72%"></div></div></div>
+              <div class="lp-progress-count">24</div>
+            </div>
+            <div class="lp-progress-row">
+              <div class="lp-progress-icon gold"><i class="ti ti-plane-departure"></i></div>
+              <div class="lp-progress-copy"><strong>Pending travel</strong><div class="lp-progress-bar"><div class="lp-progress-fill gold" style="width:48%"></div></div></div>
+              <div class="lp-progress-count">12</div>
+            </div>
+            <div class="lp-progress-row">
+              <div class="lp-progress-icon green"><i class="ti ti-circle-check"></i></div>
+              <div class="lp-progress-copy"><strong>Cleared finance</strong><div class="lp-progress-bar"><div class="lp-progress-fill green" style="width:86%"></div></div></div>
+              <div class="lp-progress-count">41</div>
+            </div>
+          </div>
+          <div class="lp-float-card lp-finance-card">
+            <div class="lp-float-icon"><i class="ti ti-coin"></i></div>
+            <strong>Finance</strong>
+            <span>Collected and outstanding</span>
+          </div>
+          <div class="lp-float-card lp-docs-card">
+            <div class="lp-float-icon"><i class="ti ti-folder-check"></i></div>
+            <strong>Documents</strong>
+            <span>Drive links and records</span>
+          </div>
+          <div class="lp-float-card lp-report-card">
+            <strong>Reports</strong>
+            <span>Trends by stage</span>
+            <div class="lp-mini-chart"><span style="height:18px"></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="lp-plane-path"><div class="lp-plane"><i class="ti ti-plane"></i></div></div>
+        </div>
         <div class="lp-board">
           <div class="lp-board-top">
             <div class="lp-board-title">Professional pipeline</div>
