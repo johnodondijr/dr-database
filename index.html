@@ -1539,6 +1539,62 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   .wb-right{grid-template-columns:1fr!important}
 }
 
+/* Typography and login polish pass */
+body,button,input,select,textarea{font-family:'Manrope',var(--font-body),system-ui,sans-serif!important;letter-spacing:0!important}
+h1,h2,h3,h4,h5,h6,.lp-brand-name,.sidebar-logo-text,.topbar-title,.panel-title,.metric-val,.p-card-count,.spotlight-amount,.wb-stat-val,.rev-cell-val,.kanban-card-name,.pd-name,.suc-name{font-family:'Manrope',var(--font-heading),system-ui,sans-serif!important;letter-spacing:0!important}
+.lp-brand-name{font-size:24px!important;line-height:1!important;font-weight:800!important;color:#111827!important}
+.lp-content-area{max-width:390px!important}
+.lp-header{text-align:left!important;margin-bottom:34px!important}
+.lp-header h1{font-size:31px!important;line-height:1.12!important;font-weight:800!important;color:#0F1430!important;margin-bottom:8px!important}
+.lp-header p{font-size:15px!important;line-height:1.45!important;color:#697386!important;font-weight:500!important}
+.lp-input-group{margin-bottom:22px!important}
+.lp-input-group label{font-size:12px!important;line-height:1.2!important;color:#1F2937!important;text-transform:none!important;letter-spacing:0!important;margin-left:0!important;margin-bottom:10px!important;font-weight:750!important}
+.lp-input-wrap{position:relative!important}
+.lp-input-icon{position:absolute!important;left:18px!important;top:50%!important;transform:translateY(-50%)!important;font-size:20px!important;color:#8A94A8!important;z-index:1!important;pointer-events:none!important}
+.lp-input-wrap input{height:56px!important;border-radius:12px!important;background:#F3F6FB!important;border:1px solid #E1E7F2!important;padding:0 52px!important;font-size:15px!important;font-weight:600!important;color:#111827!important}
+.lp-input-wrap input::placeholder{color:#8A94A8!important;font-weight:600!important;opacity:1!important}
+.lp-input-wrap input:focus{background:#fff!important;border-color:#6D5DF6!important;box-shadow:0 0 0 4px rgba(83,71,206,.12)!important}
+.lp-pw-toggle{right:18px!important;color:#8A94A8!important}
+.lp-forgot{font-size:13px!important;color:#6D5DF6!important;margin-top:8px!important;font-weight:650!important}
+.lp-submit{height:56px!important;border-radius:12px!important;font-size:15px!important;font-weight:800!important;background:#111827!important;color:#fff!important;box-shadow:0 14px 30px rgba(17,24,39,.18)!important}
+.lp-signup-cta{width:max-content!important;height:auto!important;margin:24px auto 0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#7B8496!important;font-size:14px!important;font-weight:500!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important}
+.lp-signup-cta:hover{border:0!important;box-shadow:none!important;color:#5B6475!important}
+.lp-signup-cta strong{font-size:14px!important;font-weight:750!important;color:#5347CE!important}
+.lp-signup-cta span{color:#7B8496!important}
+.lp-chip{font-size:12px!important;font-weight:650!important;color:#697386!important}
+.lp-footer{font-size:12px!important}
+.lp-media-copy h2{font-size:36px!important;line-height:1.12!important;font-weight:850!important;letter-spacing:0!important}
+.lp-media-copy p{font-size:15px!important;line-height:1.55!important;color:#4B556A!important}
+.lp-kicker{font-size:10px!important;letter-spacing:.04em!important}
+.topbar-title{font-size:18px!important;font-weight:800!important}
+.nav-item-label,.panel-title,.dash-card h3,.metric-label,.p-card-label,.report-card-title{letter-spacing:0!important;text-transform:none!important}
+.panel-title{font-size:14px!important;font-weight:800!important}
+.metric-label,.p-card-label{font-size:11px!important;line-height:1.25!important}
+.metric-val{font-size:29px!important;line-height:1.05!important}
+.metric-val.sm{font-size:17px!important;line-height:1.25!important}
+td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field select,.field textarea{font-size:12px!important;letter-spacing:0!important}
+.field label{font-size:11px!important;letter-spacing:0!important;text-transform:none!important}
+
+@media(max-width:900px){
+  .lp-content-area{max-width:430px!important}
+  .lp-header h1{font-size:30px!important}
+  .lp-media-copy h2{font-size:25px!important}
+  .lp-media-copy p{font-size:12px!important}
+  .lp-signup-cta{height:auto!important;margin-top:22px!important}
+}
+
+@media(max-width:420px){
+  .lp-brand-name{font-size:22px!important}
+  .lp-header h1{font-size:27px!important}
+  .lp-header p{font-size:14px!important}
+  .lp-input-wrap input{height:52px!important;font-size:15px!important}
+  .lp-submit{height:52px!important}
+  .lp-signup-cta{font-size:13px!important;gap:7px!important}
+  .lp-signup-cta strong{font-size:13px!important}
+  .metric-val{font-size:24px!important}
+  .metric-val.sm{font-size:15px!important}
+}
+
   </style>
 </head>
 <body>
@@ -1574,21 +1630,23 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <div class="lp-input-group">
               <label for="username-input">Username</label>
               <div class="lp-input-wrap">
-                <input type="text" id="username-input" placeholder="e.g. fred" required autocomplete="username">
+                <i class="ti ti-user lp-input-icon"></i>
+                <input type="text" id="username-input" placeholder="johnfred" required autocomplete="username">
               </div>
             </div>
             <div class="lp-input-group">
               <label for="pw-input">Password</label>
               <div class="lp-input-wrap">
-                <input type="password" id="pw-input" placeholder="Password" required autocomplete="current-password">
+                <i class="ti ti-lock lp-input-icon"></i>
+                <input type="password" id="pw-input" placeholder="••••••••" required autocomplete="current-password">
                 <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
               </div>
-              <span class="lp-forgot" onclick="showForgotPassword()">Forgot Password?</span>
+              <span class="lp-forgot" onclick="showForgotPassword()">Forgot password?</span>
             </div>
-            <button type="submit" class="lp-submit">Sign In</button>
+            <button type="submit" class="lp-submit">Sign in</button>
           </form>
           <div class="login-error" id="login-error">Incorrect username or password.</div>
-          <button type="button" class="lp-signup-cta" onclick="showSignup()"><i class="ti ti-building-plus"></i> New to Dreco? Create an account</button>
+          <button type="button" class="lp-signup-cta" onclick="showSignup()"><span>New to Dreco?</span><strong>Create an account</strong></button>
           <div class="lp-chips">
             <div class="lp-chip"><i class="ti ti-building"></i> Office LAN</div>
             <div class="lp-chip"><i class="ti ti-lock"></i> Secure SSL</div>
@@ -1603,24 +1661,28 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <div class="lp-input-group">
               <label for="signup-company">Company Name</label>
               <div class="lp-input-wrap">
+                <i class="ti ti-building lp-input-icon"></i>
                 <input type="text" id="signup-company" placeholder="e.g. Apex Recruitment" required autocomplete="organization">
               </div>
             </div>
             <div class="lp-input-group">
               <label for="signup-name">Your Name</label>
               <div class="lp-input-wrap">
+                <i class="ti ti-user lp-input-icon"></i>
                 <input type="text" id="signup-name" placeholder="Account owner" required autocomplete="name">
               </div>
             </div>
             <div class="lp-input-group">
               <label for="signup-username">Username</label>
               <div class="lp-input-wrap">
+                <i class="ti ti-at lp-input-icon"></i>
                 <input type="text" id="signup-username" placeholder="e.g. admin" required autocomplete="username">
               </div>
             </div>
             <div class="lp-input-group">
               <label for="signup-password">Password</label>
               <div class="lp-input-wrap">
+                <i class="ti ti-lock lp-input-icon"></i>
                 <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password">
               </div>
             </div>
@@ -1638,6 +1700,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <div class="lp-input-group">
               <label for="recovery-code-input">Recovery Code</label>
               <div class="lp-input-wrap">
+                <i class="ti ti-key lp-input-icon"></i>
                 <input type="password" id="recovery-code-input" placeholder="Recovery code" required autocomplete="off">
               </div>
             </div>
