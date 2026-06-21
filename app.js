@@ -744,12 +744,12 @@ async function saveLBRecord(rec) {
 }
 async function deleteProRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('pro_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
 async function deleteLBRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('lb_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
-async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ const {error}=await db.from('documents').upsert({key:getCompanyScopedKey(key),data},{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
-async function saveTimeline(key){ if(!allTimelines[key]) return; if(!useCloud()){ saveLocalStore(); return; } try{ const {error}=await db.from('timelines').upsert({key:getCompanyScopedKey(key),entries:allTimelines[key]},{onConflict:'key'}); if(error) throw error; }catch(e){fallBackToLocal(e);} }
+async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ const {error}=await db.from('documents').upsert({key:getCompanyScopedKey(key),data,company_id:getCompanyId()},{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
+async function saveTimeline(key){ if(!allTimelines[key]) return; if(!useCloud()){ saveLocalStore(); return; } try{ const {error}=await db.from('timelines').upsert({key:getCompanyScopedKey(key),entries:allTimelines[key],company_id:getCompanyId()},{onConflict:'key'}); if(error) throw error; }catch(e){fallBackToLocal(e);} }
 async function saveStages(){
   setSaveStatus('saving');
   if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; }
-  try{ const {error}=await db.from('app_settings').upsert([{key:getCompanyScopedKey('pro_stages'),value:proStages},{key:getCompanyScopedKey('lb_stages'),value:lbStages}],{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }
+  try{ const {error}=await db.from('app_settings').upsert([{key:getCompanyScopedKey('pro_stages'),value:proStages,company_id:getCompanyId()},{key:getCompanyScopedKey('lb_stages'),value:lbStages,company_id:getCompanyId()}],{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }
   catch(e){fallBackToLocal(e);setSaveStatus('saved');}
 }
 
