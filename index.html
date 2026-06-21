@@ -1670,6 +1670,96 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   .lp-security-copy{text-align:left}
 }
 
+/* Final production calibration for the Dreco authentication surface */
+:root{
+  --auth-primary:#635BFF;
+  --auth-surface:#F6F5FF;
+  --auth-accent:#EEF2FF;
+  --auth-ink:#0F172A;
+  --auth-muted:#64748B;
+  --auth-border:rgba(99,91,255,.12);
+  --auth-shadow-sm:0 2px 8px rgba(0,0,0,.03);
+  --auth-shadow-md:0 18px 40px rgba(15,23,42,.18);
+}
+#login-screen{animation:drecoAuthPageIn .3s ease both!important}
+@keyframes drecoAuthPageIn{from{opacity:0}to{opacity:1}}
+.lp-window{max-width:1360px!important}
+.lp-form-panel{flex:0 0 50%!important;padding:72px 72px 32px!important;justify-content:flex-start!important}
+.lp-media{flex:0 0 50%!important;padding:48px 64px 32px!important;gap:16px!important}
+.lp-content-area{max-width:420px!important;margin-top:56px!important}
+.lp-header{margin:0 0 28px!important}
+.lp-header h1{font-size:52px!important;line-height:1!important;font-weight:700!important;letter-spacing:-.028em!important;margin-bottom:20px!important;color:var(--auth-ink)!important}
+.lp-header p{font-size:18px!important;line-height:1.6!important;max-width:420px!important;color:#5F6B7C!important;font-weight:450!important}
+.lp-input-group{margin-bottom:28px!important}
+.lp-input-group label{margin-bottom:12px!important;font-weight:550!important;color:#243044!important}
+.lp-input-wrap input{height:58px!important;border-radius:18px!important;background:#fff!important;border:1px solid var(--auth-border)!important;box-shadow:var(--auth-shadow-sm)!important;color:#111827!important;caret-color:var(--auth-primary)!important;transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease,background .2s ease!important}
+.lp-input-wrap input:hover{border-color:rgba(99,91,255,.24)!important;box-shadow:0 4px 14px rgba(15,23,42,.045)!important}
+.lp-input-wrap input:focus{border-color:var(--auth-primary)!important;box-shadow:0 0 0 5px rgba(99,91,255,.10),0 4px 14px rgba(15,23,42,.045)!important;transform:translateY(-1px)!important}
+.lp-input-wrap input::placeholder{color:#9CA3AF!important;font-weight:450!important}
+.lp-input-icon{opacity:.62!important}
+.lp-input-wrap:focus-within .lp-input-icon{opacity:1!important}
+.lp-submit{height:58px!important;border-radius:18px!important;margin-top:8px!important;background:linear-gradient(135deg,#111827,#1E293B)!important;box-shadow:0 12px 30px rgba(15,23,42,.14)!important}
+.lp-submit:hover{transform:translateY(-2px)!important;box-shadow:var(--auth-shadow-md)!important}
+.lp-submit.is-success{background:linear-gradient(135deg,#13A37A,#0F8A66)!important}
+.lp-signup-cta{margin-top:32px!important}
+.lp-chips{margin-top:24px!important;gap:8px!important}
+.lp-chip{height:34px!important;font-size:11px!important;font-weight:500!important;background:#fff!important;border-color:rgba(99,91,255,.10)!important;color:#6B7280!important}
+.lp-chip i{font-size:14px!important;opacity:.8!important}
+.lp-security-copy{font-size:14px!important;line-height:1.55!important;color:#747F90!important;font-weight:400!important;margin-top:8px!important}
+.lp-footer{margin-top:auto!important;padding-top:32px!important;font-size:11px!important;color:#8A94A8!important}
+.lp-kicker{height:30px!important;padding:0 12px!important;font-size:9px!important;font-weight:700!important;box-shadow:none!important}
+.lp-media-head{margin-top:-8px!important}
+.lp-media-copy{margin-top:16px!important}
+.lp-media-copy h2{font-size:44px!important;line-height:.98!important;font-weight:700!important;letter-spacing:-.035em!important;margin-bottom:16px!important}
+.lp-media-copy h2 span{font-weight:650!important;color:var(--auth-primary)!important}
+.lp-media-copy p{font-size:15px!important;line-height:1.55!important;max-width:440px!important;color:#5F6B7C!important}
+.lp-media::before{opacity:.62!important}
+.lp-media-grid{opacity:.38!important;background-size:30px 30px!important}
+.lp-hero-object{opacity:.75!important;transform:translate3d(var(--hero-x,0),var(--hero-y,0),0)!important;transition:transform .15s ease,opacity .15s ease!important;filter:drop-shadow(0 18px 30px rgba(99,91,255,.12))!important}
+.lp-dashboard-preview{opacity:.88!important;filter:blur(.4px) saturate(.92)!important;box-shadow:0 12px 34px rgba(83,71,206,.07)!important}
+.lp-preview-kpi{box-shadow:none!important;background:#fff!important}
+.lp-preview-kpi span{font-weight:650!important;color:#8B95A7!important}
+.lp-preview-kpi strong{font-size:18px!important;font-weight:650!important;color:#273142!important}
+.lp-preview-kpi i{opacity:.64!important}
+.lp-line-fill{opacity:.68!important}
+.lp-report-wave{opacity:.72!important}
+.lp-report-wave path:first-child{stroke-width:3!important;opacity:.7!important}
+.lp-report-gain{opacity:.72!important}
+.lp-testimonial{opacity:.82!important;box-shadow:0 10px 28px rgba(83,71,206,.06)!important}
+
+@media(min-width:761px) and (max-width:1100px){
+  .lp-window{height:calc(100vh - 28px)!important;min-height:700px!important;flex-direction:row!important}
+  .lp-form-panel{flex:0 0 58%!important;padding:64px 54px 30px!important}
+  .lp-media{display:flex!important;order:0!important;flex:0 0 42%!important;padding:40px 38px 30px!important}
+  .lp-content-area{margin-top:48px!important}
+  .lp-header h1{font-size:46px!important}
+  .lp-media-copy h2{font-size:34px!important}
+  .lp-hero-object{width:140px!important;height:112px!important;flex-basis:140px!important}
+  .lp-dashboard-preview{padding:16px!important}
+  .lp-testimonial{display:none!important}
+}
+
+@media(max-width:760px){
+  .lp-window{display:flex!important;flex-direction:column!important}
+  .lp-form-panel{order:0!important;padding:32px 24px 24px!important}
+  .lp-media{order:1!important;display:flex!important;padding:20px 24px 24px!important}
+  .lp-content-area{margin-top:36px!important;max-width:100%!important}
+  .lp-header{margin-bottom:24px!important}
+  .lp-header h1{font-size:38px!important}
+  .lp-header p{font-size:15px!important;line-height:1.55!important}
+  .lp-input-group{margin-bottom:24px!important}
+  .lp-submit,.lp-input-wrap input{width:100%!important}
+  .lp-media-copy h2{font-size:24px!important;line-height:1.06!important}
+  .lp-media-copy p{font-size:12px!important}
+}
+
+@media(max-width:420px){
+  .lp-form-panel{padding:28px 18px 22px!important}
+  .lp-header h1{font-size:34px!important}
+  .lp-input-wrap input,.lp-submit{height:56px!important}
+  .lp-chips{grid-template-columns:1fr!important;margin-top:20px!important}
+}
+
   </style>
 </head>
 <body>
