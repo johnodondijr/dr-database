@@ -18,11 +18,12 @@ const AUTH_API_PATH = '/api/dreco-auth';
 const AUTH_EMAIL_DOMAIN = 'dreco.local';
 const DEFAULT_COMPANY = {
   id: 'destiny-recruitment-consults',
-  name: 'Destiny Recruitment Consults',
+  name: 'Destiny Recruit Consults',
   generalJobsCountries: ['Lebanon','Oman','Saudi Arabia'],
 };
 const DEFAULT_ADMIN_USERNAME = 'johnfred';
-const LEGACY_DESTINY_USERS = ['fred','robert','doreen','maxwell','consolata'];
+const DEFAULT_ADMIN_BLOCKED_ALIASES = ['john_fred','john-fred','john.fred'];
+const LEGACY_DESTINY_USERS = ['fred','robert','doreen','maxwell','consolata',...DEFAULT_ADMIN_BLOCKED_ALIASES];
 const LEGACY_DESTINY_HASHES = {
   fred: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49',
   robert: '0dfd05497b2dfbe6c66f70a108aae220eae2fc5259b1b9c3902d4df58d9b9004',
@@ -40,8 +41,9 @@ const STAFF_ACCOUNTS = {
 const RECOVERY_CODE = 'DR-RESET-2025';
 
 function normalizeAccount(username, account = {}) {
-  const companyName = (account.companyName || DEFAULT_COMPANY.name).trim();
+  let companyName = (account.companyName || DEFAULT_COMPANY.name).trim();
   const companyId = account.companyId || slugify(companyName) || DEFAULT_COMPANY.id;
+  if (companyId === DEFAULT_COMPANY.id) companyName = DEFAULT_COMPANY.name;
   const legacyCountry = account.generalJobsCountry || String(account.generalJobsLabel || '').replace(/\s+Jobs$/i,'');
   const generalJobsCountries = Array.isArray(account.generalJobsCountries) && account.generalJobsCountries.length
     ? account.generalJobsCountries
@@ -82,7 +84,8 @@ function cleanupLegacyDestinyUsers() {
     const account = STAFF_ACCOUNTS[username];
     const isDefaultCompany = account && (account.companyId || DEFAULT_COMPANY.id) === DEFAULT_COMPANY.id;
     const isOldSeedAccount = account && (account.password || account.passwordHash === LEGACY_DESTINY_HASHES[username]);
-    if (isDefaultCompany && (isOldSeedAccount || (username === 'fred' && migratedLegacyFred))) delete STAFF_ACCOUNTS[username];
+    const isBlockedAdminAlias = DEFAULT_ADMIN_BLOCKED_ALIASES.includes(username);
+    if (isDefaultCompany && (isOldSeedAccount || isBlockedAdminAlias || (username === 'fred' && migratedLegacyFred))) delete STAFF_ACCOUNTS[username];
   });
   if (STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME]) {
     STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] = normalizeAccount(DEFAULT_ADMIN_USERNAME, {
@@ -551,6 +554,11 @@ async function doLogin() {
   const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
   const password=(document.getElementById('pw-input').value||'').trim();
   const errEl=document.getElementById('login-error');
+  if (DEFAULT_ADMIN_BLOCKED_ALIASES.includes(username)) {
+    errEl.textContent = `Use ${DEFAULT_ADMIN_USERNAME} to sign in.`;
+    errEl.style.display = 'block';
+    return;
+  }
   try {
     const authLogin = await signInWithSupabaseAuth(username, password);
     if (authLogin?.account) {
