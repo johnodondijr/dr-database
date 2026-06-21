@@ -19,16 +19,21 @@ const DEFAULT_COMPANY = {
   name: 'Destiny Recruitment Consults',
   generalJobsCountries: ['Lebanon','Oman','Saudi Arabia'],
 };
+const DEFAULT_ADMIN_USERNAME = 'johnfred';
+const LEGACY_DESTINY_USERS = ['fred','robert','doreen','maxwell','consolata'];
+const LEGACY_DESTINY_HASHES = {
+  fred: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49',
+  robert: '0dfd05497b2dfbe6c66f70a108aae220eae2fc5259b1b9c3902d4df58d9b9004',
+  doreen: 'd11a421078a81e9751c62a48627b340d68f5d760647293f8719963ff44b2b327',
+  maxwell: '97ba06b052118b7bd451b7b0bdc8d6aa9aad347fe2f4768f93c25c0a0d181050',
+  consolata: 'b0a93dc7415fc8bb713a780060bd8796aeacd1814fc712d49868ba25674e0643',
+};
 
 // ══════════════════════════════════════════════════════════
 // STAFF ACCOUNTS
 // ══════════════════════════════════════════════════════════
 const STAFF_ACCOUNTS = {
-  fred:      { passwordSalt: 'd66ed843dec2214091d4dcc1723179ef', passwordHash: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49', role: 'admin', display: 'Fred',      companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  robert:    { passwordSalt: '321f2fc6c7cfab32aff4b9a94092bec9', passwordHash: '0dfd05497b2dfbe6c66f70a108aae220eae2fc5259b1b9c3902d4df58d9b9004', role: 'staff', display: 'Robert',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  doreen:    { passwordSalt: 'e9dc170827136a345edbf4457af8f4fe', passwordHash: 'd11a421078a81e9751c62a48627b340d68f5d760647293f8719963ff44b2b327', role: 'staff', display: 'Doreen',    companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  maxwell:   { passwordSalt: '0cc65cda8acac3c875c22e4d5f20a1b1', passwordHash: '97ba06b052118b7bd451b7b0bdc8d6aa9aad347fe2f4768f93c25c0a0d181050', role: 'staff', display: 'Maxwell',   companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-  consolata: { passwordSalt: '3b2e99aa49600f0a97ba764a2799cce5', passwordHash: 'b0a93dc7415fc8bb713a780060bd8796aeacd1814fc712d49868ba25674e0643', role: 'staff', display: 'Consolata', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
+  johnfred: { passwordSalt: 'd66ed843dec2214091d4dcc1723179ef', passwordHash: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
 };
 const RECOVERY_CODE = 'DR-RESET-2025';
 
@@ -55,6 +60,36 @@ function normalizeAllAccounts() {
   Object.keys(STAFF_ACCOUNTS).forEach(username => {
     STAFF_ACCOUNTS[username] = normalizeAccount(username, STAFF_ACCOUNTS[username]);
   });
+}
+function cleanupLegacyDestinyUsers() {
+  const legacyAdmin = STAFF_ACCOUNTS.fred;
+  let migratedLegacyFred = false;
+  if (!STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] && legacyAdmin && (legacyAdmin.companyId || DEFAULT_COMPANY.id) === DEFAULT_COMPANY.id) {
+    STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] = {
+      ...legacyAdmin,
+      role: 'admin',
+      display: 'John Fred',
+      companyId: DEFAULT_COMPANY.id,
+      companyName: DEFAULT_COMPANY.name,
+      generalJobsCountries: legacyAdmin.generalJobsCountries || DEFAULT_COMPANY.generalJobsCountries,
+    };
+    migratedLegacyFred = true;
+  }
+  LEGACY_DESTINY_USERS.forEach(username => {
+    const account = STAFF_ACCOUNTS[username];
+    const isDefaultCompany = account && (account.companyId || DEFAULT_COMPANY.id) === DEFAULT_COMPANY.id;
+    const isOldSeedAccount = account && (account.password || account.passwordHash === LEGACY_DESTINY_HASHES[username]);
+    if (isDefaultCompany && (isOldSeedAccount || (username === 'fred' && migratedLegacyFred))) delete STAFF_ACCOUNTS[username];
+  });
+  if (STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME]) {
+    STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] = normalizeAccount(DEFAULT_ADMIN_USERNAME, {
+      ...STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME],
+      role: 'admin',
+      display: STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME].display || 'John Fred',
+      companyId: DEFAULT_COMPANY.id,
+      companyName: STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME].companyName || DEFAULT_COMPANY.name,
+    });
+  }
 }
 function slugify(value) {
   return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);
@@ -94,10 +129,12 @@ async function verifyAccountPassword(account, password) {
 }
 async function loadStaffAccounts() {
   normalizeAllAccounts();
+  cleanupLegacyDestinyUsers();
   try {
     const saved = safeLocalGet(LOCAL_STAFF_KEY);
     if (saved) Object.assign(STAFF_ACCOUNTS, JSON.parse(saved));
     normalizeAllAccounts();
+    cleanupLegacyDestinyUsers();
   } catch (err) {
     console.warn('Saved staff accounts could not be loaded:', err);
   }
@@ -107,6 +144,7 @@ async function loadStaffAccounts() {
       if (error) throw error;
       if (data?.value) Object.assign(STAFF_ACCOUNTS, data.value);
       normalizeAllAccounts();
+      cleanupLegacyDestinyUsers();
       safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
     } catch (err) {
       console.warn('Cloud staff accounts could not be loaded:', err);
@@ -115,6 +153,7 @@ async function loadStaffAccounts() {
 }
 async function saveStaffAccounts() {
   normalizeAllAccounts();
+  cleanupLegacyDestinyUsers();
   safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
   if (db) {
     try {
@@ -1018,7 +1057,70 @@ function openSettings(){
   if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel();
   const companyInput=document.getElementById('settings-company-name');
   if(companyInput) companyInput.value=getCompanyName();
+  renderCompanyUsers();
   document.getElementById('settings-modal')?.classList.add('open');
+}
+function getCompanyUsers() {
+  const companyId = getCompanyId();
+  return Object.entries(STAFF_ACCOUNTS)
+    .filter(([, account]) => (account.companyId || DEFAULT_COMPANY.id) === companyId)
+    .sort(([a], [b]) => a.localeCompare(b));
+}
+function renderCompanyUsers() {
+  const card = document.getElementById('settings-users-card');
+  const list = document.getElementById('settings-users-list');
+  const err = document.getElementById('new-user-error');
+  if (err) { err.textContent = ''; err.style.display = 'none'; }
+  if (!card || !list) return;
+  const isAdmin = currentUser?.role === 'admin';
+  card.style.display = isAdmin ? 'flex' : 'none';
+  if (!isAdmin) return;
+  const users = getCompanyUsers();
+  list.innerHTML = users.map(([username, account]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);border-radius:10px;padding:9px 10px;background:#F8FAFC">
+      <div style="min-width:0">
+        <div style="font-size:13px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHTML(account.display || username)}</div>
+        <div style="font-size:11px;color:var(--text-3)">@${escHTML(username)}</div>
+      </div>
+      <span style="font-size:10px;font-weight:800;text-transform:uppercase;color:${account.role === 'admin' ? 'var(--nexus-purple)' : 'var(--text-3)'}">${account.role === 'admin' ? 'Admin' : 'Staff'}</span>
+    </div>
+  `).join('') || '<div class="empty" style="padding:12px">No users yet</div>';
+}
+async function createCompanyUser() {
+  if (currentUser?.role !== 'admin') { showToast('Only admins can add users','error'); return; }
+  const display = (document.getElementById('new-user-display')?.value || '').trim();
+  const username = (document.getElementById('new-user-username')?.value || '').trim().toLowerCase();
+  const role = document.getElementById('new-user-role')?.value === 'admin' ? 'admin' : 'staff';
+  const password = (document.getElementById('new-user-password')?.value || '').trim();
+  const errEl = document.getElementById('new-user-error');
+  const fail = msg => {
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+  };
+  if (!display) return fail('Display name is required.');
+  if (!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
+  if (STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
+  if (password.length < 6) return fail('Temporary password must be at least 6 characters.');
+  STAFF_ACCOUNTS[username] = normalizeAccount(username, {
+    role,
+    display,
+    companyId: getCompanyId(),
+    companyName: getCompanyName(),
+    generalJobsCountries: getGeneralCountries(),
+  });
+  try {
+    await setAccountPassword(STAFF_ACCOUNTS[username], password);
+    await saveStaffAccounts();
+  } catch (err) {
+    delete STAFF_ACCOUNTS[username];
+    return fail(err.message || 'User could not be created.');
+  }
+  ['new-user-display','new-user-username','new-user-password'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const roleEl = document.getElementById('new-user-role'); if (roleEl) roleEl.value = 'staff';
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+  renderCompanyUsers();
+  showToast('User added','success');
 }
 async function saveWorkspaceSettings(){
   const companyName=(document.getElementById('settings-company-name')?.value||'').trim();
