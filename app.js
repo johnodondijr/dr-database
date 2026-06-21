@@ -14,6 +14,8 @@ const db = HAS_SUPABASE_CONFIG && window.supabase
 const LOCAL_STORE_KEY = 'dreco_local_store_v1';
 const LOCAL_STAFF_KEY = 'dreco_staff_accounts_v1';
 const CLOUD_ACCOUNTS_KEY = 'dreco_accounts_v2';
+const AUTH_API_PATH = '/api/dreco-auth';
+const AUTH_EMAIL_DOMAIN = 'dreco.local';
 const DEFAULT_COMPANY = {
   id: 'destiny-recruitment-consults',
   name: 'Destiny Recruitment Consults',
@@ -49,6 +51,7 @@ function normalizeAccount(username, account = {}) {
     display: account.display || username,
     companyId,
     companyName,
+    authUserId: account.authUserId || '',
     passwordHash: account.passwordHash || '',
     passwordSalt: account.passwordSalt || '',
     generalJobsCountries: [...new Set(generalJobsCountries.map(c => String(c || '').trim()).filter(Boolean))],
@@ -93,6 +96,43 @@ function cleanupLegacyDestinyUsers() {
 }
 function slugify(value) {
   return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);
+}
+function getAuthEmail(username) {
+  return `${String(username || '').trim().toLowerCase()}@${AUTH_EMAIL_DOMAIN}`;
+}
+function accountFromAuthUser(user, fallbackUsername = '') {
+  const meta = user?.app_metadata || {};
+  return normalizeAccount(meta.username || fallbackUsername || String(user?.email || '').replace(/@.*/,''), {
+    authUserId: user?.id,
+    role: meta.role || 'staff',
+    display: meta.display || meta.username || fallbackUsername,
+    companyId: meta.company_id,
+    companyName: meta.company_name,
+    generalJobsCountries: meta.general_jobs_countries,
+  });
+}
+async function postAuthAction(payload, accessToken = '') {
+  const response = await fetch(AUTH_API_PATH, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Auth service request failed.');
+  return data;
+}
+async function signInWithSupabaseAuth(username, password) {
+  if (!db?.auth) return null;
+  const { data, error } = await db.auth.signInWithPassword({
+    email: getAuthEmail(username),
+    password,
+  });
+  if (error || !data?.user) return null;
+  const account = accountFromAuthUser(data.user, username);
+  return { account, session: data.session };
 }
 function makePasswordSalt() {
   const bytes = new Uint8Array(16);
@@ -471,16 +511,30 @@ async function doSignup() {
   if(password.length<6) return fail('Password must be at least 6 characters.');
   const companyId=slugify(companyName);
   const generalJobsCountries=['Lebanon','Oman','Saudi Arabia'];
-  STAFF_ACCOUNTS[username]=normalizeAccount(username,{role:'admin',display,companyId,companyName,generalJobsCountries});
-  try {
-    await setAccountPassword(STAFF_ACCOUNTS[username], password);
-  } catch (err) {
-    delete STAFF_ACCOUNTS[username];
-    return fail(err.message || 'Password could not be secured. Use HTTPS and try again.');
+  let authBacked = false;
+  if (db?.auth) {
+    try {
+      const authResult = await postAuthAction({ action:'create_workspace', companyName, display, username, password });
+      STAFF_ACCOUNTS[username]=normalizeAccount(username, authResult.account);
+      await signInWithSupabaseAuth(username, password);
+      authBacked = true;
+    } catch (err) {
+      console.warn('Supabase Auth workspace creation unavailable; using local account registry:', err);
+    }
+  }
+  if (!authBacked) {
+    STAFF_ACCOUNTS[username]=normalizeAccount(username,{role:'admin',display,companyId,companyName,generalJobsCountries});
+    try {
+      await setAccountPassword(STAFF_ACCOUNTS[username], password);
+    } catch (err) {
+      delete STAFF_ACCOUNTS[username];
+      return fail(err.message || 'Password could not be secured. Use HTTPS and try again.');
+    }
   }
   await saveStaffAccounts();
   errEl.style.display='none';
-  currentUser={username,role:'admin',display,companyId,companyName,generalJobsCountries};
+  const account = STAFF_ACCOUNTS[username];
+  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries,authUserId:account.authUserId};
   setCurrentWorkspace(currentUser);
   safeSessionSet('dr_user',JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display='none';
@@ -496,6 +550,26 @@ async function doLogin() {
   const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
   const password=(document.getElementById('pw-input').value||'').trim();
   const errEl=document.getElementById('login-error');
+  try {
+    const authLogin = await signInWithSupabaseAuth(username, password);
+    if (authLogin?.account) {
+      STAFF_ACCOUNTS[username]=normalizeAccount(username, authLogin.account);
+      await saveStaffAccounts();
+      errEl.style.display='none';
+      currentUser={username,role:authLogin.account.role,display:authLogin.account.display,companyId:authLogin.account.companyId,companyName:authLogin.account.companyName,generalJobsCountries:authLogin.account.generalJobsCountries,authUserId:authLogin.account.authUserId};
+      setCurrentWorkspace(currentUser);
+      safeSessionSet('dr_user',JSON.stringify(currentUser));
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      document.getElementById('bottom-nav')?.classList.add('visible');
+      setUserDisplay(authLogin.account.display, authLogin.account.role);
+      appStorageMode = db ? 'cloud' : 'local';
+      loadAllData();
+      return;
+    }
+  } catch (err) {
+    console.warn('Supabase Auth login unavailable; trying local account registry:', err);
+  }
   const account=STAFF_ACCOUNTS[username];
   let passwordCheck = { ok: false, migrated: false };
   try {
@@ -519,6 +593,7 @@ async function doLogin() {
   loadAllData();
 }
 function doLogout() {
+  if (db?.auth) db.auth.signOut().catch(err => console.warn('Supabase sign out failed:', err));
   safeSessionRemove('dr_user'); currentUser=null;
   document.getElementById('app').style.display='none';
   document.getElementById('bottom-nav')?.classList.remove('visible');
@@ -1100,6 +1175,27 @@ async function createCompanyUser() {
   if (!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
   if (STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
   if (password.length < 6) return fail('Temporary password must be at least 6 characters.');
+  if (db?.auth) {
+    try {
+      const { data: sessionData } = await db.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (token) {
+        const authResult = await postAuthAction({ action:'create_user', display, username, password, role }, token);
+        STAFF_ACCOUNTS[username] = normalizeAccount(username, authResult.account);
+        await saveStaffAccounts();
+        ['new-user-display','new-user-username','new-user-password'].forEach(id => {
+          const el = document.getElementById(id); if (el) el.value = '';
+        });
+        const roleEl = document.getElementById('new-user-role'); if (roleEl) roleEl.value = 'staff';
+        if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+        renderCompanyUsers();
+        showToast('User added','success');
+        return;
+      }
+    } catch (err) {
+      console.warn('Supabase Auth user creation unavailable; using local account registry:', err);
+    }
+  }
   STAFF_ACCOUNTS[username] = normalizeAccount(username, {
     role,
     display,
