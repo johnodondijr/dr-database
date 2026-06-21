@@ -2026,6 +2026,22 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
           <button class="btn primary" style="margin-top:10px" onclick="saveWorkspaceSettings()"><i class="ti ti-device-floppy"></i> Save workspace</button>
         </div>
       </div>
+      <div class="settings-card" id="settings-users-card" style="margin-bottom:14px;align-items:flex-start">
+        <i class="ti ti-users-plus"></i>
+        <div style="width:100%">
+          <strong>Company users</strong>
+          <span>Admins can add users for this company workspace. New users sign in with the username and temporary password set here.</span>
+          <div id="settings-users-list" style="display:grid;gap:8px;margin-top:12px"></div>
+          <div class="form-grid" style="margin-top:12px">
+            <div class="field"><label>Display name</label><input type="text" id="new-user-display" placeholder="e.g. Jane Doe"></div>
+            <div class="field"><label>Username</label><input type="text" id="new-user-username" placeholder="e.g. jane" autocomplete="off"></div>
+            <div class="field"><label>Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+            <div class="field"><label>Temporary password</label><input type="password" id="new-user-password" placeholder="At least 6 characters" autocomplete="new-password"></div>
+          </div>
+          <div class="login-error" id="new-user-error" style="display:none;text-align:left"></div>
+          <button class="btn primary" style="margin-top:10px" onclick="createCompanyUser()"><i class="ti ti-user-plus"></i> Add user</button>
+        </div>
+      </div>
       <div class="settings-grid">
         <div class="settings-card">
           <i class="ti ti-database-export"></i>
