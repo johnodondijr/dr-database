@@ -451,6 +451,30 @@ function togglePassword() {
   if (inp.type === 'password') { inp.type='text'; btn.innerHTML='<i class="ti ti-eye-off"></i>'; }
   else                         { inp.type='password'; btn.innerHTML='<i class="ti ti-eye"></i>'; }
 }
+function setLoginBusy(isBusy) {
+  const btn = document.getElementById('login-submit');
+  const label = btn?.querySelector('.lp-submit-label');
+  ['username-input','pw-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = isBusy;
+  });
+  if (!btn) return;
+  btn.disabled = isBusy;
+  btn.classList.toggle('is-loading', isBusy);
+  if (label) label.textContent = isBusy ? 'Signing in...' : 'Sign in';
+}
+function initLoginInteractions() {
+  const pw = document.getElementById('pw-input');
+  const hint = document.getElementById('caps-lock-hint');
+  if (!pw || !hint) return;
+  const updateCapsHint = e => {
+    const isOn = !!e.getModifierState?.('CapsLock');
+    hint.classList.toggle('show', isOn);
+  };
+  pw.addEventListener('keydown', updateCapsHint);
+  pw.addEventListener('keyup', updateCapsHint);
+  pw.addEventListener('blur', () => hint.classList.remove('show'));
+}
 function showForgotPassword() {
   document.getElementById('login-main').style.display='none';
   document.getElementById('signup-section').style.display='none';
@@ -555,9 +579,15 @@ async function doLogin() {
   const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
   const password=(document.getElementById('pw-input').value||'').trim();
   const errEl=document.getElementById('login-error');
-  if (DEFAULT_ADMIN_BLOCKED_ALIASES.includes(username)) {
-    errEl.textContent = `Use ${DEFAULT_ADMIN_USERNAME} to sign in.`;
+  const fail = msg => {
+    errEl.textContent = msg;
     errEl.style.display = 'block';
+    setLoginBusy(false);
+  };
+  setLoginBusy(true);
+  errEl.style.display='none';
+  if (DEFAULT_ADMIN_BLOCKED_ALIASES.includes(username)) {
+    fail(`Use ${DEFAULT_ADMIN_USERNAME} to sign in.`);
     return;
   }
   try {
@@ -585,11 +615,10 @@ async function doLogin() {
   try {
     passwordCheck = await verifyAccountPassword(account, password);
   } catch (err) {
-    errEl.textContent = err.message || 'Login failed.';
-    errEl.style.display = 'block';
+    fail(err.message || 'Login failed.');
     return;
   }
-  if (!passwordCheck.ok) { errEl.textContent='Incorrect username or password.'; errEl.style.display='block'; return; }
+  if (!passwordCheck.ok) { fail('Incorrect username or password.'); return; }
   if (passwordCheck.migrated) await saveStaffAccounts();
   errEl.style.display='none';
   currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
@@ -611,11 +640,13 @@ function doLogout() {
   document.getElementById('pw-input').value='';
   document.getElementById('username-input').value='';
   document.getElementById('login-error').style.display='none';
+  setLoginBusy(false);
   hideForgotPassword();
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
   await loadStaffAccounts();
+  initLoginInteractions();
   const saved=safeSessionGet('dr_user');
   if (saved) {
     try {
