@@ -179,6 +179,32 @@
     .lp-metric span{display:block;font-size:9px;color:#788196;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
     .lp-metric strong{display:block;font-size:18px;line-height:1;color:#111827;font-weight:900}
     .lp-metric.accent strong{color:var(--accent)}
+    .lp-visual>.lp-illustration{display:none}
+    .lp-dashboard-preview{position:relative;z-index:1;width:min(100%,420px);background:rgba(255,255,255,.86);border:1px solid #DDE4F8;border-radius:20px;padding:16px;box-shadow:0 26px 70px rgba(83,71,206,.16);backdrop-filter:blur(10px)}
+    .lp-preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+    .lp-preview-head strong{font-size:13px;color:#111827}
+    .lp-preview-chip{border:1px solid #DDE4F8;background:#fff;border-radius:12px;padding:7px 10px;font-size:11px;font-weight:800;color:#4A5568}
+    .lp-preview-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+    .lp-preview-kpi{border:1px solid #E5EAF6;border-radius:13px;background:#fff;padding:10px;min-height:70px}
+    .lp-preview-kpi span{display:block;font-size:9px;color:#7B8496;font-weight:800;margin-bottom:7px}
+    .lp-preview-kpi strong{font-size:19px;color:#101426;line-height:1}
+    .lp-preview-kpi i{float:right;width:24px;height:24px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#F0ECFF;color:#5347CE;font-size:14px}
+    .lp-preview-body{display:grid;grid-template-columns:1.25fr .85fr;gap:10px}
+    .lp-preview-panel{border:1px solid #E5EAF6;border-radius:14px;background:#fff;padding:13px}
+    .lp-preview-panel h3{font-size:12px;color:#111827;margin-bottom:13px}
+    .lp-progress-line{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:8px;margin-bottom:11px;font-size:11px;color:#3F485D;font-weight:700}
+    .lp-line-track{height:7px;border-radius:999px;background:#EEF1F7;overflow:hidden}
+    .lp-line-fill{height:100%;border-radius:999px;background:#5347CE}
+    .lp-line-fill.blue{background:#1A6BB5}.lp-line-fill.gold{background:#F0B429}.lp-line-fill.green{background:#22A06B}
+    .lp-report-wave{height:118px;position:relative;border-radius:12px;background:linear-gradient(180deg,#F6F3FF,#fff);overflow:hidden}
+    .lp-report-wave svg{position:absolute;inset:12px 8px auto;width:calc(100% - 16px);height:84px}
+    .lp-report-gain{position:absolute;right:12px;bottom:12px;color:#22A06B;font-size:13px;font-weight:900}
+    .lp-testimonial{position:relative;z-index:1;background:rgba(255,255,255,.86);border:1px solid #DDE4F8;border-radius:20px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:15px;align-items:center;box-shadow:0 18px 46px rgba(83,71,206,.12);backdrop-filter:blur(10px)}
+    .lp-quote-mark{width:42px;height:42px;border-radius:16px;background:#F0ECFF;color:#5347CE;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900}
+    .lp-testimonial-text{font-size:13px;line-height:1.45;color:#111827;font-weight:650}
+    .lp-testimonial-person{border-left:1px solid #DDE4F8;padding-left:18px;min-width:150px}
+    .lp-testimonial-person strong{display:block;font-size:13px;color:#111827;margin-bottom:4px}
+    .lp-testimonial-person span{display:block;font-size:11px;color:#697386;line-height:1.35;font-weight:700}
     @media(max-width:900px){.lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}.lp-media{display:none}.lp-form-panel{padding:40px 30px}}
 
     /* ── APP SHELL ── */
@@ -1425,8 +1451,8 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
       <div class="lp-content-area">
         <div id="login-main">
           <div class="lp-header">
-            <h1>Sign in to Portal</h1>
-            <p>Access active candidate pipelines</p>
+            <h1>Welcome back 👋</h1>
+            <p>Sign in to access your recruitment workspace</p>
           </div>
           <form onsubmit="event.preventDefault(); doLogin();">
             <div class="lp-input-group">
@@ -1446,7 +1472,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
             <button type="submit" class="lp-submit">Sign In</button>
           </form>
           <div class="login-error" id="login-error">Incorrect username or password.</div>
-          <button type="button" class="lp-signup-cta" onclick="showSignup()"><i class="ti ti-building-plus"></i> Create company workspace</button>
+          <button type="button" class="lp-signup-cta" onclick="showSignup()"><i class="ti ti-building-plus"></i> New to Dreco? Create an account</button>
           <div class="lp-chips">
             <div class="lp-chip"><i class="ti ti-building"></i> Office LAN</div>
             <div class="lp-chip"><i class="ti ti-lock"></i> Secure SSL</div>
@@ -1525,6 +1551,38 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
       </div>
 
       <div class="lp-visual">
+        <div class="lp-dashboard-preview">
+          <div class="lp-preview-head">
+            <strong>Pipeline overview</strong>
+            <div class="lp-preview-chip">All workflows <i class="ti ti-chevron-down"></i></div>
+          </div>
+          <div class="lp-preview-kpis">
+            <div class="lp-preview-kpi"><i class="ti ti-users"></i><span>Total candidates</span><strong>133</strong></div>
+            <div class="lp-preview-kpi"><i class="ti ti-loader"></i><span>In progress</span><strong>47</strong></div>
+            <div class="lp-preview-kpi"><i class="ti ti-plane"></i><span>Travelled</span><strong>77</strong></div>
+            <div class="lp-preview-kpi"><i class="ti ti-coin"></i><span>Collected</span><strong>5.2M</strong></div>
+          </div>
+          <div class="lp-preview-body">
+            <div class="lp-preview-panel">
+              <h3>Candidate progress</h3>
+              <div class="lp-progress-line"><span>Offer</span><div class="lp-line-track"><div class="lp-line-fill" style="width:74%"></div></div><strong>24</strong></div>
+              <div class="lp-progress-line"><span>MOL</span><div class="lp-line-track"><div class="lp-line-fill blue" style="width:58%"></div></div><strong>18</strong></div>
+              <div class="lp-progress-line"><span>Visa</span><div class="lp-line-track"><div class="lp-line-fill gold" style="width:46%"></div></div><strong>12</strong></div>
+              <div class="lp-progress-line"><span>Finance</span><div class="lp-line-track"><div class="lp-line-fill green" style="width:82%"></div></div><strong>41</strong></div>
+            </div>
+            <div class="lp-preview-panel">
+              <h3>Reports</h3>
+              <div class="lp-report-wave">
+                <svg viewBox="0 0 160 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 70C18 24 34 40 48 58C64 78 75 34 91 42C108 50 111 75 128 36C142 4 151 26 157 20" stroke="#5347CE" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M3 70C18 24 34 40 48 58C64 78 75 34 91 42C108 50 111 75 128 36C142 4 151 26 157 20V90H3V70Z" fill="url(#drecoReportFade)"/>
+                  <defs><linearGradient id="drecoReportFade" x1="80" y1="18" x2="80" y2="90"><stop stop-color="#5347CE" stop-opacity=".22"/><stop offset="1" stop-color="#5347CE" stop-opacity="0"/></linearGradient></defs>
+                </svg>
+                <div class="lp-report-gain">+24%</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="lp-illustration">
           <div class="lp-orbit one"></div>
           <div class="lp-orbit two"></div>
@@ -1607,10 +1665,13 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
         </div>
       </div>
 
-      <div class="lp-metrics">
-        <div class="lp-metric"><span>Candidates</span><strong>135</strong></div>
-        <div class="lp-metric accent"><span>Travelled</span><strong>77</strong></div>
-        <div class="lp-metric"><span>Collected</span><strong>KES 5.2M</strong></div>
+      <div class="lp-testimonial">
+        <div class="lp-quote-mark">“</div>
+        <div class="lp-testimonial-text">Dreco keeps our recruitment work organized, from candidate progress to finance tracking and reports.</div>
+        <div class="lp-testimonial-person">
+          <strong>John Fred</strong>
+          <span>Manager<br>Destiny Recruit Consults</span>
+        </div>
       </div>
     </div>
   </div>
