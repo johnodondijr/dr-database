@@ -2167,6 +2167,68 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   text-shadow:0 2px 18px rgba(255,255,255,.18), 0 0 28px rgba(136,124,253,.42)!important;
   font-weight:800!important;
 }
+/* Login panel logo placement */
+#login-screen .lp-brand-tag{
+  position:absolute!important;
+  top:56px!important;
+  left:72px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:11px!important;
+  z-index:5!important;
+}
+#login-screen .lp-logo-mark{
+  width:36px!important;
+  height:36px!important;
+  border-radius:10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:linear-gradient(135deg,#5347CE 0%,#887CFD 100%)!important;
+  box-shadow:0 10px 22px rgba(83,71,206,.18)!important;
+  flex:0 0 auto!important;
+}
+#login-screen .lp-logo-mark svg{
+  width:21px!important;
+  height:21px!important;
+}
+#login-screen .lp-logo-mark svg path{
+  fill:#fff!important;
+}
+#login-screen .lp-logo-mark svg path:nth-child(2){opacity:.68!important}
+#login-screen .lp-logo-mark svg path:nth-child(3){opacity:.38!important}
+#login-screen .lp-logo-mark svg path:nth-child(4){opacity:.48!important}
+#login-screen .lp-brand-name{
+  color:#5347CE!important;
+  font-family:var(--font-heading)!important;
+  font-size:21px!important;
+  line-height:1!important;
+  font-weight:820!important;
+  letter-spacing:-.025em!important;
+}
+@media(min-width:1101px) and (max-height:800px){
+  #login-screen .lp-brand-tag{top:40px!important}
+}
+@media(max-width:1100px){
+  #login-screen .lp-brand-tag{position:relative!important;top:auto!important;left:auto!important;margin:0 auto 28px!important;max-width:400px!important;width:100%!important}
+}
+@media(max-width:560px){
+  #login-screen .lp-brand-tag{margin-bottom:22px!important}
+}
+/* Signup back-link spacing match */
+#login-screen #signup-section .auth-back-link{
+  margin-top:28px!important;
+}
+@media(min-width:1101px) and (max-height:800px){
+  #login-screen #signup-section .auth-back-link{
+    margin-top:26px!important;
+  }
+}
+@media(max-width:560px){
+  #login-screen #signup-section .auth-back-link{
+    margin-top:24px!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -2181,6 +2243,17 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 <div id="login-screen">
   <div class="lp-window">
     <div class="lp-form-panel">
+      <div class="lp-brand-tag" aria-label="Dreco">
+        <div class="lp-logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M3 6C3 4.34315 4.34315 3 6 3H10C11.6569 3 13 4.34315 13 6V10C13 11.6569 11.6569 13 10 13H6C4.34315 13 3 11.6569 3 10V6Z" fill="#18191B"/>
+            <path d="M14 14C14 12.8954 14.8954 12 16 12H20C21.1046 12 22 12.8954 22 14V20C22 21.1046 21.1046 22 20 22H16C14.8954 22 14 21.1046 14 20V14Z" fill="#18191B" opacity=".55"/>
+            <path d="M3 17C3 15.8954 3.89543 15 5 15H8C9.10457 15 10 15.8954 10 17V19C10 20.1046 9.10457 21 8 21H5C3.89543 21 3 20.1046 3 19V17Z" fill="#18191B" opacity=".3"/>
+            <path d="M16 3H20C21.1046 3 22 3.89543 22 5V8C22 9.10457 21.1046 10 20 10H16C14.8954 10 14 9.10457 14 8V5C14 3.89543 14.8954 3 16 3Z" fill="white" opacity=".4"/>
+          </svg>
+        </div>
+        <span class="lp-brand-name">Dreco</span>
+      </div>
       <div class="lp-content-area">
         <div id="login-main">
           <div class="lp-header">
@@ -2198,7 +2271,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
               <label for="username-input">Username</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-mail lp-input-icon"></i>
-                <input type="text" id="username-input" placeholder="you@yourcompany.com" required autocomplete="username" autocapitalize="none" spellcheck="false">
+                <input type="text" id="username-input" placeholder="Enter your username" required autocomplete="username" autocapitalize="none" spellcheck="false">
               </div>
             </div>
             <div class="lp-input-group">
