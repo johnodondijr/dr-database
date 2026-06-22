@@ -1900,6 +1900,56 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   #login-screen .lp-product-preview{height:292px!important}
   #login-screen .lp-money-panel,#login-screen .lp-activity-panel{height:158px!important}
 }
+/* Viewport-height collision fix for login reference layout */
+#login-screen .lp-window{height:min(980px,calc(100vh - 44px))!important;min-height:0!important}
+#login-screen .lp-form-panel{overflow:hidden!important}
+#login-screen .lp-media{overflow:hidden!important}
+#login-screen .lp-feature-grid{position:relative!important;z-index:4!important}
+#login-screen .lp-product-preview{z-index:2!important}
+#login-screen .lp-feature:nth-child(5){position:relative!important;z-index:5!important}
+@media(min-width:1101px) and (max-height:930px){
+  #login-screen .lp-window{height:calc(100vh - 12px)!important}
+  #login-screen .lp-content-area{margin-top:118px!important}
+  #login-screen .lp-media{padding-top:110px!important}
+  #login-screen .lp-feature-grid{row-gap:26px!important;margin-top:24px!important}
+  #login-screen .lp-feature{grid-template-columns:56px 1fr!important;gap:14px!important}
+  #login-screen .lp-feature-icon{width:56px!important;height:56px!important}
+  #login-screen .lp-feature-icon i{font-size:30px!important}
+  #login-screen .lp-feature strong{font-size:15px!important;margin-bottom:5px!important}
+  #login-screen .lp-feature span{font-size:13px!important;line-height:1.36!important}
+  #login-screen .lp-product-preview{height:278px!important;bottom:0!important}
+  #login-screen .lp-preview-sidebar{padding-top:18px!important;gap:15px!important}
+  #login-screen .lp-preview-sidebar span{height:34px!important}
+  #login-screen .lp-preview-card{padding:22px 26px!important}
+  #login-screen .lp-preview-title{margin-bottom:16px!important}
+  #login-screen .lp-flow-card{height:49px!important;padding:9px 14px!important}
+  #login-screen .lp-flow-row{margin-bottom:15px!important}
+  #login-screen .lp-money-panel,#login-screen .lp-activity-panel{height:145px!important;padding:14px!important}
+  #login-screen .lp-money-panel h3,#login-screen .lp-activity-panel h3{margin-bottom:14px!important}
+  #login-screen .lp-donut{width:68px!important;height:68px!important;top:52px!important;right:44px!important}
+  #login-screen .lp-donut::after{inset:21px!important}
+  #login-screen .lp-activity-panel{gap:8px!important}
+}
+@media(min-width:1101px) and (max-height:820px){
+  #login-screen .lp-content-area{margin-top:74px!important}
+  #login-screen .lp-header{margin-bottom:28px!important}
+  #login-screen .lp-auth-tabs{margin-bottom:28px!important}
+  #login-screen .lp-input-group{margin-bottom:18px!important}
+  #login-screen .lp-divider{margin:28px 0 22px!important}
+  #login-screen .lp-signup-cta{margin-top:22px!important}
+  #login-screen .lp-footer-note{bottom:22px!important}
+  #login-screen .lp-media{padding-top:76px!important}
+  #login-screen .lp-media-copy h2{font-size:36px!important}
+  #login-screen .lp-media-copy p{font-size:14px!important;max-width:475px!important}
+  #login-screen .lp-feature-grid{row-gap:18px!important;margin-top:20px!important}
+  #login-screen .lp-product-preview{height:244px!important}
+}
+@media(max-width:900px){
+  #login-screen{padding:0!important;align-items:flex-start!important}
+  #login-screen .lp-window{height:auto!important;min-height:100vh!important;display:block!important;border-radius:0!important}
+  #login-screen .lp-form-panel{overflow-y:auto!important;min-height:100vh!important}
+  #login-screen .lp-media{display:none!important}
+}
   </style>
 </head>
 <body>
@@ -2680,6 +2730,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
