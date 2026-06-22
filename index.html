@@ -2713,6 +2713,71 @@ tbody tr:hover td{
   .modal-body{padding:16px!important}
   .form-grid{grid-template-columns:1fr!important}
 }
+
+/* Seven-point inside app upgrade: command-center structure */
+.topbar-workspace{
+  height:38px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  padding:0 14px!important;
+  border:1px solid #E3E7F3!important;
+  border-radius:11px!important;
+  background:linear-gradient(135deg,#F6F4FF,#EEF6FF)!important;
+  color:#111827!important;
+  font-size:12px!important;
+  font-weight:760!important;
+  cursor:pointer!important;
+  box-shadow:0 8px 20px rgba(83,71,206,.07)!important;
+}
+.topbar-workspace i{color:#5347CE!important;font-size:16px!important}
+.p-card.card-cyan,.card-cyan{--card-accent:#16C8C7;background:linear-gradient(145deg,#EAFBFB 0%,#DDF8F8 100%)!important;border-color:#BDEEEE!important;color:var(--dreco-ink)!important}
+.topbar-workspace:hover{border-color:#CFCBFF!important;box-shadow:0 12px 28px rgba(83,71,206,.12)!important}
+.dashboard-command-grid{display:grid;grid-template-columns:minmax(0,1fr) 318px;gap:18px;align-items:start}
+.dashboard-main-col{min-width:0;display:flex;flex-direction:column;gap:16px}
+.dashboard-side-col{min-width:0;display:flex!important;flex-direction:column;gap:14px}
+.pipeline-flow-card,.dashboard-work-grid>.dash-card,.dashboard-analytics-grid>.dash-card{
+  border:1px solid var(--dreco-line)!important;
+  border-radius:18px!important;
+  background:#fff!important;
+  box-shadow:var(--dreco-shadow-sm)!important;
+}
+.pipeline-flow-card{padding:20px!important;overflow:hidden!important}
+.flow-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+.flow-title{font-size:15px;font-weight:820;color:var(--dreco-ink)}
+.flow-sub{font-size:12px;color:#667085;margin-top:4px}
+.flow-total{display:inline-flex;align-items:center;gap:7px;border-radius:999px;background:#F0EEFF;color:#5347CE;padding:8px 11px;font-size:12px;font-weight:800;white-space:nowrap}
+.flow-stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;position:relative}
+.flow-stage{position:relative;border:1px solid #E4E8F2;border-radius:14px;background:linear-gradient(145deg,#FFFFFF,#F8FAFF);padding:14px 13px;min-height:86px;overflow:hidden}
+.flow-stage::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stage-color,#5347CE)}
+.flow-stage-name{font-size:11px;font-weight:760;color:#667085;line-height:1.25;min-height:28px}
+.flow-stage-count{font-size:26px;font-weight:860;color:#111827;margin-top:6px;line-height:1}
+.flow-stage-share{font-size:11px;color:#8A93A6;margin-top:6px}
+.flow-progress{height:4px;border-radius:999px;background:#EDF0F7;margin-top:18px;overflow:hidden;display:flex}
+.flow-progress span{display:block;height:100%;background:var(--stage-color,#5347CE)}
+.dashboard-analytics-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:16px}
+.chart-card{padding:18px!important;min-height:260px!important}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.chart-title{font-size:14px;font-weight:820;color:var(--dreco-ink)}
+.chart-filter{font-size:11px;color:#667085;border:1px solid #E4E8F2;border-radius:9px;padding:7px 10px;background:#fff}
+.trend-chart{height:172px;display:grid;grid-template-columns:repeat(6,1fr);align-items:end;gap:14px;border-bottom:1px solid #E9EDF6;padding:0 8px 10px}
+.trend-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.trend-bar{width:100%;max-width:42px;border-radius:10px 10px 3px 3px;background:linear-gradient(180deg,#5347CE,#4896FE);box-shadow:0 10px 22px rgba(83,71,206,.18)}
+.trend-label{font-size:10px;color:#8A93A6}
+.stage-donut-wrap{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center}
+.stage-donut{width:150px;height:150px;border-radius:50%;background:conic-gradient(#5347CE 0 25%,#4896FE 25% 50%,#16C8C7 50% 75%,#887CFD 75% 100%);position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+.stage-donut::after{content:attr(data-total);position:absolute;inset:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:#111827;font-weight:860;font-size:30px;box-shadow:0 0 0 1px #EEF1F7}
+.stage-legend{display:flex;flex-direction:column;gap:10px}
+.stage-legend-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:#667085}
+.stage-legend-left{display:inline-flex;align-items:center;gap:8px;min-width:0}.stage-dot{width:8px;height:8px;border-radius:50%;background:var(--stage-color)}
+.dashboard-work-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.72fr);gap:16px}
+#dash-cards-grid{padding:18px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+#dash-cards-grid .dash-card{box-shadow:none!important;border-radius:14px!important;background:#F8FAFD!important;padding:15px!important}
+.task-card{padding:18px!important}.task-list{display:flex;flex-direction:column;gap:10px}.task-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:12px;border:1px solid #EEF1F7;border-radius:13px;background:#F8FAFD}.task-check{width:18px;height:18px;border-radius:6px;border:1px solid #CBD5E1;background:#fff}.task-title{font-size:12px;font-weight:760;color:#111827}.task-meta{font-size:11px;color:#7B8496;margin-top:3px}.task-tag{font-size:10px;font-weight:760;border-radius:999px;padding:5px 8px;background:#F0EEFF;color:#5347CE;white-space:nowrap}
+.financial-card{background:linear-gradient(145deg,#5347CE,#4132D7)!important;color:#fff!important;border-color:transparent!important;padding:18px!important;border-radius:18px!important;box-shadow:0 18px 42px rgba(83,71,206,.22)!important}.financial-card *{color:inherit!important}.financial-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.financial-title{font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:820;opacity:.9}.financial-period{font-size:11px;padding:6px 9px;border:1px solid rgba(255,255,255,.2);border-radius:9px;background:rgba(255,255,255,.08)}.financial-section{padding-top:14px;border-top:1px solid rgba(255,255,255,.17);margin-top:14px}.financial-label{font-size:12px;opacity:.82}.financial-amount{font-size:27px;font-weight:860;margin:7px 0 11px}.financial-row{display:flex;justify-content:space-between;font-size:12px;margin-top:8px;gap:10px}.financial-report-btn{width:100%;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;padding:0 12px;margin-top:16px;font-weight:760;cursor:pointer}
+.upcoming-card,.quick-card{padding:17px!important;border-radius:18px!important;background:#fff!important;border:1px solid var(--dreco-line)!important;box-shadow:var(--dreco-shadow-sm)!important}.side-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.side-card-title{font-size:14px;font-weight:820;color:var(--dreco-ink)}.side-link{border:0;background:transparent;color:#5347CE;font-size:11px;font-weight:760;cursor:pointer}.travel-item{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #EEF1F7}.travel-item:first-of-type{border-top:0}.travel-icon{width:38px;height:38px;border-radius:12px;background:#F0EEFF;color:#5347CE;display:flex;align-items:center;justify-content:center}.travel-name{font-size:12px;font-weight:760;color:#111827}.travel-meta{font-size:11px;color:#7B8496;margin-top:2px}.travel-date{font-size:11px;font-weight:760;color:#5347CE;background:#F0EEFF;border-radius:999px;padding:6px 8px;white-space:nowrap}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick-action{min-height:74px;border:1px solid #E4E8F2;border-radius:14px;background:#F8FAFD;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:12px;color:#111827;font-size:12px;font-weight:760;cursor:pointer}.quick-action i{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#F0EEFF;color:#5347CE;font-size:17px}.quick-action:nth-child(2) i{background:#EAF2FF;color:#4896FE}.quick-action:nth-child(3) i{background:#EAFBFB;color:#16C8C7}.quick-action:nth-child(4) i{background:#FFF1F8;color:#D9488B}
+@media(max-width:1180px){.dashboard-command-grid{grid-template-columns:1fr}.dashboard-side-col{display:grid!important;grid-template-columns:repeat(3,minmax(260px,1fr));overflow-x:auto}.topbar-workspace span{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flow-stages{grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;padding-bottom:4px}.pipeline-flow-card{overflow-x:auto!important}}
+@media(max-width:760px){.topbar-workspace{display:none!important}.dashboard-command-grid,.dashboard-analytics-grid,.dashboard-work-grid{grid-template-columns:1fr!important}.dashboard-side-col{display:flex!important;overflow:visible}.flow-stages{display:flex;overflow-x:auto}.flow-stage{min-width:150px}.stage-donut-wrap{grid-template-columns:1fr;justify-items:center}.quick-grid{grid-template-columns:1fr 1fr}.trend-chart{gap:8px}.chart-card{min-height:auto!important}#dash-cards-grid{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -2929,7 +2994,7 @@ tbody tr:hover td{
       </div>
       <div class="sidebar-divider"></div>
 
-      <div class="nav-section-label">Main</div>
+      <div class="nav-section-label">General</div>
       <a class="nav-item active" id="nav-dash" data-title="Dashboard" onclick="switchTab('dash')">
         <i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span>
       </a>
@@ -2941,13 +3006,15 @@ tbody tr:hover td{
       </a>
 
       <div class="sidebar-divider" style="margin-top:4px"></div>
-      <div class="nav-section-label">Views</div>
+      <div class="nav-section-label">Pipeline</div>
       <a class="nav-item" id="nav-kanban" data-title="Kanban Board" onclick="switchTab('kanban')">
         <i class="ti ti-layout-columns"></i><span class="nav-item-label">Kanban Board</span>
       </a>
       <a class="nav-item" id="nav-calendar" data-title="Calendar" onclick="switchTab('calendar')">
         <i class="ti ti-calendar"></i><span class="nav-item-label">Calendar</span>
       </a>
+      <div class="sidebar-divider" style="margin-top:4px"></div>
+      <div class="nav-section-label">Finance</div>
       <a class="nav-item" id="nav-reports" data-title="Reports" onclick="switchTab('reports')">
         <i class="ti ti-chart-bar"></i><span class="nav-item-label">Reports</span>
       </a>
@@ -2956,6 +3023,7 @@ tbody tr:hover td{
 
       <!-- SIDEBAR BOTTOM UTILITIES -->
       <div class="sidebar-divider"></div>
+      <div class="nav-section-label">Team & Settings</div>
       <a class="nav-item" id="nav-settings" data-title="Settings" onclick="openSettings()">
         <i class="ti ti-settings"></i><span class="nav-item-label">Settings</span>
       </a>
@@ -2976,6 +3044,11 @@ tbody tr:hover td{
       <!-- TOPBAR -->
       <div class="topbar">
         <span class="topbar-title" id="topbar-title">Dashboard</span>
+        <button class="topbar-workspace" type="button" onclick="openSettings()" title="Workspace settings">
+          <i class="ti ti-building-skyscraper"></i>
+          <span id="topbar-workspace-name">Destiny Recruitment Consults</span>
+          <i class="ti ti-chevron-down"></i>
+        </button>
         <div class="topbar-search">
           <i class="ti ti-search"></i>
           <input type="text" placeholder="Search candidates..." id="global-search" oninput="onGlobalSearch()">
@@ -3064,15 +3137,24 @@ tbody tr:hover td{
             </div>
             <div class="wb-right" id="wb-stats"></div>
           </div>
+          <div class="dashboard-command-grid">
+            <div class="dashboard-main-col">
+              <div class="section-eyebrow">Command center</div>
+              <div class="pipeline-cards" id="dash-pipeline-cards"></div>
 
-          <div class="section-eyebrow">Pipeline overview</div>
-          <div class="pipeline-cards" id="dash-pipeline-cards"></div>
+              <div class="pipeline-flow-card" id="dash-pipeline-flow"></div>
 
-          <div class="split-65-35">
-            <div>
-              <div class="dash-2col" id="dash-cards-grid"></div>
+              <div class="dashboard-analytics-grid">
+                <div class="dash-card chart-card" id="dash-trend-card"></div>
+                <div class="dash-card chart-card" id="dash-stage-card"></div>
+              </div>
+
+              <div class="dashboard-work-grid">
+                <div class="dash-card" id="dash-cards-grid"></div>
+                <div class="dash-card task-card" id="dash-task-card"></div>
+              </div>
             </div>
-            <div class="right-col" id="dash-right-col"></div>
+            <div class="right-col dashboard-side-col" id="dash-right-col"></div>
           </div>
         </div>
 
