@@ -1875,6 +1875,31 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   #login-screen .lp-feature span{font-size:13px!important;line-height:1.42!important}
   #login-screen .lp-product-preview{height:317px!important}
 }
+/* Bottom-left and right-card correction */
+#login-screen .lp-form-panel{padding-bottom:0!important}
+#login-screen .lp-content-area{margin-top:119px!important}
+#login-screen .lp-signup-cta{margin-top:50px!important;z-index:3!important}
+#login-screen .lp-footer-note{position:absolute!important;left:100px!important;right:82px!important;bottom:42px!important;z-index:1!important;justify-content:flex-start!important}
+#login-screen .lp-media{padding-top:118px!important}
+#login-screen .lp-feature-grid{row-gap:30px!important;margin-top:28px!important}
+#login-screen .lp-feature:nth-child(5){grid-column:1 / 2!important;margin-top:0!important}
+#login-screen .lp-product-preview{bottom:0!important;height:300px!important;left:66px!important;right:60px!important}
+#login-screen .lp-preview-card{padding:24px 26px!important}
+#login-screen .lp-flow-row{margin-bottom:17px!important}
+#login-screen .lp-flow-card{height:52px!important;padding:10px 15px!important}
+#login-screen .lp-preview-panels{gap:14px!important}
+#login-screen .lp-money-panel,#login-screen .lp-activity-panel{height:165px!important;padding:16px!important}
+#login-screen .lp-donut{width:76px!important;height:76px!important;top:56px!important;right:44px!important}
+#login-screen .lp-donut::after{inset:23px!important}
+@media(max-height:900px) and (min-width:1101px){
+  #login-screen .lp-content-area{margin-top:112px!important}
+  #login-screen .lp-signup-cta{margin-top:36px!important}
+  #login-screen .lp-footer-note{bottom:36px!important}
+  #login-screen .lp-media{padding-top:112px!important}
+  #login-screen .lp-feature-grid{row-gap:24px!important;margin-top:25px!important}
+  #login-screen .lp-product-preview{height:292px!important}
+  #login-screen .lp-money-panel,#login-screen .lp-activity-panel{height:158px!important}
+}
   </style>
 </head>
 <body>
@@ -1903,7 +1928,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 
           <form onsubmit="event.preventDefault(); doLogin();">
             <div class="lp-input-group">
-              <label for="username-input">Email address</label>
+              <label for="username-input">Username</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-mail lp-input-icon"></i>
                 <input type="text" id="username-input" placeholder="you@yourcompany.com" required autocomplete="username" autocapitalize="none" spellcheck="false">
@@ -2655,6 +2680,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
