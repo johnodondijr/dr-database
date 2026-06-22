@@ -1697,16 +1697,16 @@ function renderDash(){
     <div class="ref-dashboard">
       <div class="ref-dashboard-head">
         <div><h1>Good afternoon, ${escHTML(firstName)} <span>👋</span></h1><p>Here's what's happening in your workspace today.</p></div>
-        <button class="ref-date-btn"><i class="ti ti-calendar"></i><span>May 12 - May 18, 2025</span><i class="ti ti-chevron-down"></i></button>
+        <button class="ref-date-btn" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i><span>Open calendar</span><i class="ti ti-chevron-right"></i></button>
       </div>
 
       <div class="ref-board-grid">
         <div class="ref-main-column">
           <div class="ref-kpi-row">
-            ${renderRefKpi('Total Candidates',totalCandidates,'12%','ti-clipboard-list','#EFEAFF')}
-            ${renderRefKpi('In Process',totalInProcess,'8%','ti-briefcase','#EAF2FF')}
-            ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF')}
-            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide')}
+            ${renderRefKpi('Total Candidates',totalCandidates,'12%','ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
+            ${renderRefKpi('In Process',totalInProcess,'8%','ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
+            ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF','','openTravelledView()')}
+            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
           </div>
 
           <section class="ref-card ref-pipeline-overview">
@@ -1761,12 +1761,12 @@ function renderDash(){
             <div class="ref-fin-block"><p>General Jobs</p><h2>${moneyUSD(lbFees)}</h2><div><span>Collected</span><strong>${moneyUSD(lbPaid)}</strong></div><div><span>Outstanding</span><strong>${moneyUSD(lbOwed-lbPaid)}</strong></div><div><span>Open Balances</span><strong>${lbIncomplete}</strong></div></div>
             <button class="ref-fin-report" onclick="switchTab('reports')"><i class="ti ti-report-money"></i>View Financial Report<i class="ti ti-chevron-right"></i></button>
           </section>
-          <section class="ref-card ref-upcoming"><div class="ref-card-head"><div class="ref-card-title">Upcoming Travels</div><button onclick="switchTab('pro')">View All</button></div>${upcomingHTML}<div class="ref-total-link">Total ${pendingTravel.length} upcoming</div></section>
+          <section class="ref-card ref-upcoming"><div class="ref-card-head"><div class="ref-card-title">Upcoming Travels</div><button onclick="openPendingTravelView()">View All</button></div>${upcomingHTML}<button class="ref-total-link" onclick="openPendingTravelView()">Total ${pendingTravel.length} upcoming</button></section>
           <section class="ref-card ref-quick"><div class="ref-card-title">Quick Actions</div><div class="ref-quick-grid">
             <button onclick="openProForm()"><i class="ti ti-user-plus"></i>Add Candidate</button>
             <button onclick="openLBForm()"><i class="ti ti-calendar-plus"></i>Add Job</button>
-            <button onclick="switchTab('reports')"><i class="ti ti-report-money"></i>Record Payment</button>
-            <button onclick="openDocs('pro',proDB[0]?.id||0,'Document')"><i class="ti ti-file-upload"></i>Upload Document</button>
+            <button onclick="switchTab('reports')"><i class="ti ti-chart-bar"></i>View Reports</button>
+            <button onclick="openFirstDocumentUpload()"><i class="ti ti-file-upload"></i>Upload Document</button>
           </div></section>
         </aside>
       </div>
@@ -1774,8 +1774,30 @@ function renderDash(){
     </div>`;
 }
 
-function renderRefKpi(label,value,change,icon,bg,extra=''){
-  return `<div class="ref-kpi ${extra}"><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
+function openTravelledView(){
+  window.proStagePillFilter='TRAVELLED';
+  switchTab('pro');
+  if (typeof rebuildProPills === 'function') rebuildProPills();
+  if (typeof renderPro === 'function') renderPro();
+  if (typeof showToast === 'function') showToast('Showing travelled candidates','success');
+}
+function openPendingTravelView(){
+  window.proStagePillFilter='PENDING TRAVEL';
+  switchTab('pro');
+  if (typeof rebuildProPills === 'function') rebuildProPills();
+  if (typeof renderPro === 'function') renderPro();
+  if (typeof showToast === 'function') showToast('Showing candidates pending travel','success');
+}
+function openFirstDocumentUpload(){
+  const pro=proDB.find(Boolean);
+  if(pro){ openDocs('pro',pro.id,pro.name||'Candidate'); return; }
+  const lb=lbDB.find(Boolean);
+  if(lb){ openDocs('lb',lb.id,lb.name||'Candidate'); return; }
+  showToast('Add a candidate before uploading documents','error');
+}
+function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
+  const onclick=action?` onclick="${action}"`:'';
+  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
 }
 function renderRefTask(title,meta,due){
   return `<div class="ref-task"><span></span><div><strong>${escHTML(title)}</strong><small>${escHTML(meta)}</small></div><em>${escHTML(due)}</em></div>`;
