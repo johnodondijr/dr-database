@@ -1,6 +1,6 @@
-// ══════════════════════════════════════════════════════════
-// SUPABASE CONFIG — replace with your project values
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// SUPABASE CONFIG â€” replace with your project values
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
 const HAS_SUPABASE_CONFIG =
@@ -32,9 +32,9 @@ const LEGACY_DESTINY_HASHES = {
   consolata: 'b0a93dc7415fc8bb713a780060bd8796aeacd1814fc712d49868ba25674e0643',
 };
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // STAFF ACCOUNTS
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const STAFF_ACCOUNTS = {
   johnfred: { passwordSalt: 'd66ed843dec2214091d4dcc1723179ef', passwordHash: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
 };
@@ -223,9 +223,9 @@ function safeSessionRemove(key) {
   try { sessionStorage.removeItem(key); } catch { /* ignore */ }
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // STATE
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let currentUser   = null;
 let currentCompany = { ...DEFAULT_COMPANY };
 let proDB         = [];
@@ -426,25 +426,25 @@ function nextLocalId(rows) {
   return rows.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1;
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // LOADING
-// ══════════════════════════════════════════════════════════
-function showLoading(msg = 'Loading…') {
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+function showLoading(msg = 'Loadingâ€¦') {
   const el = document.getElementById('loading-text'); if (el) el.textContent = msg;
   document.getElementById('loading-overlay').classList.add('show');
 }
 function hideLoading() { document.getElementById('loading-overlay').classList.remove('show'); }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SIDEBAR TOGGLE
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('collapsed');
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // AUTH
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function togglePassword() {
   const inp = document.getElementById('pw-input');
   const btn = document.getElementById('pw-toggle');
@@ -516,6 +516,12 @@ function initLoginInteractions() {
     };
     requestAnimationFrame(render);
   });
+}
+function setAuthMode(mode = 'login') {
+  const screen = document.getElementById('login-screen');
+  if (!screen) return;
+  screen.classList.remove('auth-mode-login','auth-mode-signup','auth-mode-recovery');
+  screen.classList.add(`auth-mode-`);
 }
 function showForgotPassword() {
   document.getElementById('login-main').style.display='none';
@@ -717,9 +723,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   bindModalSummaries();
 });
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DATA LOADING
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 async function loadAllData() {
   if (!useCloud()) {
     appStorageMode='local';
@@ -735,7 +741,7 @@ async function loadAllData() {
     switchTab('dash');
     return;
   }
-  showLoading('Loading candidates…');
+  showLoading('Loading candidatesâ€¦');
   try {
     const companyId = getCompanyId();
     const proQuery = db.from('pro_candidates').select('*').order('id');
@@ -811,9 +817,9 @@ async function seedLBData() {
   if(data&&data.length) lbDB=data.map(normalizeLBRecord); else { console.warn('Seed insert failed',error); lbDB=JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord); }
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SAVE STATUS
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function setSaveStatus(s) {
   const dot=document.getElementById('save-dot');
   const lbl=document.getElementById('save-label');
@@ -822,9 +828,9 @@ function setSaveStatus(s) {
   lbl.textContent=s==='saving'?'Saving...':`${appStorageMode==='cloud'?'Cloud saved':'Local saved'} ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SUPABASE WRITES
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function useCloud() { return db && appStorageMode==='cloud'; }
 async function dbInsert(table, rec) {
   const ts={...rec, company_id:getCompanyId()}; delete ts.id;
@@ -913,9 +919,9 @@ async function saveStages(){
   catch(e){fallBackToLocal(e);setSaveStatus('saved');}
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // TIMELINE
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function addTimeline(type,id,action){
   const key=`${type}_${id}`;
   if(!allTimelines[key]) allTimelines[key]=[];
@@ -933,9 +939,9 @@ function renderTimelineHTML(type,id){
   }).join('');
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // HELPERS
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function xlToISO(n){ if(!n||isNaN(n)) return ''; return new Date(EXCEL_EPOCH.getTime()+n*86400000).toISOString().split('T')[0]; }
 function escHTML(v){
   return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -977,9 +983,9 @@ function ppBadge(s){
   return `<span class="badge ${map[s]||'b-na'}">${s ? escHTML(s) : '&mdash;'}</span>`;
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // TABS + MODALS
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function switchTab(t){
   ['dash','pro','lb','kanban','calendar','reports'].forEach(x=>{
     const nav=document.getElementById('nav-'+x); if(nav) nav.classList.toggle('active',x===t);
@@ -1018,11 +1024,11 @@ function renderKanban(){
     const items=rows.filter(r=>(kanbanSource==='pro'?r.stage:(r.travelStatus||r.travel_status))===stage);
     const cards=items.length?items.map(r=>{
       const meta=kanbanSource==='pro'
-        ? `${r.position||'No position'} · ${r.company||'No company'}`
-        : `${r.ppStatus||r.pp_status||'Passport'} · ${getRefundStatus(r)}`;
+        ? `${r.position||'No position'} Â· ${r.company||'No company'}`
+        : `${r.ppStatus||r.pp_status||'Passport'} Â· ${getRefundStatus(r)}`;
       const footer=kanbanSource==='pro'
-        ? `<span class="kanban-card-country">${r.country||'—'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
-        : `<span class="kanban-card-country">${r.phone||'—'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.toRefund||r.to_refund)||0)}</span>`;
+        ? `<span class="kanban-card-country">${r.country||'â€”'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
+        : `<span class="kanban-card-country">${r.phone||'â€”'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.toRefund||r.to_refund)||0)}</span>`;
       return `<div class="kanban-card" onclick="${kanbanSource==='pro'?'editPro':'editLB'}(${r.id})">
         <div class="kanban-card-name">${r.name}</div>
         <div class="kanban-card-meta"><i class="ti ti-id"></i>${meta}</div>
@@ -1096,8 +1102,8 @@ function renderReports(){
   const stalledStages=proStages.map(stage=>({stage,count:proDB.filter(r=>r.stage===stage).length})).sort((a,b)=>b.count-a.count)[0];
   const money=n=>'KES '+Number(n||0).toLocaleString();
   const short=s=>{
-    const v=String(s||'—').replace(/^PENDING\s+/,'').trim();
-    return v.length>11?v.slice(0,10)+'…':v;
+    const v=String(s||'â€”').replace(/^PENDING\s+/,'').trim();
+    return v.length>11?v.slice(0,10)+'â€¦':v;
   };
   const palette=['#5347CE','#887CFD','#4896FE','#16C8C7','#DDEBFF','#EFEEFF','#E8FAF7','#F8FAFC'];
   const chartBars=(items,max,colorFn)=>items.map((item,i)=>{
@@ -1174,7 +1180,7 @@ function renderReports(){
       <div class="report-card-title"><i class="ti ti-briefcase"></i>Position Breakdown</div>
       <div class="report-subtitle">Top positions by candidate volume</div>
       <div class="report-chart">${chartBars(positionChart.length?positionChart:[{label:'No data',value:0,color:'#ECEDE6'}],maxPosition,(item)=>item.color)}</div>
-      <div class="report-note">${positionStats.slice(0,5).map(r=>`${r.position}: ${r.total}`).join(' · ')||'No position records yet'}</div>
+      <div class="report-note">${positionStats.slice(0,5).map(r=>`${r.position}: ${r.total}`).join(' Â· ')||'No position records yet'}</div>
     </div>
     <div class="report-card">
       <div class="report-card-title"><i class="ti ti-trending-up"></i>Monthly Trend</div>
@@ -1189,7 +1195,7 @@ function renderReports(){
         <div class="rev-cell"><div class="rev-cell-val amber">${money(totalComm-totalPaid)}</div><div class="rev-cell-label">Outstanding</div></div>
         <div class="rev-cell"><div class="rev-cell-val">${conversion}%</div><div class="rev-cell-label">Conversion Rate</div></div>
       </div>
-      <div class="report-note">${lbTravelled} General Jobs travelled · ${refundOpen} open balances</div>
+      <div class="report-note">${lbTravelled} General Jobs travelled Â· ${refundOpen} open balances</div>
     </div>
     <div class="report-card report-wide">
       <div class="report-card-title"><i class="ti ti-table"></i>Position-Wise Summary</div>
@@ -1480,7 +1486,7 @@ function validateLBRecord(rec) {
 function recordChanges(before={},after={},fields=[]) {
   return fields
     .filter(([key])=>String(before[key]??'')!==String(after[key]??''))
-    .map(([key,label])=>`${label}: "${before[key]??'—'}" to "${after[key]??'—'}"`);
+    .map(([key,label])=>`${label}: "${before[key]??'â€”'}" to "${after[key]??'â€”'}"`);
 }
 function renderProSummary(r){
   const el=document.getElementById('pro-summary'); if(!el) return;
@@ -1497,8 +1503,8 @@ function renderProSummary(r){
     </div>
   </div>
   <div class="candidate-summary-kpis">
-    <div class="candidate-kpi"><strong>${isNew?'—':moneyKES(rec.commission)}</strong><span>Billed</span></div>
-    <div class="candidate-kpi"><strong>${isNew?'—':moneyKES(Math.max(0,bal))}</strong><span>Balance</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'â€”':moneyKES(rec.commission)}</strong><span>Billed</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'â€”':moneyKES(Math.max(0,bal))}</strong><span>Balance</span></div>
   </div>`;
 }
 function renderLBSummary(r){
@@ -1517,8 +1523,8 @@ function renderLBSummary(r){
     </div>
   </div>
   <div class="candidate-summary-kpis">
-    <div class="candidate-kpi"><strong>${isNew?'—':moneyUSD(owed)}</strong><span>To refund</span></div>
-    <div class="candidate-kpi"><strong>${isNew?'—':moneyUSD(Math.max(0,owed-paid))}</strong><span>Balance</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'â€”':moneyUSD(owed)}</strong><span>To refund</span></div>
+    <div class="candidate-kpi"><strong>${isNew?'â€”':moneyUSD(Math.max(0,owed-paid))}</strong><span>Balance</span></div>
   </div>`;
 }
 function readProFormSummary(){
@@ -1552,14 +1558,14 @@ function bindModalSummaries(){
   });
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // STAGES + PILLS
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function rebuildStageSelects(){
   const proSel=document.getElementById('pf-stage');
-  if(proSel) proSel.innerHTML=proStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new stage…</option>`;
+  if(proSel) proSel.innerHTML=proStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new stageâ€¦</option>`;
   const lbSel=document.getElementById('lf-travel');
-  if(lbSel)  lbSel.innerHTML=lbStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new status…</option>`;
+  if(lbSel)  lbSel.innerHTML=lbStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new statusâ€¦</option>`;
 }
 function rebuildProPills(){
   const wrap=document.getElementById('pro-stage-pills'); if(!wrap) return;
@@ -1592,10 +1598,10 @@ function handleStageSelectChange(type,selectEl){
   if(!name){ selectEl.value=previous; return; }
   if(type==='pro'){
     if(proStages.includes(name)) selectEl.value=name;
-    else{ proStages.splice(proStages.indexOf('TRAVELLED'),0,name); rebuildStageSelects(); selectEl.value=name; saveStages(); showToast(`"${name}" added ✓`,'success'); }
+    else{ proStages.splice(proStages.indexOf('TRAVELLED'),0,name); rebuildStageSelects(); selectEl.value=name; saveStages(); showToast(`"${name}" added âœ“`,'success'); }
   } else {
     if(lbStages.includes(name)) selectEl.value=name;
-    else{ lbStages.push(name); rebuildStageSelects(); selectEl.value=name; saveStages(); showToast(`"${name}" added ✓`,'success'); }
+    else{ lbStages.push(name); rebuildStageSelects(); selectEl.value=name; saveStages(); showToast(`"${name}" added âœ“`,'success'); }
   }
   selectEl.dataset.prev=selectEl.value;
 }
@@ -1609,7 +1615,7 @@ function addCustomStage(type){
     if(lbStages.includes(name)){ showToast('Already exists','error'); return; }
     lbStages.push(name);
   }
-  rebuildStageSelects(); rebuildProPills(); saveStages(); showToast(`"${name}" added ✓`,'success');
+  rebuildStageSelects(); rebuildProPills(); saveStages(); showToast(`"${name}" added âœ“`,'success');
 }
 
 // Global search
@@ -1622,9 +1628,9 @@ function onGlobalSearch(){
   else if(active&&active.id==='nav-lb') renderLB();
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DASHBOARD
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderDash(){
   // Pro numbers
   const proTravelled=proDB.filter(r=>r.stage==='TRAVELLED').length;
@@ -1665,7 +1671,7 @@ function renderDash(){
     <div class="wb-stat"><div class="wb-stat-val">${proInProcess+lbInProcess}</div><div class="wb-stat-label">In process</div></div>
     <div class="wb-stat"><div class="wb-stat-val">${proTravelled+lbTravelled}</div><div class="wb-stat-label">Travelled</div></div>`;
 
-  // Pipeline cards — 3 cards: pro in process, LB in process, commission snapshot
+  // Pipeline cards â€” 3 cards: pro in process, LB in process, commission snapshot
   const cardsEl=document.getElementById('dash-pipeline-cards');
   if(cardsEl) cardsEl.innerHTML=`
     <div class="p-card card-gold" onclick="switchTab('pro')">
@@ -1736,7 +1742,7 @@ function renderDash(){
   // Right column
   const pendingTravel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
   const travelItems=pendingTravel.length
-    ?pendingTravel.slice(0,5).map(r=>`<div class="due-item"><div><div class="due-name">${r.name}</div><div class="due-stage">${r.company||'—'} · ${r.position||'—'}</div></div><div class="due-date">Pending</div></div>`).join('')
+    ?pendingTravel.slice(0,5).map(r=>`<div class="due-item"><div><div class="due-name">${r.name}</div><div class="due-stage">${r.company||'â€”'} Â· ${r.position||'â€”'}</div></div><div class="due-date">Pending</div></div>`).join('')
     :'<div class="due-empty">No candidates pending travel</div>';
 
   const recentActivity=Object.entries(allTimelines)
@@ -1747,7 +1753,7 @@ function renderDash(){
         const d=new Date(item.ts);
         const ds=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
         const ts=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-        return `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-action">${item.action}</div><div class="tl-meta">${item.user} · ${ds} ${ts}</div></div></div>`;
+        return `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-action">${item.action}</div><div class="tl-meta">${item.user} Â· ${ds} ${ts}</div></div></div>`;
       }).join('')
     :'<div class="tl-empty">No recent activity</div>';
 
@@ -1776,9 +1782,9 @@ function renderDash(){
     </div>`;
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PROFESSIONAL
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function getFilteredPro(){
   const q=(document.getElementById('pro-search')?.value||'').toLowerCase();
   const stage=window.proStagePillFilter||'';
@@ -1865,7 +1871,7 @@ function openProForm(){
 function editPro(id){
   const r=proDB.find(x=>x.id==id); if(!r) return;
   editingProId=id;
-  document.getElementById('pro-modal-title').textContent='Edit — '+r.name;
+  document.getElementById('pro-modal-title').textContent='Edit â€” '+r.name;
   document.getElementById('pf-name').value=r.name; document.getElementById('pf-pp').value=r.pp||'';
   document.getElementById('pf-phone').value=r.phone||''; document.getElementById('pf-position').value=r.position||'';
   document.getElementById('pf-company').value=r.company||''; document.getElementById('pf-country').value=r.country||'';
@@ -1905,11 +1911,11 @@ async function savePro(){
     rec.id=editingProId; const i=proDB.findIndex(x=>x.id==editingProId); proDB[i]={...proDB[i],...rec};
     const changes=recordChanges(oldRec,rec,[['name','Name'],['pp','Passport'],['phone','Phone'],['position','Position'],['company','Company'],['country','Country'],['stage','Stage'],['commission','Commission'],['paid','Paid'],['travel','Travel date']]);
     addTimeline('pro',editingProId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
-    showToast('Candidate updated ✓','success');
+    showToast('Candidate updated âœ“','success');
   } else {
     rec.id=Date.now(); proDB.push(rec);
-    addTimeline('pro',rec.id,`Added — Stage: ${newStage}`);
-    showToast('Candidate added ✓','success');
+    addTimeline('pro',rec.id,`Added â€” Stage: ${newStage}`);
+    showToast('Candidate added âœ“','success');
   }
   closeModal('pro-modal'); renderPro(); renderDash(); await saveProRecord(rec);
 }
@@ -1919,9 +1925,9 @@ async function deletePro(id){
   proDB=proDB.filter(x=>x.id!=id); showToast('Deleted','success'); renderPro(); renderDash(); await deleteProRecord(id);
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // LB JOBS
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function getFilteredLB(){
   const q=(document.getElementById('lb-search')?.value||'').toLowerCase();
   const travel=window.lbTravelPillFilter||'';
@@ -2021,7 +2027,7 @@ function openLBForm(){
 function editLB(id){
   const r=lbDB.find(x=>x.id==id); if(!r) return;
   editingLbId=id;
-  document.getElementById('lb-modal-title').textContent='Edit — '+r.name;
+  document.getElementById('lb-modal-title').textContent='Edit â€” '+r.name;
   document.getElementById('lf-name').value=r.name; document.getElementById('lf-phone').value=r.phone||'';
   document.getElementById('lf-pp').value=r.ppStatus||r.pp_status||'APPLIED';
   const tvEl=document.getElementById('lf-travel'); if(tvEl){ tvEl.value=r.travelStatus||r.travel_status||'NOT YET'; tvEl.dataset.prev=tvEl.value; }
@@ -2066,11 +2072,11 @@ async function saveLB(){
     rec.id=editingLbId; const i=lbDB.findIndex(x=>x.id==editingLbId); lbDB[i]={...lbDB[i],...rec};
     const changes=recordChanges(oldRec,rec,[['name','Name'],['phone','Phone'],['ppStatus','Passport'],['travelStatus','Travel'],['travelDate','Travel date'],['toRefund','To refund'],['r1Amt','1st refund'],['r2Amt','2nd refund'],['notes','Notes']]);
     addTimeline('lb',editingLbId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
-    showToast('Candidate updated ✓','success');
+    showToast('Candidate updated âœ“','success');
   } else {
     rec.id=Date.now(); lbDB.push(rec);
-    addTimeline('lb',rec.id,`Added — ${ppStatus}, ${newTravel}`);
-    showToast('Candidate added ✓','success');
+    addTimeline('lb',rec.id,`Added â€” ${ppStatus}, ${newTravel}`);
+    showToast('Candidate added âœ“','success');
   }
   closeModal('lb-modal'); renderLB(); renderDash(); await saveLBRecord(rec);
 }
@@ -2080,13 +2086,13 @@ async function deleteLB(id){
   lbDB=lbDB.filter(x=>x.id!=id); showToast('Deleted','success'); renderLB(); renderDash(); await deleteLBRecord(id);
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DOCUMENTS
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function hasDocs(type,id){ const v=allDocs[`${type}_${id}`]; return typeof v==='string'&&v.trim().length>0; }
 function openDocs(type,id,name){
   docsTarget={type,id,name};
-  document.getElementById('docs-modal-title').textContent=`Documents — ${name}`;
+  document.getElementById('docs-modal-title').textContent=`Documents â€” ${name}`;
   let existing=allDocs[`${type}_${id}`]; if(typeof existing!=='string') existing='';
   const input=document.getElementById('docs-link-input');
   const openBtn=document.getElementById('docs-open-btn');
@@ -2102,14 +2108,14 @@ async function saveDocs(){
   const dbKey=`${type}_${id}`;
   allDocs[dbKey]=link;
   addTimeline(type,id,link?'Documents link updated':'Documents link removed');
-  closeModal('docs-modal'); showToast('Documents saved ✓','success');
+  closeModal('docs-modal'); showToast('Documents saved âœ“','success');
   if(type==='pro') renderPro(); else renderLB();
   await saveDocsToDB(dbKey,link);
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // EXPORT CSV
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function exportCSV(type){
   let headers,rows,filename;
   if(type==='pro'){
@@ -2135,12 +2141,12 @@ function exportCSV(type){
     href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),
     download:`${filename}_${new Date().toISOString().split('T')[0]}.csv`
   });
-  a.click(); showToast('Export downloaded ✓','success');
+  a.click(); showToast('Export downloaded âœ“','success');
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PAGINATION
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderPagination(elId,page,total,count,which){
   const el=document.getElementById(elId); if(!el) return;
   if(total<=1){ el.innerHTML=`<span>${count} record${count!==1?'s':''}</span><span></span>`; return; }
@@ -2148,7 +2154,7 @@ function renderPagination(elId,page,total,count,which){
   for(let p=1;p<=total;p++){
     if(p===1||p===total||Math.abs(p-page)<=1)
       btns+=`<button class="page-btn ${p===page?'active':''}" onclick="goPage('${which}',${p})">${p}</button>`;
-    else if(Math.abs(p-page)===2) btns+=`<span style="padding:4px 2px;color:var(--text-3);font-size:11px">…</span>`;
+    else if(Math.abs(p-page)===2) btns+=`<span style="padding:4px 2px;color:var(--text-3);font-size:11px">â€¦</span>`;
   }
   el.innerHTML=`<span>${count} record${count!==1?'s':''}</span><div class="page-btns">${btns}</div>`;
 }
@@ -2157,9 +2163,9 @@ function goPage(which,p){
   document.querySelector('.content-area')?.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // TOAST
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function showToast(msg,type=''){
   const t=document.getElementById('toast'); if(!t) return;
   const icon=type==='error'?'ti-alert-circle':'ti-circle-check';
@@ -2169,9 +2175,9 @@ function showToast(msg,type=''){
   setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PROFILE DROPDOWN
-// ══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function toggleProfileDropdown(e) {
   e.stopPropagation();
   const dd = document.getElementById('profile-dropdown');
@@ -2254,7 +2260,7 @@ async function saveProfileChanges() {
     changed = true;
   }
 
-  // ── Username change ──
+  // â”€â”€ Username change â”€â”€
   if (newUsername && newUsername !== currentUser.username) {
     if (!/^[a-z0-9._-]{3,32}$/.test(newUsername)) {
       showMsg('Use 3-32 letters, numbers, dots, dashes, or underscores for username.', 'err'); return;
@@ -2269,7 +2275,7 @@ async function saveProfileChanges() {
     changed = true;
   }
 
-  // ── Password change ──
+  // â”€â”€ Password change â”€â”€
   if (currentPw || newPw || confirmPw) {
     if (!currentPw) { showMsg('Enter your current password.', 'err'); return; }
     const account = STAFF_ACCOUNTS[currentUser.username];
@@ -2303,7 +2309,7 @@ async function saveProfileChanges() {
   setUserDisplay(currentUser.display, currentUser.role);
 }
 
-// ── Extended setUserDisplay to also fill profile dropdown ──
+// â”€â”€ Extended setUserDisplay to also fill profile dropdown â”€â”€
 const _baseSetUserDisplay = setUserDisplay;
 function setUserDisplay(display, role) {
   // original fields
@@ -2338,3 +2344,4 @@ function setUserDisplay(display, role) {
   if (sucOrg) sucOrg.textContent = getCompanyName();
   updateWorkspaceLabels();
 }
+
