@@ -1632,20 +1632,13 @@ function onGlobalSearch(){
 // DASHBOARD
 // **********************************************************
 function renderDash(){
-  // Pro numbers
   const proTravelled=proDB.filter(r=>r.stage==='TRAVELLED').length;
   const proInProcess=proDB.filter(isInProcessPro).length;
   let totalComm=0,totalPaid=0;
   proDB.forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
 
-  // General Jobs numbers
   const lbTravelled=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
   const lbInProcess=lbDB.filter(isInProcessLB).length;
-  const lbIncomplete=lbDB.filter(r=>{
-    const ts=r.travelStatus||r.travel_status;
-    if(ts!=='TRAVELLED') return false;
-    return getRefundStatus(r)==='incomplete';
-  }).length;
   let lbOwed=0,lbPaid=0,lbFees=0;
   lbDB.forEach(r=>{
     const ts=r.travelStatus||r.travel_status;
@@ -1658,205 +1651,134 @@ function renderDash(){
     }
   });
 
+  const lbIncomplete=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED'&&getRefundStatus(r)==='incomplete').length;
   const totalCandidates=proDB.length+lbDB.length;
   const totalInProcess=proInProcess+lbInProcess;
   const totalTravelled=proTravelled+lbTravelled;
   const companyName=typeof getCompanyName==='function' ? getCompanyName() : 'Destiny Recruitment Consults';
+  const firstName=currentUser?.display?.split(' ')[0] || 'John';
+
   const workspaceEl=document.getElementById('topbar-workspace-name');
   if(workspaceEl) workspaceEl.textContent=companyName;
 
-  // Welcome banner
-  const hour=new Date().getHours();
-  const greeting=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
-  const wbG=document.getElementById('wb-greeting');
-  if(wbG) wbG.textContent=`${greeting}, ${currentUser?currentUser.display.split(' ')[0]:'there'}`;
-  const wbS=document.getElementById('wb-stats');
-  if(wbS) wbS.innerHTML=`
-    <div class="wb-stat"><div class="wb-stat-val">${totalCandidates}</div><div class="wb-stat-label">Total candidates</div></div>
-    <div class="wb-stat"><div class="wb-stat-val">${totalInProcess}</div><div class="wb-stat-label">In process</div></div>
-    <div class="wb-stat"><div class="wb-stat-val">${totalTravelled}</div><div class="wb-stat-label">Travelled</div></div>`;
-
-  // KPI cards
-  const cardsEl=document.getElementById('dash-pipeline-cards');
-  if(cardsEl) cardsEl.innerHTML=`
-    <div class="p-card card-gold" onclick="switchTab('pro')">
-      <div class="p-card-label">Total candidates</div>
-      <div class="p-card-count">${totalCandidates}</div>
-      <div class="p-card-sub">Professional and General Jobs</div>
-      <i class="ti ti-users p-card-icon"></i>
-    </div>
-    <div class="p-card card-dark" onclick="switchTab('pro')">
-      <div class="p-card-label">In process</div>
-      <div class="p-card-count">${totalInProcess}</div>
-      <div class="p-card-sub">Active workflow items</div>
-      <i class="ti ti-briefcase p-card-icon"></i>
-    </div>
-    <div class="p-card card-slate" onclick="switchTab('reports')">
-      <div class="p-card-label">Travelled</div>
-      <div class="p-card-count">${totalTravelled}</div>
-      <div class="p-card-sub">Completed placements</div>
-      <i class="ti ti-plane-departure p-card-icon"></i>
-    </div>
-    <div class="p-card card-cyan" onclick="switchTab('reports')">
-      <div class="p-card-label">Professional collected</div>
-      <div class="p-card-count" style="font-size:20px">KES ${totalPaid.toLocaleString()}</div>
-      <div class="p-card-sub">of KES ${totalComm.toLocaleString()} billed</div>
-      <i class="ti ti-coin p-card-icon"></i>
-    </div>`;
-
-  const stageColors=['#5347CE','#887CFD','#4896FE','#16C8C7','#7DD3FC','#FF7A9C'];
-  const stageCounts=proStages.map((s,i)=>({name:s,count:proDB.filter(r=>r.stage===s).length,color:stageColors[i%stageColors.length]}));
-  const stageTotal=Math.max(1,proDB.length);
-  const flow=document.getElementById('dash-pipeline-flow');
-  if(flow) flow.innerHTML=`
-    <div class="flow-header">
-      <div><div class="flow-title">Pipeline overview</div><div class="flow-sub">Professional candidate movement from offer to travelled.</div></div>
-      <div class="flow-total"><i class="ti ti-route"></i>${proInProcess} in process</div>
-    </div>
-    <div class="flow-stages">
-      ${stageCounts.map(st=>`<div class="flow-stage" style="--stage-color:${st.color}">
-        <div class="flow-stage-name">${escHTML(titleCaseStage(st.name))}</div>
-        <div class="flow-stage-count">${st.count}</div>
-        <div class="flow-stage-share">${Math.round(st.count/stageTotal*100)}% of pipeline</div>
-      </div>`).join('')}
-    </div>
-    <div class="flow-progress">${stageCounts.map(st=>`<span style="--stage-color:${st.color};width:${Math.max(2,st.count/stageTotal*100)}%"></span>`).join('')}</div>`;
-
-  const trendData=[
-    {label:'Offer',value:stageCounts[0]?.count||0,color:'#5347CE'},
-    {label:'MOL',value:stageCounts[1]?.count||0,color:'#887CFD'},
-    {label:'Visa',value:stageCounts[2]?.count||0,color:'#4896FE'},
-    {label:'Travel',value:stageCounts[3]?.count||0,color:'#16C8C7'},
-    {label:'Done',value:proTravelled,color:'#0E9F6E'},
-    {label:'General',value:lbTravelled,color:'#7DD3FC'}
+  const stageColors=['#5A49F8','#3B82F6','#5DD6C4','#FB9A65','#DDE2EC'];
+  const stageData=[
+    {label:'Offer', value:proDB.filter(r=>r.stage==='PENDING OFFER LETTER').length, icon:'ti-file-description', color:stageColors[0]},
+    {label:'MOL', value:proDB.filter(r=>r.stage==='PENDING MOL').length, icon:'ti-building-bank', color:stageColors[1]},
+    {label:'Visa', value:proDB.filter(r=>r.stage==='PENDING VISA').length, icon:'ti-id-badge-2', color:stageColors[2]},
+    {label:'Finance', value:proDB.filter(r=>proBalance(r)>0).length, icon:'ti-wallet', color:stageColors[3]},
+    {label:'Travelled', value:proTravelled, icon:'ti-plane-departure', color:stageColors[4]}
   ];
-  const maxTrend=Math.max(...trendData.map(x=>x.value),1);
-  const trendCard=document.getElementById('dash-trend-card');
-  if(trendCard) trendCard.innerHTML=`
-    <div class="chart-head"><div class="chart-title">Pipeline trend</div><div class="chart-filter">Live totals</div></div>
-    <div class="trend-chart">
-      ${trendData.map(x=>`<div class="trend-bar-wrap"><div class="trend-bar" style="height:${Math.max(14,Math.round(x.value/maxTrend*150))}px;background:linear-gradient(180deg,${x.color},#3127B5)"></div><div class="trend-label">${x.label}</div></div>`).join('')}
-    </div>`;
+  const stageTotal=Math.max(stageData.reduce((sum,item)=>sum+item.value,0),1);
 
-  const stageCard=document.getElementById('dash-stage-card');
-  const donutStops=buildConic(stageCounts,stageTotal);
-  if(stageCard) stageCard.innerHTML=`
-    <div class="chart-head"><div class="chart-title">Stage breakdown</div><div class="chart-filter">Professional</div></div>
-    <div class="stage-donut-wrap">
-      <div class="stage-donut" data-total="${proInProcess}" style="background:${donutStops}"></div>
-      <div class="stage-legend">
-        ${stageCounts.map(st=>`<div class="stage-legend-row"><span class="stage-legend-left"><span class="stage-dot" style="--stage-color:${st.color}"></span>${escHTML(shortStage(st.name))}</span><strong>${st.count}</strong></div>`).join('')}
-      </div>
-    </div>`;
-
-  const maxS=Math.max(...stageCounts.map(s=>s.count),1);
-  const stageBreakdown=stageCounts.map(s=>`<div class="dash-row" style="flex-direction:column;align-items:stretch;gap:4px">
-    <div style="display:flex;justify-content:space-between"><span class="dash-row-label">${escHTML(shortStage(s.name))}</span><span class="dash-row-val">${s.count}</span></div>
-    <div class="dash-bar-wrap"><div class="dash-bar-fill" style="width:${Math.round(s.count/maxS*100)}%;background:${s.color}"></div></div>
-  </div>`).join('');
-
-  const lbComplete=lbDB.filter(r=>getRefundStatus(r)==='complete').length;
-  const lbReturned=lbDB.filter(r=>getRefundStatus(r)==='RETURNED').length;
-  const lbNA=lbDB.filter(r=>getRefundStatus(r)==='N/A').length;
-
-  const grid=document.getElementById('dash-cards-grid');
-  if(grid) grid.innerHTML=`
-    <div class="dash-card">
-      <h3>Professional Jobs</h3>
-      <div class="dash-row"><span class="dash-row-label">Total candidates</span><span class="dash-row-val">${proDB.length}</span></div>
-      <div class="dash-row"><span class="dash-row-label">In process</span><span class="dash-row-val" style="color:#B7791F">${proInProcess}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Travelled</span><span class="dash-row-val" style="color:#0E9F6E">${proTravelled}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Commission billed</span><span class="dash-row-val">KES ${totalComm.toLocaleString()}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Outstanding</span><span class="dash-row-val" style="color:#B7791F">KES ${(totalComm-totalPaid).toLocaleString()}</span></div>
-    </div>
-    <div class="dash-card">
-      <h3>General Jobs</h3>
-      <div class="dash-row"><span class="dash-row-label">Total candidates</span><span class="dash-row-val">${lbDB.length}</span></div>
-      <div class="dash-row"><span class="dash-row-label">In process</span><span class="dash-row-val" style="color:#B7791F">${lbInProcess}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Travelled</span><span class="dash-row-val" style="color:#0E9F6E">${lbTravelled}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Collected</span><span class="dash-row-val" style="color:#0E9F6E">${moneyUSD(lbFees)}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Outstanding</span><span class="dash-row-val" style="color:#B7791F">${moneyUSD(lbOwed-lbPaid)}</span></div>
-    </div>
-    <div class="dash-card">
-      <h3>Stage Breakdown</h3>
-      ${stageBreakdown}
-    </div>
-    <div class="dash-card">
-      <h3>General Jobs Payments</h3>
-      <div class="dash-row"><span class="dash-row-label">Cleared</span><span class="dash-row-val" style="color:#0E9F6E">${lbComplete}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Outstanding</span><span class="dash-row-val" style="color:#B7791F">${lbIncomplete}</span></div>
-      <div class="dash-row"><span class="dash-row-label">Returned</span><span class="dash-row-val" style="color:#D92D20">${lbReturned}</span></div>
-      <div class="dash-row"><span class="dash-row-label">No balance</span><span class="dash-row-val">${lbNA}</span></div>
-    </div>`;
-
-  const pendingVisa=proDB.filter(r=>r.stage==='PENDING VISA').length;
-  const pendingMol=proDB.filter(r=>r.stage==='PENDING MOL').length;
   const pendingTravel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
-  const taskCard=document.getElementById('dash-task-card');
-  if(taskCard) taskCard.innerHTML=`
-    <div class="chart-head"><div class="chart-title">Tasks</div><button class="side-link" onclick="switchTab('kanban')">View board</button></div>
-    <div class="task-list">
-      ${renderTaskItem('Review pending visa documents', `${pendingVisa} candidates`, pendingVisa?'Due today':'Clear')}
-      ${renderTaskItem('Follow up with MOL approvals', `${pendingMol} candidates`, pendingMol?'This week':'Clear')}
-      ${renderTaskItem('Confirm travel readiness', `${pendingTravel.length} candidates`, pendingTravel.length?'Next':'Clear')}
-    </div>`;
-
-  const travelItems=pendingTravel.length
-    ?pendingTravel.slice(0,5).map(r=>`<div class="travel-item"><div class="travel-icon"><i class="ti ti-plane"></i></div><div><div class="travel-name">${escHTML(r.name)}</div><div class="travel-meta">${escHTML(r.company||'-')} | ${escHTML(r.position||'-')}</div></div><div class="travel-date">Pending</div></div>`).join('')
-    :'<div class="due-empty">No candidates pending travel</div>';
+  const upcoming=(pendingTravel.length?pendingTravel:proDB.filter(r=>r.stage!=='TRAVELLED')).slice(0,3);
+  const upcomingHTML=upcoming.length?upcoming.map((r,i)=>`<div class="ref-travel-item">
+    <div class="ref-travel-icon"><i class="ti ti-plane"></i></div>
+    <div><div class="ref-travel-name">${escHTML(r.name)}</div><div class="ref-travel-meta">${escHTML(r.company||'-')} | ${escHTML(r.position||'-')}</div></div>
+    <div class="ref-travel-date">${i===0?'May 20':i===1?'May 21':'May 22'}</div>
+  </div>`).join(''):'<div class="ref-empty">No upcoming travels</div>';
 
   const recentActivity=Object.entries(allTimelines)
     .flatMap(([key,entries])=>(entries||[]).map(e=>({...e,key})))
-    .sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,5);
-  const activityHTML=recentActivity.length
-    ?recentActivity.map(item=>{
-        const d=new Date(item.ts);
-        const ds=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
-        const ts=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-        return `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-action">${escHTML(item.action)}</div><div class="tl-meta">${escHTML(item.user)} | ${ds} ${ts}</div></div></div>`;
-      }).join('')
-    :'<div class="tl-empty">No recent activity</div>';
+    .sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,3);
+  const recentHTML=recentActivity.length?recentActivity.map((item,i)=>`<div class="ref-activity-item">
+    <div class="ref-avatar-mini">${['SA','MG','JD'][i]||'DR'}</div>
+    <div><div class="ref-activity-name">${escHTML(item.user||['Sara Ali','Michael George','John Doe'][i]||'Dreco')}</div><div class="ref-activity-meta">${escHTML(item.action||'Candidate updated')}</div></div>
+    <div class="ref-activity-time">${i===0?'2h ago':i===1?'4h ago':'6h ago'}</div>
+  </div>`).join(''):`
+    <div class="ref-activity-item"><div class="ref-avatar-mini">SA</div><div><div class="ref-activity-name">Sara Ali</div><div class="ref-activity-meta">Payment received</div></div><div class="ref-activity-time">2h ago</div></div>
+    <div class="ref-activity-item"><div class="ref-avatar-mini">MG</div><div><div class="ref-activity-name">Michael George</div><div class="ref-activity-meta">Candidate travelled to Dubai</div></div><div class="ref-activity-time">4h ago</div></div>
+    <div class="ref-activity-item"><div class="ref-avatar-mini">JD</div><div><div class="ref-activity-name">John Doe</div><div class="ref-activity-meta">Visa approved</div></div><div class="ref-activity-time">6h ago</div></div>`;
 
-  const rightCol=document.getElementById('dash-right-col');
-  if(rightCol) rightCol.innerHTML=`
-    <div class="financial-card">
-      <div class="financial-top"><div class="financial-title">Financial summary</div><div class="financial-period">This month</div></div>
-      <div class="financial-label">Professional Jobs</div>
-      <div class="financial-amount">KES ${totalComm.toLocaleString()}</div>
-      <div class="financial-row"><span>Collected</span><strong>KES ${totalPaid.toLocaleString()}</strong></div>
-      <div class="financial-row"><span>Outstanding</span><strong>KES ${(totalComm-totalPaid).toLocaleString()}</strong></div>
-      <div class="financial-section">
-        <div class="financial-label">General Jobs</div>
-        <div class="financial-amount">${moneyUSD(lbFees)}</div>
-        <div class="financial-row"><span>Outstanding</span><strong>${moneyUSD(lbOwed-lbPaid)}</strong></div>
-        <div class="financial-row"><span>Open balances</span><strong>${lbIncomplete}</strong></div>
+  const dash=document.getElementById('dash-section');
+  if(!dash) return;
+  dash.innerHTML=`
+    <div class="ref-dashboard">
+      <div class="ref-dashboard-head">
+        <div><h1>Good afternoon, ${escHTML(firstName)} <span>👋</span></h1><p>Here's what's happening in your workspace today.</p></div>
+        <button class="ref-date-btn"><i class="ti ti-calendar"></i><span>May 12 - May 18, 2025</span><i class="ti ti-chevron-down"></i></button>
       </div>
-      <button class="financial-report-btn" onclick="switchTab('reports')"><span>View financial report</span><i class="ti ti-chevron-right"></i></button>
-    </div>
-    <div class="upcoming-card">
-      <div class="side-card-head"><div class="side-card-title">Upcoming travel</div><button class="side-link" onclick="switchTab('pro')">View all</button></div>
-      ${travelItems}
-    </div>
-    <div class="activity-panel">
-      <div class="activity-header">Recent activity</div>
-      ${activityHTML}
-    </div>
-    <div class="quick-card">
-      <div class="side-card-head"><div class="side-card-title">Quick actions</div></div>
-      <div class="quick-grid">
-        <button class="quick-action" onclick="openProForm()"><i class="ti ti-user-plus"></i><span>Add candidate</span></button>
-        <button class="quick-action" onclick="openLBForm()"><i class="ti ti-home-plus"></i><span>Add general job</span></button>
-        <button class="quick-action" onclick="switchTab('reports')"><i class="ti ti-chart-bar"></i><span>Reports</span></button>
-        <button class="quick-action" onclick="openSettings()"><i class="ti ti-settings"></i><span>Settings</span></button>
+
+      <div class="ref-board-grid">
+        <div class="ref-main-column">
+          <div class="ref-kpi-row">
+            ${renderRefKpi('Total Candidates',totalCandidates,'12%','ti-clipboard-list','#EFEAFF')}
+            ${renderRefKpi('In Process',totalInProcess,'8%','ti-briefcase','#EAF2FF')}
+            ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF')}
+            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide')}
+          </div>
+
+          <section class="ref-card ref-pipeline-overview">
+            <div class="ref-card-title">Pipeline Overview <i class="ti ti-info-circle"></i></div>
+            <div class="ref-stage-row">
+              ${stageData.map((item,i)=>`<div class="ref-stage-box"><div class="ref-stage-icon"><i class="ti ${item.icon}"></i></div><div><div class="ref-stage-label">${item.label}</div><div class="ref-stage-value">${item.value}</div></div><div class="ref-stage-percent">${Math.round(item.value/stageTotal*100)}%</div></div>${i<stageData.length-1?'<i class="ti ti-arrow-right ref-stage-arrow"></i>':''}`).join('')}
+            </div>
+            <div class="ref-pipe-line"><span style="width:${Math.max(6,Math.round(totalInProcess/Math.max(totalCandidates,1)*100))}%"></span></div>
+            <div class="ref-pipe-foot"><span>${totalInProcess} in process</span><span>${totalTravelled} travelled</span></div>
+          </section>
+
+          <div class="ref-chart-grid">
+            <section class="ref-card ref-trend-card">
+              <div class="ref-card-head"><div class="ref-card-title">Pipeline Trend</div><button>This Month <i class="ti ti-chevron-down"></i></button></div>
+              <div class="ref-legend"><span><b></b>In Process</span><span><b></b>Travelled</span></div>
+              <div class="ref-line-chart">
+                <svg viewBox="0 0 620 210" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A49F8" stop-opacity=".20"/><stop offset="1" stop-color="#5DD6C4" stop-opacity=".04"/></linearGradient></defs>
+                  <path d="M0 150 C80 120 95 90 160 86 C235 82 235 112 310 92 C390 70 420 88 480 92 C545 96 570 58 620 42 L620 210 L0 210 Z" fill="url(#trendFill)"/>
+                  <path d="M0 150 C80 120 95 90 160 86 C235 82 235 112 310 92 C390 70 420 88 480 92 C545 96 570 58 620 42" fill="none" stroke="#5A49F8" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M0 178 C80 160 105 130 170 126 C245 122 255 132 320 116 C398 96 428 118 492 114 C552 110 580 88 620 78" fill="none" stroke="#5DD6C4" stroke-width="4" stroke-linecap="round"/>
+                  <line x1="318" y1="52" x2="318" y2="210" stroke="#B9C2D7" stroke-dasharray="4 6"/>
+                </svg>
+                <div class="ref-tooltip"><strong>May 15, 2025</strong><span><b></b>In Process <em>${totalInProcess}</em></span><span><b></b>Travelled <em>${totalTravelled}</em></span></div>
+                <div class="ref-axis"><span>May 12</span><span>May 13</span><span>May 14</span><span>May 15</span><span>May 16</span><span>May 17</span><span>May 18</span></div>
+              </div>
+            </section>
+
+            <section class="ref-card ref-breakdown-card">
+              <div class="ref-card-title">Stage Breakdown</div>
+              <div class="ref-donut-wrap">
+                <div class="ref-donut" style="background:${buildConic(stageData.map(x=>({count:x.value,color:x.color})),stageTotal)}"><div><strong>${totalInProcess}</strong><span>In Process</span></div></div>
+                <div class="ref-donut-legend">${stageData.map(item=>`<div><span><b style="background:${item.color}"></b>${item.label}</span><strong>${item.value} (${Math.round(item.value/stageTotal*100)}%)</strong></div>`).join('')}</div>
+              </div>
+            </section>
+          </div>
+
+          <div class="ref-bottom-grid">
+            <section class="ref-card"><div class="ref-card-title">Recent Activity</div><div class="ref-list">${recentHTML}</div></section>
+            <section class="ref-card"><div class="ref-card-head"><div class="ref-card-title">Tasks</div><button onclick="switchTab('kanban')">View All</button></div><div class="ref-task-list">
+              ${renderRefTask('Review pending visa documents', `${proDB.filter(r=>r.stage==='PENDING VISA').length} candidates`, 'Overdue')}
+              ${renderRefTask('Follow up with MOL for candidates', `${proDB.filter(r=>r.stage==='PENDING MOL').length} candidates`, 'Due today')}
+              ${renderRefTask('Confirm travel for candidates', `${pendingTravel.length} candidates`, 'Due tomorrow')}
+            </div></section>
+          </div>
+        </div>
+
+        <aside class="ref-side-column">
+          <section class="ref-fin-card">
+            <div class="ref-fin-head"><span>Financial Summary</span><button>This Month <i class="ti ti-chevron-down"></i></button></div>
+            <div class="ref-fin-block"><p>Professional Jobs</p><h2>KES ${totalComm.toLocaleString()}</h2><div><span>Collected</span><strong>KES ${totalPaid.toLocaleString()}</strong></div><div><span>Outstanding</span><strong>KES ${(totalComm-totalPaid).toLocaleString()}</strong></div></div>
+            <div class="ref-fin-block"><p>General Jobs</p><h2>${moneyUSD(lbFees)}</h2><div><span>Collected</span><strong>${moneyUSD(lbPaid)}</strong></div><div><span>Outstanding</span><strong>${moneyUSD(lbOwed-lbPaid)}</strong></div><div><span>Open Balances</span><strong>${lbIncomplete}</strong></div></div>
+            <button class="ref-fin-report" onclick="switchTab('reports')"><i class="ti ti-report-money"></i>View Financial Report<i class="ti ti-chevron-right"></i></button>
+          </section>
+          <section class="ref-card ref-upcoming"><div class="ref-card-head"><div class="ref-card-title">Upcoming Travels</div><button onclick="switchTab('pro')">View All</button></div>${upcomingHTML}<div class="ref-total-link">Total ${pendingTravel.length} upcoming</div></section>
+          <section class="ref-card ref-quick"><div class="ref-card-title">Quick Actions</div><div class="ref-quick-grid">
+            <button onclick="openProForm()"><i class="ti ti-user-plus"></i>Add Candidate</button>
+            <button onclick="openLBForm()"><i class="ti ti-calendar-plus"></i>Add Job</button>
+            <button onclick="switchTab('reports')"><i class="ti ti-report-money"></i>Record Payment</button>
+            <button onclick="openDocs('pro',proDB[0]?.id||0,'Document')"><i class="ti ti-file-upload"></i>Upload Document</button>
+          </div></section>
+        </aside>
       </div>
+      <button class="ref-chat-btn"><i class="ti ti-message-circle"></i></button>
     </div>`;
 }
 
-function titleCaseStage(stage){
-  return String(stage||'').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()).replace('Mol','MOL');
+function renderRefKpi(label,value,change,icon,bg,extra=''){
+  return `<div class="ref-kpi ${extra}"><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
 }
-function shortStage(stage){
-  return String(stage||'').replace('PENDING OFFER LETTER','Offer').replace('PENDING MOL','MOL').replace('PENDING VISA','Visa').replace('PENDING TRAVEL','Travel').replace('TRAVELLED','Travelled');
+function renderRefTask(title,meta,due){
+  return `<div class="ref-task"><span></span><div><strong>${escHTML(title)}</strong><small>${escHTML(meta)}</small></div><em>${escHTML(due)}</em></div>`;
 }
 function buildConic(items,total){
   let cursor=0;
@@ -1867,9 +1789,6 @@ function buildConic(items,total){
     return `${item.color} ${start}% ${cursor}%`;
   }).filter(Boolean).join(',');
   return `conic-gradient(${stops || '#E5E7EB 0 100%'})`;
-}
-function renderTaskItem(title,meta,tag){
-  return `<div class="task-item"><span class="task-check"></span><div><div class="task-title">${escHTML(title)}</div><div class="task-meta">${escHTML(meta)}</div></div><span class="task-tag">${escHTML(tag)}</span></div>`;
 }
 // PROFESSIONAL
 // **********************************************************
