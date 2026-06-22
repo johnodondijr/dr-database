@@ -7,17 +7,17 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
-    /* ── FONT FALLBACK — fires before Google Fonts response, prevents FOUT ── */
+    /* â”€â”€ FONT FALLBACK â€” fires before Google Fonts response, prevents FOUT â”€â”€ */
     /* Once Geist loads via the <link> above, the browser switches automatically */
     html{font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      /* Geist & Geist Mono from Google Fonts — family names as registered */
+      /* Geist & Geist Mono from Google Fonts â€” family names as registered */
       --font-heading: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --font-body: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --font-mono: 'Geist Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;      
-      /* ── NEW PALETTE (cp1): lime-yellow accent, near-black, sage green ── */
+      /* â”€â”€ NEW PALETTE (cp1): lime-yellow accent, near-black, sage green â”€â”€ */
       --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
       --accent-light:#F7FDE0;--accent-lighter:#FBFEF2;
       --ink:#18191B;--ink-2:#1E2023;
@@ -29,14 +29,14 @@
       --purple-light:#EEEDFE;--purple:#3C3489;
       --pink-light:#FBEAF0;--pink:#993556;
       --gray-light:#F3F3F3;--gray:#888;
-      /* ── SURFACES ── */
+      /* â”€â”€ SURFACES â”€â”€ */
       --bg:#F3F3F3;--surface:#FAFAFA;--surface-2:#FFFFFF;
       --border:#E8E8E8;--border-2:#D4D4D4;
-      /* ── TEXT ── */
+      /* â”€â”€ TEXT â”€â”€ */
       --text:#18191B;--text-2:#555;--text-3:#999;
-      /* ── SHAPE ── */
+      /* â”€â”€ SHAPE â”€â”€ */
       --radius:10px;--radius-lg:16px;--radius-xl:22px;--radius-pill:999px;
-      /* ── SHADOW ── */
+      /* â”€â”€ SHADOW â”€â”€ */
       --shadow-sm:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
       --shadow:0 4px 12px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.04);
       --shadow-lg:0 16px 48px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
@@ -54,7 +54,7 @@
     /* The app shell itself clips to viewport; login screen can scroll freely */
     #app{overflow:hidden}
 
-    /* ── TYPOGRAPHY SYSTEM — Geist (Google Fonts) for all text, Geist Mono for data ── */
+    /* â”€â”€ TYPOGRAPHY SYSTEM â€” Geist (Google Fonts) for all text, Geist Mono for data â”€â”€ */
     h1,h2,h3,h4,h5,h6,
     .lp-brand-name,.lp-header h1,.wb-left h2,
     .topbar-title,.panel-title,.modal-header h3,
@@ -74,13 +74,13 @@
       line-height:1;
     }
 
-    /* ── LOADING ── */
+    /* â”€â”€ LOADING â”€â”€ */
     .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:13px;color:var(--text-2)}
     .loading-overlay.show{display:flex}
     .spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--accent-dark);border-radius:50%;animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ── LOGIN ── */
+    /* â”€â”€ LOGIN â”€â”€ */
     #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:#EBEBEB;overflow:auto}
     .lp-window{background:#fff;width:100%;max-width:1360px;height:calc(100vh - 32px);min-height:700px;max-height:760px;border-radius:28px;box-shadow:0 32px 80px rgba(0,0,0,.14),0 8px 24px rgba(0,0,0,.06);display:flex;overflow:hidden;border:1px solid var(--border)}
     .lp-form-panel{flex:0 0 460px;padding:52px 58px;display:flex;flex-direction:column;justify-content:space-between;background:#fff}
@@ -213,11 +213,11 @@
     .lp-testimonial-person span{display:block;font-size:11px;color:#697386;line-height:1.35;font-weight:700}
     @media(max-width:900px){.lp-window{height:auto;flex-direction:column;border-radius:0;min-height:100vh}.lp-media{display:none}.lp-form-panel{padding:40px 30px}}
 
-    /* ── APP SHELL ── */
+    /* â”€â”€ APP SHELL â”€â”€ */
     #app{display:none;height:100vh;height:100dvh}
     .app-layout{display:flex;height:100%;overflow:hidden}
 
-    /* ── SIDEBAR ── */
+    /* â”€â”€ SIDEBAR â”€â”€ */
     .sidebar{
       width:var(--sidebar-w);background:var(--ink);
       display:flex;flex-direction:column;padding:0;
@@ -248,12 +248,12 @@
     /* tooltip for collapsed state */
     .sidebar.collapsed .nav-item:hover::after{content:attr(data-title);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;z-index:200;box-shadow:var(--shadow)}
     .nav-spacer{flex:1}
-    /* sidebar bottom utilities use nav-item styles — no extra rules needed */
+    /* sidebar bottom utilities use nav-item styles â€” no extra rules needed */
 
-    /* ── MAIN AREA ── */
+    /* â”€â”€ MAIN AREA â”€â”€ */
     .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0}
 
-    /* ── TOPBAR ── */
+    /* â”€â”€ TOPBAR â”€â”€ */
     .topbar{height:58px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;flex-shrink:0}
     .topbar-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.03em;flex:1;font-family:var(--font-heading)}
     .topbar-search{flex:1;max-width:280px;position:relative}
@@ -266,9 +266,9 @@
     .save-label{font-size:11px;color:var(--text-3);font-weight:500}
     .topbar-user{display:flex;align-items:center;gap:8px;background:var(--gray-light);border-radius:12px;padding:5px 12px 5px 6px}
     .topbar-avatar{width:26px;height:26px;border-radius:8px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--accent)}
-    .topbar-user-caret{display:none} /* removed — icon-only button now */
+    .topbar-user-caret{display:none} /* removed â€” icon-only button now */
 
-    /* ── WELCOME BANNER ── */
+    /* â”€â”€ WELCOME BANNER â”€â”€ */
     .welcome-banner{background:var(--ink);border-radius:var(--radius-xl);padding:22px 26px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
     .welcome-banner::before{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:var(--accent);opacity:.07;pointer-events:none}
     .welcome-banner::after{content:'';position:absolute;right:80px;bottom:-80px;width:180px;height:180px;border-radius:50%;background:var(--sage);opacity:.08;pointer-events:none}
@@ -279,13 +279,13 @@
     .wb-stat-val{font-size:22px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.03em;font-family:var(--font-heading);white-space:nowrap;font-variant-numeric:tabular-nums}
     .wb-stat-label{font-size:10px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:600;white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
 
-    /* ── CONTENT ── */
+    /* â”€â”€ CONTENT â”€â”€ */
     .content-area{flex:1;overflow-y:auto;padding:22px 24px}
     .content-area::-webkit-scrollbar{width:5px}
     .content-area::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:4px}
     .section-eyebrow{font-size:10px;font-weight:700;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
 
-    /* ── PIPELINE CARDS ── */
+    /* â”€â”€ PIPELINE CARDS â”€â”€ */
     .pipeline-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
     .p-card{border-radius:var(--radius-xl);padding:20px 18px;cursor:pointer;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
     .p-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
@@ -297,24 +297,24 @@
     .card-dark{background:var(--ink);color:#fff}
     .card-slate{background:var(--sage);color:#fff}
 
-    /* ── LAYOUT SPLITS ── */
+    /* â”€â”€ LAYOUT SPLITS â”€â”€ */
     .split-65-35{display:grid;grid-template-columns:1fr 300px;gap:14px}
     .right-col{display:flex;flex-direction:column;gap:14px}
     .dash-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 
-    /* ── PANEL ── */
+    /* â”€â”€ PANEL â”€â”€ */
     .panel{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-sm)}
     .panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
     .panel-title{font-size:13px;font-weight:800;color:var(--text);letter-spacing:-.02em;font-family:var(--font-heading)}
     .panel-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 
-    /* ── PILL TABS ── */
+    /* â”€â”€ PILL TABS â”€â”€ */
     .pill-tabs{display:flex;gap:4px;flex-wrap:wrap}
     .pill-tab{padding:5px 12px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-3);font-family:inherit;transition:all .15s}
     .pill-tab.active{background:var(--ink);color:#fff}
     .pill-tab:hover:not(.active){background:var(--gray-light);color:var(--text)}
 
-    /* ── TOOLBAR BTNS ── */
+    /* â”€â”€ TOOLBAR BTNS â”€â”€ */
     .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;font-size:11px;font-weight:600;font-family:inherit;border:1.5px solid var(--border);border-radius:10px;background:var(--surface-2);color:var(--text);cursor:pointer;white-space:nowrap;transition:all .18s}
     .btn i{font-size:14px}
     .btn:hover{background:var(--gray-light);border-color:var(--border-2)}
@@ -329,7 +329,7 @@
     .toolbar-select{height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:10px;font-size:11px;font-family:inherit;color:var(--text);background:var(--surface-2);cursor:pointer;font-weight:600;outline:none}
     .toolbar-select:focus{border-color:var(--accent-dark)}
 
-    /* ── TABLE ── */
+    /* â”€â”€ TABLE â”€â”€ */
     .table-scroll{overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:12px}
     th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);background:var(--gray-light);border-bottom:1px solid var(--border);white-space:nowrap}
@@ -345,7 +345,7 @@
     .click-hint{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3);padding:8px 14px;border-top:1px solid var(--border);background:var(--gray-light)}
     .click-hint i{font-size:13px}
 
-    /* ── BADGES ── */
+    /* â”€â”€ BADGES â”€â”€ */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--radius-pill);font-size:10px;font-weight:700;white-space:nowrap;letter-spacing:.02em}
     .b-pol{background:#E8F0FD;color:#1040A0}
     .b-mol{background:var(--amber-light);color:#7A4500}
@@ -363,27 +363,27 @@
     .b-hadpp{background:var(--green-light);color:#0D5E3A}
     .b-pushed{background:var(--amber-light);color:#7A4500}
 
-    /* ── ACTION BTNS ── */
+    /* â”€â”€ ACTION BTNS â”€â”€ */
     .action-btn{background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px 6px;border-radius:8px;font-size:14px;line-height:1;transition:all .15s;display:inline-flex;align-items:center}
     .action-btn:hover{color:var(--text);background:var(--gray-light)}
     .action-btn.del:hover{color:var(--red);background:var(--red-light)}
     .action-btn.docs{color:var(--blue)}.action-btn.docs:hover{background:var(--blue-light)}
 
-    /* ── PAGINATION ── */
+    /* â”€â”€ PAGINATION â”€â”€ */
     .pagination{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-3);background:var(--gray-light)}
     .page-btns{display:flex;gap:4px}
     .page-btn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface-2);font-size:11px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:all .15s}
     .page-btn.active{background:var(--ink);border-color:var(--ink);color:var(--accent)}
     .page-btn:hover:not(.active){background:var(--surface);border-color:var(--border-2)}
 
-    /* ── EMPTY ── */
+    /* â”€â”€ EMPTY â”€â”€ */
     .empty{text-align:center;padding:3rem;color:var(--text-3);font-size:13px;font-weight:500}
 
-    /* ── METRICS STRIP ── */
+    /* â”€â”€ METRICS STRIP â”€â”€ */
     /* min 160px prevents cards crushing below the breakpoint */
     .metrics-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
 
-    /* base card — more generous padding so numbers have room */
+    /* base card â€” more generous padding so numbers have room */
     .metric-card{
       position:relative;overflow:hidden;
       background:var(--surface-2);border:1px solid var(--border);
@@ -402,7 +402,7 @@
       background:var(--border);
     }
 
-    /* ── CARD THEMES ── */
+    /* â”€â”€ CARD THEMES â”€â”€ */
     .metric-card.mc-default::before{background:var(--border-2)}
     .metric-card.mc-amber{background:linear-gradient(160deg,#FFFDF5 0%,#FFF8E0 100%);border-color:#EFD97A}
     .metric-card.mc-amber::before{background:linear-gradient(90deg,var(--accent-dark),var(--accent))}
@@ -418,7 +418,7 @@
     .metric-card.mc-sage{background:linear-gradient(160deg,#F4F7F3 0%,#EAF0E8 100%);border-color:#BDD0BA}
     .metric-card.mc-sage::before{background:linear-gradient(90deg,var(--sage-dark),var(--sage))}
 
-    /* ── METRIC LABEL & VALUE — desktop defaults ── */
+    /* â”€â”€ METRIC LABEL & VALUE â€” desktop defaults â”€â”€ */
     .metric-label{
       font-size:10px;color:var(--text-3);
       margin-bottom:10px;               /* more breathing room above the number */
@@ -428,7 +428,7 @@
     .metric-val{
       font-size:30px;                   /* up from 26px */
       font-weight:800;color:var(--text);
-      letter-spacing:-.02em;            /* less tight than -.03em — Geist reads better here */
+      letter-spacing:-.02em;            /* less tight than -.03em â€” Geist reads better here */
       white-space:nowrap;               /* never wrap mid-number */
       font-family:var(--font-heading);
     }
@@ -437,7 +437,7 @@
     .metric-val.amber{color:#8C6200}
     .metric-val.red{color:var(--red)}
     .metric-val.blue{color:var(--blue)}
-    /* .sm = currency / longer strings — never go below 18px on desktop */
+    /* .sm = currency / longer strings â€” never go below 18px on desktop */
     .metric-val.sm{
       font-size:18px;                   /* up from 16px */
       letter-spacing:-.01em;
@@ -446,7 +446,7 @@
       line-height:1.25;                 /* comfortable when it wraps to 2 lines */
     }
 
-    /* ── DASHBOARD CARDS ── */
+    /* â”€â”€ DASHBOARD CARDS â”€â”€ */
     .dash-card{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:18px;box-shadow:var(--shadow-sm)}
     .dash-card h3{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
     .dash-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
@@ -456,7 +456,7 @@
     .dash-bar-wrap{height:4px;background:var(--accent-light);border-radius:3px;margin-top:4px;width:100%}
     .dash-bar-fill{height:4px;background:var(--accent-dark);border-radius:3px}
 
-    /* ── RIGHT PANEL WIDGETS ── */
+    /* â”€â”€ RIGHT PANEL WIDGETS â”€â”€ */
     .spotlight{background:var(--ink);border-radius:var(--radius-xl);padding:20px;color:#fff;box-shadow:var(--shadow)}
     .spotlight-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px}
     .spotlight-section{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.25);margin:12px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)}
@@ -485,7 +485,7 @@
     .tl-meta{font-size:10px;color:var(--text-3);margin-top:2px}
     .tl-empty{padding:14px;font-size:11px;color:var(--text-3);text-align:center}
 
-    /* ── MODAL ── */
+    /* â”€â”€ MODAL â”€â”€ */
     .modal-bg{display:none;position:fixed;inset:0;background:rgba(24,25,27,.45);backdrop-filter:blur(6px);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
     .modal-bg.open{display:flex}
     .modal{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:0;width:100%;max-width:560px;margin:auto;box-shadow:var(--shadow-lg);overflow:hidden}
@@ -511,19 +511,19 @@
     .tl-action-modal{font-weight:600;color:var(--text)}
     .tl-meta-modal{font-size:11px;color:var(--text-3);margin-top:2px}
 
-    /* ── DOCS ── */
+    /* â”€â”€ DOCS â”€â”€ */
     .doc-link-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--gray-light);font-weight:500}
     .doc-link-input:focus{outline:none;border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(200,214,32,.12);background:#fff}
     .doc-open-btn{padding:9px 14px;background:var(--sage-light);color:var(--sage-dark);border:1.5px solid #ccdbc9;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
     .doc-open-btn:hover{background:#dbebd8}
     .doc-open-btn:disabled{opacity:.4;cursor:default}
 
-    /* ── SIDEBAR VERSION TAG ── */
+    /* â”€â”€ SIDEBAR VERSION TAG â”€â”€ */
     .sidebar-version{padding:8px 16px 12px;display:flex;align-items:center;gap:8px;overflow:hidden}
     .sv-text{font-size:10px;color:rgba(255,255,255,.2);font-weight:500;white-space:nowrap;transition:opacity .2s}
     .sidebar.collapsed .sv-text{opacity:0}
 
-    /* ── TOPBAR PROFILE BUTTON ── */
+    /* â”€â”€ TOPBAR PROFILE BUTTON â”€â”€ */
     .topbar-profile-btn{
       background:none;border:none;cursor:pointer;padding:0;
       display:flex;align-items:center;
@@ -538,7 +538,7 @@
       transition:box-shadow .18s;flex-shrink:0;
     }
 
-    /* ── PROFILE DROPDOWN ── */
+    /* â”€â”€ PROFILE DROPDOWN â”€â”€ */
     .profile-wrap{position:relative}
     .profile-dropdown{
       display:none;position:absolute;top:calc(100% + 10px);right:0;
@@ -610,7 +610,7 @@
     .pd-msg{font-size:11px;padding:2px 14px 4px;font-weight:500}
     .pd-msg.ok{color:var(--green)}.pd-msg.err{color:var(--red)}
 
-    /* ── TOAST ── */
+    /* â”€â”€ TOAST â”€â”€ */
     .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px}
     .toast i{font-size:14px}
     .toast.show{opacity:1;transform:translateY(0)}
@@ -618,11 +618,11 @@
     .toast.error{background:var(--red)}
     .toast.error i{color:#fff}
 
-    /* ══════════════════════════════════════════════
-       RESPONSIVE — mobile-first progressive system
-       ══════════════════════════════════════════════ */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       RESPONSIVE â€” mobile-first progressive system
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-    /* ── 1080px: collapse right sidebar panel into single column ── */
+    /* â”€â”€ 1080px: collapse right sidebar panel into single column â”€â”€ */
     @media(max-width:1080px){
       .split-65-35{grid-template-columns:1fr}
       /* right-col becomes a horizontal scrollable strip below the main cards */
@@ -637,7 +637,7 @@
       .right-col::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:4px}
     }
 
-    /* ── 860px: tablet — tighten spacing, 2-col dash, compress header ── */
+    /* â”€â”€ 860px: tablet â€” tighten spacing, 2-col dash, compress header â”€â”€ */
     @media(max-width:860px){
       .content-area{padding:16px}
       .pipeline-cards{grid-template-columns:repeat(2,1fr);gap:10px}
@@ -653,14 +653,14 @@
       /* search inputs full width */
       .search-wrap{flex:1;min-width:0}
       .search-wrap input{min-width:0;width:100%}
-      /* topbar search hidden — use panel-level search instead */
+      /* topbar search hidden â€” use panel-level search instead */
       .topbar-search{display:none}
       /* topbar: keep title + user pill tight */
       .topbar{padding:0 14px;gap:10px}
       .topbar-title{font-size:14px}
     }
 
-    /* ── 640px: mobile — bottom nav, full-width layouts ── */
+    /* â”€â”€ 640px: mobile â€” bottom nav, full-width layouts â”€â”€ */
     @media(max-width:640px){
       /* body must scroll on login but app uses its own scroll */
       body{overflow-x:hidden}
@@ -748,9 +748,9 @@
       .pagination{flex-direction:column;gap:6px;align-items:flex-start;padding:8px 12px}
     }
 
-    /* ── BOTTOM NAV BAR (mobile only, shown after login via JS) ── */
+    /* â”€â”€ BOTTOM NAV BAR (mobile only, shown after login via JS) â”€â”€ */
     .bottom-nav{
-      display:none; /* hidden by default — JS adds .visible after login */
+      display:none; /* hidden by default â€” JS adds .visible after login */
       position:fixed;bottom:0;left:0;right:0;
       height:60px;background:var(--ink);
       border-top:1px solid rgba(255,255,255,.08);
@@ -777,7 +777,7 @@
     .bottom-nav-item.active{color:var(--accent)}
     .bottom-nav-item span{font-size:9px;line-height:1}
 
-    /* ── Login screen mobile ── */
+    /* â”€â”€ Login screen mobile â”€â”€ */
     @media(max-width:640px){
       #login-screen{padding:0;background:#fff}
       .lp-window{border-radius:0;height:100dvh;height:100vh;box-shadow:none;border:none}
@@ -786,7 +786,7 @@
       .lp-header h1{font-size:22px}
       .lp-chips{flex-direction:column;gap:8px}
     }
-    /* ── KANBAN ── */
+    /* â”€â”€ KANBAN â”€â”€ */
     .kanban-col{flex:0 0 240px;background:var(--gray-light);border-radius:var(--radius-xl);padding:12px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--border)}
     .kanban-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;padding:0 2px}
     .kanban-col-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.06em}
@@ -801,7 +801,7 @@
     .kanban-card-comm{font-size:10px;font-weight:800;color:var(--green-dark)}
     .kanban-empty{font-size:11px;color:var(--text-3);text-align:center;padding:20px 8px;font-weight:500}
 
-    /* ── CALENDAR ── */
+    /* â”€â”€ CALENDAR â”€â”€ */
     .cal-header-row{display:grid;grid-template-columns:repeat(7,1fr);background:var(--ink)}
     .cal-header-cell{padding:10px 0;text-align:center;font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em}
     .cal-grid-body{display:grid;grid-template-columns:repeat(7,1fr)}
@@ -821,7 +821,7 @@
     .cal-ev-interview{background:var(--purple-light);color:var(--purple)}
     .cal-ev-lb{background:var(--accent-light);color:var(--accent-deeper)}
 
-    /* ── REPORTS ── */
+    /* â”€â”€ REPORTS â”€â”€ */
     .reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
     .report-card{background:var(--surface-2);border-radius:var(--radius-xl);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow-sm)}
     .report-card-title{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;display:flex;align-items:center;gap:7px}
@@ -851,10 +851,10 @@
     .chart-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3);font-weight:600}
   
 
-/* ═════════════════════════════════════════════════════════════
-   DRECO CRM SOFT UI OVERHAUL — reference-inspired v1
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   DRECO CRM SOFT UI OVERHAUL â€” reference-inspired v1
    Paste-safe override layer: keeps existing IDs/functions intact.
-   ═════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 :root{
   --accent:#C9F03C;
   --accent-dark:#8FBF18;
@@ -919,9 +919,9 @@ body{background:radial-gradient(circle at top left,rgba(201,240,60,.20),transpar
 
   
 
-/* ─────────────────────────────────────────────────────────────
-   DRECO SOFT CRM PATCH v1.1 — sidebar, user card, contrast, palette
-   ───────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   DRECO SOFT CRM PATCH v1.1 â€” sidebar, user card, contrast, palette
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root{
   --font-heading:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --font-body:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -1002,10 +1002,10 @@ th{color:#77786D!important;background:transparent!important}td{background:#F3F2E
 
 @media(max-width:760px){.sidebar{display:none!important}.bottom-nav{background:#0D0E0C!important}.bottom-nav-item{color:rgba(255,255,255,.58)!important}.bottom-nav-item.active{color:var(--accent)!important}}
 
-/* ═════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    DRECO TYPOGRAPHY + REPORTS REFINEMENT
    Cleaner database feel: Inter for UI, IBM Plex Mono for identifiers.
-   ═════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 :root{
   --font-heading:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --font-body:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -1208,10 +1208,10 @@ th,.field label,.section-eyebrow,.metric-label,.report-card-title,.p-card-label,
 @media(max-width:760px){.modal-bg{padding:10px!important;align-items:flex-start!important}.modal{border-radius:18px!important;max-height:calc(100vh - 20px)!important;overflow-y:auto!important}.candidate-summary{grid-template-columns:1fr!important;margin:0 14px 12px!important}.candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.modal-tabs{padding:0 14px!important;overflow-x:auto!important}.modal-body{padding:16px 14px!important}.modal-footer{padding:12px 14px!important}.action-grid{grid-template-columns:1fr}}
 @media print{#app{padding:0!important}.sidebar,.topbar,.bottom-nav,.btn.export{display:none!important}.app-layout{box-shadow:none!important;border:0!important}.content-area{overflow:visible!important}.reports-grid{grid-template-columns:1fr 1fr!important}}
 
-/* ═════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    NEXUS-INSPIRED UI DIRECTION
    Crisp white workspace, cool gray canvas, purple/blue/cyan accents.
-   ═════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 :root{
   --accent:#5347CE;
   --accent-dark:#4538B8;
@@ -1759,7 +1759,47 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   .lp-input-wrap input,.lp-submit{height:56px!important}
   .lp-chips{grid-template-columns:1fr!important;margin-top:20px!important}
 }
-
+/* Auth UX refinement: calmer inputs, clearer signup mode, unclipped trust chips */
+#login-screen .lp-window{overflow:hidden!important}
+#login-screen .lp-form-panel{padding-bottom:30px!important;min-height:0!important}
+#login-screen .lp-content-area{margin-top:46px!important}
+#login-screen .lp-header{margin-bottom:24px!important}
+#login-screen .lp-header h1{letter-spacing:0!important}
+#login-screen .lp-header p{max-width:390px!important}
+#login-screen .lp-input-group{margin-bottom:20px!important}
+#login-screen .lp-input-wrap input{background:#fff!important;border-color:#E3E8F4!important;box-shadow:0 1px 2px rgba(15,23,42,.03)!important;text-transform:none!important}
+#login-screen .lp-input-wrap input:-webkit-autofill,
+#login-screen .lp-input-wrap input:-webkit-autofill:hover,
+#login-screen .lp-input-wrap input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #fff inset,0 0 0 5px rgba(99,91,255,.10)!important;-webkit-text-fill-color:#111827!important;caret-color:#635BFF!important}
+#login-screen .lp-input-wrap input:focus{background:#fff!important;border-color:#635BFF!important;box-shadow:0 0 0 5px rgba(99,91,255,.11),0 8px 22px rgba(83,71,206,.08)!important}
+#login-screen .lp-submit{background:linear-gradient(135deg,#5347CE 0%,#887CFD 100%)!important;box-shadow:0 14px 30px rgba(83,71,206,.26)!important;color:#fff!important}
+#login-screen .lp-submit:hover{box-shadow:0 20px 42px rgba(83,71,206,.34)!important}
+#login-screen .lp-signup-cta{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;width:100%!important;min-height:46px!important;margin-top:22px!important;border:1px solid #E4E7F2!important;border-radius:14px!important;background:#fff!important;color:#6B7280!important;font-size:14px!important;font-weight:650!important;box-shadow:0 1px 2px rgba(15,23,42,.03)!important}
+#login-screen .lp-signup-cta strong{color:#5347CE!important;font-size:14px!important;font-weight:800!important}
+#login-screen .lp-signup-cta:hover{border-color:#CFCBFF!important;background:#F8F7FF!important;box-shadow:0 8px 24px rgba(83,71,206,.09)!important;color:#4B5563!important}
+#login-screen .lp-chips{margin-top:18px!important;padding-bottom:2px!important}
+#login-screen .lp-chip{min-height:36px!important;height:auto!important;padding:8px 12px!important;white-space:normal!important;text-align:center!important}
+#login-screen .lp-security-copy{margin-top:8px!important;font-size:12px!important}
+#login-screen .lp-footer{padding-top:18px!important}
+#login-screen .lp-media::before{opacity:.45!important}
+#login-screen .lp-hero-object{opacity:.54!important;transform:scale(.92) translate3d(var(--hero-x,0),var(--hero-y,0),0)!important}
+#login-screen .lp-dashboard-preview{opacity:.96!important;filter:none!important}
+#login-screen .lp-testimonial{display:none!important}
+#login-screen.auth-mode-signup .lp-content-area,
+#login-screen.auth-mode-recovery .lp-content-area{margin-top:26px!important}
+#login-screen.auth-mode-signup .lp-header,
+#login-screen.auth-mode-recovery .lp-header{padding:16px 16px 14px!important;margin-bottom:18px!important;border:1px solid #E6E9F5!important;border-radius:18px!important;background:linear-gradient(135deg,#FFFFFF 0%,#F8F7FF 100%)!important;box-shadow:0 8px 22px rgba(83,71,206,.06)!important}
+#login-screen.auth-mode-signup .lp-header h1,
+#login-screen.auth-mode-recovery .lp-header h1{font-size:34px!important;line-height:1.08!important;margin-bottom:8px!important;color:#111827!important}
+#login-screen.auth-mode-signup .lp-header p,
+#login-screen.auth-mode-recovery .lp-header p{font-size:14px!important;line-height:1.45!important;color:#64748B!important}
+#login-screen.auth-mode-signup .lp-input-group{margin-bottom:14px!important}
+#login-screen .auth-helper{display:block;margin-top:7px;font-size:12px;line-height:1.4;color:#7B8496;font-weight:550}
+#login-screen .auth-back-link{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;width:max-content!important;margin:16px auto 0!important;padding:9px 12px!important;border-radius:999px!important;background:#F8F7FF!important;color:#5347CE!important;font-size:13px!important;font-weight:750!important;cursor:pointer!important}
+#login-screen .auth-back-link:hover{background:#F0ECFF!important;text-decoration:none!important}
+@media(max-height:760px) and (min-width:901px){#login-screen .lp-content-area{margin-top:28px!important}#login-screen .lp-header h1{font-size:44px!important}#login-screen .lp-header p{font-size:15px!important}#login-screen .lp-input-group{margin-bottom:16px!important}#login-screen .lp-chips{display:none!important}#login-screen .lp-security-copy{display:none!important}}
+@media(max-width:760px){#login-screen .lp-content-area{margin-top:28px!important}#login-screen .lp-chips{display:grid!important;grid-template-columns:1fr 1fr!important}#login-screen.auth-mode-signup .lp-header h1,#login-screen.auth-mode-recovery .lp-header h1{font-size:28px!important}}
+@media(max-width:420px){#login-screen .lp-chips{grid-template-columns:1fr!important}#login-screen .lp-signup-cta{align-items:flex-start!important;flex-direction:column!important;gap:2px!important;padding:10px 14px!important}}
   </style>
 </head>
 <body>
@@ -1767,7 +1807,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 <!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
-  <span id="loading-text">Loading…</span>
+  <span id="loading-text">Loadingâ€¦</span>
 </div>
 
 <!-- LOGIN -->
@@ -1796,14 +1836,14 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
               <label for="username-input">Username</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-user lp-input-icon"></i>
-                <input type="text" id="username-input" placeholder="johnfred" required autocomplete="username">
+                <input type="text" id="username-input" placeholder="johnfred" required autocomplete="username" autocapitalize="none" spellcheck="false">
               </div>
             </div>
             <div class="lp-input-group">
               <label for="pw-input">Password</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-lock lp-input-icon"></i>
-                <input type="password" id="pw-input" placeholder="••••••••" required autocomplete="current-password">
+                <input type="password" id="pw-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required autocomplete="current-password">
                 <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
               </div>
               <div class="lp-field-hint" id="caps-lock-hint" aria-live="polite">Caps Lock is on</div>
@@ -1821,8 +1861,8 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
         </div>
         <div id="signup-section" style="display:none">
           <div class="lp-header">
-            <h1>Create Workspace</h1>
-            <p>Set up Dreco for your recruitment company</p>
+            <h1>Create workspace</h1>
+            <p>Create your company workspace and first administrator account.</p>
           </div>
           <form onsubmit="event.preventDefault(); doSignup();">
             <div class="lp-input-group">
@@ -1831,6 +1871,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
                 <i class="ti ti-building lp-input-icon"></i>
                 <input type="text" id="signup-company" placeholder="e.g. Apex Recruitment" required autocomplete="organization">
               </div>
+              <span class="auth-helper">This becomes the workspace name shown across Dreco.</span>
             </div>
             <div class="lp-input-group">
               <label for="signup-name">Your Name</label>
@@ -1843,8 +1884,9 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
               <label for="signup-username">Username</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-at lp-input-icon"></i>
-                <input type="text" id="signup-username" placeholder="e.g. admin" required autocomplete="username">
+                <input type="text" id="signup-username" placeholder="e.g. admin" required autocomplete="username" autocapitalize="none" spellcheck="false">
               </div>
+              <span class="auth-helper">Use 3-32 lowercase letters, numbers, dots, underscores, or hyphens.</span>
             </div>
             <div class="lp-input-group">
               <label for="signup-password">Password</label>
@@ -1852,16 +1894,17 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
                 <i class="ti ti-lock lp-input-icon"></i>
                 <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password">
               </div>
+              <span class="auth-helper">Minimum 6 characters. Use something your team will not guess.</span>
             </div>
-            <button type="submit" class="lp-submit">Create Workspace</button>
+            <button type="submit" class="lp-submit">Create workspace</button>
           </form>
           <div class="login-error" id="signup-error" style="display:none"></div>
-          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideSignup()">Back to login</span>
+          <span class="lp-forgot auth-back-link" onclick="hideSignup()"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
         <div id="forgot-section" style="display:none">
           <div class="lp-header">
-            <h1>Recovery Request</h1>
-            <p>Enter the administrative recovery code</p>
+            <h1>Recovery request</h1>
+            <p>Enter the administrative recovery code to confirm account ownership.</p>
           </div>
           <form onsubmit="event.preventDefault(); submitForgotPassword();">
             <div class="lp-input-group">
@@ -1875,7 +1918,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
           </form>
           <div class="login-error" id="forgot-error" style="display:none"></div>
           <div class="recovery-result" id="forgot-result" style="display:none"></div>
-          <span class="lp-forgot" style="text-align:center;margin-top:16px;display:block" onclick="hideForgotPassword()">Back to login</span>
+          <span class="lp-forgot auth-back-link" onclick="hideForgotPassword()"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
       </div>
       <div class="lp-footer">
@@ -2000,8 +2043,8 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
             </div>
             <div class="lp-stage">
               <h3>Travel</h3>
-              <div class="lp-candidate green"><strong>C. Njeri</strong><span>UAE · Paid</span></div>
-              <div class="lp-candidate green"><strong>T. Waweru</strong><span>Qatar · Cleared</span></div>
+              <div class="lp-candidate green"><strong>C. Njeri</strong><span>UAE Â· Paid</span></div>
+              <div class="lp-candidate green"><strong>T. Waweru</strong><span>Qatar Â· Cleared</span></div>
             </div>
           </div>
         </div>
@@ -2053,9 +2096,9 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 
       <!-- USER CARD -->
       <div class="sidebar-user-card">
-        <div class="suc-avatar" id="suc-avatar">—</div>
+        <div class="suc-avatar" id="suc-avatar">â€”</div>
         <div class="suc-info">
-          <div class="suc-name" id="suc-name">—</div>
+          <div class="suc-name" id="suc-name">â€”</div>
           <div class="suc-org">Destiny Recruitment Consults</div>
         </div>
       </div>
@@ -2110,23 +2153,23 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
         <span class="topbar-title" id="topbar-title">Dashboard</span>
         <div class="topbar-search">
           <i class="ti ti-search"></i>
-          <input type="text" placeholder="Search candidates…" id="global-search" oninput="onGlobalSearch()">
+          <input type="text" placeholder="Search candidatesâ€¦" id="global-search" oninput="onGlobalSearch()">
         </div>
         <div class="save-dot" id="save-dot"></div>
         <span class="save-label" id="save-label">Saved</span>
         <div class="profile-wrap">
           <!-- Icon-only profile button -->
           <button class="topbar-profile-btn" id="topbar-profile-btn" onclick="toggleProfileDropdown(event)" title="Account">
-            <div class="topbar-avatar" id="topbar-avatar">—</div>
+            <div class="topbar-avatar" id="topbar-avatar">â€”</div>
           </button>
 
           <!-- Rich profile dropdown -->
           <div class="profile-dropdown" id="profile-dropdown">
             <!-- Header: avatar + name + role -->
             <div class="pd-header">
-              <div class="pd-avatar" id="pd-avatar">—</div>
+              <div class="pd-avatar" id="pd-avatar">â€”</div>
               <div style="flex:1;min-width:0">
-                <div class="pd-name" id="pd-name">—</div>
+                <div class="pd-name" id="pd-name">â€”</div>
                 <div class="pd-role-badge" id="pd-role-badge"><i class="ti ti-shield-check"></i><span id="pd-role-text">Staff</span></div>
               </div>
             </div>
@@ -2187,7 +2230,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
       <!-- CONTENT -->
       <div class="content-area">
 
-        <!-- ── DASHBOARD ── -->
+        <!-- â”€â”€ DASHBOARD â”€â”€ -->
         <div id="dash-section">
           <div class="welcome-banner" id="welcome-banner">
             <div class="wb-left">
@@ -2208,7 +2251,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
           </div>
         </div>
 
-        <!-- ── PROFESSIONAL ── -->
+        <!-- â”€â”€ PROFESSIONAL â”€â”€ -->
         <div id="pro-section" style="display:none">
           <div class="metrics-strip" id="pro-metrics"></div>
           <div class="panel">
@@ -2218,7 +2261,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
                 <div class="pill-tabs" id="pro-stage-pills"></div>
                 <div class="search-wrap">
                   <i class="ti ti-search"></i>
-                  <input type="text" id="pro-search" placeholder="Search…" oninput="renderPro()">
+                  <input type="text" id="pro-search" placeholder="Searchâ€¦" oninput="renderPro()">
                 </div>
                 <select class="toolbar-select" id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
                 <select class="toolbar-select" id="pro-position-f" onchange="renderPro()"><option value="">All positions</option></select>
@@ -2239,7 +2282,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
                   <th>#</th><th>Full name</th><th>Position</th><th>Company</th><th>Country</th>
                   <th>Stage</th><th>Commission</th><th>Paid</th><th>Balance</th><th>Docs</th><th></th>
                 </tr></thead>
-                <tbody id="pro-tbody"><tr><td colspan="11"><div class="empty">Loading…</div></td></tr></tbody>
+                <tbody id="pro-tbody"><tr><td colspan="11"><div class="empty">Loadingâ€¦</div></td></tr></tbody>
               </table>
             </div>
             <div class="click-hint"><i class="ti ti-hand-click"></i> Click any row to edit that candidate</div>
@@ -2247,7 +2290,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
           </div>
         </div>
 
-        <!-- ── LB JOBS ── -->
+        <!-- â”€â”€ LB JOBS â”€â”€ -->
         <div id="lb-section" style="display:none">
           <div class="metrics-strip" id="lb-metrics"></div>
           <div class="panel">
@@ -2276,7 +2319,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
               <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
                 <div class="search-wrap">
                   <i class="ti ti-search"></i>
-                  <input type="text" id="lb-search" placeholder="Search…" oninput="renderLB()">
+                  <input type="text" id="lb-search" placeholder="Searchâ€¦" oninput="renderLB()">
                 </div>
                 <select class="toolbar-select" id="lb-refund-f" onchange="renderLB()">
                   <option value="">All refund statuses</option>
@@ -2303,7 +2346,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
                   <th>Travel status</th><th>Travel date</th><th>To refund</th>
                   <th>Refunded</th><th>Balance</th><th>Refund status</th><th>Docs</th><th></th>
                 </tr></thead>
-                <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loading…</div></td></tr></tbody>
+                <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loadingâ€¦</div></td></tr></tbody>
               </table>
             </div>
             <div class="click-hint"><i class="ti ti-hand-click"></i> Click any row to edit that candidate</div>
@@ -2311,7 +2354,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
           </div>
         </div>
 
-        <!-- ── KANBAN BOARD ── -->
+        <!-- â”€â”€ KANBAN BOARD â”€â”€ -->
         <div id="kanban-section" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
             <div>
@@ -2329,7 +2372,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
           <div id="kanban-board" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;min-height:300px"></div>
         </div>
 
-        <!-- ── CALENDAR ── -->
+        <!-- â”€â”€ CALENDAR â”€â”€ -->
         <div id="calendar-section" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
             <div style="display:flex;align-items:center;gap:14px">
@@ -2347,7 +2390,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
           </div>
         </div>
 
-        <!-- ── REPORTS ── -->
+        <!-- â”€â”€ REPORTS â”€â”€ -->
         <div id="reports-section" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div style="font-size:13px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em">Placement Analytics</div>
@@ -2366,7 +2409,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   <div class="modal">
     <div class="modal-header">
       <h3 id="pro-modal-title">Add professional candidate</h3>
-      <button class="modal-close" onclick="closeModal('pro-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('pro-modal')">Ã—</button>
     </div>
     <div class="candidate-summary" id="pro-summary"></div>
     <div class="modal-tabs">
@@ -2419,7 +2462,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   <div class="modal">
     <div class="modal-header">
       <h3 id="lb-modal-title">Add General Jobs candidate</h3>
-      <button class="modal-close" onclick="closeModal('lb-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('lb-modal')">Ã—</button>
     </div>
     <div class="candidate-summary" id="lb-summary"></div>
     <div class="modal-tabs">
@@ -2470,16 +2513,16 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   <div class="modal" style="max-width:460px">
     <div class="modal-header">
       <h3 id="docs-modal-title">Documents</h3>
-      <button class="modal-close" onclick="closeModal('docs-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('docs-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <p style="font-size:12px;color:var(--text-3);margin-bottom:14px">
         Upload all of this candidate's documents into one Google Drive folder, then paste the share link below.
-        <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link →</a>
+        <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link â†’</a>
       </p>
       <div class="field">
         <label>Documents folder link</label>
-        <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link…" oninput="onDocsLinkInput()">
+        <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder linkâ€¦" oninput="onDocsLinkInput()">
       </div>
     </div>
     <div class="modal-footer" style="justify-content:space-between">
@@ -2497,7 +2540,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   <div class="modal" style="max-width:720px">
     <div class="modal-header">
       <h3>Settings</h3>
-      <button class="modal-close" onclick="closeModal('settings-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('settings-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="settings-kpi-row" id="settings-kpis"></div>
@@ -2556,7 +2599,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
         </div>
         <div class="settings-card">
           <i class="ti ti-cloud-check"></i>
-          <div><strong>Storage mode</strong><span id="settings-storage-mode">Checking storage…</span></div>
+          <div><strong>Storage mode</strong><span id="settings-storage-mode">Checking storageâ€¦</span></div>
         </div>
       </div>
       <div class="settings-actions">
@@ -2579,7 +2622,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   <div class="modal" style="max-width:720px">
     <div class="modal-header">
       <h3>Help & Support</h3>
-      <button class="modal-close" onclick="closeModal('help-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('help-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="help-list">
@@ -2630,3 +2673,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 <script src="app.js"></script>
 </body>
 </html>
+
+
+
+
