@@ -1734,233 +1734,17 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
   .lp-input-wrap input,.lp-submit{height:56px!important}
   .lp-chips{grid-template-columns:1fr!important;margin-top:20px!important}
 }
-/* Dreco login redesign */
-:root{
-  --font-heading: 'Inter', 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-}
-@supports (font-variation-settings: normal) {
-  html { font-family: 'InterVariable', sans-serif; }
-}
-html,body,button,input,select,textarea{
-  font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif!important;
-}
-body{font-feature-settings:'liga' 1,'calt' 1;}
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#EBEBEB;overflow:auto}
-.lp-window {
-  background: #fff;
-  width: 100%;
-  max-width: 1280px;
-  height: calc(100vh - 48px);
-  min-height: 620px;
-  max-height: 820px;
-  border-radius: 20px;
-  box-shadow: 0 24px 64px rgba(0,0,0,.10), 0 4px 16px rgba(0,0,0,.06);
-  display: flex;
-  overflow: hidden;
-  border: 1px solid #E4E7EE;
-}
-.lp-form-panel {
-  flex: 0 0 420px;
-  padding: 40px 48px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background: #fff;
-  overflow-y: auto;
-}
-.lp-content-area {
-  width: 100%;
-  max-width: 320px;
-  margin: 0 auto;
-}
-.lp-header {
-  margin-bottom: 28px;
-  text-align: left;
-}
-.lp-header h1 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111827;
-  letter-spacing: -0.02em;
-  margin-bottom: 6px;
-  line-height: 1.25;
-}
-.lp-header p {
-  font-size: 14px;
-  color: #6B7280;
-  font-weight: 400;
-  line-height: 1.5;
-}
-.lp-input-group{margin-bottom:18px;text-align:left}
-.lp-input-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 6px;
-  text-transform: none;
-  letter-spacing: 0;
-}
-.lp-input-wrap{position:relative;display:flex;align-items:center}
-.lp-input-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:17px;color:#9CA3AF;z-index:1}
-.lp-input-wrap input {
-  width: 100%;
-  height: 44px;
-  background: #F9FAFB;
-  border: 1.5px solid #E5E7EB;
-  border-radius: 10px;
-  padding: 0 16px 0 42px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 400;
-  color: #111827;
-  transition: border-color .15s, box-shadow .15s;
-}
-.lp-input-wrap input:focus {
-  outline: none;
-  border-color: #5347CE;
-  box-shadow: 0 0 0 3px rgba(83,71,206,.12);
-  background: #fff;
-}
-.lp-pw-toggle{position:absolute;right:12px;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:17px;line-height:1;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
-.lp-forgot{display:block;text-align:right;font-size:12px;color:#5347CE;margin-top:6px;font-weight:500;cursor:pointer}
-.lp-forgot:hover{color:#4538B8;text-decoration:underline}
-.lp-submit {
-  width: 100%;
-  height: 44px;
-  background: #5347CE;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 16px;
-  letter-spacing: 0;
-  transition: background .15s, transform .1s;
-  box-shadow: 0 2px 8px rgba(83,71,206,.24);
-}
-.lp-submit:hover {
-  background: #4538B8;
-  transform: translateY(-1px);
-}
-.lp-submit:focus-visible {
-  outline: 3px solid #5347CE;
-  outline-offset: 2px;
-}
-.lp-submit.is-success{background:#138A63}
-.lp-submit-dots{display:none;align-items:center;gap:4px;margin-left:8px}
-.lp-submit.is-loading .lp-submit-dots{display:inline-flex}
-.lp-submit-dots i{width:5px;height:5px;border-radius:50%;background:#fff;opacity:.5;animation:drecoLoginDot .9s infinite ease-in-out}
-.lp-submit-dots i:nth-child(2){animation-delay:.12s}.lp-submit-dots i:nth-child(3){animation-delay:.24s}
-.lp-chips {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-}
-.lp-chip {
-  flex: 1;
-  height: 36px;
-  background: #F9FAFB;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #6B7280;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.lp-chip i { font-size: 13px; color: #9CA3AF; }
-.lp-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #9CA3AF;
-  font-weight: 400;
-  margin-top: 24px;
-}
-.lp-footer a { color: #9CA3AF; text-decoration: none; }
-.lp-footer a:hover { color: #6B7280; text-decoration: underline; }
-.login-error{color:#B83232;font-size:12px;margin-top:10px;display:none;background:#FDEAEA;padding:8px 12px;border-radius:10px;text-align:left}
-.lp-signup-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:42px;margin-top:18px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;color:#6B7280;font-size:13px;font-weight:500;cursor:pointer}
-.lp-signup-cta strong{color:#5347CE;font-weight:600}.lp-signup-cta:hover{background:#F9FAFB;border-color:#D8DAE3}
-.lp-security-copy{margin-top:8px;font-size:12px;line-height:1.45;color:#9CA3AF;text-align:center}
-.lp-field-hint{display:none;margin-top:6px;font-size:12px;color:#9A5B00}.lp-field-hint.show{display:block}
-.auth-helper{display:block;margin-top:6px;font-size:12px;line-height:1.4;color:#6B7280;font-weight:400}.auth-back-link{display:block!important;text-align:center!important;margin-top:14px!important}
-.lp-media {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(160deg, #F5F4FF 0%, #EEF2FF 60%, #F0F9FF 100%);
-  border-left: 1px solid #E4E7EE;
-  padding: 48px 56px 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 32px;
-}
-.lp-media::before,.lp-media::after{content:none!important;display:none!important}
-.lp-media-head{position:relative;z-index:1;display:block}
-.lp-kicker{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#5347CE;border:1px solid #E1E6F4;border-radius:999px;padding:8px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;box-shadow:none}
-.lp-media-copy{max-width:500px;margin-top:20px}
-.lp-media-copy h2 {
-  font-size: 30px;
-  line-height: 1.18;
-  letter-spacing: -0.02em;
-  color: #111827;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-.lp-media-copy h2 span { color: #5347CE; }
-.lp-media-copy p {
-  font-size: 14px;
-  color: #6B7280;
-  font-weight: 400;
-  line-height: 1.6;
-  max-width: 420px;
-}
-.lp-visual{position:relative;z-index:1;display:flex;align-items:center;justify-content:center}
-.lp-dashboard-preview {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  background: rgba(255,255,255,.96);
-  border: 1px solid #E4E7EE;
-  border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: 0 12px 40px rgba(83,71,206,.10);
-}
-.lp-preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.lp-preview-head strong{font-size:13px;color:#111827}.lp-preview-chip{border:1px solid #DDE4F8;background:#fff;border-radius:12px;padding:7px 10px;font-size:11px;color:#697386;font-weight:600}.lp-preview-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.lp-preview-kpi{border:1px solid #E5EAF6;border-radius:13px;background:#fff;padding:11px 12px;min-height:78px}.lp-preview-kpi span{display:block;font-size:9px;color:#7B8496;font-weight:600;margin-bottom:6px}.lp-preview-kpi i{float:right;width:24px;height:24px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#F0ECFF;color:#5347CE}.lp-preview-kpi strong {
-  font-size: 18px;
-  color: #111827;
-  font-weight: 700;
-  line-height: 1;
-}
-.lp-preview-body{display:grid;grid-template-columns:1.25fr .85fr;gap:10px}.lp-preview-panel{border:1px solid #E5EAF6;border-radius:14px;background:#fff;padding:12px 13px}.lp-preview-panel h3{font-size:12px;color:#111827;margin-bottom:11px}.lp-progress-line{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:8px;margin-bottom:10px;font-size:11px;color:#6B7280}.lp-line-track{height:7px;border-radius:999px;background:#EEF1F7;overflow:hidden}.lp-line-fill{height:100%;border-radius:999px;background:#5347CE}.lp-line-fill.blue{background:#1A6BB5}.lp-line-fill.gold{background:#F0B429}.lp-line-fill.green{background:#22A06B}.lp-report-wave{height:94px;position:relative;border-radius:12px;background:linear-gradient(180deg,#F7F6FF,#fff)}.lp-report-wave svg{position:absolute;inset:10px 8px auto;width:calc(100% - 16px);height:68px}.lp-report-gain{position:absolute;right:12px;bottom:12px;color:#22A06B;font-size:13px;font-weight:700}
-.lp-illustration,.lp-board,.lp-doc-card,.lp-route{display:none!important}
-@media(max-width:960px) {
-  .lp-window {
-    height: auto;
-    flex-direction: column;
-    border-radius: 0;
-    min-height: 100vh;
-    max-height: none;
-  }
-  .lp-media { display: none; }
-  .lp-form-panel {
-    flex: 1;
-    padding: 36px 28px 32px;
-    overflow-y: auto;
-  }
-  .lp-content-area { max-width: 100%; }
-}
-@media(max-width:480px) {
-  .lp-form-panel { padding: 28px 20px 24px; }
-}
+/* Dreco login exact reference redesign */
+:root{--font-heading:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif;--font-body:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif}
+@supports (font-variation-settings: normal){html{font-family:'InterVariable',sans-serif}}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;background:#EEF2F8;overflow:auto;font-family:var(--font-body)}
+#login-screen *{box-sizing:border-box;letter-spacing:0}
+.lp-window{width:100%;max-width:1490px;min-height:760px;height:calc(100vh - 44px);max-height:980px;background:#fff;border:1px solid #E8ECF4;border-radius:14px;box-shadow:0 20px 50px rgba(28,36,62,.08);display:grid;grid-template-columns:42% 58%;overflow:hidden}
+.lp-form-panel{background:#fff;padding:0 78px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow-y:auto}
+.lp-content-area{width:100%;max-width:462px;margin:0 auto}.lp-header{margin:0 0 42px;text-align:left}.lp-header h1{font-family:var(--font-heading);font-size:39px;line-height:1.08;font-weight:760;color:#0F1633;margin:0 0 12px;letter-spacing:-.03em}.lp-header p{font-size:20px;line-height:1.45;color:#7F89A3;font-weight:430;margin:0}.lp-auth-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #E4E8F0;margin:0 0 38px}.lp-auth-tab{height:46px;border:0;background:transparent;color:#30384D;font-size:15px;font-weight:700;cursor:pointer;position:relative}.lp-auth-tab.active{color:#271FE0}.lp-auth-tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#3F36F6}.lp-input-group{margin-bottom:27px;text-align:left}.lp-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.lp-input-group label{display:block;color:#111827;font-size:14px;font-weight:650;margin:0 0 10px;text-transform:none}.lp-label-row label{margin:0}.lp-input-wrap{position:relative;display:flex;align-items:center}.lp-input-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:22px;color:#98A2B8;z-index:1}.lp-input-wrap input{width:100%;height:54px;border:1px solid #D8DEEA;border-radius:7px;background:#fff;padding:0 50px;font-size:16px;font-weight:430;color:#111827;outline:0;font-family:var(--font-body);transition:border-color .15s,box-shadow .15s}.lp-input-wrap input::placeholder{color:#929CB5}.lp-input-wrap input:focus{border-color:#4D43F5;box-shadow:0 0 0 3px rgba(77,67,245,.12)}.lp-pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;background:transparent;color:#98A2B8;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}.lp-forgot{color:#2D22E8;font-size:14px;font-weight:560;cursor:pointer;text-decoration:none}.lp-forgot:hover{text-decoration:underline}.lp-field-hint{display:none;margin-top:7px;font-size:12px;color:#9A5B00}.lp-field-hint.show{display:block}.lp-remember{display:flex;align-items:center;gap:10px;color:#6D7791;font-size:14px;font-weight:450;margin:-4px 0 24px}.lp-remember input{appearance:none;width:18px;height:18px;border:1.5px solid #C9D1E1;border-radius:4px;background:#fff}.lp-remember input:checked{background:#4A3DF1;border-color:#4A3DF1;box-shadow:inset 0 0 0 4px #fff}.lp-submit{width:100%;height:58px;border:0;border-radius:7px;background:linear-gradient(135deg,#4F42F4 0%,#3F30DC 100%);box-shadow:0 10px 22px rgba(63,48,220,.22);color:#fff;font-size:15px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:transform .12s,box-shadow .12s;margin:0}.lp-submit:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(63,48,220,.27)}.lp-submit:focus-visible{outline:3px solid #4F42F4;outline-offset:2px}.lp-submit.is-success{background:#12825F}.lp-submit-dots{display:none;align-items:center;gap:4px;margin-left:8px}.lp-submit.is-loading .lp-submit-dots{display:inline-flex}.lp-submit-dots i{width:5px;height:5px;border-radius:999px;background:#fff;opacity:.55;animation:drecoLoginDot .9s infinite ease-in-out}.lp-submit-dots i:nth-child(2){animation-delay:.12s}.lp-submit-dots i:nth-child(3){animation-delay:.24s}.login-error{display:none;margin-top:14px;padding:10px 12px;border-radius:8px;background:#FFF1F3;color:#A51232;font-size:13px;font-weight:550}.lp-divider{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;color:#8C95AB;font-size:14px;margin:42px 0 30px}.lp-divider::before,.lp-divider::after{content:'';height:1px;background:#E4E8F0}.lp-social-row{display:grid;grid-template-columns:1fr 1fr;gap:13px}.lp-social-btn{height:52px;border:1px solid #D8DEEA;background:#fff;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;gap:13px;color:#111827;font-size:16px;font-weight:650;cursor:pointer}.lp-google-mark{font-weight:800;font-size:22px;color:#4285F4}.lp-ms-mark{width:20px;height:20px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px}.lp-ms-mark i:nth-child(1){background:#F35325}.lp-ms-mark i:nth-child(2){background:#81BC06}.lp-ms-mark i:nth-child(3){background:#05A6F0}.lp-ms-mark i:nth-child(4){background:#FFBA08}.lp-signup-cta{margin:56px auto 0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;gap:14px;color:#8A94AB;font-size:15px;font-weight:460;cursor:pointer}.lp-signup-cta strong{color:#251CE2;font-size:15px;font-weight:760}.lp-footer-note{position:absolute;left:78px;right:78px;bottom:42px;color:#9AA4BB;font-size:14px;display:flex;align-items:center;gap:12px}.lp-footer-note i{font-size:22px;color:#9AA4BB}.auth-helper{display:block;margin-top:7px;font-size:12px;color:#7F89A3}.auth-back-link{display:block;text-align:center;margin-top:16px}.lp-footer,.lp-chips,.lp-chip,.lp-security-copy{display:none!important}
+.lp-media{position:relative;overflow:hidden;background:radial-gradient(circle at 94% 3%,rgba(255,255,255,.28) 0 10%,transparent 10.5%),linear-gradient(135deg,#4B3DE4 0%,#3025B8 100%);padding:112px 84px 0;color:#fff;display:flex;flex-direction:column;justify-content:flex-start}.lp-media::before{content:'';position:absolute;width:460px;height:460px;border-radius:50%;right:-120px;top:-190px;background:rgba(255,255,255,.12)}.lp-media::after{content:'';position:absolute;width:560px;height:560px;border-radius:50%;right:-78px;bottom:-220px;background:rgba(255,255,255,.06)}.lp-bg-circle.one{position:absolute;right:-76px;top:-88px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.10)}.lp-bg-circle.two{position:absolute;right:-42px;top:38px;width:126px;height:126px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.28) 1.2px,transparent 1.6px);background-size:10px 10px;opacity:.55}.lp-dot-field{display:none}.lp-media-copy{position:relative;z-index:2;max-width:590px;margin:0 0 28px}.lp-media-copy h2{font-family:var(--font-heading);font-size:47px;line-height:1.15;font-weight:760;letter-spacing:-.025em;color:#fff;margin:0 0 18px}.lp-media-copy h2 span{color:rgba(255,255,255,.36)}.lp-media-copy p{max-width:505px;color:#fff;font-size:17px;line-height:1.55;font-weight:430;margin:0}.lp-feature-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;column-gap:58px;row-gap:34px;max-width:720px;margin-top:30px}.lp-feature{display:grid;grid-template-columns:60px 1fr;gap:16px;align-items:start}.lp-feature:nth-child(5){grid-column:1 / 2}.lp-feature-icon{width:60px;height:60px;border-radius:9px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}.lp-feature-icon i{font-size:34px;color:#fff}.lp-feature strong{display:block;color:#fff;font-size:16px;font-weight:760;margin-bottom:7px}.lp-feature span{display:block;color:#fff;font-size:14px;line-height:1.45;font-weight:430}.lp-product-preview{position:absolute;left:66px;right:60px;bottom:0;height:346px;z-index:3;display:grid;grid-template-columns:70px 1fr}.lp-preview-sidebar{border:1px solid rgba(255,255,255,.45);border-right:0;border-radius:17px 0 0 0;background:rgba(255,255,255,.06);padding:22px 11px;display:flex;flex-direction:column;align-items:center;gap:18px}.lp-preview-sidebar span{width:46px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff}.lp-preview-sidebar span.active{background:rgba(255,255,255,.13)}.lp-preview-sidebar i{font-size:18px}.lp-preview-card{background:#fff;border-radius:0 14px 0 0;padding:28px;color:#151A2D;box-shadow:0 -2px 22px rgba(25,19,104,.14);overflow:hidden}.lp-preview-title{font-size:12px;font-weight:760;margin-bottom:20px}.lp-flow-row{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;position:relative;margin-bottom:20px}.lp-flow-row>i{position:absolute;top:20px;transform:translateX(-50%);width:27px;height:27px;border-radius:50%;background:#fff;border:1px solid #E2E5F0;color:#4F42F4;display:flex;align-items:center;justify-content:center;font-size:15px;z-index:2}.lp-flow-row>i:nth-of-type(1){left:19.8%}.lp-flow-row>i:nth-of-type(2){left:40%}.lp-flow-row>i:nth-of-type(3){left:60.2%}.lp-flow-row>i:nth-of-type(4){left:80.2%}.lp-flow-card{height:56px;border:1px solid #E2E5F0;border-radius:7px;background:#FBFCFF;padding:12px 16px}.lp-flow-card.active{border-color:#A49DFF;background:#F6F4FF;box-shadow:inset 3px 0 0 #4F42F4}.lp-flow-card span{display:block;font-size:10px;font-weight:650;color:#536078;margin-bottom:4px}.lp-flow-card strong{font-size:17px;color:#111827}.lp-preview-panels{display:grid;grid-template-columns:1.08fr .92fr;gap:16px}.lp-money-panel,.lp-activity-panel{height:182px;border:1px solid #E6E9F2;border-radius:8px;padding:18px;background:#fff;position:relative}.lp-money-panel h3,.lp-activity-panel h3{font-size:12px;margin:0 0 22px;color:#111827}.lp-money-panel span{display:block;font-size:10px;color:#98A2B8;margin-bottom:6px}.lp-money-panel strong{display:block;font-size:17px;color:#111827;margin-bottom:20px}.lp-donut{position:absolute;right:42px;top:58px;width:84px;height:84px;border-radius:50%;background:conic-gradient(#4F42F4 0 36%,#DCD8FF 36% 100%)}.lp-donut::after{content:'';position:absolute;inset:25px;background:#fff;border-radius:50%}.lp-activity-panel{display:flex;flex-direction:column;gap:13px}.lp-activity-panel h3{margin-bottom:4px}.lp-activity-panel div{position:relative;padding-left:34px;min-height:28px}.lp-activity-panel div::before{content:'';position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:linear-gradient(#FFD0B5,#A9C5FF)}.lp-activity-panel b{display:block;font-size:10px;color:#111827}.lp-activity-panel span{display:block;font-size:10px;color:#7B8496}.lp-activity-panel em{position:absolute;right:0;top:3px;font-style:normal;font-size:9px;color:#98A2B8}
+@media(max-width:1100px){.lp-window{grid-template-columns:1fr}.lp-media{display:none}.lp-form-panel{min-height:100vh;padding:44px 28px}.lp-content-area{max-width:462px}.lp-footer-note{position:static;margin:52px auto 0;max-width:462px}.lp-header h1{font-size:34px}.lp-header p{font-size:17px}}
+@media(max-width:560px){#login-screen{padding:0}.lp-window{min-height:100vh;height:auto;border-radius:0;border:0}.lp-form-panel{padding:34px 20px}.lp-header{margin-bottom:32px}.lp-header h1{font-size:30px}.lp-header p{font-size:16px}.lp-social-row{grid-template-columns:1fr}.lp-signup-cta{margin-top:34px}.lp-footer-note{font-size:13px}}
   </style>
 </head>
 <body>
@@ -1975,51 +1759,53 @@ body{font-feature-settings:'liga' 1,'calt' 1;}
 <div id="login-screen">
   <div class="lp-window">
     <div class="lp-form-panel">
-      <div class="lp-brand-tag">
-        <div class="lp-logo-mark">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 6C3 4.34315 4.34315 3 6 3H10C11.6569 3 13 4.34315 13 6V10C13 11.6569 11.6569 13 10 13H6C4.34315 13 3 11.6569 3 10V6Z" fill="#EEFA94"/>
-            <path d="M14 14C14 12.8954 14.8954 12 16 12H20C21.1046 12 22 12.8954 22 14V20C22 21.1046 21.1046 22 20 22H16C14.8954 22 14 21.1046 14 20V14Z" fill="#EEFA94" opacity=".6"/>
-            <path d="M3 17C3 15.8954 3.89543 15 5 15H8C9.10457 15 10 15.8954 10 17V19C10 20.1046 9.10457 21 8 21H5C3.89543 21 3 20.1046 3 19V17Z" fill="#EEFA94" opacity=".35"/>
-            <path d="M16 3H20C21.1046 3 22 3.89543 22 5V8C22 9.10457 21.1046 10 20 10H16C14.8954 10 14 9.10457 14 8V5C14 3.89543 14.8954 3 16 3Z" fill="white" opacity=".25"/>
-          </svg>
-        </div>
-        <span class="lp-brand-name">Dreco</span>
-      </div>
       <div class="lp-content-area">
         <div id="login-main">
           <div class="lp-header">
             <h1>Welcome back</h1>
-            <p>Continue where your recruitment workflow left off.</p>
+            <p>Sign in to your Dreco workspace</p>
           </div>
+
+          <div class="lp-auth-tabs" role="tablist" aria-label="Authentication options">
+            <button class="lp-auth-tab active" type="button">Log in</button>
+            <button class="lp-auth-tab" type="button" onclick="showSignup()">Sign up</button>
+          </div>
+
           <form onsubmit="event.preventDefault(); doLogin();">
             <div class="lp-input-group">
-              <label for="username-input">Username</label>
+              <label for="username-input">Email address</label>
               <div class="lp-input-wrap">
-                <i class="ti ti-user lp-input-icon"></i>
-                <input type="text" id="username-input" placeholder="Enter your username" required autocomplete="username" autocapitalize="none" spellcheck="false">
+                <i class="ti ti-mail lp-input-icon"></i>
+                <input type="text" id="username-input" placeholder="you@yourcompany.com" required autocomplete="username" autocapitalize="none" spellcheck="false">
               </div>
             </div>
             <div class="lp-input-group">
-              <label for="pw-input">Password</label>
+              <div class="lp-label-row">
+                <label for="pw-input">Password</label>
+                <span class="lp-forgot" onclick="showForgotPassword()">Forgot password?</span>
+              </div>
               <div class="lp-input-wrap">
                 <i class="ti ti-lock lp-input-icon"></i>
-                <input type="password" id="pw-input" placeholder="********" required autocomplete="current-password">
+                <input type="password" id="pw-input" placeholder="Enter your password" required autocomplete="current-password">
                 <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
               </div>
               <div class="lp-field-hint" id="caps-lock-hint" aria-live="polite">Caps Lock is on</div>
-              <span class="lp-forgot" onclick="showForgotPassword()">Need account recovery?</span>
             </div>
-            <button type="submit" class="lp-submit" id="login-submit"><span class="lp-submit-label">Sign in</span><span class="lp-submit-dots" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <label class="lp-remember"><input type="checkbox"><span>Remember me</span></label>
+            <button type="submit" class="lp-submit" id="login-submit"><span class="lp-submit-label">Log in</span><span class="lp-submit-dots" aria-hidden="true"><i></i><i></i><i></i></span></button>
           </form>
+
           <div class="login-error" id="login-error" role="alert" aria-live="polite">Incorrect username or password.</div>
-          <button type="button" class="lp-signup-cta" onclick="showSignup()"><span>New to Dreco?</span><strong>Create an account</strong></button>
-          <div class="lp-chips">
-            <div class="lp-chip"><i class="ti ti-shield-check"></i> Enterprise Security</div>
-            <div class="lp-chip"><i class="ti ti-cloud-check"></i> Auto Backup Enabled</div>
+
+          <div class="lp-divider"><span>or continue with</span></div>
+          <div class="lp-social-row">
+            <button type="button" class="lp-social-btn"><span class="lp-google-mark">G</span>Google</button>
+            <button type="button" class="lp-social-btn"><span class="lp-ms-mark"><i></i><i></i><i></i><i></i></span>Microsoft</button>
           </div>
-          <div class="lp-security-copy">Protected access for recruitment operations.</div>
+
+          <button type="button" class="lp-signup-cta" onclick="showSignup()"><span>New to Dreco?</span><strong>Sign up</strong></button>
         </div>
+
         <div id="signup-section" style="display:none">
           <div class="lp-header">
             <h1>Create workspace</h1>
@@ -2062,6 +1848,7 @@ body{font-feature-settings:'liga' 1,'calt' 1;}
           <div class="login-error" id="signup-error" style="display:none"></div>
           <span class="lp-forgot auth-back-link" onclick="hideSignup()"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
+
         <div id="forgot-section" style="display:none">
           <div class="lp-header">
             <h1>Recovery request</h1>
@@ -2082,140 +1869,59 @@ body{font-feature-settings:'liga' 1,'calt' 1;}
           <span class="lp-forgot auth-back-link" onclick="hideForgotPassword()"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
       </div>
-      <div class="lp-footer">
-        <span>&copy; 2025 Dreco</span>
-        <a href="https://supabase.com" target="_blank">Cloud Database Status</a>
-      </div>
+
+      <div class="lp-footer-note"><i class="ti ti-shield-check"></i><span>Your data is secure with enterprise-grade encryption.</span></div>
     </div>
+
     <div class="lp-media">
-      <div class="lp-media-head">
-        <div>
-          <div class="lp-kicker"><i class="ti ti-briefcase"></i>Recruitment command center</div>
-          <div class="lp-media-copy">
-            <h2>Recruitment operations.<br><span>Organized. Faster. Clearer.</span></h2>
-            <p>Track candidates, approvals, visas, payments, and reporting from one intelligent workspace.</p>
-          </div>
-        </div>
+      <div class="lp-bg-circle one"></div>
+      <div class="lp-bg-circle two"></div>
+      <div class="lp-dot-field"></div>
+
+      <div class="lp-media-copy">
+        <h2>Run Your Recruitment<br>Business. <span>End to End.</span></h2>
+        <p>Dreco brings your candidate pipeline, visa workflows, payments, compliance, and team activity together in one secure workspace.</p>
       </div>
 
-      <div class="lp-visual">
-        <div class="lp-dashboard-preview">
-          <div class="lp-preview-head">
-            <strong>Pipeline overview</strong>
-            <div class="lp-preview-chip">All workflows <i class="ti ti-chevron-down"></i></div>
-          </div>
-          <div class="lp-preview-kpis">
-            <div class="lp-preview-kpi"><i class="ti ti-users"></i><span>Total candidates</span><strong>133</strong></div>
-            <div class="lp-preview-kpi"><i class="ti ti-loader"></i><span>In progress</span><strong>47</strong></div>
-            <div class="lp-preview-kpi"><i class="ti ti-plane"></i><span>Travelled</span><strong>77</strong></div>
-            <div class="lp-preview-kpi"><i class="ti ti-coin"></i><span>Collected</span><strong>5.2M</strong></div>
-          </div>
-          <div class="lp-preview-body">
-            <div class="lp-preview-panel">
-              <h3>Candidate progress</h3>
-              <div class="lp-progress-line"><span>Offer</span><div class="lp-line-track"><div class="lp-line-fill" style="width:74%"></div></div><strong>24</strong></div>
-              <div class="lp-progress-line"><span>MOL</span><div class="lp-line-track"><div class="lp-line-fill blue" style="width:58%"></div></div><strong>18</strong></div>
-              <div class="lp-progress-line"><span>Visa</span><div class="lp-line-track"><div class="lp-line-fill gold" style="width:46%"></div></div><strong>12</strong></div>
-              <div class="lp-progress-line"><span>Finance</span><div class="lp-line-track"><div class="lp-line-fill green" style="width:82%"></div></div><strong>41</strong></div>
-            </div>
-            <div class="lp-preview-panel">
-              <h3>Reports</h3>
-              <div class="lp-report-wave">
-                <svg viewBox="0 0 160 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 70C18 24 34 40 48 58C64 78 75 34 91 42C108 50 111 75 128 36C142 4 151 26 157 20" stroke="#5347CE" stroke-width="4" stroke-linecap="round"/>
-                  <path d="M3 70C18 24 34 40 48 58C64 78 75 34 91 42C108 50 111 75 128 36C142 4 151 26 157 20V90H3V70Z" fill="url(#drecoReportFade)"/>
-                  <defs><linearGradient id="drecoReportFade" x1="80" y1="18" x2="80" y2="90"><stop stop-color="#5347CE" stop-opacity=".22"/><stop offset="1" stop-color="#5347CE" stop-opacity="0"/></linearGradient></defs>
-                </svg>
-                <div class="lp-report-gain">+24%</div>
-              </div>
-            </div>
-          </div>
+      <div class="lp-feature-grid">
+        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-users-group"></i></div><div><strong>Candidate Pipeline</strong><span>Track every candidate from Offer to Travelled.</span></div></div>
+        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-file-description"></i></div><div><strong>Visa &amp; Document Workflow</strong><span>Streamline MOL, visa, and travel document processes.</span></div></div>
+        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-coin"></i></div><div><strong>Commission &amp; Payments</strong><span>Manage commissions, payments, deductions, and reconciliations.</span></div></div>
+        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-shield-check"></i></div><div><strong>Compliance &amp; Reporting</strong><span>Stay audit-ready with built-in reports and compliance tools.</span></div></div>
+        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-users"></i></div><div><strong>Team &amp; Access Control</strong><span>Role-based access for admins, managers, and staff.</span></div></div>
+      </div>
+
+      <div class="lp-product-preview">
+        <div class="lp-preview-sidebar">
+          <span class="active"><i class="ti ti-layout-grid"></i></span>
+          <span><i class="ti ti-briefcase"></i></span>
+          <span><i class="ti ti-users"></i></span>
+          <span><i class="ti ti-file-description"></i></span>
+          <span><i class="ti ti-chart-line"></i></span>
+          <span><i class="ti ti-settings"></i></span>
         </div>
-        <div class="lp-illustration">
-          <div class="lp-orbit one"></div>
-          <div class="lp-orbit two"></div>
-          <div class="lp-plus a">+</div>
-          <div class="lp-plus b">+</div>
-          <div class="lp-plus c">+</div>
-          <div class="lp-hero-card">
-            <div class="lp-hero-top">
-              <div class="lp-hero-title">Candidate progress</div>
-              <div class="lp-hero-badge">Live</div>
-            </div>
-            <div class="lp-progress-row">
-              <div class="lp-progress-icon blue"><i class="ti ti-file-cv"></i></div>
-              <div class="lp-progress-copy"><strong>Offer letter</strong><div class="lp-progress-bar"><div class="lp-progress-fill" style="width:72%"></div></div></div>
-              <div class="lp-progress-count">24</div>
-            </div>
-            <div class="lp-progress-row">
-              <div class="lp-progress-icon gold"><i class="ti ti-plane-departure"></i></div>
-              <div class="lp-progress-copy"><strong>Pending travel</strong><div class="lp-progress-bar"><div class="lp-progress-fill gold" style="width:48%"></div></div></div>
-              <div class="lp-progress-count">12</div>
-            </div>
-            <div class="lp-progress-row">
-              <div class="lp-progress-icon green"><i class="ti ti-circle-check"></i></div>
-              <div class="lp-progress-copy"><strong>Cleared finance</strong><div class="lp-progress-bar"><div class="lp-progress-fill green" style="width:86%"></div></div></div>
-              <div class="lp-progress-count">41</div>
-            </div>
+        <div class="lp-preview-card">
+          <div class="lp-preview-title">Pipeline Overview</div>
+          <div class="lp-flow-row">
+            <div class="lp-flow-card active"><span>Offer</span><strong>128</strong></div>
+            <i class="ti ti-chevron-right"></i>
+            <div class="lp-flow-card"><span>MOL</span><strong>96</strong></div>
+            <i class="ti ti-chevron-right"></i>
+            <div class="lp-flow-card"><span>Visa</span><strong>64</strong></div>
+            <i class="ti ti-chevron-right"></i>
+            <div class="lp-flow-card"><span>Finance</span><strong>48</strong></div>
+            <i class="ti ti-chevron-right"></i>
+            <div class="lp-flow-card"><span>Travelled</span><strong>32</strong></div>
           </div>
-          <div class="lp-float-card lp-finance-card">
-            <div class="lp-float-icon"><i class="ti ti-coin"></i></div>
-            <strong>Finance</strong>
-            <span>Collected and outstanding</span>
+          <div class="lp-preview-panels">
+            <div class="lp-money-panel"><h3>Payments Overview</h3><span>Total Receivables</span><strong>$125,430</strong><span>Total Payables</span><strong>$78,210</strong><div class="lp-donut"></div></div>
+            <div class="lp-activity-panel"><h3>Recent Activity</h3><div><b>John Doe</b><span>Visa approved - Dubai</span><em>2h ago</em></div><div><b>Sara Ali</b><span>Payment received</span><em>4h ago</em></div><div><b>Michael George</b><span>Candidate travelled</span><em>1d ago</em></div></div>
           </div>
-          <div class="lp-float-card lp-docs-card">
-            <div class="lp-float-icon"><i class="ti ti-folder-check"></i></div>
-            <strong>Documents</strong>
-            <span>Drive links and records</span>
-          </div>
-          <div class="lp-float-card lp-report-card">
-            <strong>Reports</strong>
-            <span>Trends by stage</span>
-            <div class="lp-mini-chart"><span style="height:18px"></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="lp-plane-path"><div class="lp-plane"><i class="ti ti-plane"></i></div></div>
-        </div>
-        <div class="lp-board">
-          <div class="lp-board-top">
-            <div class="lp-board-title">Professional pipeline</div>
-            <div class="lp-board-meta">87 active</div>
-          </div>
-          <div class="lp-stage-grid">
-            <div class="lp-stage">
-              <h3>Offer</h3>
-              <div class="lp-candidate blue"><strong>J. Kamau</strong><span>Security Guard</span></div>
-              <div class="lp-candidate blue"><strong>A. Wanjiku</strong><span>Housekeeping</span></div>
-            </div>
-            <div class="lp-stage">
-              <h3>MOL</h3>
-              <div class="lp-candidate amber"><strong>P. Ondieki</strong><span>Driver</span></div>
-              <div class="lp-candidate amber"><strong>B. Wainaina</strong><span>Chef</span></div>
-            </div>
-            <div class="lp-stage">
-              <h3>Visa</h3>
-              <div class="lp-candidate purple"><strong>M. Ndungu</strong><span>Supervisor</span></div>
-              <div class="lp-candidate purple"><strong>F. Otieno</strong><span>Plant Helper</span></div>
-            </div>
-            <div class="lp-stage">
-              <h3>Travel</h3>
-              <div class="lp-candidate green"><strong>C. Njeri</strong><span>UAE  |  Paid</span></div>
-              <div class="lp-candidate green"><strong>T. Waweru</strong><span>Qatar  |  Cleared</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="lp-doc-card">
-          <strong>Docs ready</strong>
-          <span>28 folders linked</span>
-        </div>
-        <div class="lp-route">
-          <div class="lp-route-label">Next departure</div>
-          <div class="lp-route-row"><span>NBO</span><span class="lp-route-line"></span><span>DXB</span></div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
 <!-- APP -->
 <div id="app">
   <div class="app-layout">
@@ -2819,6 +2525,7 @@ body{font-feature-settings:'liga' 1,'calt' 1;}
 <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
