@@ -2802,6 +2802,13 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
 @media(max-width:1360px){.topbar-title{flex-basis:440px!important}.topbar-search{max-width:320px!important;flex-basis:320px!important}.ref-board-grid{grid-template-columns:minmax(0,1fr) 266px!important}.ref-kpi-row{gap:16px!important}.ref-kpi strong{font-size:23px!important}}
 @media(max-width:1180px){.topbar-title{flex:1 1 auto!important}.ref-board-grid{grid-template-columns:1fr!important}.ref-side-column{display:grid!important;grid-template-columns:repeat(3,minmax(250px,1fr));overflow-x:auto}.ref-fin-card,.ref-upcoming,.ref-quick{height:auto!important}.ref-kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:900px){.sidebar{display:none!important}.topbar{padding:0 14px!important}.topbar-search{display:none!important}.topbar-title{font-size:18px!important}.content-area>div{padding:18px 14px 92px!important}.ref-kpi-row,.ref-chart-grid,.ref-bottom-grid{grid-template-columns:1fr!important}.ref-stage-row{display:flex!important;overflow-x:auto!important}.ref-stage-box{min-width:174px!important}.ref-stage-arrow{display:none!important}.ref-side-column{display:flex!important;overflow:visible!important}.ref-donut-wrap{grid-template-columns:1fr!important;justify-items:center!important}.ref-dashboard-head{flex-direction:column!important;gap:14px!important}}
+
+/* Functional navigation cleanup */
+.sidebar .nav-section-label{margin-top:18px!important}.sidebar .nav-section-label:first-of-type{margin-top:0!important}
+.topbar::before,.topbar::after{display:none!important;content:none!important}.topbar-icon-btn{order:2;width:34px;height:34px;border:0;border-radius:10px;background:#fff;color:#334663;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .16s,color .16s,transform .16s}.topbar-icon-btn i{font-size:19px;stroke-width:1.8}.topbar-icon-btn:hover{background:#F0ECFF;color:#5A49F8;transform:translateY(-1px)}.save-dot{order:3!important}.profile-wrap{order:5!important}.topbar-workspace{order:4!important}.ref-date-btn,.ref-card-head button,.ref-fin-head button,.ref-total-link,.ref-pipe-foot span,.ref-stage-box,.ref-kpi,.ref-travel-item,.ref-task{user-select:none}.ref-stage-box,.ref-kpi,.ref-travel-item{cursor:pointer}.ref-stage-box:hover,.ref-travel-item:hover{border-color:#CFCBFF;background:#FBFAFF}.ref-quick-grid button{cursor:pointer;transition:transform .16s,box-shadow .16s,border-color .16s}.ref-quick-grid button:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(30,41,59,.08);border-color:#CFCBFF}.ref-fin-report,.ref-date-btn{cursor:pointer;transition:transform .16s,box-shadow .16s}.ref-fin-report:hover,.ref-date-btn:hover{transform:translateY(-1px)}
+
+/* Functional cleanup polish */
+.ref-total-link{display:block;width:100%;border:0;background:transparent;cursor:pointer;font-family:inherit}.topbar-icon-btn + .save-dot{margin-left:2px!important}
 </style>
 </head>
 <body>
@@ -3018,51 +3025,36 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
       </div>
       <div class="sidebar-divider"></div>
 
-            <div class="nav-section-label">General</div>
+                  <div class="nav-section-label">General</div>
       <a class="nav-item active" id="nav-dash" data-title="Dashboard" onclick="switchTab('dash')">
         <i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span>
       </a>
 
-      <div class="nav-section-label">Pipeline</div>
+      <div class="nav-section-label">Workflows</div>
       <a class="nav-item" id="nav-pro" data-title="Candidates" onclick="switchTab('pro')">
         <i class="ti ti-users"></i><span class="nav-item-label">Candidates</span>
       </a>
-      <a class="nav-item" id="nav-lb" data-title="Jobs" onclick="switchTab('lb')">
-        <i class="ti ti-briefcase"></i><span class="nav-item-label">Jobs</span>
+      <a class="nav-item" id="nav-lb" data-title="General Jobs" onclick="switchTab('lb')">
+        <i class="ti ti-briefcase"></i><span class="nav-item-label">General Jobs</span>
       </a>
-      <a class="nav-item" id="nav-kanban" data-title="Pipeline" onclick="switchTab('kanban')">
-        <i class="ti ti-route"></i><span class="nav-item-label">Pipeline</span>
+      <a class="nav-item" id="nav-kanban" data-title="Pipeline Board" onclick="switchTab('kanban')">
+        <i class="ti ti-route"></i><span class="nav-item-label">Pipeline Board</span>
       </a>
-      <a class="nav-item" id="nav-calendar" data-title="Visa & Documents" onclick="switchTab('calendar')">
-        <i class="ti ti-calendar-check"></i><span class="nav-item-label">Visa & Documents</span>
-      </a>
-      <a class="nav-item" id="nav-travel-ref" data-title="Travel" onclick="switchTab('pro')">
-        <i class="ti ti-plane-departure"></i><span class="nav-item-label">Travel</span>
+      <a class="nav-item" id="nav-calendar" data-title="Calendar" onclick="switchTab('calendar')">
+        <i class="ti ti-calendar-check"></i><span class="nav-item-label">Calendar</span>
       </a>
 
-      <div class="nav-section-label">Finance</div>
-      <a class="nav-item" id="nav-payments-ref" data-title="Payments" onclick="switchTab('reports')">
-        <i class="ti ti-credit-card"></i><span class="nav-item-label">Payments</span>
-      </a>
-      <a class="nav-item" id="nav-commissions-ref" data-title="Commissions" onclick="switchTab('reports')">
-        <i class="ti ti-currency-dollar"></i><span class="nav-item-label">Commissions</span>
-      </a>
-      <a class="nav-item" id="nav-expenses-ref" data-title="Expenses" onclick="switchTab('reports')">
-        <i class="ti ti-shield-dollar"></i><span class="nav-item-label">Expenses</span>
-      </a>
-
-      <div class="nav-section-label">Team & Settings</div>
-      <a class="nav-item" id="nav-team-ref" data-title="Team" onclick="openSettings()">
-        <i class="ti ti-users-group"></i><span class="nav-item-label">Team</span>
-      </a>
-      <a class="nav-item" id="nav-roles-ref" data-title="Roles & Permissions" onclick="openSettings()">
-        <i class="ti ti-user-shield"></i><span class="nav-item-label">Roles & Permissions</span>
-      </a>
+      <div class="nav-section-label">Insights</div>
       <a class="nav-item" id="nav-reports" data-title="Reports" onclick="switchTab('reports')">
         <i class="ti ti-chart-bar"></i><span class="nav-item-label">Reports</span>
       </a>
+
+      <div class="nav-section-label">Support</div>
       <a class="nav-item" id="nav-settings" data-title="Settings" onclick="openSettings()">
         <i class="ti ti-settings"></i><span class="nav-item-label">Settings</span>
+      </a>
+      <a class="nav-item" id="nav-help" data-title="Help & Support" onclick="openHelp()">
+        <i class="ti ti-help-circle"></i><span class="nav-item-label">Help & Support</span>
       </a>
 
       <div class="nav-spacer"></div>
@@ -3083,6 +3075,7 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
           <i class="ti ti-search"></i>
           <input type="text" placeholder="Search candidates, jobs, clients..." id="global-search" oninput="onGlobalSearch()">
         </div>
+        <button class="topbar-icon-btn" type="button" onclick="openHelp()" title="Help & Support"><i class="ti ti-help-circle"></i></button>
         <div class="save-dot" id="save-dot"></div>
         <span class="save-label" id="save-label">Saved</span>
         <div class="profile-wrap">
