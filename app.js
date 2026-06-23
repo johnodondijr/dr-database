@@ -236,6 +236,9 @@ let proStages     = ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDIN
 let lbStages      = ['NOT YET','TRAVELLED','NOT TRAVELLED'];
 let drecoExpenses = JSON.parse(localStorage.getItem('dreco_expenses') || '[]');
 let drecoEvents   = JSON.parse(localStorage.getItem('dreco_events') || '[]');
+let editingEventId = null;
+let pendingStageType = null;
+let pendingStageSelect = null;
 let financePeriod = 'month';
 let proPage       = 1;
 let lbPage        = 1;
@@ -320,16 +323,24 @@ function setGeneralCountry(country) {
   renderLB();
 }
 async function addGeneralCountry() {
-  const name = (prompt('Add destination country:') || '').trim();
-  if (!name) return;
-  const countries = getGeneralCountries();
-  if (!countries.some(c => c.toLowerCase() === name.toLowerCase())) countries.push(name);
-  window.generalCountryFilter = countries.find(c => c.toLowerCase() === name.toLowerCase()) || name;
+  const input=document.getElementById('quick-country-name');
+  const err=document.getElementById('quick-country-error');
+  if(input) input.value='';
+  if(err){ err.textContent=''; err.style.display='none'; }
+  document.getElementById('quick-country-modal')?.classList.add('open');
+}
+async function submitQuickCountry(){
+  const input=document.getElementById('quick-country-name');
+  const err=document.getElementById('quick-country-error');
+  const fail=msg=>{ if(err){ err.textContent=msg; err.style.display='block'; } };
+  const name=(input?.value||'').trim();
+  if(!name) return fail('Country name is required.');
+  const countries=getGeneralCountries();
+  if(!countries.some(c=>c.toLowerCase()===name.toLowerCase())) countries.push(name);
+  window.generalCountryFilter=countries.find(c=>c.toLowerCase()===name.toLowerCase())||name;
   await persistWorkspaceCountries(countries);
-  renderGeneralCountryTabs();
-  renderSettingsCountries();
-  renderLB();
-  renderDash();
+  closeModal('quick-country-modal');
+  renderGeneralCountryTabs(); renderSettingsCountries(); renderLB(); renderDash();
 }
 async function persistWorkspaceCountries(countries) {
   const clean = [...new Set(countries.map(c => String(c || '').trim()).filter(Boolean))];
@@ -1590,29 +1601,47 @@ function setLBPill(type,val,btn){
 }
 function handleStageSelectChange(type,selectEl){
   if(selectEl.value!=='__add_new__'){ selectEl.dataset.prev=selectEl.value; return; }
+  pendingStageType=type;
+  pendingStageSelect=selectEl;
   const previous=selectEl.dataset.prev||(type==='pro'?proStages[0]:lbStages[0]);
-  const name=(prompt(`Enter new ${type==='pro'?'stage':'travel status'} name:`)||'').trim().toUpperCase();
-  if(!name){ selectEl.value=previous; return; }
-  if(type==='pro'){
-    if(proStages.includes(name)) selectEl.value=name;
-    else{ proStages.splice(proStages.indexOf('TRAVELLED'),0,name); rebuildStageSelects(); selectEl.value=name; saveStages(); showToast(`"${name}" added œ"`,'success'); }
-  } else {
-    if(lbStages.includes(name)) selectEl.value=name;
-    else{ lbStages.push(name); rebuildStageSelects(); selectEl.value=name; saveStages(); showToast(`"${name}" added œ"`,'success'); }
-  }
-  selectEl.dataset.prev=selectEl.value;
+  selectEl.value=previous;
+  openStageModal(type);
 }
 function addCustomStage(type){
-  const name=(prompt(`Enter new ${type==='pro'?'stage':'travel status'} name:`)||'').trim().toUpperCase();
-  if(!name) return;
+  pendingStageType=type;
+  pendingStageSelect=null;
+  openStageModal(type);
+}
+function openStageModal(type){
+  const modal=document.getElementById('quick-stage-modal');
+  const input=document.getElementById('quick-stage-name');
+  const err=document.getElementById('quick-stage-error');
+  const heading=document.getElementById('quick-stage-heading');
+  if(input) input.value='';
+  if(err){ err.textContent=''; err.style.display='none'; }
+  if(heading) heading.textContent=type==='pro'?'Add Professional Jobs stage':'Add General Jobs travel status';
+  modal?.classList.add('open');
+}
+function submitQuickStage(){
+  const type=pendingStageType||'pro';
+  const input=document.getElementById('quick-stage-name');
+  const err=document.getElementById('quick-stage-error');
+  const fail=msg=>{ if(err){ err.textContent=msg; err.style.display='block'; } };
+  const name=(input?.value||'').trim().toUpperCase();
+  if(!name) return fail('Name is required.');
   if(type==='pro'){
-    if(proStages.includes(name)){ showToast('Already exists','error'); return; }
-    proStages.splice(proStages.indexOf('TRAVELLED'),0,name);
-  } else {
-    if(lbStages.includes(name)){ showToast('Already exists','error'); return; }
+    if(proStages.includes(name)) return fail('That stage already exists.');
+    const insertAt=Math.max(0,proStages.indexOf('TRAVELLED'));
+    proStages.splice(insertAt,0,name);
+  }else{
+    if(lbStages.includes(name)) return fail('That status already exists.');
     lbStages.push(name);
   }
-  rebuildStageSelects(); rebuildProPills(); saveStages(); showToast(`"${name}" added œ"`,'success');
+  rebuildStageSelects(); rebuildProPills(); saveStages();
+  if(pendingStageSelect){ pendingStageSelect.value=name; pendingStageSelect.dataset.prev=name; }
+  closeModal('quick-stage-modal');
+  pendingStageType=null; pendingStageSelect=null;
+  showToast(`"${name}" added`,'success');
 }
 
 // Global search
@@ -1857,42 +1886,121 @@ function renderExpenses(){
 }
 function renderTeam(){
   const grid=document.getElementById('team-grid'); if(!grid) return;
-  const users=[currentUser||{display:'John Fred',role:'admin',username:'johnfred'}];
-  grid.innerHTML=users.map(u=>`<div class="team-card"><div class="team-card-head"><div class="team-avatar">${escHTML((u.display||u.username||'JF').slice(0,2).toUpperCase())}</div><div><div class="team-name">${escHTML(u.display||u.username||'User')}</div><div class="team-role">${u.role==='admin'?'Administrator':'Staff'}</div></div></div><div class="team-perms"><span>Dashboard</span><span>Professional Jobs</span><span>Finance</span><span>Reports</span></div></div>`).join('');
+  const users=(typeof getCompanyUsers==='function'?getCompanyUsers():[]).map(([username,account])=>({username,...account}));
+  const fallback=currentUser?[{username:currentUser.username||'user',...currentUser}]:[{display:'John Fred',role:'admin',username:'johnfred'}];
+  const list=users.length?users:fallback;
+  grid.innerHTML=list.map(u=>`<div class="team-card"><div class="team-card-head"><div class="team-avatar">${escHTML((u.display||u.username||'U').slice(0,2).toUpperCase())}</div><div><div class="team-name">${escHTML(u.display||u.username||'User')}</div><div class="team-role">${u.role==='admin'?'Administrator':'Staff'} @${escHTML(u.username||'user')}</div></div></div><div class="team-perms"><span>Dashboard</span><span>Professional Jobs</span><span>General Jobs</span><span>Finance</span><span>Reports</span></div></div>`).join('');
 }
 function renderSettingsPage(){
   const el=document.getElementById('settings-page-content'); if(!el) return;
   el.innerHTML=`<div class="settings-page-card"><h3>Workspace</h3><p>Manage company identity and data mode.</p><div class="setting-row"><span>Company</span><button onclick="openSettingsModal()">Edit</button></div><div class="setting-row"><span>Storage</span><span class="settings-pill">${appStorageMode==='cloud'?'Cloud':'Local'}</span></div></div><div class="settings-page-card"><h3>Pipeline</h3><p>Adjust workflow stages and country options from their respective screens.</p><div class="setting-row"><span>Professional stages</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General countries</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Team & permissions</h3><p>Add staff and review roles from the Team page.</p><div class="setting-row"><span>Team members</span><button onclick="switchTab('team')">Manage</button></div></div><div class="settings-page-card"><h3>Data</h3><p>Export backups or reset local filters.</p><div class="setting-row"><span>Backup</span><button onclick="downloadBackup()">Download</button></div></div>`;
 }
 function openQuickAddCandidate(){
-  const choice=(prompt('Add candidate to which workflow? Type: professional or general')||'').trim().toLowerCase();
-  if(!choice) return;
-  if(choice.startsWith('p')){ switchTab('pro'); openProForm(); return; }
-  if(choice.startsWith('g')){ switchTab('lb'); openLBForm(); return; }
-  showToast('Type professional or general','error');
+  const modal=document.getElementById('quick-add-modal');
+  if(modal) modal.classList.add('open');
+}
+function submitQuickAddCandidate(){
+  const choice=document.querySelector('input[name="quick-workflow"]:checked')?.value || 'pro';
+  closeModal('quick-add-modal');
+  if(choice==='lb'){ switchTab('lb'); openLBForm(); return; }
+  switchTab('pro'); openProForm();
+}
+function createStaffAccount(){
+  switchTab('team');
+  const modal=document.getElementById('quick-user-modal');
+  if(!modal){ showToast('User form is unavailable','error'); return; }
+  ['quick-user-display','quick-user-username','quick-user-password'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const role=document.getElementById('quick-user-role'); if(role) role.value='staff';
+  const err=document.getElementById('quick-user-error'); if(err){ err.textContent=''; err.style.display='none'; }
+  modal.classList.add('open');
+}
+async function submitQuickUser(){
+  if (currentUser?.role !== 'admin') { showToast('Only admins can add users','error'); return; }
+  const display=(document.getElementById('quick-user-display')?.value||'').trim();
+  const username=(document.getElementById('quick-user-username')?.value||'').trim().toLowerCase();
+  const role=document.getElementById('quick-user-role')?.value==='admin'?'admin':'staff';
+  const password=(document.getElementById('quick-user-password')?.value||'').trim();
+  const err=document.getElementById('quick-user-error');
+  const fail=msg=>{ if(err){ err.textContent=msg; err.style.display='block'; } };
+  if(!display) return fail('Display name is required.');
+  if(!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
+  if(STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
+  if(password.length<6) return fail('Temporary password must be at least 6 characters.');
+  STAFF_ACCOUNTS[username]=normalizeAccount(username,{role,display,companyId:getCompanyId(),companyName:getCompanyName(),generalJobsCountries:getGeneralCountries()});
+  try{ await setAccountPassword(STAFF_ACCOUNTS[username],password); await saveStaffAccounts(); }
+  catch(e){ delete STAFF_ACCOUNTS[username]; return fail(e.message||'User could not be created.'); }
+  closeModal('quick-user-modal'); renderTeam(); renderCompanyUsers(); showToast('User added','success');
 }
 function openRecordPaymentPrompt(type='commission'){
-  if(type==='repayment'){ switchTab('repayments'); showToast('Select a repayment row and click Update to record payment details.','success'); return; }
-  switchTab('commissions'); showToast('Select a commission row and click Update to record payment details.','success');
+  if(type==='repayment'){ switchTab('repayments'); showToast('Open a repayment row and update its installment fields.','success'); return; }
+  switchTab('commissions'); showToast('Open a commission row and update billed or received amounts.','success');
 }
 function openExpensePrompt(){
-  const client=(prompt('Client / candidate name:')||'').trim(); if(!client) return;
-  const amount=Number(prompt('Amount spent (KES):')||0); if(!amount){ showToast('Amount is required','error'); return; }
-  const category=(prompt('Category (documents, transport, processing, other):')||'Other').trim();
-  const notes=(prompt('Notes:')||'').trim();
-  drecoExpenses.unshift({id:String(Date.now()),date:new Date().toISOString().slice(0,10),client,amount,category,notes}); persistExpenses(); renderExpenses(); showToast('Expense recorded','success');
+  const modal=document.getElementById('quick-expense-modal');
+  if(!modal){ showToast('Expense form is unavailable','error'); return; }
+  const date=document.getElementById('quick-expense-date'); if(date) date.value=new Date().toISOString().slice(0,10);
+  ['quick-expense-client','quick-expense-amount','quick-expense-notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const cat=document.getElementById('quick-expense-category'); if(cat) cat.value='Documents';
+  const err=document.getElementById('quick-expense-error'); if(err){ err.textContent=''; err.style.display='none'; }
+  modal.classList.add('open');
+}
+function submitQuickExpense(){
+  const date=(document.getElementById('quick-expense-date')?.value||new Date().toISOString().slice(0,10));
+  const client=(document.getElementById('quick-expense-client')?.value||'').trim();
+  const amount=Number(document.getElementById('quick-expense-amount')?.value||0);
+  const category=(document.getElementById('quick-expense-category')?.value||'Other').trim();
+  const notes=(document.getElementById('quick-expense-notes')?.value||'').trim();
+  const err=document.getElementById('quick-expense-error');
+  const fail=msg=>{ if(err){ err.textContent=msg; err.style.display='block'; } };
+  if(!client) return fail('Client or candidate name is required.');
+  if(!amount || amount<0) return fail('Enter a valid amount.');
+  drecoExpenses.unshift({id:String(Date.now()),date,client,amount,category,notes});
+  persistExpenses(); closeModal('quick-expense-modal'); renderExpenses(); showToast('Expense recorded','success');
 }
 function deleteExpense(id){ drecoExpenses=drecoExpenses.filter(e=>e.id!==id); persistExpenses(); renderExpenses(); }
 function openCalendarEventPrompt(){
-  const date=(prompt('Event date (YYYY-MM-DD):')||'').trim(); if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ showToast('Use date format YYYY-MM-DD','error'); return; }
-  const title=(prompt('Event title:')||'').trim(); if(!title) return;
-  drecoEvents.unshift({id:String(Date.now()),date,title}); persistEvents(); renderCalendar(); showToast('Calendar event recorded','success');
+  editingEventId=null;
+  const modal=document.getElementById('quick-event-modal');
+  if(!modal){ showToast('Calendar event form is unavailable','error'); return; }
+  document.getElementById('quick-event-title').value='';
+  document.getElementById('quick-event-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('quick-event-notes').value='';
+  const del=document.getElementById('quick-event-delete'); if(del) del.style.display='none';
+  const heading=document.getElementById('quick-event-heading'); if(heading) heading.textContent='Record calendar event';
+  modal.classList.add('open');
 }
 function editCalendarEvent(id){
   const ev=drecoEvents.find(e=>e.id===id); if(!ev) return;
-  if(confirm(`Delete event: ${ev.title}?`)){ drecoEvents=drecoEvents.filter(e=>e.id!==id); persistEvents(); renderCalendar(); }
+  editingEventId=id;
+  const modal=document.getElementById('quick-event-modal'); if(!modal) return;
+  document.getElementById('quick-event-title').value=ev.title||'';
+  document.getElementById('quick-event-date').value=ev.date||new Date().toISOString().slice(0,10);
+  document.getElementById('quick-event-notes').value=ev.notes||'';
+  const del=document.getElementById('quick-event-delete'); if(del) del.style.display='inline-flex';
+  const heading=document.getElementById('quick-event-heading'); if(heading) heading.textContent='Edit calendar event';
+  modal.classList.add('open');
 }
-function openTravelEventPrompt(){ showToast('Open a candidate record to add airline, time, and travel notes.','success'); }
+function submitCalendarEvent(){
+  const date=(document.getElementById('quick-event-date')?.value||'').trim();
+  const title=(document.getElementById('quick-event-title')?.value||'').trim();
+  const notes=(document.getElementById('quick-event-notes')?.value||'').trim();
+  const err=document.getElementById('quick-event-error');
+  const fail=msg=>{ if(err){ err.textContent=msg; err.style.display='block'; } };
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return fail('Use date format YYYY-MM-DD.');
+  if(!title) return fail('Event title is required.');
+  if(editingEventId){
+    const ev=drecoEvents.find(e=>e.id===editingEventId); if(ev){ ev.date=date; ev.title=title; ev.notes=notes; }
+  }else{
+    drecoEvents.unshift({id:String(Date.now()),date,title,notes});
+  }
+  persistEvents(); closeModal('quick-event-modal'); renderCalendar(); showToast('Calendar event saved','success');
+}
+function deleteCalendarEvent(){
+  if(!editingEventId) return;
+  drecoEvents=drecoEvents.filter(e=>e.id!==editingEventId);
+  editingEventId=null; persistEvents(); closeModal('quick-event-modal'); renderCalendar(); showToast('Calendar event deleted','success');
+}
+function openTravelEventPrompt(){ switchTab('travel'); showToast('Open a candidate row to add airline, travel time, and notes.','success'); }
 function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
 function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
   const onclick=action?` onclick="${action}"`:'';
