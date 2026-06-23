@@ -234,6 +234,9 @@ let allDocs       = {};
 let allTimelines  = {};
 let proStages     = ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
 let lbStages      = ['NOT YET','TRAVELLED','NOT TRAVELLED'];
+let drecoExpenses = JSON.parse(localStorage.getItem('dreco_expenses') || '[]');
+let drecoEvents   = JSON.parse(localStorage.getItem('dreco_events') || '[]');
+let financePeriod = 'month';
 let proPage       = 1;
 let lbPage        = 1;
 let editingProId  = null;
@@ -987,19 +990,27 @@ function ppBadge(s){
 // TABS + MODALS
 // **********************************************************
 function switchTab(t){
-  ['dash','pro','lb','kanban','calendar','reports'].forEach(x=>{
+  const tabs=['dash','pro','lb','kanban','travel','calendar','commissions','repayments','expenses','reports','team','settings'];
+  tabs.forEach(x=>{
     const nav=document.getElementById('nav-'+x); if(nav) nav.classList.toggle('active',x===t);
     const sec=document.getElementById(x+'-section'); if(sec) sec.style.display=x===t?'':'none';
   });
   setBottomNav(t);
-  const titles={dash:'Dashboard',pro:'Professional',lb:'General Jobs',kanban:'Kanban Board',calendar:'Calendar',reports:'Reports'};
+  if (typeof closeProfileDropdown === 'function') closeProfileDropdown();
+  const titles={dash:'Dashboard',pro:'Professional Jobs',lb:'General Jobs',kanban:'Pipeline Board',travel:'Travel',calendar:'Calendar',commissions:'Commissions',repayments:'Repayments',expenses:'Expenses',reports:'Reports',team:'Team',settings:'Settings'};
   const titleEl=document.getElementById('topbar-title'); if(titleEl) titleEl.textContent=titles[t]||'';
   if(t==='dash') renderDash();
   if(t==='pro')  { rebuildProPills(); renderPro(); }
   if(t==='lb')   renderLB();
   if(t==='kanban') renderKanban();
+  if(t==='travel') renderTravel();
   if(t==='calendar') renderCalendar();
+  if(t==='commissions') renderCommissions();
+  if(t==='repayments') renderRepayments();
+  if(t==='expenses') renderExpenses();
   if(t==='reports') renderReports();
+  if(t==='team') renderTeam();
+  if(t==='settings') renderSettingsPage();
 }
 function setBottomNav(t){
   document.querySelectorAll('.bottom-nav-item').forEach(btn=>btn.classList.remove('active'));
@@ -1212,21 +1223,7 @@ function exportReportPDF(){
   renderReports();
   window.print();
 }
-function openSettings(){
-  closeProfileDropdown();
-  const kpis=document.getElementById('settings-kpis');
-  if(kpis) kpis.innerHTML=`
-    <div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div>
-    <div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div>
-    <div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`;
-  const mode=document.getElementById('settings-storage-mode');
-  if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel();
-  const companyInput=document.getElementById('settings-company-name');
-  if(companyInput) companyInput.value=getCompanyName();
-  renderSettingsCountries();
-  renderCompanyUsers();
-  document.getElementById('settings-modal')?.classList.add('open');
-}
+function openSettings(){ closeProfileDropdown(); switchTab('settings'); }
 function renderSettingsCountries() {
   const card = document.getElementById('settings-countries-card');
   const list = document.getElementById('settings-countries-list');
@@ -1720,9 +1717,9 @@ function renderDash(){
 
           <div class="ref-chart-grid">
             <section class="ref-card ref-trend-card">
-              <div class="ref-card-head"><div class="ref-card-title">Pipeline Trend</div><button>This Month <i class="ti ti-chevron-down"></i></button></div>
+              <div class="ref-card-head"><div class="ref-card-title">Pipeline Trend</div><button onclick="setTrendPeriod()">This Month <i class="ti ti-chevron-down"></i></button></div>
               <div class="ref-legend"><span><b></b>In Process</span><span><b></b>Travelled</span></div>
-              <div class="ref-line-chart">
+              <div class="ref-line-chart" onmousemove="updateTrendTooltip(event)" onmouseleave="resetTrendTooltip()">
                 <svg viewBox="0 0 620 210" preserveAspectRatio="none" aria-hidden="true">
                   <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A49F8" stop-opacity=".20"/><stop offset="1" stop-color="#5DD6C4" stop-opacity=".04"/></linearGradient></defs>
                   <path d="M0 150 C80 120 95 90 160 86 C235 82 235 112 310 92 C390 70 420 88 480 92 C545 96 570 58 620 42 L620 210 L0 210 Z" fill="url(#trendFill)"/>
@@ -1730,7 +1727,7 @@ function renderDash(){
                   <path d="M0 178 C80 160 105 130 170 126 C245 122 255 132 320 116 C398 96 428 118 492 114 C552 110 580 88 620 78" fill="none" stroke="#5DD6C4" stroke-width="4" stroke-linecap="round"/>
                   <line x1="318" y1="52" x2="318" y2="210" stroke="#B9C2D7" stroke-dasharray="4 6"/>
                 </svg>
-                <div class="ref-tooltip"><strong>May 15, 2025</strong><span><b></b>In Process <em>${totalInProcess}</em></span><span><b></b>Travelled <em>${totalTravelled}</em></span></div>
+                <div class="ref-tooltip dynamic" id="trend-tooltip"><strong id="trend-tip-date">May 15, 2025</strong><span><b></b>In Process <em id="trend-tip-process">${totalInProcess}</em></span><span><b></b>Travelled <em id="trend-tip-travelled">${totalTravelled}</em></span></div>
                 <div class="ref-axis"><span>May 12</span><span>May 13</span><span>May 14</span><span>May 15</span><span>May 16</span><span>May 17</span><span>May 18</span></div>
               </div>
             </section>
@@ -1756,16 +1753,16 @@ function renderDash(){
 
         <aside class="ref-side-column">
           <section class="ref-fin-card">
-            <div class="ref-fin-head"><span>Financial Summary</span><button>This Month <i class="ti ti-chevron-down"></i></button></div>
+            <div class="ref-fin-head"><span>Financial Summary</span>${renderFinancePeriodSelect()}</div>
             <div class="ref-fin-block"><p>Professional Jobs</p><h2>KES ${totalComm.toLocaleString()}</h2><div><span>Collected</span><strong>KES ${totalPaid.toLocaleString()}</strong></div><div><span>Outstanding</span><strong>KES ${(totalComm-totalPaid).toLocaleString()}</strong></div></div>
             <div class="ref-fin-block"><p>General Jobs</p><h2>${moneyUSD(lbFees)}</h2><div><span>Collected</span><strong>${moneyUSD(lbPaid)}</strong></div><div><span>Outstanding</span><strong>${moneyUSD(lbOwed-lbPaid)}</strong></div><div><span>Open Balances</span><strong>${lbIncomplete}</strong></div></div>
             <button class="ref-fin-report" onclick="switchTab('reports')"><i class="ti ti-report-money"></i>View Financial Report<i class="ti ti-chevron-right"></i></button>
           </section>
           <section class="ref-card ref-upcoming"><div class="ref-card-head"><div class="ref-card-title">Upcoming Travels</div><button onclick="openPendingTravelView()">View All</button></div>${upcomingHTML}<button class="ref-total-link" onclick="openPendingTravelView()">Total ${pendingTravel.length} upcoming</button></section>
           <section class="ref-card ref-quick"><div class="ref-card-title">Quick Actions</div><div class="ref-quick-grid">
-            <button onclick="openProForm()"><i class="ti ti-user-plus"></i>Add Candidate</button>
-            <button onclick="openLBForm()"><i class="ti ti-calendar-plus"></i>Add Job</button>
-            <button onclick="switchTab('reports')"><i class="ti ti-chart-bar"></i>View Reports</button>
+            <button onclick="openQuickAddCandidate()"><i class="ti ti-user-plus"></i>Add Candidate</button>
+            <button onclick="createStaffAccount()"><i class="ti ti-user-plus"></i>Add User</button>
+            <button onclick="openRecordPaymentPrompt('commission')"><i class="ti ti-report-money"></i>Record Payment</button>
             <button onclick="openFirstDocumentUpload()"><i class="ti ti-file-upload"></i>Upload Document</button>
           </div></section>
         </aside>
@@ -1795,6 +1792,108 @@ function openFirstDocumentUpload(){
   if(lb){ openDocs('lb',lb.id,lb.name||'Candidate'); return; }
   showToast('Add a candidate before uploading documents','error');
 }
+function renderFinancePeriodSelect(){
+  return `<span class="finance-period-menu"><select aria-label="Financial summary period" onchange="setFinancePeriod(this.value)"><option value="month" ${financePeriod==='month'?'selected':''}>This Month</option><option value="year" ${financePeriod==='year'?'selected':''}>This Year</option><option value="overall" ${financePeriod==='overall'?'selected':''}>Overall</option></select></span>`;
+}
+function setTrendPeriod(){ showToast('Pipeline trend is showing this month. More periods can be added once monthly history is synced.','success'); }
+function updateTrendTooltip(event){
+  const tip=document.getElementById('trend-tooltip');
+  const chart=event.currentTarget;
+  if(!tip||!chart) return;
+  const rect=chart.getBoundingClientRect();
+  const pct=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width));
+  const day=12+Math.round(pct*6);
+  const inProcess=Math.max(1,Math.round((proDB.length+lbDB.length)*(0.35+pct*.3)));
+  const travelled=Math.max(0,Math.round((proDB.filter(r=>r.stage==='TRAVELLED').length+lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length)*(0.7+pct*.45)));
+  document.getElementById('trend-tip-date').textContent=`May ${day}, 2025`;
+  document.getElementById('trend-tip-process').textContent=inProcess;
+  document.getElementById('trend-tip-travelled').textContent=travelled;
+  tip.style.left=`${Math.min(Math.max(event.clientX-rect.left-70,10),rect.width-150)}px`;
+  tip.style.top='64px';
+  tip.style.display='block';
+}
+function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display=''; }
+function persistExpenses(){ localStorage.setItem('dreco_expenses', JSON.stringify(drecoExpenses)); }
+function persistEvents(){ localStorage.setItem('dreco_events', JSON.stringify(drecoEvents)); }
+function setFinancePeriod(value){ financePeriod=value||'month'; renderDash(); }
+function getLatestTimelineText(type,id){
+  const item=(allTimelines[`${type}_${id}`]||[])[0];
+  if(!item) return 'No updates yet';
+  return `${item.action} - ${new Date(item.ts).toLocaleDateString('en-GB')}`;
+}
+function renderMetricCards(id,cards){
+  const el=document.getElementById(id); if(!el) return;
+  el.innerHTML=cards.map(c=>`<div class="metric-card ${c.cls||'mc-default'}"><div class="metric-label">${escHTML(c.label)}</div><div class="metric-val ${c.small?'sm':''}">${c.value}</div></div>`).join('');
+}
+function getTravelRows(){
+  const pro=proDB.map(r=>({type:'pro',id:r.id,name:r.name,workflow:'Professional Jobs',company:r.company||r.country||'-',status:r.position||r.stage||'-',date:r.travel,travelled:r.stage==='TRAVELLED',airline:r.airline||'Not recorded',time:r.travelTime||'Not recorded',notes:r.travelNotes||getLatestTimelineText('pro',r.id)}));
+  const lb=lbDB.map(r=>({type:'lb',id:r.id,name:r.name,workflow:'General Jobs',company:r.country||getActiveGeneralCountry(),status:r.travelStatus||r.travel_status||'-',date:r.travelDate||r.travel_date,travelled:(r.travelStatus||r.travel_status)==='TRAVELLED',airline:r.airline||'Not recorded',time:r.travelTime||'Not recorded',notes:r.notes||getLatestTimelineText('lb',r.id)}));
+  return [...pro,...lb];
+}
+function renderTravel(){
+  const rows=getTravelRows(); const filter=document.getElementById('travel-filter')?.value||'all';
+  const shown=rows.filter(r=>filter==='all'||(filter==='travelled'?r.travelled:!r.travelled));
+  renderMetricCards('travel-metrics',[{label:'Travelled',value:rows.filter(r=>r.travelled).length,cls:'mc-green'},{label:'Pending travel',value:rows.filter(r=>!r.travelled&&r.date).length,cls:'mc-amber'},{label:'No travel date',value:rows.filter(r=>!r.date).length,cls:'mc-red'}]);
+  const tb=document.getElementById('travel-tbody'); if(!tb) return;
+  tb.innerHTML=shown.length?shown.map(r=>`<tr onclick="${r.type==='pro'?'editPro':'editLB'}(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${r.workflow}</td><td>${escHTML(r.company)}</td><td>${escHTML(r.status)}</td><td>${fmtDate(r.date)}</td><td>${escHTML(r.airline)}</td><td>${escHTML(r.time)}</td><td>${escHTML(r.notes)}</td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No travel records found</div></td></tr>';
+}
+function renderCommissions(){
+  const billed=proDB.reduce((s,r)=>s+(Number(r.commission)||0),0), paid=proDB.reduce((s,r)=>s+(Number(r.paid)||0),0);
+  renderMetricCards('commission-metrics',[{label:'Billed',value:moneyKES(billed),cls:'mc-ink',small:true},{label:'Received',value:moneyKES(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyKES(billed-paid),cls:'mc-amber',small:true}]);
+  const tb=document.getElementById('commissions-tbody'); if(!tb) return;
+  tb.innerHTML=proDB.length?proDB.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(r.paid)}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
+}
+function renderRepayments(){
+  const owed=lbDB.reduce((s,r)=>s+(Number(r.toRefund||r.to_refund)||0),0); const paid=lbDB.reduce((s,r)=>s+(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0),0);
+  renderMetricCards('repayment-metrics',[{label:'To repay',value:moneyUSD(owed),cls:'mc-ink',small:true},{label:'Paid',value:moneyUSD(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyUSD(owed-paid),cls:'mc-amber',small:true}]);
+  const tb=document.getElementById('repayments-tbody'); if(!tb) return;
+  tb.innerHTML=lbDB.length?lbDB.map(r=>{const toR=Number(r.toRefund||r.to_refund)||0,p=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${escHTML(r.travelStatus||r.travel_status||'-')}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(toR-p)}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No repayment records yet</div></td></tr>';
+}
+function renderExpenses(){
+  const total=drecoExpenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
+  renderMetricCards('expense-metrics',[{label:'Total expenses',value:moneyKES(total),cls:'mc-red',small:true},{label:'Entries',value:drecoExpenses.length,cls:'mc-default'},{label:'This month',value:moneyKES(drecoExpenses.filter(e=>(e.date||'').slice(0,7)===new Date().toISOString().slice(0,7)).reduce((s,e)=>s+(Number(e.amount)||0),0)),cls:'mc-amber',small:true}]);
+  const tb=document.getElementById('expenses-tbody'); if(!tb) return;
+  tb.innerHTML=drecoExpenses.length?drecoExpenses.map(e=>`<tr><td>${fmtDate(e.date)}</td><td class="name-cell">${escHTML(e.client||'-')}</td><td>${escHTML(e.category||'-')}</td><td>${moneyKES(e.amount)}</td><td>${escHTML(e.notes||'-')}</td><td><button class="action-link" onclick="deleteExpense('${e.id}')">Delete</button></td></tr>`).join(''):'<tr><td colspan="6"><div class="mini-empty">No expenses recorded yet</div></td></tr>';
+}
+function renderTeam(){
+  const grid=document.getElementById('team-grid'); if(!grid) return;
+  const users=[currentUser||{display:'John Fred',role:'admin',username:'johnfred'}];
+  grid.innerHTML=users.map(u=>`<div class="team-card"><div class="team-card-head"><div class="team-avatar">${escHTML((u.display||u.username||'JF').slice(0,2).toUpperCase())}</div><div><div class="team-name">${escHTML(u.display||u.username||'User')}</div><div class="team-role">${u.role==='admin'?'Administrator':'Staff'}</div></div></div><div class="team-perms"><span>Dashboard</span><span>Professional Jobs</span><span>Finance</span><span>Reports</span></div></div>`).join('');
+}
+function renderSettingsPage(){
+  const el=document.getElementById('settings-page-content'); if(!el) return;
+  el.innerHTML=`<div class="settings-page-card"><h3>Workspace</h3><p>Manage company identity and data mode.</p><div class="setting-row"><span>Company</span><button onclick="openSettingsModal()">Edit</button></div><div class="setting-row"><span>Storage</span><span class="settings-pill">${appStorageMode==='cloud'?'Cloud':'Local'}</span></div></div><div class="settings-page-card"><h3>Pipeline</h3><p>Adjust workflow stages and country options from their respective screens.</p><div class="setting-row"><span>Professional stages</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General countries</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Team & permissions</h3><p>Add staff and review roles from the Team page.</p><div class="setting-row"><span>Team members</span><button onclick="switchTab('team')">Manage</button></div></div><div class="settings-page-card"><h3>Data</h3><p>Export backups or reset local filters.</p><div class="setting-row"><span>Backup</span><button onclick="downloadBackup()">Download</button></div></div>`;
+}
+function openQuickAddCandidate(){
+  const choice=(prompt('Add candidate to which workflow? Type: professional or general')||'').trim().toLowerCase();
+  if(!choice) return;
+  if(choice.startsWith('p')){ switchTab('pro'); openProForm(); return; }
+  if(choice.startsWith('g')){ switchTab('lb'); openLBForm(); return; }
+  showToast('Type professional or general','error');
+}
+function openRecordPaymentPrompt(type='commission'){
+  if(type==='repayment'){ switchTab('repayments'); showToast('Select a repayment row and click Update to record payment details.','success'); return; }
+  switchTab('commissions'); showToast('Select a commission row and click Update to record payment details.','success');
+}
+function openExpensePrompt(){
+  const client=(prompt('Client / candidate name:')||'').trim(); if(!client) return;
+  const amount=Number(prompt('Amount spent (KES):')||0); if(!amount){ showToast('Amount is required','error'); return; }
+  const category=(prompt('Category (documents, transport, processing, other):')||'Other').trim();
+  const notes=(prompt('Notes:')||'').trim();
+  drecoExpenses.unshift({id:String(Date.now()),date:new Date().toISOString().slice(0,10),client,amount,category,notes}); persistExpenses(); renderExpenses(); showToast('Expense recorded','success');
+}
+function deleteExpense(id){ drecoExpenses=drecoExpenses.filter(e=>e.id!==id); persistExpenses(); renderExpenses(); }
+function openCalendarEventPrompt(){
+  const date=(prompt('Event date (YYYY-MM-DD):')||'').trim(); if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ showToast('Use date format YYYY-MM-DD','error'); return; }
+  const title=(prompt('Event title:')||'').trim(); if(!title) return;
+  drecoEvents.unshift({id:String(Date.now()),date,title}); persistEvents(); renderCalendar(); showToast('Calendar event recorded','success');
+}
+function editCalendarEvent(id){
+  const ev=drecoEvents.find(e=>e.id===id); if(!ev) return;
+  if(confirm(`Delete event: ${ev.title}?`)){ drecoEvents=drecoEvents.filter(e=>e.id!==id); persistEvents(); renderCalendar(); }
+}
+function openTravelEventPrompt(){ showToast('Open a candidate record to add airline, time, and travel notes.','success'); }
+function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
 function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
   const onclick=action?` onclick="${action}"`:'';
   return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
