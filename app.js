@@ -1001,14 +1001,14 @@ function ppBadge(s){
 // TABS + MODALS
 // **********************************************************
 function switchTab(t){
-  const tabs=['dash','pro','lb','kanban','travel','calendar','commissions','repayments','expenses','reports','team','settings'];
+  const tabs=['dash','pro','lb','kanban','travel','calendar','commissions','repayments','expenses','reports','team','settings','help'];
   tabs.forEach(x=>{
     const nav=document.getElementById('nav-'+x); if(nav) nav.classList.toggle('active',x===t);
     const sec=document.getElementById(x+'-section'); if(sec) sec.style.display=x===t?'':'none';
   });
   setBottomNav(t);
   if (typeof closeProfileDropdown === 'function') closeProfileDropdown();
-  const titles={dash:'Dashboard',pro:'Professional Jobs',lb:'General Jobs',kanban:'Pipeline Board',travel:'Travel',calendar:'Calendar',commissions:'Commissions',repayments:'Repayments',expenses:'Expenses',reports:'Reports',team:'Team',settings:'Settings'};
+  const titles={dash:'Dashboard',pro:'Professional Jobs',lb:'General Jobs',kanban:'Pipeline Board',travel:'Travel',calendar:'Calendar',commissions:'Commissions',repayments:'Repayments',expenses:'Expenses',reports:'Reports',team:'Team',settings:'Settings',help:'Help & Support'};
   const titleEl=document.getElementById('topbar-title'); if(titleEl) titleEl.textContent=titles[t]||'';
   if(t==='dash') renderDash();
   if(t==='pro')  { rebuildProPills(); renderPro(); }
@@ -1022,6 +1022,7 @@ function switchTab(t){
   if(t==='reports') renderReports();
   if(t==='team') renderTeam();
   if(t==='settings') renderSettingsPage();
+  if(t==='help') renderHelpPage();
 }
 function setBottomNav(t){
   document.querySelectorAll('.bottom-nav-item').forEach(btn=>btn.classList.remove('active'));
@@ -1388,10 +1389,7 @@ async function saveWorkspaceSettings(){
   renderDash(); renderLB(); renderReports();
   showToast('Workspace updated','success');
 }
-function openHelp(){
-  closeProfileDropdown();
-  document.getElementById('help-modal')?.classList.add('open');
-}
+function openHelp(){ closeProfileDropdown(); switchTab('help'); }
 function downloadBackup(){
   const backup={
     exportedAt:new Date().toISOString(),
@@ -1859,24 +1857,53 @@ function getTravelRows(){
   const lb=lbDB.map(r=>({type:'lb',id:r.id,name:r.name,workflow:'General Jobs',company:r.country||getActiveGeneralCountry(),status:r.travelStatus||r.travel_status||'-',date:r.travelDate||r.travel_date,travelled:(r.travelStatus||r.travel_status)==='TRAVELLED',airline:r.airline||'Not recorded',time:r.travelTime||'Not recorded',notes:r.notes||getLatestTimelineText('lb',r.id)}));
   return [...pro,...lb];
 }
+function drecoDateValue(value){
+  if(!value) return 0;
+  const t=new Date(value).getTime();
+  return Number.isFinite(t)?t:0;
+}
+function latestTimelineTs(type,id){
+  const list=allTimelines[`${type}_${id}`]||[];
+  return list.reduce((max,item)=>Math.max(max,drecoDateValue(item.ts)),0);
+}
+function latestCommissionTs(row){
+  return Math.max(drecoDateValue(row.paidDate||row.paid_date||row.paymentDate||row.payment_date), latestTimelineTs('pro',row.id));
+}
+function latestRepaymentTs(row){
+  return Math.max(drecoDateValue(row.r2Date||row.r2_date), drecoDateValue(row.r1Date||row.r1_date), latestTimelineTs('lb',row.id));
+}
+function isTravelledLB(row){
+  const status=String(row.travelStatus||row.travel_status||'').toUpperCase();
+  return status==='TRAVELLED' || !!(row.travelDate||row.travel_date);
+}
+function populateExpenseCandidateOptions(){
+  const list=document.getElementById('expense-candidate-options');
+  if(!list) return;
+  const names=[...proDB.map(r=>r.name),...lbDB.map(r=>r.name)].filter(Boolean);
+  list.innerHTML=[...new Set(names)].sort((a,b)=>a.localeCompare(b)).map(name=>`<option value="${escHTML(name)}"></option>`).join('');
+}
 function renderTravel(){
-  const rows=getTravelRows(); const filter=document.getElementById('travel-filter')?.value||'all';
+  const rows=getTravelRows().sort((a,b)=>drecoDateValue(b.date)-drecoDateValue(a.date) || Number(b.travelled)-Number(a.travelled) || String(a.name||'').localeCompare(String(b.name||'')));
+  const filter=document.getElementById('travel-filter')?.value||'all';
   const shown=rows.filter(r=>filter==='all'||(filter==='travelled'?r.travelled:!r.travelled));
   renderMetricCards('travel-metrics',[{label:'Travelled',value:rows.filter(r=>r.travelled).length,cls:'mc-green'},{label:'Pending travel',value:rows.filter(r=>!r.travelled&&r.date).length,cls:'mc-amber'},{label:'No travel date',value:rows.filter(r=>!r.date).length,cls:'mc-red'}]);
   const tb=document.getElementById('travel-tbody'); if(!tb) return;
   tb.innerHTML=shown.length?shown.map(r=>`<tr onclick="${r.type==='pro'?'editPro':'editLB'}(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${r.workflow}</td><td>${escHTML(r.company)}</td><td>${escHTML(r.status)}</td><td>${fmtDate(r.date)}</td><td>${escHTML(r.airline)}</td><td>${escHTML(r.time)}</td><td>${escHTML(r.notes)}</td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No travel records found</div></td></tr>';
 }
 function renderCommissions(){
-  const billed=proDB.reduce((s,r)=>s+(Number(r.commission)||0),0), paid=proDB.reduce((s,r)=>s+(Number(r.paid)||0),0);
+  const billed=proDB.reduce((sum,row)=>sum+(Number(row.commission)||0),0), paid=proDB.reduce((sum,row)=>sum+(Number(row.paid)||0),0);
+  const rows=[...proDB].sort((a,b)=>latestCommissionTs(b)-latestCommissionTs(a) || Number(b.paid||0)-Number(a.paid||0));
   renderMetricCards('commission-metrics',[{label:'Billed',value:moneyKES(billed),cls:'mc-ink',small:true},{label:'Received',value:moneyKES(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyKES(billed-paid),cls:'mc-amber',small:true}]);
   const tb=document.getElementById('commissions-tbody'); if(!tb) return;
-  tb.innerHTML=proDB.length?proDB.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(r.paid)}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
+  tb.innerHTML=rows.length?rows.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(r.paid)}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
 }
 function renderRepayments(){
-  const owed=lbDB.reduce((s,r)=>s+(Number(r.toRefund||r.to_refund)||0),0); const paid=lbDB.reduce((s,r)=>s+(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0),0);
-  renderMetricCards('repayment-metrics',[{label:'To repay',value:moneyUSD(owed),cls:'mc-ink',small:true},{label:'Paid',value:moneyUSD(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyUSD(owed-paid),cls:'mc-amber',small:true}]);
+  const travelled=lbDB.filter(isTravelledLB).sort((a,b)=>latestRepaymentTs(b)-latestRepaymentTs(a));
+  const owed=travelled.reduce((sum,row)=>sum+(Number(row.toRefund||row.to_refund)||0),0);
+  const paid=travelled.reduce((sum,row)=>sum+(Number(row.r1Amt||row.r1_amt)||0)+(Number(row.r2Amt||row.r2_amt)||0),0);
+  renderMetricCards('repayment-metrics',[{label:'Travelled clients',value:travelled.length,cls:'mc-default'},{label:'Paid',value:moneyUSD(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyUSD(owed-paid),cls:'mc-amber',small:true}]);
   const tb=document.getElementById('repayments-tbody'); if(!tb) return;
-  tb.innerHTML=lbDB.length?lbDB.map(r=>{const toR=Number(r.toRefund||r.to_refund)||0,p=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${escHTML(r.travelStatus||r.travel_status||'-')}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(toR-p)}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No repayment records yet</div></td></tr>';
+  tb.innerHTML=travelled.length?travelled.map(r=>{const toR=Number(r.toRefund||r.to_refund)||0,p=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${fmtDate(r.travelDate||r.travel_date)}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(toR-p)}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No travelled clients with repayment records yet</div></td></tr>';
 }
 function renderExpenses(){
   const total=drecoExpenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
@@ -1936,6 +1963,7 @@ function openRecordPaymentPrompt(type='commission'){
   switchTab('commissions'); showToast('Open a commission row and update billed or received amounts.','success');
 }
 function openExpensePrompt(){
+  populateExpenseCandidateOptions();
   const modal=document.getElementById('quick-expense-modal');
   if(!modal){ showToast('Expense form is unavailable','error'); return; }
   const date=document.getElementById('quick-expense-date'); if(date) date.value=new Date().toISOString().slice(0,10);
@@ -2001,6 +2029,10 @@ function deleteCalendarEvent(){
   editingEventId=null; persistEvents(); closeModal('quick-event-modal'); renderCalendar(); showToast('Calendar event deleted','success');
 }
 function openTravelEventPrompt(){ switchTab('travel'); showToast('Open a candidate row to add airline, travel time, and notes.','success'); }
+function renderHelpPage(){
+  const el=document.getElementById('help-section-content'); if(!el) return;
+  el.innerHTML=`<div class="settings-page-card"><h3>Daily workflow</h3><p>Use Dashboard for status, Pipeline Board for movement, Calendar for deadlines, and Reports for management review.</p><div class="setting-row"><span>Pipeline board</span><button onclick="switchTab('kanban')">Open</button></div><div class="setting-row"><span>Calendar</span><button onclick="switchTab('calendar')">Open</button></div></div><div class="settings-page-card"><h3>Records</h3><p>Professional Jobs and General Jobs are separate workflows. Travel combines both lists and sorts latest travel first.</p><div class="setting-row"><span>Professional Jobs</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General Jobs</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Finance</h3><p>Commissions focus on professional job income. Repayments only track travelled general-job clients. Expenses capture money spent on clients.</p><div class="setting-row"><span>Commissions</span><button onclick="switchTab('commissions')">Open</button></div><div class="setting-row"><span>Expenses</span><button onclick="switchTab('expenses')">Open</button></div></div><div class="settings-page-card"><h3>Support note</h3><p>For shared multi-user work, keep Supabase configured. Local mode is useful for solo testing, but cloud mode is better for office use.</p><div class="setting-row"><span>Settings</span><button onclick="switchTab('settings')">Open</button></div></div>`;
+}
 function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
 function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
   const onclick=action?` onclick="${action}"`:'';
