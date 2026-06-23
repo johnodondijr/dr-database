@@ -234,8 +234,9 @@ let allDocs       = {};
 let allTimelines  = {};
 let proStages     = ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
 let lbStages      = ['NOT YET','TRAVELLED','NOT TRAVELLED'];
-let drecoExpenses = JSON.parse(localStorage.getItem('dreco_expenses') || '[]');
-let drecoEvents   = JSON.parse(localStorage.getItem('dreco_events') || '[]');
+let drecoExpenses = JSON.parse(safeLocalGet('dreco_expenses') || '[]');
+let drecoEvents   = JSON.parse(safeLocalGet('dreco_events') || '[]');
+let drecoAudit    = JSON.parse(safeLocalGet('dreco_audit') || '[]');
 let editingEventId = null;
 let pendingStageType = null;
 let pendingStageSelect = null;
@@ -535,7 +536,7 @@ function setAuthMode(mode = 'login') {
   const screen = document.getElementById('login-screen');
   if (!screen) return;
   screen.classList.remove('auth-mode-login','auth-mode-signup','auth-mode-recovery');
-  screen.classList.add(`auth-mode-`);
+  screen.classList.add(`auth-mode-${mode}`);
 }
 function showForgotPassword() {
   document.getElementById('login-main').style.display='none';
@@ -1457,6 +1458,10 @@ function resetAllFilters(){
   renderPro(); renderLB();
   showToast('Filters cleared','success');
 }
+function resetSavedFilters(){
+  try{ localStorage.removeItem(userFilterKey()); }catch(e){ /* ignore */ }
+  showToast('Filters reset','success');
+}
 function switchModalTab(modal,tab,btn){
   const tabs=modal==='pro'?['details','pipeline','commission','timeline']:['details','refunds','timeline'];
   tabs.forEach(tt=>{ const el=document.getElementById(`${modal}-tab-${tt}`); if(el) el.style.display=tt===tab?'':'none'; });
@@ -1703,20 +1708,30 @@ function renderDash(){
   const upcomingHTML=upcoming.length?upcoming.map((r,i)=>`<div class="ref-travel-item">
     <div class="ref-travel-icon"><i class="ti ti-plane"></i></div>
     <div><div class="ref-travel-name">${escHTML(r.name)}</div><div class="ref-travel-meta">${escHTML(r.company||'-')} | ${escHTML(r.position||'-')}</div></div>
-    <div class="ref-travel-date">${i===0?'May 20':i===1?'May 21':'May 22'}</div>
+    <div class="ref-travel-date">${r.travel?fmtDate(r.travel):'No date'}</div>
   </div>`).join(''):'<div class="ref-empty">No upcoming travels</div>';
 
   const recentActivity=Object.entries(allTimelines)
     .flatMap(([key,entries])=>(entries||[]).map(e=>({...e,key})))
     .sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,3);
-  const recentHTML=recentActivity.length?recentActivity.map((item,i)=>`<div class="ref-activity-item">
-    <div class="ref-avatar-mini">${['SA','MG','JD'][i]||'DR'}</div>
-    <div><div class="ref-activity-name">${escHTML(item.user||['Sara Ali','Michael George','John Doe'][i]||'Dreco')}</div><div class="ref-activity-meta">${escHTML(item.action||'Candidate updated')}</div></div>
-    <div class="ref-activity-time">${i===0?'2h ago':i===1?'4h ago':'6h ago'}</div>
-  </div>`).join(''):`
-    <div class="ref-activity-item"><div class="ref-avatar-mini">SA</div><div><div class="ref-activity-name">Sara Ali</div><div class="ref-activity-meta">Payment received</div></div><div class="ref-activity-time">2h ago</div></div>
-    <div class="ref-activity-item"><div class="ref-avatar-mini">MG</div><div><div class="ref-activity-name">Michael George</div><div class="ref-activity-meta">Candidate travelled to Dubai</div></div><div class="ref-activity-time">4h ago</div></div>
-    <div class="ref-activity-item"><div class="ref-avatar-mini">JD</div><div><div class="ref-activity-name">John Doe</div><div class="ref-activity-meta">Visa approved</div></div><div class="ref-activity-time">6h ago</div></div>`;
+  function timeAgo(ts){
+    if(!ts) return '';
+    const diff=Date.now()-new Date(ts).getTime();
+    const mins=Math.floor(diff/60000);
+    if(mins<60) return `${mins}m ago`;
+    const hrs=Math.floor(mins/60);
+    if(hrs<24) return `${hrs}h ago`;
+    return `${Math.floor(hrs/24)}d ago`;
+  }
+  const recentHTML=recentActivity.length?recentActivity.map((item)=>{
+    const initials=(item.user||'DR').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return `<div class="ref-activity-item">
+    <div class="ref-avatar-mini">${initials}</div>
+    <div><div class="ref-activity-name">${escHTML(item.user||'Dreco')}</div><div class="ref-activity-meta">${escHTML(item.action||'Candidate updated')}</div></div>
+    <div class="ref-activity-time">${timeAgo(item.ts)}</div>
+  </div>`;
+  }).join(''):`
+    <div class="ref-empty" style="padding:18px;text-align:center;color:var(--text-3);font-size:12px">No activity yet — actions will appear here as candidates are added and updated.</div>`;
 
   const dash=document.getElementById('dash-section');
   if(!dash) return;
@@ -1845,9 +1860,9 @@ function updateTrendTooltip(event){
   tip.style.display='block';
 }
 function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display=''; }
-function persistExpenses(){ localStorage.setItem('dreco_expenses', JSON.stringify(drecoExpenses)); }
-function persistEvents(){ localStorage.setItem('dreco_events', JSON.stringify(drecoEvents)); }
-function persistAudit(){ localStorage.setItem('dreco_audit', JSON.stringify(drecoAudit)); }
+function persistExpenses(){ safeLocalSet('dreco_expenses', JSON.stringify(drecoExpenses)); }
+function persistEvents(){ safeLocalSet('dreco_events', JSON.stringify(drecoEvents)); }
+function persistAudit(){ safeLocalSet('dreco_audit', JSON.stringify(drecoAudit)); }
 function auditAction(area, action, detail=''){
   drecoAudit.unshift({id:String(Date.now()), area, action, detail, user:currentUser?.display||'System', ts:new Date().toISOString()});
   if(drecoAudit.length>200) drecoAudit.length=200;
@@ -1867,11 +1882,11 @@ function requireFinanceAction(label='This finance action'){
 }
 function userFilterKey(){ return `dreco_filters_${currentUser?.username||'guest'}`; }
 function saveUserFilters(next={}){
-  const current=JSON.parse(localStorage.getItem(userFilterKey())||'{}');
-  localStorage.setItem(userFilterKey(), JSON.stringify({...current,...next,savedAt:new Date().toISOString()}));
+  const current=JSON.parse(safeLocalGet(userFilterKey())||'{}');
+  safeLocalSet(userFilterKey(), JSON.stringify({...current,...next,savedAt:new Date().toISOString()}));
 }
 function restoreUserFilters(){
-  const saved=JSON.parse(localStorage.getItem(userFilterKey())||'{}');
+  const saved=JSON.parse(safeLocalGet(userFilterKey())||'{}');
   if(saved.globalSearch){
     const global=document.getElementById('global-search'); if(global) global.value=saved.globalSearch;
     const pro=document.getElementById('pro-search'); if(pro) pro.value=saved.globalSearch;
@@ -2255,12 +2270,12 @@ async function savePro(){
     const changes=recordChanges(oldRec,rec,[['name','Name'],['pp','Passport'],['phone','Phone'],['position','Position'],['company','Company'],['country','Country'],['stage','Stage'],['commission','Commission'],['paid','Paid'],['travel','Travel date']]);
     addTimeline('pro',editingProId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
     auditAction('Professional Jobs','Candidate updated',rec.name);
-    showToast('Candidate updated Å“"','success');
+    showToast('Candidate updated ✓','success');
   } else {
     rec.id=Date.now(); proDB.push(rec);
     addTimeline('pro',rec.id,`Added - Stage: ${newStage}`);
     auditAction('Professional Jobs','Candidate added',rec.name);
-    showToast('Candidate added Å“"','success');
+    showToast('Candidate added ✓','success');
   }
   closeModal('pro-modal'); renderPro(); renderDash(); await saveProRecord(rec);
 }
@@ -2418,12 +2433,12 @@ async function saveLB(){
     const changes=recordChanges(oldRec,rec,[['name','Name'],['phone','Phone'],['ppStatus','Passport'],['travelStatus','Travel'],['travelDate','Travel date'],['toRefund','To refund'],['r1Amt','1st refund'],['r2Amt','2nd refund'],['notes','Notes']]);
     addTimeline('lb',editingLbId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
     auditAction('General Jobs','Candidate updated',rec.name);
-    showToast('Candidate updated Å“"','success');
+    showToast('Candidate updated ✓','success');
   } else {
     rec.id=Date.now(); lbDB.push(rec);
     addTimeline('lb',rec.id,`Added - ${ppStatus}, ${newTravel}`);
     auditAction('General Jobs','Candidate added',rec.name);
-    showToast('Candidate added Å“"','success');
+    showToast('Candidate added ✓','success');
   }
   closeModal('lb-modal'); renderLB(); renderDash(); await saveLBRecord(rec);
 }
