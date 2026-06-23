@@ -2845,6 +2845,93 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 @media(max-width:1180px){.app-layout{display:flex!important}.main,.main-area{width:100%!important;min-width:0!important}.sidebar{flex:0 0 224px!important}.ref-board-grid{grid-template-columns:1fr!important}.ref-side-column{display:grid!important;grid-template-columns:repeat(3,minmax(230px,1fr))!important;overflow-x:auto!important}.ref-bottom-grid,.ref-chart-grid{grid-template-columns:1fr!important}.ref-quick-grid button{height:48px!important}}
 @media(max-width:900px){.sidebar{display:none!important}.topbar{height:auto!important;min-height:58px!important;align-items:center!important}.topbar-title{width:auto!important;flex:1 1 auto!important;min-width:120px!important}.topbar-search{display:none!important}.content-area{height:calc(100dvh - 58px)!important;overflow:auto!important}.content-area>div{padding:14px 12px 92px!important}.ref-dashboard-head{position:relative!important;margin-bottom:14px!important}.ref-dashboard-head h1{font-size:20px!important;line-height:1.15!important}.ref-kpi-row{grid-template-columns:1fr!important}.smart-alert-strip{grid-template-columns:1fr!important}.ref-side-column{display:flex!important;flex-direction:column!important;overflow:visible!important}.ref-upcoming,.ref-quick,.ref-fin-card{height:auto!important;min-height:0!important}.ref-chart-grid,.ref-bottom-grid{grid-template-columns:1fr!important}.ref-trend-card,.ref-breakdown-card{height:auto!important;min-height:244px!important}.ref-line-chart{height:186px!important}.ref-axis{font-size:10px!important}.profile-dropdown{left:10px!important;right:10px!important;bottom:74px!important;top:auto!important;width:auto!important;max-width:none!important}.settings-page-grid,.team-grid{grid-template-columns:1fr!important}}
 @media(max-width:560px){.topbar-workspace,.save-dot,.save-label,.topbar-icon-btn{display:none!important}.ref-quick-grid{grid-template-columns:1fr!important}.ref-quick-grid button{justify-content:flex-start!important}.ref-chat-btn{width:42px!important;height:42px!important;right:14px!important;bottom:76px!important}.ref-axis span{font-size:9px!important}.section-page-head h2{font-size:20px!important}}
+
+/* ══════════════════════════════════════════════════════════
+   DRECO FINAL AUTHORITY — resolves all conflicting :root
+   blocks and !important overrides above. This block wins.
+   ══════════════════════════════════════════════════════════ */
+:root {
+  /* Single authoritative purple accent */
+  --accent: #5347CE;
+  --accent-dark: #4538B8;
+  --accent-deeper: #352A95;
+  --accent-light: #EFEEFF;
+  --accent-lighter: #F7F6FF;
+  /* Canvas */
+  --bg: #EEF2F8;
+  --surface: #F8FAFC;
+  --surface-2: #FFFFFF;
+  --border: #E4E8F2;
+  --border-2: #D5DAE4;
+  /* Text */
+  --text: #10172F;
+  --text-2: #485066;
+  --text-3: #8A93A6;
+  --ink: #10172F;
+  --ink-2: #263044;
+  /* Semantic colours */
+  --green: #0E9F6E;
+  --green-dark: #0A7A55;
+  --green-light: #DCF9F2;
+  --amber: #B07B10;
+  --amber-light: #FDF3DC;
+  --red: #B83232;
+  --red-light: #FDEAEA;
+  --blue: #1A6BB5;
+  --blue-light: #E3EEF9;
+  /* Dreco purple system */
+  --dreco-purple: #5347CE;
+  --dreco-purple-2: #6F62F4;
+  --dreco-lavender: #887CFD;
+  --dreco-blue: #4896FE;
+  --dreco-cyan: #16C8C7;
+  --dreco-ink: #10172F;
+  --dreco-muted: #6B7280;
+  --dreco-line: #E4E8F2;
+  --dreco-soft: #F6F7FB;
+  --dreco-card: #FFFFFF;
+  --dreco-shadow: 0 18px 48px rgba(31,42,73,.08), 0 4px 14px rgba(31,42,73,.05);
+  --dreco-shadow-sm: 0 10px 28px rgba(31,42,73,.06);
+  /* Nexus aliases kept for JS/HTML that reference them */
+  --nexus-purple: #5347CE;
+  --nexus-lavender: #887CFD;
+  --nexus-blue: #4896FE;
+  --nexus-cyan: #16C8C7;
+  --nexus-bg: #EEF2F8;
+  --nexus-shell: #F8FAFC;
+  --nexus-line: #E4E8F2;
+  --nexus-muted: #7D8797;
+  /* Shape */
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 4px 12px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+  --sidebar-w: 224px;
+  --sidebar-w-collapsed: 64px;
+}
+
+/* Badge classes missing from all previous passes */
+.b-applied   { background:#EAF2FF!important; color:#225EA8!important; }
+.b-notapplied{ background:#FFE6EA!important; color:#A51232!important; }
+.b-hadpp     { background:#DCF9F2!important; color:#0F766E!important; }
+.b-pushed    { background:#FFF1D6!important; color:#8A5A00!important; }
+
+/* click-hint row below tables */
+.click-hint{
+  font-size:11px;color:var(--text-3);padding:8px 16px;
+  display:flex;align-items:center;gap:6px;font-weight:500;
+  border-top:1px solid var(--dreco-line);
+}
+.click-hint i{font-size:13px}
+
+/* Ensure save-dot uses dreco cyan */
+.save-dot{background:var(--dreco-cyan)!important}
+.save-dot.saving{background:var(--amber)!important;animation:pulse .8s infinite alternate}
+@keyframes pulse{to{opacity:.5}}
 </style>
 </head>
 <body>
@@ -3364,7 +3451,8 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn primary" onclick="openCalendarEventPrompt()"><i class="ti ti-plus"></i> Record event</button><div class="pill-tabs" id="cal-source-tabs">
               <button class="pill-tab active" onclick="setCalSource('pro',this)">Professional</button>
               <button class="pill-tab" onclick="setCalSource('lb',this)">General Jobs</button>
-            </div></div></div>`r`n          <div class="panel" style="overflow:hidden">
+            </div></div></div>
+          <div class="panel" style="overflow:hidden">
             <div id="cal-grid"></div>
           </div>
         </div>
