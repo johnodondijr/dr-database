@@ -2828,6 +2828,8 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
   .section-page-head{margin-top:4px!important}
   .ref-table{min-width:820px!important}
 }
+
+.quick-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.quick-choice{display:block;cursor:pointer}.quick-choice input{position:absolute;opacity:0;pointer-events:none}.quick-choice span{height:100%;display:flex;flex-direction:column;gap:8px;border:1px solid #DDE4F0;border-radius:14px;background:#fff;padding:16px;color:#27364F}.quick-choice i{width:38px;height:38px;border-radius:12px;background:#F0EEFF;color:#4D3FD9;display:inline-flex;align-items:center;justify-content:center;font-size:22px}.quick-choice strong{font-size:14px;color:#0B1024}.quick-choice small{font-size:12px;color:#657188;line-height:1.4}.quick-choice input:checked+span{border-color:#6A5AF9;box-shadow:0 0 0 4px rgba(106,90,249,.12);background:#FBFAFF}.quick-modal textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:inherit;resize:vertical}@media(max-width:640px){.quick-choice-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -3400,6 +3402,75 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
   </div><!-- /app-layout -->
 </div><!-- /app -->
 
+
+<!-- QUICK ACTION MODALS -->
+<div class="modal-bg" id="quick-add-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3>Add candidate</h3><button class="modal-close" onclick="closeModal('quick-add-modal')">x</button></div>
+    <div class="modal-body">
+      <div class="quick-choice-grid">
+        <label class="quick-choice"><input type="radio" name="quick-workflow" value="pro" checked><span><i class="ti ti-users"></i><strong>Professional Jobs</strong><small>Recruitment pipeline, visas, commissions, travel.</small></span></label>
+        <label class="quick-choice"><input type="radio" name="quick-workflow" value="lb"><span><i class="ti ti-briefcase"></i><strong>General Jobs</strong><small>General job records, refunds, repayments, travel.</small></span></label>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('quick-add-modal')">Cancel</button><button class="btn primary" onclick="submitQuickAddCandidate()">Continue</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="quick-user-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3>Add user</h3><button class="modal-close" onclick="closeModal('quick-user-modal')">x</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field form-full"><label>Display name *</label><input id="quick-user-display" type="text" placeholder="e.g. Mary Wanjiku"></div>
+      <div class="field"><label>Username *</label><input id="quick-user-username" type="text" placeholder="e.g. mary" autocomplete="off"></div>
+      <div class="field"><label>Role</label><select id="quick-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+      <div class="field form-full"><label>Temporary password *</label><input id="quick-user-password" type="password" placeholder="At least 6 characters"></div>
+    </div><div class="login-error" id="quick-user-error" style="display:none"></div></div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('quick-user-modal')">Cancel</button><button class="btn primary" onclick="submitQuickUser()">Add user</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="quick-expense-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3>Add expense</h3><button class="modal-close" onclick="closeModal('quick-expense-modal')">x</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field"><label>Date</label><input id="quick-expense-date" type="date"></div>
+      <div class="field"><label>Amount (KES) *</label><input id="quick-expense-amount" type="number" min="0" placeholder="e.g. 2500"></div>
+      <div class="field"><label>Category</label><select id="quick-expense-category"><option>Documents</option><option>Transport</option><option>Processing</option><option>Communication</option><option>Other</option></select></div>
+      <div class="field"><label>Client / candidate *</label><input id="quick-expense-client" type="text" placeholder="Name"></div>
+      <div class="field form-full"><label>Notes</label><textarea id="quick-expense-notes" rows="3" placeholder="What was this expense for?"></textarea></div>
+    </div><div class="login-error" id="quick-expense-error" style="display:none"></div></div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('quick-expense-modal')">Cancel</button><button class="btn primary" onclick="submitQuickExpense()">Save expense</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="quick-event-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3 id="quick-event-heading">Record calendar event</h3><button class="modal-close" onclick="closeModal('quick-event-modal')">x</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field"><label>Date *</label><input id="quick-event-date" type="date"></div>
+      <div class="field"><label>Title *</label><input id="quick-event-title" type="text" placeholder="e.g. Embassy appointment"></div>
+      <div class="field form-full"><label>Notes</label><textarea id="quick-event-notes" rows="3" placeholder="Optional details"></textarea></div>
+    </div><div class="login-error" id="quick-event-error" style="display:none"></div></div>
+    <div class="modal-footer"><button class="btn" id="quick-event-delete" onclick="deleteCalendarEvent()" style="display:none">Delete</button><button class="btn" onclick="closeModal('quick-event-modal')">Cancel</button><button class="btn primary" onclick="submitCalendarEvent()">Save event</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="quick-country-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3>Add destination country</h3><button class="modal-close" onclick="closeModal('quick-country-modal')">x</button></div>
+    <div class="modal-body"><div class="field"><label>Country name *</label><input id="quick-country-name" type="text" placeholder="e.g. Qatar"></div><div class="login-error" id="quick-country-error" style="display:none"></div></div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('quick-country-modal')">Cancel</button><button class="btn primary" onclick="submitQuickCountry()">Add country</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="quick-stage-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3 id="quick-stage-heading">Add stage</h3><button class="modal-close" onclick="closeModal('quick-stage-modal')">x</button></div>
+    <div class="modal-body"><div class="field"><label>Name *</label><input id="quick-stage-name" type="text" placeholder="e.g. Medical"></div><div class="login-error" id="quick-stage-error" style="display:none"></div></div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('quick-stage-modal')">Cancel</button><button class="btn primary" onclick="submitQuickStage()">Add</button></div>
+  </div>
+</div>
 <!-- PRO MODAL -->
 <div class="modal-bg" id="pro-modal">
   <div class="modal">
