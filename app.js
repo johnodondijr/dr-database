@@ -1723,7 +1723,7 @@ function renderDash(){
   dash.innerHTML=`
     <div class="ref-dashboard">
       <div class="ref-dashboard-head">
-        <div><h1>Good afternoon, ${escHTML(firstName)} <span>ðŸ‘‹</span></h1><p>Here's what's happening in your workspace today.</p></div>
+        <div><h1>Good afternoon, ${escHTML(firstName)}</h1><p>Here's what's happening in your workspace today.</p></div>
         <button class="ref-date-btn" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i><span>Open calendar</span><i class="ti ti-chevron-right"></i></button>
       </div>
 
@@ -2701,6 +2701,7 @@ function setUserDisplay(display, role) {
   if (sucOrg) sucOrg.textContent = getCompanyName();
   updateWorkspaceLabels();
 }
+
 
 
 
