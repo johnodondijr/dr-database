@@ -1,6 +1,6 @@
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // SUPABASE CONFIG - replace with your project values
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
 const HAS_SUPABASE_CONFIG =
@@ -32,9 +32,9 @@ const LEGACY_DESTINY_HASHES = {
   consolata: 'b0a93dc7415fc8bb713a780060bd8796aeacd1814fc712d49868ba25674e0643',
 };
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // STAFF ACCOUNTS
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 const STAFF_ACCOUNTS = {
   johnfred: { passwordSalt: 'd66ed843dec2214091d4dcc1723179ef', passwordHash: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
 };
@@ -223,9 +223,9 @@ function safeSessionRemove(key) {
   try { sessionStorage.removeItem(key); } catch { /* ignore */ }
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // STATE
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 let currentUser   = null;
 let currentCompany = { ...DEFAULT_COMPANY };
 let proDB         = [];
@@ -440,25 +440,25 @@ function nextLocalId(rows) {
   return rows.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1;
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // LOADING
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function showLoading(msg = 'Loading...') {
   const el = document.getElementById('loading-text'); if (el) el.textContent = msg;
   document.getElementById('loading-overlay').classList.add('show');
 }
 function hideLoading() { document.getElementById('loading-overlay').classList.remove('show'); }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // SIDEBAR TOGGLE
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('collapsed');
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // AUTH
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function togglePassword() {
   const inp = document.getElementById('pw-input');
   const btn = document.getElementById('pw-toggle');
@@ -737,9 +737,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   bindModalSummaries();
 });
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // DATA LOADING
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 async function loadAllData() {
   if (!useCloud()) {
     appStorageMode='local';
@@ -751,6 +751,7 @@ async function loadAllData() {
     proStages = local.proStages;
     lbStages = local.lbStages;
     rebuildStageSelects();
+    restoreUserFilters();
     hideLoading();
     switchTab('dash');
     return;
@@ -806,6 +807,7 @@ async function loadAllData() {
     showToast('Cloud sync unavailable. Using local mode.','error');
   }
   rebuildStageSelects();
+  restoreUserFilters();
   hideLoading();
   switchTab('dash');
 }
@@ -831,9 +833,9 @@ async function seedLBData() {
   if(data&&data.length) lbDB=data.map(normalizeLBRecord); else { console.warn('Seed insert failed',error); lbDB=JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord); }
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // SAVE STATUS
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function setSaveStatus(s) {
   const dot=document.getElementById('save-dot');
   const lbl=document.getElementById('save-label');
@@ -842,9 +844,9 @@ function setSaveStatus(s) {
   lbl.textContent=s==='saving'?'Saving...':`${appStorageMode==='cloud'?'Cloud saved':'Local saved'} ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // SUPABASE WRITES
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function useCloud() { return db && appStorageMode==='cloud'; }
 async function dbInsert(table, rec) {
   const ts={...rec, company_id:getCompanyId()}; delete ts.id;
@@ -933,9 +935,9 @@ async function saveStages(){
   catch(e){fallBackToLocal(e);setSaveStatus('saved');}
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // TIMELINE
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function addTimeline(type,id,action){
   const key=`${type}_${id}`;
   if(!allTimelines[key]) allTimelines[key]=[];
@@ -953,9 +955,9 @@ function renderTimelineHTML(type,id){
   }).join('');
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // HELPERS
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function xlToISO(n){ if(!n||isNaN(n)) return ''; return new Date(EXCEL_EPOCH.getTime()+n*86400000).toISOString().split('T')[0]; }
 function escHTML(v){
   return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -997,9 +999,9 @@ function ppBadge(s){
   return `<span class="badge ${map[s]||'b-na'}">${s ? escHTML(s) : '&mdash;'}</span>`;
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // TABS + MODALS
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function switchTab(t){
   const tabs=['dash','pro','lb','kanban','travel','calendar','commissions','repayments','expenses','reports','team','settings','help'];
   tabs.forEach(x=>{
@@ -1564,9 +1566,9 @@ function bindModalSummaries(){
   });
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // STAGES + PILLS
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function rebuildStageSelects(){
   const proSel=document.getElementById('pf-stage');
   if(proSel) proSel.innerHTML=proStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new stage...</option>`;
@@ -1645,6 +1647,7 @@ function submitQuickStage(){
 // Global search
 function onGlobalSearch(){
   const q=document.getElementById('global-search').value;
+  saveUserFilters({globalSearch:q});
   const ps=document.getElementById('pro-search'); const ls=document.getElementById('lb-search');
   if(ps) ps.value=q; if(ls) ls.value=q;
   const active=document.querySelector('.nav-item.active');
@@ -1652,9 +1655,9 @@ function onGlobalSearch(){
   else if(active&&active.id==='nav-lb') renderLB();
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // DASHBOARD
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function renderDash(){
   const proTravelled=proDB.filter(r=>r.stage==='TRAVELLED').length;
   const proInProcess=proDB.filter(isInProcessPro).length;
@@ -1720,7 +1723,7 @@ function renderDash(){
   dash.innerHTML=`
     <div class="ref-dashboard">
       <div class="ref-dashboard-head">
-        <div><h1>Good afternoon, ${escHTML(firstName)} <span>👋</span></h1><p>Here's what's happening in your workspace today.</p></div>
+        <div><h1>Good afternoon, ${escHTML(firstName)} <span>ðŸ‘‹</span></h1><p>Here's what's happening in your workspace today.</p></div>
         <button class="ref-date-btn" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i><span>Open calendar</span><i class="ti ti-chevron-right"></i></button>
       </div>
 
@@ -1732,6 +1735,8 @@ function renderDash(){
             ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF','','openTravelledView()')}
             ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
           </div>
+
+          ${renderSmartAlertsHTML()}
 
           <section class="ref-card ref-pipeline-overview">
             <div class="ref-card-title">Pipeline Overview <i class="ti ti-info-circle"></i></div>
@@ -1842,6 +1847,68 @@ function updateTrendTooltip(event){
 function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display=''; }
 function persistExpenses(){ localStorage.setItem('dreco_expenses', JSON.stringify(drecoExpenses)); }
 function persistEvents(){ localStorage.setItem('dreco_events', JSON.stringify(drecoEvents)); }
+function persistAudit(){ localStorage.setItem('dreco_audit', JSON.stringify(drecoAudit)); }
+function auditAction(area, action, detail=''){
+  drecoAudit.unshift({id:String(Date.now()), area, action, detail, user:currentUser?.display||'System', ts:new Date().toISOString()});
+  if(drecoAudit.length>200) drecoAudit.length=200;
+  persistAudit();
+}
+function hasRole(role){ return currentUser?.role===role; }
+function canManageFinance(){ return hasRole('admin') || hasRole('finance'); }
+function requireAdminAction(label='This action'){
+  if(hasRole('admin')) return true;
+  showToast(`${label} is available to administrators only`,'error');
+  return false;
+}
+function requireFinanceAction(label='This finance action'){
+  if(canManageFinance()) return true;
+  showToast(`${label} is available to admins and finance users only`,'error');
+  return false;
+}
+function userFilterKey(){ return `dreco_filters_${currentUser?.username||'guest'}`; }
+function saveUserFilters(next={}){
+  const current=JSON.parse(localStorage.getItem(userFilterKey())||'{}');
+  localStorage.setItem(userFilterKey(), JSON.stringify({...current,...next,savedAt:new Date().toISOString()}));
+}
+function restoreUserFilters(){
+  const saved=JSON.parse(localStorage.getItem(userFilterKey())||'{}');
+  if(saved.globalSearch){
+    const global=document.getElementById('global-search'); if(global) global.value=saved.globalSearch;
+    const pro=document.getElementById('pro-search'); if(pro) pro.value=saved.globalSearch;
+    const lb=document.getElementById('lb-search'); if(lb) lb.value=saved.globalSearch;
+  }
+}
+function getSmartAlerts(){
+  const now=Date.now(), day=86400000;
+  const oldMol=proDB.filter(r=>r.stage==='PENDING MOL' && drecoDateValue(r.submitted) && now-drecoDateValue(r.submitted)>7*day);
+  const oldVisa=proDB.filter(r=>r.stage==='PENDING VISA' && Math.max(drecoDateValue(r.mol),drecoDateValue(r.submitted)) && now-Math.max(drecoDateValue(r.mol),drecoDateValue(r.submitted))>10*day);
+  const unpaid=proDB.filter(r=>proBalance(r)>0).sort((a,b)=>proBalance(b)-proBalance(a));
+  const travel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
+  return [
+    {label:'MOL overdue',value:oldMol.length,icon:'ti-clock-exclamation',tone:'warn',target:"switchTab('pro')"},
+    {label:'Visa pending too long',value:oldVisa.length,icon:'ti-id-badge-2',tone:'violet',target:"switchTab('pro')"},
+    {label:'Unpaid commissions',value:unpaid.length,icon:'ti-cash-banknote',tone:'money',target:"switchTab('commissions')"},
+    {label:'Pending travel',value:travel.length,icon:'ti-plane',tone:'blue',target:'openPendingTravelView()'}
+  ].filter(a=>a.value>0);
+}
+function renderSmartAlertsHTML(){
+  const alerts=getSmartAlerts();
+  if(!alerts.length) return '';
+  return `<section class="smart-alert-strip">${alerts.map(a=>`<button class="smart-alert ${a.tone}" onclick="${a.target}"><i class="ti ${a.icon}"></i><span>${a.label}</span><strong>${a.value}</strong></button>`).join('')}</section>`;
+}
+function getCommissionTransactions(){
+  return proDB.filter(r=>Number(r.paid)>0).map(r=>({candidate:r.name, ref:r.company||r.position||'Professional Jobs', amount:Number(r.paid)||0, date:latestCommissionTs(r)||drecoDateValue(r.submitted), note:getLatestTimelineText('pro',r.id)})).sort((a,b)=>b.date-a.date);
+}
+function getRepaymentTransactions(){
+  return lbDB.filter(isTravelledLB).flatMap(r=>[
+    {candidate:r.name, ref:'Installment 1', amount:Number(r.r1Amt||r.r1_amt)||0, date:drecoDateValue(r.r1Date||r.r1_date)},
+    {candidate:r.name, ref:'Installment 2', amount:Number(r.r2Amt||r.r2_amt)||0, date:drecoDateValue(r.r2Date||r.r2_date)}
+  ].filter(x=>x.amount>0)).sort((a,b)=>b.date-a.date);
+}
+function renderTransactionHistory(id, rows, currencyFn){
+  const el=document.getElementById(id); if(!el) return;
+  el.innerHTML=rows.length?`<div class="transaction-list">${rows.slice(0,8).map(row=>`<div class="transaction-row"><div><strong>${escHTML(row.candidate)}</strong><span>${escHTML(row.ref||'Update')}</span></div><div><b>${currencyFn(row.amount)}</b><em>${row.date?fmtDate(new Date(row.date).toISOString().slice(0,10)):'No date'}</em></div></div>`).join('')}</div>`:'<div class="mini-empty">No payment transactions yet</div>';
+}
 function setFinancePeriod(value){ financePeriod=value||'month'; renderDash(); }
 function getLatestTimelineText(type,id){
   const item=(allTimelines[`${type}_${id}`]||[])[0];
@@ -1894,6 +1961,7 @@ function renderCommissions(){
   const billed=proDB.reduce((sum,row)=>sum+(Number(row.commission)||0),0), paid=proDB.reduce((sum,row)=>sum+(Number(row.paid)||0),0);
   const rows=[...proDB].sort((a,b)=>latestCommissionTs(b)-latestCommissionTs(a) || Number(b.paid||0)-Number(a.paid||0));
   renderMetricCards('commission-metrics',[{label:'Billed',value:moneyKES(billed),cls:'mc-ink',small:true},{label:'Received',value:moneyKES(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyKES(billed-paid),cls:'mc-amber',small:true}]);
+  renderTransactionHistory('commission-history', getCommissionTransactions(), moneyKES);
   const tb=document.getElementById('commissions-tbody'); if(!tb) return;
   tb.innerHTML=rows.length?rows.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(r.paid)}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
 }
@@ -1902,6 +1970,7 @@ function renderRepayments(){
   const owed=travelled.reduce((sum,row)=>sum+(Number(row.toRefund||row.to_refund)||0),0);
   const paid=travelled.reduce((sum,row)=>sum+(Number(row.r1Amt||row.r1_amt)||0)+(Number(row.r2Amt||row.r2_amt)||0),0);
   renderMetricCards('repayment-metrics',[{label:'Travelled clients',value:travelled.length,cls:'mc-default'},{label:'Paid',value:moneyUSD(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyUSD(owed-paid),cls:'mc-amber',small:true}]);
+  renderTransactionHistory('repayment-history', getRepaymentTransactions(), moneyUSD);
   const tb=document.getElementById('repayments-tbody'); if(!tb) return;
   tb.innerHTML=travelled.length?travelled.map(r=>{const toR=Number(r.toRefund||r.to_refund)||0,p=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${fmtDate(r.travelDate||r.travel_date)}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(toR-p)}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No travelled clients with repayment records yet</div></td></tr>';
 }
@@ -1920,7 +1989,8 @@ function renderTeam(){
 }
 function renderSettingsPage(){
   const el=document.getElementById('settings-page-content'); if(!el) return;
-  el.innerHTML=`<div class="settings-page-card"><h3>Workspace</h3><p>Manage company identity and data mode.</p><div class="setting-row"><span>Company</span><button onclick="openSettingsModal()">Edit</button></div><div class="setting-row"><span>Storage</span><span class="settings-pill">${appStorageMode==='cloud'?'Cloud':'Local'}</span></div></div><div class="settings-page-card"><h3>Pipeline</h3><p>Adjust workflow stages and country options from their respective screens.</p><div class="setting-row"><span>Professional stages</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General countries</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Team & permissions</h3><p>Add staff and review roles from the Team page.</p><div class="setting-row"><span>Team members</span><button onclick="switchTab('team')">Manage</button></div></div><div class="settings-page-card"><h3>Data</h3><p>Export backups or reset local filters.</p><div class="setting-row"><span>Backup</span><button onclick="downloadBackup()">Download</button></div></div>`;
+  const syncCopy=appStorageMode==='cloud'?'Supabase cloud sync is active. Local fallback remains available if a write fails.':'Local mode is active. Configure Supabase to enable shared office sync.';
+  el.innerHTML=`<div class="settings-page-card"><h3>Workspace</h3><p>Manage company identity and data mode.</p><div class="setting-row"><span>Company</span><button onclick="openSettingsModal()">Edit</button></div><div class="setting-row"><span>Storage</span><span class="settings-pill">${appStorageMode==='cloud'?'Cloud':'Local'}</span></div></div><div class="settings-page-card"><h3>Pipeline</h3><p>Adjust workflow stages and country options from their respective screens.</p><div class="setting-row"><span>Professional stages</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General countries</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Team & permissions</h3><p>Add staff and review roles from the Team page.</p><div class="setting-row"><span>Team members</span><button onclick="switchTab('team')">Manage</button></div></div><div class="settings-page-card"><h3>Data</h3><p>Export backups or reset local filters.</p><div class="setting-row"><span>Backup</span><button onclick="downloadBackup()">Download</button></div><div class="setting-row"><span>Saved filters</span><button onclick="localStorage.removeItem(userFilterKey());showToast('Filters reset','success')">Reset</button></div></div><div class="settings-page-card"><h3>Sync health</h3><p>${syncCopy}</p><div class="setting-row"><span>Mode</span><span class="settings-pill">${appStorageMode==='cloud'?'Cloud first':'Local fallback'}</span></div><div class="setting-row"><span>Last sync issue</span><span>${escHTML(lastSyncError||'None')}</span></div></div><div class="settings-page-card"><h3>Audit log</h3><p>Recent system activity across candidates, finance, users, and documents.</p>${drecoAudit.slice(0,6).map(a=>`<div class="audit-row"><strong>${escHTML(a.action)}</strong><span>${escHTML(a.area)} - ${fmtDate(a.ts)}</span></div>`).join('')||'<div class="mini-empty">No audited actions yet</div>'}</div>`;
 }
 function openQuickAddCandidate(){
   const modal=document.getElementById('quick-add-modal');
@@ -1933,6 +2003,7 @@ function submitQuickAddCandidate(){
   switchTab('pro'); openProForm();
 }
 function createStaffAccount(){
+  if(!requireAdminAction('Adding users')) return;
   switchTab('team');
   const modal=document.getElementById('quick-user-modal');
   if(!modal){ showToast('User form is unavailable','error'); return; }
@@ -1959,10 +2030,12 @@ async function submitQuickUser(){
   closeModal('quick-user-modal'); renderTeam(); renderCompanyUsers(); showToast('User added','success');
 }
 function openRecordPaymentPrompt(type='commission'){
+  if(!requireFinanceAction('Recording payments')) return;
   if(type==='repayment'){ switchTab('repayments'); showToast('Open a repayment row and update its installment fields.','success'); return; }
   switchTab('commissions'); showToast('Open a commission row and update billed or received amounts.','success');
 }
 function openExpensePrompt(){
+  if(!requireFinanceAction('Adding expenses')) return;
   populateExpenseCandidateOptions();
   const modal=document.getElementById('quick-expense-modal');
   if(!modal){ showToast('Expense form is unavailable','error'); return; }
@@ -1973,6 +2046,7 @@ function openExpensePrompt(){
   modal.classList.add('open');
 }
 function submitQuickExpense(){
+  if(!requireFinanceAction('Adding expenses')) return;
   const date=(document.getElementById('quick-expense-date')?.value||new Date().toISOString().slice(0,10));
   const client=(document.getElementById('quick-expense-client')?.value||'').trim();
   const amount=Number(document.getElementById('quick-expense-amount')?.value||0);
@@ -1983,9 +2057,10 @@ function submitQuickExpense(){
   if(!client) return fail('Client or candidate name is required.');
   if(!amount || amount<0) return fail('Enter a valid amount.');
   drecoExpenses.unshift({id:String(Date.now()),date,client,amount,category,notes});
+  auditAction('Expenses','Expense added',`${client} - ${moneyKES(amount)}`);
   persistExpenses(); closeModal('quick-expense-modal'); renderExpenses(); showToast('Expense recorded','success');
 }
-function deleteExpense(id){ drecoExpenses=drecoExpenses.filter(e=>e.id!==id); persistExpenses(); renderExpenses(); }
+function deleteExpense(id){ if(!requireFinanceAction('Deleting expenses')) return; const item=drecoExpenses.find(e=>e.id===id); drecoExpenses=drecoExpenses.filter(e=>e.id!==id); auditAction('Expenses','Expense deleted',item?.client||''); persistExpenses(); renderExpenses(); }
 function openCalendarEventPrompt(){
   editingEventId=null;
   const modal=document.getElementById('quick-event-modal');
@@ -2052,7 +2127,7 @@ function buildConic(items,total){
   return `conic-gradient(${stops || '#E5E7EB 0 100%'})`;
 }
 // PROFESSIONAL
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function getFilteredPro(){
   const q=(document.getElementById('pro-search')?.value||'').toLowerCase();
   const stage=window.proStagePillFilter||'';
@@ -2179,23 +2254,25 @@ async function savePro(){
     rec.id=editingProId; const i=proDB.findIndex(x=>x.id==editingProId); proDB[i]={...proDB[i],...rec};
     const changes=recordChanges(oldRec,rec,[['name','Name'],['pp','Passport'],['phone','Phone'],['position','Position'],['company','Company'],['country','Country'],['stage','Stage'],['commission','Commission'],['paid','Paid'],['travel','Travel date']]);
     addTimeline('pro',editingProId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
-    showToast('Candidate updated œ"','success');
+    auditAction('Professional Jobs','Candidate updated',rec.name);
+    showToast('Candidate updated Å“"','success');
   } else {
     rec.id=Date.now(); proDB.push(rec);
     addTimeline('pro',rec.id,`Added - Stage: ${newStage}`);
-    showToast('Candidate added œ"','success');
+    auditAction('Professional Jobs','Candidate added',rec.name);
+    showToast('Candidate added Å“"','success');
   }
   closeModal('pro-modal'); renderPro(); renderDash(); await saveProRecord(rec);
 }
 async function deletePro(id){
   const r=proDB.find(x=>x.id==id);
   if(!confirm(`Delete ${r?r.name:'this candidate'}? Cannot be undone.`)) return;
-  proDB=proDB.filter(x=>x.id!=id); showToast('Deleted','success'); renderPro(); renderDash(); await deleteProRecord(id);
+  proDB=proDB.filter(x=>x.id!=id); auditAction('Professional Jobs','Candidate deleted',r?.name||''); showToast('Deleted','success'); renderPro(); renderDash(); await deleteProRecord(id);
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // LB JOBS
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function getFilteredLB(){
   const q=(document.getElementById('lb-search')?.value||'').toLowerCase();
   const travel=window.lbTravelPillFilter||'';
@@ -2340,23 +2417,25 @@ async function saveLB(){
     rec.id=editingLbId; const i=lbDB.findIndex(x=>x.id==editingLbId); lbDB[i]={...lbDB[i],...rec};
     const changes=recordChanges(oldRec,rec,[['name','Name'],['phone','Phone'],['ppStatus','Passport'],['travelStatus','Travel'],['travelDate','Travel date'],['toRefund','To refund'],['r1Amt','1st refund'],['r2Amt','2nd refund'],['notes','Notes']]);
     addTimeline('lb',editingLbId,changes.length?`Updated: ${changes.slice(0,4).join('; ')}${changes.length>4?'...':''}`:'Details reviewed');
-    showToast('Candidate updated œ"','success');
+    auditAction('General Jobs','Candidate updated',rec.name);
+    showToast('Candidate updated Å“"','success');
   } else {
     rec.id=Date.now(); lbDB.push(rec);
     addTimeline('lb',rec.id,`Added - ${ppStatus}, ${newTravel}`);
-    showToast('Candidate added œ"','success');
+    auditAction('General Jobs','Candidate added',rec.name);
+    showToast('Candidate added Å“"','success');
   }
   closeModal('lb-modal'); renderLB(); renderDash(); await saveLBRecord(rec);
 }
 async function deleteLB(id){
   const r=lbDB.find(x=>x.id==id);
   if(!confirm(`Delete ${r?r.name:'this candidate'}? Cannot be undone.`)) return;
-  lbDB=lbDB.filter(x=>x.id!=id); showToast('Deleted','success'); renderLB(); renderDash(); await deleteLBRecord(id);
+  lbDB=lbDB.filter(x=>x.id!=id); auditAction('General Jobs','Candidate deleted',r?.name||''); showToast('Deleted','success'); renderLB(); renderDash(); await deleteLBRecord(id);
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // DOCUMENTS
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function hasDocs(type,id){ const v=allDocs[`${type}_${id}`]; return typeof v==='string'&&v.trim().length>0; }
 function openDocs(type,id,name){
   docsTarget={type,id,name};
@@ -2364,11 +2443,20 @@ function openDocs(type,id,name){
   let existing=allDocs[`${type}_${id}`]; if(typeof existing!=='string') existing='';
   const input=document.getElementById('docs-link-input');
   const openBtn=document.getElementById('docs-open-btn');
-  input.value=existing; openBtn.disabled=!existing.trim();
+  input.value=existing; openBtn.disabled=!existing.trim(); renderDocChecklist(type,id);
   document.getElementById('docs-modal').classList.add('open');
 }
 function onDocsLinkInput(){ document.getElementById('docs-open-btn').disabled=!document.getElementById('docs-link-input').value.trim(); }
 function openCurrentDocLink(){ const v=document.getElementById('docs-link-input').value.trim(); if(v) window.open(v,'_blank'); }
+function renderDocChecklist(type,id){
+  const el=document.getElementById('docs-checklist'); if(!el) return;
+  const record=(type==='pro'?proDB:lbDB).find(r=>String(r.id)===String(id))||{};
+  const hasFolder=!!String(allDocs[`${type}_${id}`]||'').trim();
+  const items=type==='pro'
+    ? [{label:'Passport',done:!!record.pp},{label:'Offer letter',done:!!record.ol},{label:'MOL',done:!!record.mol},{label:'Visa',done:!!record.visa},{label:'Travel ticket',done:!!record.travel},{label:'Drive folder',done:hasFolder}]
+    : [{label:'Passport',done:String(record.ppStatus||record.pp_status||'')==='HAD PP'},{label:'Travel details',done:!!(record.travelDate||record.travel_date)},{label:'Repayment record',done:!!(record.r1Amt||record.r1_amt||record.r2Amt||record.r2_amt)},{label:'Drive folder',done:hasFolder}];
+  el.innerHTML=`<div class="doc-checklist-title">Document checklist</div><div class="doc-checklist-grid">${items.map(item=>`<span class="doc-check ${item.done?'done':'missing'}"><i class="ti ${item.done?'ti-circle-check':'ti-alert-circle'}"></i>${item.label}</span>`).join('')}</div>`;
+}
 async function saveDocs(){
   if(!docsTarget) return;
   const {type,id}=docsTarget;
@@ -2376,14 +2464,15 @@ async function saveDocs(){
   const dbKey=`${type}_${id}`;
   allDocs[dbKey]=link;
   addTimeline(type,id,link?'Documents link updated':'Documents link removed');
-  closeModal('docs-modal'); showToast('Documents saved œ"','success');
+  auditAction('Documents',link?'Documents link updated':'Documents link removed',docsTarget.name||'Candidate');
+  closeModal('docs-modal'); showToast('Documents saved Å“"','success');
   if(type==='pro') renderPro(); else renderLB();
   await saveDocsToDB(dbKey,link);
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // EXPORT CSV
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function exportCSV(type){
   let headers,rows,filename;
   if(type==='pro'){
@@ -2409,12 +2498,12 @@ function exportCSV(type){
     href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),
     download:`${filename}_${new Date().toISOString().split('T')[0]}.csv`
   });
-  a.click(); showToast('Export downloaded œ"','success');
+  a.click(); showToast('Export downloaded Å“"','success');
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // PAGINATION
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function renderPagination(elId,page,total,count,which){
   const el=document.getElementById(elId); if(!el) return;
   if(total<=1){ el.innerHTML=`<span>${count} record${count!==1?'s':''}</span><span></span>`; return; }
@@ -2431,9 +2520,9 @@ function goPage(which,p){
   document.querySelector('.content-area')?.scrollTo({top:0,behavior:'smooth'});
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // TOAST
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function showToast(msg,type=''){
   const t=document.getElementById('toast'); if(!t) return;
   const icon=type==='error'?'ti-alert-circle':'ti-circle-check';
@@ -2443,9 +2532,9 @@ function showToast(msg,type=''){
   setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // PROFILE DROPDOWN
-// **********************************************************
+// *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function toggleProfileDropdown(e) {
   e.stopPropagation();
   const dd = document.getElementById('profile-dropdown');
@@ -2612,6 +2701,10 @@ function setUserDisplay(display, role) {
   if (sucOrg) sucOrg.textContent = getCompanyName();
   updateWorkspaceLabels();
 }
+
+
+
+
 
 
 
