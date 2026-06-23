@@ -2809,6 +2809,25 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
 
 /* Functional cleanup polish */
 .ref-total-link{display:block;width:100%;border:0;background:transparent;cursor:pointer;font-family:inherit}.topbar-icon-btn + .save-dot{margin-left:2px!important}
+
+/* Full workflow sections and responsive cleanup */
+.sidebar-user-card.sidebar-account-trigger{border:0;width:100%;text-align:left;cursor:pointer}.sidebar-user-card.sidebar-account-trigger:hover{background:#F7F5FF!important;border-color:#DCD8FF!important}.topbar-avatar-static{cursor:default!important;pointer-events:none!important}.profile-dropdown{position:fixed!important;right:auto!important;left:18px!important;top:86px!important;bottom:auto!important}.profile-wrap .profile-dropdown{left:18px!important;right:auto!important;top:86px!important;bottom:auto!important}.section-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.section-page-head h2{margin:0;color:#0B1024;font-size:22px;font-weight:780;letter-spacing:-.035em}.section-page-head p{margin:6px 0 0;color:#657188;font-size:13px}.ref-table{width:100%;min-width:900px}.ref-table th,.ref-table td{white-space:nowrap}.team-grid,.settings-page-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.team-card,.settings-page-card{background:#fff;border:1px solid #E6EAF2;border-radius:12px;box-shadow:0 12px 28px rgba(30,41,59,.04);padding:18px}.team-card-head{display:flex;align-items:center;gap:12px}.team-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6A5AF9,#4D3FD9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:780}.team-name{font-weight:760;color:#0B1024}.team-role{font-size:12px;color:#657188;margin-top:3px}.team-perms{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.team-perms span,.settings-pill{font-size:11px;border-radius:999px;background:#F0ECFF;color:#4D3FD9;padding:6px 9px;font-weight:650}.settings-page-card h3{margin:0 0 8px;color:#0B1024;font-size:15px}.settings-page-card p{margin:0 0 14px;color:#657188;font-size:12px;line-height:1.5}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #EEF2F7}.setting-row:first-of-type{border-top:0}.setting-row span{font-size:12px;color:#27364F}.setting-row button,.setting-row select{height:32px;border-radius:8px;border:1px solid #DDE4F0;background:#fff;color:#27364F;padding:0 10px;font-size:12px}.mini-empty{padding:18px;color:#657188;font-size:13px}.action-link{border:0;background:transparent;color:#4D3FD9;font-weight:700;cursor:pointer}.finance-period-menu{position:relative;display:inline-flex}.finance-period-menu select{height:30px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;font-size:11px;padding:0 8px}.finance-period-menu option{color:#111827}.trend-hit{position:absolute;inset:0;cursor:crosshair}.ref-tooltip.dynamic{display:none}.ref-line-chart:hover .ref-tooltip.dynamic{display:block}@media(max-width:900px){.section-page-head{flex-direction:column}.section-page-head .btn{width:100%}.profile-dropdown{left:10px!important;right:10px!important;bottom:74px!important;width:auto!important}.ref-table{min-width:820px}.team-grid,.settings-page-grid{grid-template-columns:1fr}.topbar-avatar-static{display:flex!important}}
+
+/* Dreco functional responsiveness pass */
+.profile-dropdown{z-index:80!important}
+.ref-line-chart{position:relative!important}
+.ref-tooltip.dynamic{pointer-events:none;transition:left .12s ease,top .12s ease}
+@media(max-width:760px){
+  .table-scroll{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+  .table-scroll table,.table-scroll .ref-table{display:table!important;width:100%!important;min-width:820px!important;padding:0!important}
+  .table-scroll thead{display:table-header-group!important}
+  .table-scroll tbody{display:table-row-group!important}
+  .table-scroll tr{display:table-row!important;background:transparent!important;border-radius:0!important;margin:0!important;padding:0!important}
+  .table-scroll td,.table-scroll th{display:table-cell!important;width:auto!important;white-space:nowrap!important;padding:12px 14px!important}
+  .table-scroll tr td:first-child{display:table-cell!important}
+  .section-page-head{margin-top:4px!important}
+  .ref-table{min-width:820px!important}
+}
 </style>
 </head>
 <body>
@@ -3016,23 +3035,23 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
       <div class="sidebar-divider"></div>
 
       <!-- USER CARD -->
-      <div class="sidebar-user-card">
+      <button class="sidebar-user-card sidebar-account-trigger" onclick="toggleProfileDropdown(event)" type="button">
         <div class="suc-avatar" id="suc-avatar">-</div>
         <div class="suc-info">
           <div class="suc-name" id="suc-name">-</div>
           <div class="suc-org">Destiny Recruitment Consults</div>
         </div>
-      </div>
+      </button>
       <div class="sidebar-divider"></div>
 
-                  <div class="nav-section-label">General</div>
+                        <div class="nav-section-label">General</div>
       <a class="nav-item active" id="nav-dash" data-title="Dashboard" onclick="switchTab('dash')">
         <i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span>
       </a>
 
       <div class="nav-section-label">Workflows</div>
-      <a class="nav-item" id="nav-pro" data-title="Candidates" onclick="switchTab('pro')">
-        <i class="ti ti-users"></i><span class="nav-item-label">Candidates</span>
+      <a class="nav-item" id="nav-pro" data-title="Professional Jobs" onclick="switchTab('pro')">
+        <i class="ti ti-users"></i><span class="nav-item-label">Professional Jobs</span>
       </a>
       <a class="nav-item" id="nav-lb" data-title="General Jobs" onclick="switchTab('lb')">
         <i class="ti ti-briefcase"></i><span class="nav-item-label">General Jobs</span>
@@ -3040,17 +3059,32 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
       <a class="nav-item" id="nav-kanban" data-title="Pipeline Board" onclick="switchTab('kanban')">
         <i class="ti ti-route"></i><span class="nav-item-label">Pipeline Board</span>
       </a>
+      <a class="nav-item" id="nav-travel" data-title="Travel" onclick="switchTab('travel')">
+        <i class="ti ti-plane-departure"></i><span class="nav-item-label">Travel</span>
+      </a>
       <a class="nav-item" id="nav-calendar" data-title="Calendar" onclick="switchTab('calendar')">
         <i class="ti ti-calendar-check"></i><span class="nav-item-label">Calendar</span>
       </a>
 
-      <div class="nav-section-label">Insights</div>
+      <div class="nav-section-label">Finance</div>
+      <a class="nav-item" id="nav-commissions" data-title="Commissions" onclick="switchTab('commissions')">
+        <i class="ti ti-coin"></i><span class="nav-item-label">Commissions</span>
+      </a>
+      <a class="nav-item" id="nav-repayments" data-title="Repayments" onclick="switchTab('repayments')">
+        <i class="ti ti-receipt-refund"></i><span class="nav-item-label">Repayments</span>
+      </a>
+      <a class="nav-item" id="nav-expenses" data-title="Expenses" onclick="switchTab('expenses')">
+        <i class="ti ti-wallet"></i><span class="nav-item-label">Expenses</span>
+      </a>
       <a class="nav-item" id="nav-reports" data-title="Reports" onclick="switchTab('reports')">
         <i class="ti ti-chart-bar"></i><span class="nav-item-label">Reports</span>
       </a>
 
-      <div class="nav-section-label">Support</div>
-      <a class="nav-item" id="nav-settings" data-title="Settings" onclick="openSettings()">
+      <div class="nav-section-label">Team & Settings</div>
+      <a class="nav-item" id="nav-team" data-title="Team" onclick="switchTab('team')">
+        <i class="ti ti-users-group"></i><span class="nav-item-label">Team</span>
+      </a>
+      <a class="nav-item" id="nav-settings" data-title="Settings" onclick="switchTab('settings')">
         <i class="ti ti-settings"></i><span class="nav-item-label">Settings</span>
       </a>
       <a class="nav-item" id="nav-help" data-title="Help & Support" onclick="openHelp()">
@@ -3066,7 +3100,7 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
       <!-- TOPBAR -->
       <div class="topbar">
         <span class="topbar-title" id="topbar-title">Dashboard</span>
-        <button class="topbar-workspace" type="button" onclick="openSettings()" title="Workspace settings">
+        <button class="topbar-workspace" type="button" onclick="switchTab('settings')" title="Workspace settings">
           <i class="ti ti-building-skyscraper"></i>
           <span id="topbar-workspace-name">Destiny Recruitment Consults</span>
           <i class="ti ti-chevron-down"></i>
@@ -3080,9 +3114,9 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
         <span class="save-label" id="save-label">Saved</span>
         <div class="profile-wrap">
           <!-- Icon-only profile button -->
-          <button class="topbar-profile-btn" id="topbar-profile-btn" onclick="toggleProfileDropdown(event)" title="Account">
+          <div class="topbar-profile-btn topbar-avatar-static" id="topbar-profile-btn" title="Account">
             <div class="topbar-avatar" id="topbar-avatar">-</div>
-          </button>
+          </div>
 
           <!-- Rich profile dropdown -->
           <div class="profile-dropdown" id="profile-dropdown">
@@ -3186,7 +3220,7 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
           <div class="metrics-strip" id="pro-metrics"></div>
           <div class="panel">
             <div class="panel-header">
-              <span class="panel-title">Professional candidates</span>
+              <span class="panel-title">Professional Jobs</span>
               <div class="panel-actions">
                 <div class="pill-tabs" id="pro-stage-pills"></div>
                 <div class="search-wrap">
@@ -3225,7 +3259,7 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
           <div class="metrics-strip" id="lb-metrics"></div>
           <div class="panel">
             <div class="panel-header">
-              <span class="panel-title">General Jobs candidates</span>
+              <span class="panel-title">General Jobs</span>
               <div class="panel-actions">
                 <div class="pill-tabs" id="lb-travel-pills">
                   <button class="pill-tab active" onclick="setLBPill('travel','',this)">All</button>
@@ -3310,12 +3344,10 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
               <span id="cal-month-label" style="font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.02em;min-width:120px;text-align:center"></span>
               <button class="btn" onclick="calNav(1)"><i class="ti ti-chevron-right"></i></button>
             </div>
-            <div class="pill-tabs" id="cal-source-tabs">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn primary" onclick="openCalendarEventPrompt()"><i class="ti ti-plus"></i> Record event</button><div class="pill-tabs" id="cal-source-tabs">
               <button class="pill-tab active" onclick="setCalSource('pro',this)">Professional</button>
               <button class="pill-tab" onclick="setCalSource('lb',this)">General Jobs</button>
-            </div>
-          </div>
-          <div class="panel" style="overflow:hidden">
+            </div></div></div>`r`n          <div class="panel" style="overflow:hidden">
             <div id="cal-grid"></div>
           </div>
         </div>
@@ -3329,6 +3361,40 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
           <div id="reports-content"></div>
         </div>
 
+
+        <div id="travel-section" style="display:none">
+          <div class="section-page-head"><div><h2>Travel</h2><p>Travelled and pending travel records across Professional Jobs and General Jobs.</p></div><button class="btn primary" onclick="openTravelEventPrompt()"><i class="ti ti-plus"></i> Record travel note</button></div>
+          <div class="metrics-strip" id="travel-metrics"></div>
+          <div class="panel"><div class="panel-header"><span class="panel-title">Travel register</span><div class="panel-actions"><select class="toolbar-select" id="travel-filter" onchange="renderTravel()"><option value="all">All travel</option><option value="travelled">Travelled</option><option value="pending">Pending travel</option></select></div></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Name</th><th>Workflow</th><th>Company / Country</th><th>Position / Status</th><th>Travel Date</th><th>Airline</th><th>Time</th><th>Notes</th></tr></thead><tbody id="travel-tbody"></tbody></table></div></div>
+        </div>
+
+        <div id="commissions-section" style="display:none">
+          <div class="section-page-head"><div><h2>Commissions</h2><p>Commission billed, received, balances, and latest payment updates.</p></div><button class="btn primary" onclick="openRecordPaymentPrompt('commission')"><i class="ti ti-plus"></i> Record commission</button></div>
+          <div class="metrics-strip" id="commission-metrics"></div>
+          <div class="panel"><div class="panel-header"><span class="panel-title">Commission ledger</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Candidate</th><th>Company</th><th>Position</th><th>Billed</th><th>Received</th><th>Balance</th><th>Latest Update</th><th>Action</th></tr></thead><tbody id="commissions-tbody"></tbody></table></div></div>
+        </div>
+
+        <div id="repayments-section" style="display:none">
+          <div class="section-page-head"><div><h2>Repayments</h2><p>Client repayments/refunds with installment status and outstanding balances.</p></div><button class="btn primary" onclick="openRecordPaymentPrompt('repayment')"><i class="ti ti-plus"></i> Record repayment</button></div>
+          <div class="metrics-strip" id="repayment-metrics"></div>
+          <div class="panel"><div class="panel-header"><span class="panel-title">Repayment tracker</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Candidate</th><th>Passport</th><th>Travel</th><th>To Repay</th><th>Paid</th><th>Balance</th><th>Installments</th><th>Action</th></tr></thead><tbody id="repayments-tbody"></tbody></table></div></div>
+        </div>
+
+        <div id="expenses-section" style="display:none">
+          <div class="section-page-head"><div><h2>Expenses</h2><p>Money spent on clients, documents, transport, processing, and follow-ups.</p></div><button class="btn primary" onclick="openExpensePrompt()"><i class="ti ti-plus"></i> Add expense</button></div>
+          <div class="metrics-strip" id="expense-metrics"></div>
+          <div class="panel"><div class="panel-header"><span class="panel-title">Expense register</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Date</th><th>Client</th><th>Category</th><th>Amount</th><th>Notes</th><th>Action</th></tr></thead><tbody id="expenses-tbody"></tbody></table></div></div>
+        </div>
+
+        <div id="team-section" style="display:none">
+          <div class="section-page-head"><div><h2>Team</h2><p>Company users, roles, permissions, and account access.</p></div><button class="btn primary" onclick="createStaffAccount()"><i class="ti ti-user-plus"></i> Add user</button></div>
+          <div class="team-grid" id="team-grid"></div>
+        </div>
+
+        <div id="settings-section" style="display:none">
+          <div class="section-page-head"><div><h2>Settings</h2><p>Workspace settings that affect how Dreco behaves for your team.</p></div><button class="btn export" onclick="downloadBackup()"><i class="ti ti-download"></i> Backup data</button></div>
+          <div class="settings-page-grid" id="settings-page-content"></div>
+        </div>
       </div><!-- /content-area -->
     </div><!-- /main-area -->
   </div><!-- /app-layout -->
@@ -3579,10 +3645,10 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
     <i class="ti ti-layout-dashboard"></i><span>Home</span>
   </button>
   <button class="bottom-nav-item" id="bnav-pro" onclick="switchTab('pro');setBottomNav('pro')">
-    <i class="ti ti-briefcase"></i><span>Pro</span>
+    <i class="ti ti-users"></i><span>Pro Jobs</span>
   </button>
   <button class="bottom-nav-item" id="bnav-lb" onclick="switchTab('lb');setBottomNav('lb')">
-    <i class="ti ti-home"></i><span>General</span>
+    <i class="ti ti-briefcase"></i><span>General</span>
   </button>
   <button class="bottom-nav-item" id="bnav-kanban" onclick="switchTab('kanban');setBottomNav('kanban')">
     <i class="ti ti-layout-columns"></i><span>Board</span>
