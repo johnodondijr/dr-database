@@ -2932,6 +2932,54 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 .save-dot{background:var(--dreco-cyan)!important}
 .save-dot.saving{background:var(--amber)!important;animation:pulse .8s infinite alternate}
 @keyframes pulse{to{opacity:.5}}
+
+/* Mobile navigation parity: every desktop section is reachable on phones. */
+@media(max-width:760px){
+  .bottom-nav{
+    display:none;
+    height:72px!important;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;
+    gap:6px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    justify-content:flex-start!important;
+    align-items:center!important;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    background:rgba(255,255,255,.96)!important;
+    border-top:1px solid #DDE4F8!important;
+    box-shadow:0 -10px 30px rgba(31,42,73,.08)!important;
+    z-index:70!important;
+  }
+  .bottom-nav.visible{display:flex!important;}
+  .bottom-nav::-webkit-scrollbar{display:none;}
+  .bottom-nav-item{
+    flex:0 0 74px!important;
+    min-width:74px!important;
+    height:56px!important;
+    border:0!important;
+    border-radius:14px!important;
+    background:transparent!important;
+    color:#7B8496!important;
+    scroll-snap-align:center;
+  }
+  .bottom-nav-item i{font-size:19px!important;}
+  .bottom-nav-item span{
+    font-size:9px!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+    max-width:68px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .bottom-nav-item.active{
+    background:#F0EEFF!important;
+    color:var(--dreco-purple,#5347CE)!important;
+  }
+  .bottom-nav-item.active i{color:var(--dreco-purple,#5347CE)!important;}
+  .content-area>div{padding-bottom:104px!important;}
+}
 </style>
 </head>
 <body>
@@ -3824,24 +3872,45 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 </div>
 
 <!-- MOBILE BOTTOM NAV -->
-<nav class="bottom-nav" id="bottom-nav">
-  <button class="bottom-nav-item active" id="bnav-dash" onclick="switchTab('dash');setBottomNav('dash')">
+<nav class="bottom-nav" id="bottom-nav" aria-label="Mobile navigation">
+  <button class="bottom-nav-item active" id="bnav-dash" onclick="switchTab('dash')" aria-label="Dashboard">
     <i class="ti ti-layout-dashboard"></i><span>Home</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-pro" onclick="switchTab('pro');setBottomNav('pro')">
+  <button class="bottom-nav-item" id="bnav-pro" onclick="switchTab('pro')" aria-label="Professional Jobs">
     <i class="ti ti-users"></i><span>Pro Jobs</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-lb" onclick="switchTab('lb');setBottomNav('lb')">
+  <button class="bottom-nav-item" id="bnav-lb" onclick="switchTab('lb')" aria-label="General Jobs">
     <i class="ti ti-briefcase"></i><span>General</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-kanban" onclick="switchTab('kanban');setBottomNav('kanban')">
+  <button class="bottom-nav-item" id="bnav-kanban" onclick="switchTab('kanban')" aria-label="Pipeline Board">
     <i class="ti ti-layout-columns"></i><span>Board</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-calendar" onclick="switchTab('calendar');setBottomNav('calendar')">
-    <i class="ti ti-calendar"></i><span>Cal</span>
+  <button class="bottom-nav-item" id="bnav-travel" onclick="switchTab('travel')" aria-label="Travel">
+    <i class="ti ti-plane-departure"></i><span>Travel</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-reports" onclick="switchTab('reports');setBottomNav('reports')">
+  <button class="bottom-nav-item" id="bnav-calendar" onclick="switchTab('calendar')" aria-label="Calendar">
+    <i class="ti ti-calendar"></i><span>Calendar</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-commissions" onclick="switchTab('commissions')" aria-label="Commissions">
+    <i class="ti ti-coin"></i><span>Comms</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-repayments" onclick="switchTab('repayments')" aria-label="Repayments">
+    <i class="ti ti-receipt-refund"></i><span>Repay</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-expenses" onclick="switchTab('expenses')" aria-label="Expenses">
+    <i class="ti ti-wallet"></i><span>Expenses</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-reports" onclick="switchTab('reports')" aria-label="Reports">
     <i class="ti ti-chart-bar"></i><span>Reports</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-team" onclick="switchTab('team')" aria-label="Team">
+    <i class="ti ti-users-group"></i><span>Team</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-settings" onclick="switchTab('settings')" aria-label="Settings">
+    <i class="ti ti-settings"></i><span>Settings</span>
+  </button>
+  <button class="bottom-nav-item" id="bnav-help" onclick="switchTab('help')" aria-label="Help and Support">
+    <i class="ti ti-help-circle"></i><span>Help</span>
   </button>
 </nav>
 
@@ -3853,6 +3922,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
