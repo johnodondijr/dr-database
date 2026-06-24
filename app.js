@@ -242,16 +242,20 @@ async function loadStaffAccounts() {
     }
   });
 
-  // Step 4: Re-apply hardcoded password hashes — they must always win over
-  // stale cloud data. A local password change (saved via saveStaffAccounts)
-  // will overwrite this on the next load because local wins in Step 3.
+  // Step 4: Re-apply hardcoded password hashes.
+  // They are the canonical source of truth UNLESS the user has deliberately
+  // changed their password (detected by local hash differing from the hardcoded one).
+  // A hash that matches the hardcoded default or is empty/missing means the
+  // local copy is stale/corrupted and the hardcoded value should win.
   Object.entries(hardcodedDefaults).forEach(([u, defaults]) => {
     const current = STAFF_ACCOUNTS[u];
-    // Only restore if no local override exists (local would have been merged in Step 3)
-    const hasLocalOverride = localAccounts[u]?.passwordHash;
-    if (!hasLocalOverride && current) {
+    const localHash = localAccounts[u]?.passwordHash;
+    // "Custom" means the user changed their password to something other than the default
+    const localIsCustom = localHash && localHash !== defaults.passwordHash;
+    if (localIsCustom) return; // deliberate password change — keep it
+    if (current) {
       STAFF_ACCOUNTS[u] = { ...current, passwordHash: defaults.passwordHash, passwordSalt: defaults.passwordSalt, hashVersion: defaults.hashVersion };
-    } else if (!current) {
+    } else {
       STAFF_ACCOUNTS[u] = { ...defaults };
     }
   });
@@ -873,7 +877,16 @@ async function doLogin() {
     const authLogin = await signInWithSupabaseAuth(username, password);
     if (authLogin?.account) {
       _clearLoginFailures(username);
-      STAFF_ACCOUNTS[username] = normalizeAccount(username, authLogin.account);
+      // Preserve existing password fields — Supabase Auth doesn't store them
+      // so accountFromAuthUser returns no hash. Without this, saveStaffAccounts
+      // would write a hash-less entry to localStorage and cloud, breaking
+      // the local password login path on the next visit.
+      const existingPwFields = {
+        passwordHash: STAFF_ACCOUNTS[username]?.passwordHash || '',
+        passwordSalt: STAFF_ACCOUNTS[username]?.passwordSalt || '',
+        hashVersion:  STAFF_ACCOUNTS[username]?.hashVersion  || '',
+      };
+      STAFF_ACCOUNTS[username] = normalizeAccount(username, { ...authLogin.account, ...existingPwFields });
       await saveStaffAccounts();
       errEl.style.display = 'none';
       setLoginSuccessState();
