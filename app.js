@@ -198,25 +198,48 @@ async function verifyAccountPassword(account, password) {
   return { ok: false, migrated: false };
 }
 async function loadStaffAccounts() {
-  // Merge local overrides first
+  // Step 1: Load local accounts first — these take priority for password hashes
+  // because a local reset must survive a cloud load.
+  let localAccounts = {};
   try {
     const saved = safeLocalGet(LOCAL_STAFF_KEY);
-    if (saved) Object.assign(STAFF_ACCOUNTS, JSON.parse(saved));
+    if (saved) localAccounts = JSON.parse(saved);
   } catch (err) {
     console.warn('Saved staff accounts could not be loaded:', err);
   }
-  // Then merge cloud overrides on top (if available)
+
+  // Step 2: Load cloud accounts (if available)
+  let cloudAccounts = {};
   if (db) {
     try {
       const { data, error } = await db.from('app_settings').select('value').eq('key', CLOUD_ACCOUNTS_KEY).maybeSingle();
       if (error) throw error;
-      if (data?.value) Object.assign(STAFF_ACCOUNTS, data.value);
-      safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
+      if (data?.value && typeof data.value === 'object') cloudAccounts = data.value;
     } catch (err) {
       console.warn('Cloud staff accounts could not be loaded:', err);
     }
   }
-  // Normalise and clean up exactly once, after all sources are merged
+
+  // Step 3: Merge — cloud first as the base, then local on top.
+  // For password fields specifically, local always wins over cloud
+  // so that a password reset (saved locally) is never overwritten
+  // by an older cloud hash.
+  Object.assign(STAFF_ACCOUNTS, cloudAccounts);
+  Object.keys(localAccounts).forEach(username => {
+    const local = localAccounts[username];
+    const existing = STAFF_ACCOUNTS[username];
+    if (existing && local.passwordHash && local.passwordSalt) {
+      // Local has a hash — use it, keep everything else from cloud
+      STAFF_ACCOUNTS[username] = { ...existing, ...local };
+    } else if (local) {
+      STAFF_ACCOUNTS[username] = { ...(existing || {}), ...local };
+    }
+  });
+
+  // Step 4: Persist the merged result locally for next time
+  safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
+
+  // Step 5: Normalise and clean up exactly once
   normalizeAllAccounts();
   cleanupLegacyDestinyUsers();
 }
@@ -646,10 +669,14 @@ async function submitNewPassword() {
   }
 
   try {
-    // Hash and save the new password
+    // Hash and save the new password — save locally first so it
+    // survives even if the cloud push fails, then push to cloud.
     const account = STAFF_ACCOUNTS[_recoveryUsername];
     await setAccountPassword(account, newPw);
-    await saveStaffAccounts();
+    // Save locally immediately so login can use it right away
+    safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
+    // Then push to cloud (non-blocking on failure)
+    try { await saveStaffAccounts(); } catch(e) { console.warn('Cloud save after reset failed:', e); }
 
     // Clear sensitive fields
     document.getElementById('recovery-new-pw').value = '';
