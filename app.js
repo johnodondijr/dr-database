@@ -58,6 +58,10 @@ function normalizeAccount(username, account = {}) {
     passwordSalt: account.passwordSalt || '',
     generalJobsCountries: [...new Set(generalJobsCountries.map(c => String(c || '').trim()).filter(Boolean))],
   };
+  // Preserve hashVersion — critical for PBKDF2 detection in verifyAccountPassword.
+  // Without this, every normalizeAccount call strips the field and forces a
+  // legacy SHA-256 verification path, which fails for PBKDF2-hashed passwords.
+  if (account.hashVersion) normalized.hashVersion = account.hashVersion;
   if (account.password && !normalized.passwordHash) normalized.password = account.password;
   return normalized;
 }
