@@ -835,6 +835,10 @@ async function doLogin() {
     console.warn('Supabase Auth login unavailable; trying local account registry:', err);
   }
   const account=STAFF_ACCOUNTS[username];
+  if (!account) {
+    fail('Account not found. Check your internet connection and try again.');
+    return;
+  }
   let passwordCheck = { ok: false, migrated: false };
   try {
     passwordCheck = await verifyAccountPassword(account, password);
