@@ -1243,29 +1243,75 @@ function ppBadge(s){
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // TABS + MODALS
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
-function switchTab(t){
-  const tabs=['dash','pro','lb','kanban','travel','calendar','commissions','repayments','expenses','reports','team','settings','help'];
-  tabs.forEach(x=>{
-    const nav=document.getElementById('nav-'+x); if(nav) nav.classList.toggle('active',x===t);
-    const sec=document.getElementById(x+'-section'); if(sec) sec.style.display=x===t?'':'none';
+function switchTab(tab){
+  // DV5 unified tab router — handles both legacy and new tabs
+  const DV5_TABS = ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'];
+  const DV5_ALIASES = {
+    pro:'candidates', lb:'candidates',
+    kanban:'pipeline', travel:'pipeline',
+    calendar:'tasks',
+    commissions:'finance', repayments:'finance', expenses:'finance',
+    team:'settings', help:'settings'
+  };
+  const DV5_TITLES = {
+    dash:'Home', pipeline:'Pipeline', candidates:'Candidates',
+    tasks:'Tasks', finance:'Finance', documents:'Documents',
+    reports:'Reports', clients:'Clients', settings:'Settings'
+  };
+
+  const t = DV5_ALIASES[tab] || tab || 'dash';
+
+  // Hide all known sections
+  const allSections = [
+    ...DV5_TABS,
+    'pro','lb','kanban','travel','calendar',
+    'commissions','repayments','expenses','team','help'
+  ];
+  allSections.forEach(x => {
+    const sec = document.getElementById(x + '-section');
+    if (sec) sec.style.display = 'none';
   });
+
+  // Show the target section
+  const target = document.getElementById(t + '-section');
+  if (target) target.style.display = 'block';
+
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const activeNav = document.getElementById('nav-' + t);
+  if (activeNav) activeNav.classList.add('active');
+
+  // Update topbar title
+  const titleEl = document.getElementById('topbar-title');
+  if (titleEl) titleEl.textContent = DV5_TITLES[t] || t;
+
   setBottomNav(t);
   if (typeof closeProfileDropdown === 'function') closeProfileDropdown();
-  const titles={dash:'Dashboard',pro:'Professional Jobs',lb:'General Jobs',kanban:'Pipeline Board',travel:'Travel',calendar:'Calendar',commissions:'Commissions',repayments:'Repayments',expenses:'Expenses',reports:'Reports',team:'Team',settings:'Settings',help:'Help & Support'};
-  const titleEl=document.getElementById('topbar-title'); if(titleEl) titleEl.textContent=titles[t]||'';
-  if(t==='dash') renderDash();
-  if(t==='pro')  { rebuildProPills(); renderPro(); }
-  if(t==='lb')   renderLB();
-  if(t==='kanban') renderKanban();
-  if(t==='travel') renderTravel();
-  if(t==='calendar') renderCalendar();
-  if(t==='commissions') renderCommissions();
-  if(t==='repayments') renderRepayments();
-  if(t==='expenses') renderExpenses();
-  if(t==='reports') renderReports();
-  if(t==='team') renderTeam();
-  if(t==='settings') renderSettingsPage();
-  if(t==='help') renderHelpPage();
+
+  // Route to renderer — use window.renderX so DV5 overrides are picked up
+  const renderers = {
+    dash: ()=> (window.renderDash || renderDash)(),
+    pipeline: ()=> window.renderPipelinePage?.(),
+    candidates: ()=> window.renderCandidatesPage?.(),
+    tasks: ()=> window.renderTasksPage?.(),
+    finance: ()=> window.renderFinancePage?.(),
+    documents: ()=> window.renderDocumentsPage?.(),
+    reports: ()=> window.renderReportsPage?.(),
+    clients: ()=> window.renderClientsPage?.(),
+    settings: ()=> (typeof renderSettingsPage === 'function') && renderSettingsPage(),
+    // Legacy fallbacks
+    pro: ()=> { if(typeof rebuildProPills==='function') rebuildProPills(); if(typeof renderPro==='function') renderPro(); },
+    lb: ()=> (typeof renderLB === 'function') && renderLB(),
+    kanban: ()=> (typeof renderKanban === 'function') && renderKanban(),
+    travel: ()=> (typeof renderTravel === 'function') && renderTravel(),
+    calendar: ()=> (typeof renderCalendar === 'function') && renderCalendar(),
+    commissions: ()=> (typeof renderCommissions === 'function') && renderCommissions(),
+    repayments: ()=> (typeof renderRepayments === 'function') && renderRepayments(),
+    expenses: ()=> (typeof renderExpenses === 'function') && renderExpenses(),
+    team: ()=> (typeof renderTeam === 'function') && renderTeam(),
+    help: ()=> (typeof renderHelpPage === 'function') && renderHelpPage(),
+  };
+  if (renderers[t]) renderers[t]();
 }
 function setBottomNav(t){
   document.querySelectorAll('.bottom-nav-item').forEach(btn=>btn.classList.remove('active'));
@@ -3323,32 +3369,8 @@ function setUserDisplay(display, role) {
     if (title) title.textContent = TITLES[t] || 'Dreco';
   }
 
-  // ── Main switchTab override ───────────────────────────────
-  window.switchTab = function(tab) {
-    ensureSections();
-    buildSidebar();
-    const t = ALIASES[tab] || tab || 'dash';
-    TABS.forEach(x => {
-      const sec = document.getElementById(`${x}-section`);
-      if (sec) sec.style.display = (x===t) ? 'block' : 'none';
-    });
-    // Also hide legacy sections not in TABS
-    ['pro-section','lb-section','kanban-section','calendar-section',
-     'travel-section','commissions-section','repayments-section',
-     'expenses-section','team-section','help-section'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
-    markActive(t);
-    if (typeof closeProfileDropdown === 'function') closeProfileDropdown();
-    // Route to renderer
-    const renderers = {
-      dash: renderDash, pipeline: renderPipeline, candidates: renderCandidates,
-      tasks: renderTasks, finance: renderFinance, documents: renderDocuments,
-      reports: renderReports, clients: renderClients, settings: renderSettings
-    };
-    (renderers[t] || renderDash)();
-  };
+  // switchTab is now handled by the base function declaration.
+  // window.renderXPage aliases are set below so the base router can call them.
 
   // ══════════════════════════════════════════════════════════
   // SECTION RENDERERS
