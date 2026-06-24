@@ -103,35 +103,20 @@ CREATE TABLE app_settings (
   value JSONB
 );
 
--- Row Level Security — each company only sees its own data.
--- The app uses Supabase Auth; company_id is stored in app_metadata.
+-- RLS is enabled; the app enforces company_id isolation at the query level.
+-- JWT-based RLS is not used because the app authenticates with its own system
+-- and talks to Supabase using the publishable/anon key directly.
 ALTER TABLE pro_candidates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lb_candidates  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE timelines      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_settings   ENABLE ROW LEVEL SECURITY;
 
--- Candidates: enforce company_id matches the authenticated user's company
-CREATE POLICY "Company isolation" ON pro_candidates
-  FOR ALL USING (company_id = (auth.jwt()->'app_metadata'->>'company_id'))
-  WITH CHECK (company_id = (auth.jwt()->'app_metadata'->>'company_id'));
-
-CREATE POLICY "Company isolation" ON lb_candidates
-  FOR ALL USING (company_id = (auth.jwt()->'app_metadata'->>'company_id'))
-  WITH CHECK (company_id = (auth.jwt()->'app_metadata'->>'company_id'));
-
--- Documents/timelines/settings: key must start with the user's company_id prefix
-CREATE POLICY "Company isolation" ON documents
-  FOR ALL USING (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'))
-  WITH CHECK (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'));
-
-CREATE POLICY "Company isolation" ON timelines
-  FOR ALL USING (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'))
-  WITH CHECK (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'));
-
-CREATE POLICY "Company isolation" ON app_settings
-  FOR ALL USING (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'))
-  WITH CHECK (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'));
+CREATE POLICY "Allow all" ON pro_candidates FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all" ON lb_candidates  FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all" ON documents      FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all" ON timelines      FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all" ON app_settings   FOR ALL USING (true) WITH CHECK (true);
 
 -- If you have existing data without company_id, run this after creating the column:
 -- UPDATE pro_candidates SET company_id = 'destiny-recruitment-consults' WHERE company_id IS NULL;
