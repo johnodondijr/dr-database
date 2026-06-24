@@ -3060,3 +3060,207 @@ function setUserDisplay(display, role) {
   window.updateWorkspaceLabels = function(){ if(oldUpdate) oldUpdate(); ensureShell(); };
   window.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ ensureShell(); if($('#app')?.style.display!=='none') switchTab('dash'); },50));
 })();
+
+/* ========================= DRECO FULL OPS UI V3 PATCH =========================
+   Implements: full workflow pipeline, pro/general candidate split, visual reports,
+   finance visuals/recent transactions, modal stacking fixes, bottom user card.
+============================================================================= */
+(function(){
+  const $ = (s,r=document)=>r.querySelector(s);
+  const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+  const esc = v => String(v ?? '').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const js = v => String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');
+  const num = v => Number(v) || 0;
+  const money = v => 'KES ' + (num(v)).toLocaleString('en-KE');
+  const fmtDate = v => {
+    if(!v) return '—';
+    if(typeof v === 'number'){
+      const d = new Date(Math.round((v - 25569) * 86400 * 1000));
+      return isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    }
+    const d = new Date(v);
+    return isNaN(d) ? esc(v) : d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  };
+  const initials = n => String(n||'U').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || 'U';
+  const avatar = n => `<div class="avatar-mini">${esc(initials(n))}</div>`;
+  const stageClass = s => {
+    s=String(s||'').toUpperCase();
+    if(s.includes('TRAVELLED')||s.includes('ONBOARD')) return 'green';
+    if(s.includes('VISA')||s.includes('MEDICAL')) return 'blue';
+    if(s.includes('MOL')||s.includes('OFFER')) return 'amber';
+    if(s.includes('PENDING')||s.includes('NOT')) return 'red';
+    return 'purple';
+  };
+  const badge = s => `<span class="stage-badge ${stageClass(s)}">${esc(s||'Not set')}</span>`;
+
+  const OPS_STAGES = ['Submitted','Interview','Offer','MOL','Medical','Visa','Commission','Ticket','Travelled','Onboarded'];
+  const PRO_STAGE_TO_OPS = {
+    'PENDING OFFER LETTER':'Offer',
+    'PENDING MOL':'MOL',
+    'PENDING VISA':'Visa',
+    'PENDING TRAVEL':'Ticket',
+    'TRAVELLED':'Travelled'
+  };
+  const GENERAL_STAGES = ['Registered','Documents','Payment','Travelled'];
+  let candidateMode = sessionStorage.getItem('dreco_candidate_mode_v3') || 'professional';
+
+  function rows(type='all'){
+    const pro = (Array.isArray(window.proDB)?window.proDB:[]).map(r=>({
+      type:'pro', id:r.id, name:r.name, pp:r.pp, phone:r.phone, position:r.position||'—', company:r.company||'—', country:r.country||'—',
+      stage:r.stage||'PENDING OFFER LETTER', opsStage:opsStageForPro(r), submitted:r.submitted, interview:r.interview, ol:r.ol, mol:r.mol, visa:r.visa, travel:r.travel,
+      commission:num(r.commission), paid:num(r.paid), balance:Math.max(num(r.commission)-num(r.paid),0), owner:window.currentUser?.display||'Team', raw:r
+    }));
+    const lb = (Array.isArray(window.lbDB)?window.lbDB:[]).map(r=>{
+      const paid = num(r.r1Amt||r.r1_amt)+num(r.r2Amt||r.r2_amt); const comm=num(r.toRefund||r.to_refund||r.commission);
+      return {type:'lb', id:r.id, name:r.name, pp:r.pp||r.passport, phone:r.phone, position:r.position||'General Job', company:r.company||r.country||'General Jobs', country:r.country||'',
+      stage:r.travelStatus||r.travel_status||'NOT YET', opsStage:opsStageForGeneral(r,paid,comm), submitted:r.submitted||r.travelDate||r.travel_date,
+      commission:comm, paid, balance:Math.max(comm-paid,0), owner:window.currentUser?.display||'Team', raw:r};
+    });
+    if(type==='pro') return pro; if(type==='lb') return lb; return [...pro,...lb];
+  }
+  function opsStageForPro(r){
+    const s = String(r.stage||'').toUpperCase();
+    if(r.travel || s==='TRAVELLED') return 'Travelled';
+    if(s.includes('TRAVEL')) return 'Ticket';
+    if(num(r.commission)>0 && Math.max(num(r.commission)-num(r.paid),0)>0 && (r.visa || s.includes('VISA'))) return 'Commission';
+    if(r.visa || s.includes('VISA')) return 'Visa';
+    if(r.mol || s.includes('MOL')) return 'MOL';
+    if(r.ol || s.includes('OFFER')) return 'Offer';
+    if(r.interview) return 'Interview';
+    return 'Submitted';
+  }
+  function opsStageForGeneral(r,paid,comm){
+    const s = String(r.travelStatus||r.travel_status||'').toUpperCase();
+    if(s.includes('TRAVELLED')) return 'Travelled';
+    if(comm && paid < comm) return 'Payment';
+    if(r.pp||r.passport) return 'Documents';
+    return 'Registered';
+  }
+  function hasDoc(type,id){
+    const docs = window.allDocs || {};
+    return !!(docs[`${type}_${id}`] || docs[id] || docs[String(id)]);
+  }
+  function setActiveNav(t){
+    $$('#app .nav-item,.bottom-nav-item').forEach(n=>n.classList.remove('active'));
+    $(`#nav-${t}`)?.classList.add('active'); $(`#bnav-${t}`)?.classList.add('active');
+  }
+  function ensureSections(){
+    const area=$('.content-area'); if(!area) return;
+    ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'].forEach(t=>{
+      if(!$(`#${t}-section`)){ const d=document.createElement('div'); d.id=`${t}-section`; d.style.display='none'; area.appendChild(d); }
+    });
+  }
+  function nav(t,icon,label){ return `<a class="nav-item" id="nav-${t}" data-title="${label}" onclick="switchTab('${t}')"><i class="ti ${icon}"></i><span class="nav-item-label">${label}</span></a>`; }
+  function setupShellV3(){
+    ensureSections();
+    const side=$('#app .sidebar');
+    if(side && !side.dataset.v3Shell){
+      const display = window.currentUser?.display || 'John Fred';
+      const org = (typeof window.getCompanyName==='function'?window.getCompanyName():'Destiny Recruit Consults');
+      side.innerHTML = `
+        <div class="sidebar-top"><a class="sidebar-logo" onclick="switchTab('dash')"><div class="sidebar-logo-mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6C3 4.343 4.343 3 6 3h4c1.657 0 3 1.343 3 3v4c0 1.657-1.343 3-3 3H6c-1.657 0-3-1.343-3-3V6Z"/><path d="M14 14c0-1.105.895-2 2-2h4c1.105 0 2 .895 2 2v6c0 1.105-.895 2-2 2h-4c-1.105 0-2-.895-2-2v-6Z" opacity=".55"/><path d="M3 17c0-1.105.895-2 2-2h3c1.105 0 2 .895 2 2v2c0 1.105-.895 2-2 2H5c-1.105 0-2-.895-2-2v-2Z" opacity=".32"/></svg></div><span class="sidebar-logo-text">DRECO</span></a><button class="sidebar-toggle" onclick="toggleSidebar()"><i class="ti ti-chevrons-left"></i></button></div>
+        <div class="nav-section-label">Workspace</div>${nav('dash','ti-home','Home')}${nav('pipeline','ti-route','Pipeline')}${nav('candidates','ti-users','Candidates')}${nav('tasks','ti-checkbox','Tasks')}
+        <div class="nav-section-label">Operations</div>${nav('finance','ti-wallet','Finance')}${nav('documents','ti-file-text','Documents')}${nav('reports','ti-chart-pie','Reports')}${nav('clients','ti-building','Clients')}
+        <div class="nav-section-label">System</div>${nav('settings','ti-settings','Settings')}<div class="nav-spacer"></div>
+        <button class="sidebar-user-card v3-user-bottom" onclick="toggleProfileDropdown(event)" type="button"><div class="suc-avatar">${esc(initials(display))}</div><div class="suc-info"><div class="suc-name">${esc(display)}</div><div class="suc-org">${esc(org)}</div></div><i class="ti ti-chevron-right suc-arrow"></i></button>`;
+      side.dataset.v3Shell='1';
+    }
+    const title=$('#topbar-title'); if(title) title.textContent='Dreco';
+  }
+
+  function topHead(title,sub,actions=''){ return `<div class="dreco-page-head"><div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div><div class="dreco-head-actions">${actions}</div></div>`; }
+  function kpi(label,value,note,icon,click=''){ return `<div class="dreco-kpi" ${click?`onclick="${click}"`:''}><div class="dreco-kpi-icon"><i class="ti ${icon}"></i></div><div class="dreco-kpi-label">${esc(label)}</div><div class="dreco-kpi-value">${esc(value)}</div><div class="dreco-kpi-note">${esc(note)}</div></div>`; }
+
+  window.switchTab = function(t='dash'){
+    setupShellV3();
+    const alias={pro:'candidates',lb:'candidates',kanban:'pipeline',travel:'pipeline',commissions:'finance',repayments:'finance',expenses:'finance',team:'settings',calendar:'tasks'};
+    t=alias[t]||t;
+    ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings','pro','lb','kanban','travel','commissions','repayments','expenses','team','calendar','help'].forEach(x=>{ const s=$(`#${x}-section`); if(s) s.style.display='none'; });
+    const sec=$(`#${t}-section`); if(sec) sec.style.display='';
+    setActiveNav(t); const tb=$('#topbar-title'); if(tb) tb.textContent = ({dash:'Home',pipeline:'Pipeline',candidates:'Candidates',tasks:'Tasks',finance:'Finance',documents:'Documents',reports:'Reports',clients:'Clients',settings:'Settings'})[t] || 'Dreco';
+    ({dash:renderDashV3,pipeline:renderPipelineV3,candidates:renderCandidatesV3,tasks:renderTasksV3,finance:renderFinanceV3,documents:renderDocumentsV3,reports:renderReportsV3,clients:renderClientsV3,settings:renderSettingsV3}[t]||renderDashV3)();
+    closeProfileDropdown?.();
+  };
+
+  function renderDashV3(){
+    const el=$('#dash-section'); if(!el) return; const all=rows();
+    const count = st => all.filter(x=>x.opsStage===st || x.stage===st).length;
+    const due = all.filter(x=>x.balance>0).reduce((s,x)=>s+x.balance,0);
+    el.innerHTML=`<div class="dreco-page">${topHead(`Good morning, ${(window.currentUser?.display||'John').split(' ')[0]} 👋`,'Here is what needs your attention today.',`<button class="dreco-btn" onclick="switchTab('tasks')">View all tasks</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>New Candidate</button>`)}
+      <div class="dreco-grid priority-grid">${kpi('Awaiting MOL',count('MOL'),'High priority','ti-file-description','switchTab(\'pipeline\')')}${kpi('Visas Ready',count('Visa'),'Ready for ticketing','ti-id-badge-2','switchTab(\'pipeline\')')}${kpi('Unpaid Commissions',money(due),'Requires follow-up','ti-coin','switchTab(\'finance\')')}${kpi('Tickets Pending',count('Ticket'),'Awaiting issue','ti-plane-departure','switchTab(\'pipeline\')')}${kpi('Compliance Issues',all.filter(x=>!hasDoc(x.type,x.id)).length,'Missing documents','ti-alert-circle','switchTab(\'documents\')')}</div>
+      <div class="dreco-card pad"><div class="dreco-card-title">Operations Pipeline <span onclick="switchTab('pipeline')">View pipeline →</span></div><div class="pipeline-flow">${OPS_STAGES.map(s=>`<div class="flow-step"><span>${s}</span><strong>${count(s)}</strong></div>`).join('')}</div></div>
+      <div class="dreco-grid dash-two"><div class="dreco-card pad"><div class="dreco-card-title">Recent Activity</div>${recentTransactionsHTML(6)}</div><div class="dreco-card pad"><div class="dreco-card-title">Priority Queue</div>${taskRowsHTML(6)}</div></div></div>`;
+  }
+
+  function renderPipelineV3(){
+    const el=$('#pipeline-section'); if(!el) return; const all=rows('pro');
+    el.innerHTML=`<div class="dreco-page">${topHead('Pipeline','Full recruitment workflow: Submitted → Interview → Offer → MOL → Medical → Visa → Commission → Ticket → Travelled → Onboarded.',`<button class="dreco-btn" onclick="switchTab('candidates')">View Candidates</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate</button>`)}
+    <div class="pipeline-board v3-pipeline-board">${OPS_STAGES.map(stage=>{
+      const list=all.filter(x=>x.opsStage===stage).slice(0,8);
+      return `<div class="pipeline-col"><div class="pipeline-col-head"><strong>${stage}</strong><span>${all.filter(x=>x.opsStage===stage).length}</span></div>${list.map(x=>pipelineCard(x)).join('') || '<div class="mini-empty">No candidates</div>'}</div>`;
+    }).join('')}</div></div>`;
+  }
+  function pipelineCard(x){ return `<div class="pipeline-card" onclick="openCandidateProfile && openCandidateProfile('${x.type}',${x.id})"><div class="pc-top">${avatar(x.name)}<button onclick="event.stopPropagation();${x.type==='pro'?`editPro(${x.id})`:`editLB(${x.id})`}"><i class="ti ti-dots-vertical"></i></button></div><strong>${esc(x.name)}</strong><span>${esc(x.position)}</span><small>${esc(x.company)} • ${fmtDate(x.submitted)}</small></div>`; }
+
+  window.setCandidateMode = function(mode){ candidateMode=mode; sessionStorage.setItem('dreco_candidate_mode_v3',mode); renderCandidatesV3(); };
+  function renderCandidatesV3(){
+    const el=$('#candidates-section'); if(!el) return;
+    const type = candidateMode==='general'?'lb':'pro'; const data=rows(type); const q=String($('#candidate-search-v3')?.value||'').toLowerCase();
+    const st=String($('#candidate-stage-v3')?.value||'');
+    const filtered=data.filter(x=>(!q||[x.name,x.pp,x.position,x.company,x.stage].some(v=>String(v||'').toLowerCase().includes(q))) && (!st||x.stage===st||x.opsStage===st));
+    const stages=[...new Set(data.flatMap(x=>[x.stage,x.opsStage]).filter(Boolean))];
+    el.innerHTML=`<div class="dreco-page">${topHead('Candidates','Separate professional and general job candidates while keeping all records connected to existing data.',`<button class="dreco-btn" onclick="openLBForm()"><i class="ti ti-briefcase"></i>Add General</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Professional</button>`)}
+      <div class="dreco-tabs"><button class="${candidateMode==='professional'?'active':''}" onclick="setCandidateMode('professional')">Professional <span>${rows('pro').length}</span></button><button class="${candidateMode==='general'?'active':''}" onclick="setCandidateMode('general')">General <span>${rows('lb').length}</span></button></div>
+      <div class="toolbar"><div class="toolbar-left"><input class="dreco-input" id="candidate-search-v3" placeholder="Search ${candidateMode} candidates..." value="${esc($('#candidate-search-v3')?.value||'')}" oninput="renderCandidatesV3()"><select class="dreco-select" id="candidate-stage-v3" onchange="renderCandidatesV3()"><option value="">All stages</option>${stages.map(s=>`<option ${s===st?'selected':''}>${esc(s)}</option>`).join('')}</select></div><div class="toolbar-right"><button class="dreco-btn" onclick="exportCSV('${type}')"><i class="ti ti-download"></i>Export</button></div></div>
+      <div class="table-card"><div class="dreco-table-wrap"><table class="dreco-table"><thead><tr><th>Name</th><th>Job Title</th><th>Company/Country</th><th>Workflow</th><th>Stage</th><th>Balance</th><th>Owner</th><th>Actions</th></tr></thead><tbody>${filtered.map(x=>`<tr onclick="openCandidateProfile && openCandidateProfile('${x.type}',${x.id})"><td><div class="name-cell">${avatar(x.name)}<div><div class="item-title">${esc(x.name)}</div><div class="item-meta">${esc(x.pp||'No passport')}</div></div></div></td><td>${esc(x.position)}</td><td>${esc(x.company||x.country)}</td><td>${badge(x.opsStage)}</td><td>${badge(x.stage)}</td><td>${x.balance?money(x.balance):'<span class="stage-badge green">Clear</span>'}</td><td>${esc(x.owner)}</td><td><button class="action-mini" onclick="event.stopPropagation();${x.type==='pro'?`editPro(${x.id})`:`editLB(${x.id})`}">Edit</button><button class="action-mini" onclick="event.stopPropagation();openDocs('${x.type}',${JSON.stringify(x.id)},'${js(x.name)}')">Docs</button></td></tr>`).join('') || '<tr><td colspan="8"><div class="empty-state">No candidates found.</div></td></tr>'}</tbody></table></div></div></div>`;
+  }
+  window.renderCandidatesV3 = renderCandidatesV3;
+
+  function taskRows(){ return rows().flatMap(x=>{ const arr=[]; if(!hasDoc(x.type,x.id)) arr.push({title:'Upload documents',meta:x.name,prio:'High'}); if(x.balance>0) arr.push({title:'Follow up commission',meta:`${x.name} • ${money(x.balance)}`,prio:'High'}); if(x.opsStage==='Visa') arr.push({title:'Prepare ticketing',meta:x.name,prio:'Medium'}); if(x.opsStage==='MOL') arr.push({title:'MOL follow-up',meta:x.name,prio:'Medium'}); return arr; }); }
+  function taskRowsHTML(limit=999){ const t=taskRows().slice(0,limit); return `<div class="task-list">${t.map(x=>`<div class="task-item"><div class="task-icon"><i class="ti ti-checkbox"></i></div><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(x.meta)}</div></div><span class="item-pill ${x.prio==='High'?'danger':''}">${x.prio}</span></div>`).join('') || '<div class="empty-state">No generated tasks right now.</div>'}</div>`; }
+  function renderTasksV3(){ const el=$('#tasks-section'); if(!el) return; el.innerHTML=`<div class="dreco-page">${topHead('Tasks','Priority queue generated from workflow blockers, missing documents and finance balances.',`<button class="dreco-btn primary" onclick="switchTab('candidates')">Open Candidates</button>`)}<div class="dreco-grid dreco-kpis">${kpi('Open Tasks',taskRows().length,'Generated automatically','ti-checkbox')}${kpi('Missing Docs',rows().filter(x=>!hasDoc(x.type,x.id)).length,'Compliance blockers','ti-file-alert')}${kpi('Unpaid',rows().filter(x=>x.balance>0).length,'Finance follow-ups','ti-coin')}</div><div class="dreco-card pad">${taskRowsHTML()}</div></div>`; }
+
+  function transactions(){ return rows().filter(x=>x.commission||x.paid||x.balance).map(x=>({name:x.name,company:x.company,paid:x.paid,balance:x.balance,commission:x.commission,date:x.travel||x.visa||x.submitted,type:x.paid?'Payment':'Invoice',status:x.balance>0?'Unpaid':'Paid'})).sort((a,b)=>num(b.date)-num(a.date)); }
+  function recentTransactionsHTML(limit=8){ const tx=transactions().slice(0,limit); return `<div class="transaction-list">${tx.map(t=>`<div class="tx-row"><div><strong>${esc(t.name)}</strong><span>${esc(t.company)} • ${t.type}</span></div><div><strong>${money(t.paid||t.commission)}</strong>${badge(t.status)}</div></div>`).join('') || '<div class="empty-state">No transactions yet.</div>'}</div>`; }
+  function renderFinanceV3(){
+    const el=$('#finance-section'); if(!el) return; const all=rows(); const total=all.reduce((s,x)=>s+x.commission,0), paid=all.reduce((s,x)=>s+x.paid,0), bal=all.reduce((s,x)=>s+x.balance,0);
+    el.innerHTML=`<div class="dreco-page">${topHead('Finance','Track commissions, payments, outstanding balances and recent transactions.',`<button class="dreco-btn" onclick="switchTab('candidates')">Open Candidates</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>New Invoice Candidate</button>`)}
+    <div class="dreco-grid dreco-kpis">${kpi('Total Invoiced',money(total),'All commissions','ti-receipt')}${kpi('Total Paid',money(paid),'Collected','ti-wallet')}${kpi('Outstanding',money(bal),'Needs follow-up','ti-alert-circle')}${kpi('Collection Rate',total?Math.round(paid/total*100)+'%':'0%','Paid / invoiced','ti-chart-line')}</div>
+    <div class="dreco-grid dash-two"><div class="dreco-card pad"><div class="dreco-card-title">Cash Flow</div>${barChart(monthlyFinance())}</div><div class="dreco-card pad"><div class="dreco-card-title">Outstanding by Age</div>${donutChart([{label:'Paid',value:paid},{label:'Outstanding',value:bal}], bal?money(bal):'Clear')}</div></div>
+    <div class="dreco-card pad"><div class="dreco-card-title">Recent Transactions <span>Functional from candidate payment data</span></div>${recentTransactionsHTML(12)}</div></div>`;
+  }
+  function monthlyFinance(){ const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const paid=Array(12).fill(0), inv=Array(12).fill(0); rows().forEach(x=>{ let d=x.submitted; let m=(typeof d==='number'?new Date(Math.round((d-25569)*86400*1000)):new Date(d||Date.now())).getMonth(); if(isNaN(m)) m=new Date().getMonth(); paid[m]+=x.paid; inv[m]+=x.commission; }); return months.map((m,i)=>({label:m,paid:paid[i],invoiced:inv[i]})); }
+
+  function renderDocumentsV3(){ const el=$('#documents-section'); if(!el) return; const all=rows(); el.innerHTML=`<div class="dreco-page">${topHead('Documents','Manage passport, visa, MOL, medical, ticket and contract links attached to each candidate.',`<button class="dreco-btn primary" onclick="switchTab('candidates')">Attach from Candidate</button>`)}<div class="dreco-grid dreco-kpis">${kpi('Passports',all.filter(x=>x.pp).length,'Captured','ti-id')}${kpi('Document Links',all.filter(x=>hasDoc(x.type,x.id)).length,'Uploaded','ti-folder')}${kpi('Missing',all.filter(x=>!hasDoc(x.type,x.id)).length,'Need action','ti-file-alert')}</div><div class="table-card"><div class="dreco-table-wrap"><table class="dreco-table"><thead><tr><th>Candidate</th><th>Type</th><th>Passport</th><th>Workflow</th><th>Status</th><th>Action</th></tr></thead><tbody>${all.map(x=>`<tr><td><div class="name-cell">${avatar(x.name)}<div><div class="item-title">${esc(x.name)}</div><div class="item-meta">${esc(x.company)}</div></div></div></td><td>${x.type==='pro'?'Professional':'General'}</td><td>${esc(x.pp||'—')}</td><td>${badge(x.opsStage)}</td><td>${hasDoc(x.type,x.id)?'<span class="stage-badge green">Uploaded</span>':'<span class="stage-badge red">Missing</span>'}</td><td><button class="action-mini" onclick="openDocs('${x.type}',${JSON.stringify(x.id)},'${js(x.name)}')">Manage</button></td></tr>`).join('')}</tbody></table></div></div></div>`; }
+
+  function renderReportsV3(){
+    const el=$('#reports-section'); if(!el) return; const all=rows(); const stageCounts=OPS_STAGES.map(s=>({label:s,value:all.filter(x=>x.opsStage===s).length})).filter(x=>x.value); const trend=monthlyTrends();
+    el.innerHTML=`<div class="dreco-page">${topHead('Reports','Visual performance overview for candidates, stages, monthly trends and companies.',`<button class="dreco-btn" onclick="exportCSV('pro')">Export Pro</button><button class="dreco-btn" onclick="exportCSV('lb')">Export General</button>`)}<div class="dreco-grid dreco-kpis">${kpi('Total Candidates',all.length,'All records','ti-users')}${kpi('Travelled',all.filter(x=>x.opsStage==='Travelled').length,'Completed placements','ti-plane')}${kpi('Success Rate',all.length?Math.round(all.filter(x=>x.opsStage==='Travelled').length/all.length*100)+'%':'0%','Travelled / total','ti-target')}${kpi('Collection Rate',all.reduce((s,x)=>s+x.commission,0)?Math.round(all.reduce((s,x)=>s+x.paid,0)/all.reduce((s,x)=>s+x.commission,0)*100)+'%':'0%','Finance health','ti-chart-line')}</div><div class="dreco-grid dash-two"><div class="dreco-card pad"><div class="dreco-card-title">Candidates by Stage</div>${donutChart(stageCounts, String(all.length))}<div class="chart-legend">${stageCounts.map(x=>`<span><i></i>${esc(x.label)} ${x.value}</span>`).join('')}</div></div><div class="dreco-card pad"><div class="dreco-card-title">Monthly Trends</div>${lineChart(trend)}</div></div><div class="dreco-card pad"><div class="dreco-card-title">Top Companies</div>${clientTableHTML()}</div></div>`;
+  }
+  function monthlyTrends(){ const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const sub=Array(12).fill(0), tr=Array(12).fill(0); rows().forEach(x=>{ let d=x.submitted; let m=(typeof d==='number'?new Date(Math.round((d-25569)*86400*1000)):new Date(d||Date.now())).getMonth(); if(!isNaN(m)) sub[m]++; if(x.opsStage==='Travelled') tr[m]++; }); return months.map((m,i)=>({label:m,submitted:sub[i],travelled:tr[i]})); }
+
+  function clients(){ const map={}; rows().forEach(x=>{ const k=x.company||'Unknown'; if(!map[k]) map[k]={name:k,country:x.country||'—',active:0,total:0,due:0,manager:x.owner}; map[k].total++; if(x.opsStage!=='Travelled') map[k].active++; map[k].due+=x.balance; }); return Object.values(map).sort((a,b)=>b.total-a.total); }
+  function clientTableHTML(){ const c=clients().slice(0,10); return `<div class="dreco-table-wrap"><table class="dreco-table"><thead><tr><th>Company</th><th>Country</th><th>Active</th><th>Total</th><th>Due</th></tr></thead><tbody>${c.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.country)}</td><td>${x.active}</td><td>${x.total}</td><td>${money(x.due)}</td></tr>`).join('')}</tbody></table></div>`; }
+  function renderClientsV3(){ const el=$('#clients-section'); if(!el) return; el.innerHTML=`<div class="dreco-page">${topHead('Clients','Client accounts generated from company names already attached to candidates.',`<button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Client Candidate</button>`)}<div class="table-card">${clientTableHTML()}</div></div>`; }
+  function renderSettingsV3(){ if(typeof window.renderSettingsPage==='function') window.renderSettingsPage(); const el=$('#settings-section'); if(el) el.classList.add('dreco-settings-v3'); }
+
+  function donutChart(items,totalText){ const total=items.reduce((s,x)=>s+x.value,0)||1; let acc=0; const stops=items.map((x,i)=>{ const start=acc/total*100; acc+=x.value; const end=acc/total*100; const colors=['#5347CE','#1A6BB5','#22A06B','#F0B429','#EF4444','#8B5CF6','#14B8A6','#F97316','#64748B','#111827']; return `${colors[i%colors.length]} ${start}% ${end}%`; }).join(','); return `<div class="donut-wrap"><div class="donut" style="background:conic-gradient(${stops})"><div><strong>${esc(totalText)}</strong><span>Total</span></div></div></div>`; }
+  function barChart(data){ const max=Math.max(...data.flatMap(x=>[x.paid,x.invoiced]),1); return `<div class="bar-chart">${data.map(x=>`<div class="bar-group"><div class="bars"><span style="height:${Math.max(4,x.invoiced/max*120)}px"></span><span style="height:${Math.max(4,x.paid/max*120)}px"></span></div><small>${x.label}</small></div>`).join('')}</div><div class="chart-legend"><span><i></i>Invoiced</span><span><i></i>Paid</span></div>`; }
+  function lineChart(data){ const max=Math.max(...data.flatMap(x=>[x.submitted,x.travelled]),1); const pts1=data.map((x,i)=>`${i*(500/(data.length-1))},${140-(x.submitted/max*120)}`).join(' '); const pts2=data.map((x,i)=>`${i*(500/(data.length-1))},${140-(x.travelled/max*120)}`).join(' '); return `<svg class="line-chart" viewBox="0 0 520 160"><polyline points="${pts1}" fill="none" stroke="#5347CE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${pts2}" fill="none" stroke="#22A06B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>${data.map((x,i)=>`<text x="${i*(500/(data.length-1))}" y="156" font-size="10" fill="#8a8f9e">${x.label}</text>`).join('')}</svg><div class="chart-legend"><span><i></i>Submitted</span><span><i></i>Travelled</span></div>`; }
+
+  // Modal stacking fix: close profile before opening edit/docs and force one active overlay layer.
+  function closeFloatingOverlays(except){
+    ['candidate-profile-modal','command-modal','pro-modal','lb-modal','docs-modal'].forEach(id=>{ if(id!==except) $(`#${id}`)?.classList.remove('open'); });
+    $$('.modal.open').forEach(m=>{ if(m.id!==except) m.classList.remove('open'); });
+  }
+  ['openProForm','editPro','openLBForm','editLB','openDocs'].forEach(name=>{
+    const old=window[name]; if(typeof old==='function' && !old._v3Wrapped){
+      const wrapped=function(...args){ closeFloatingOverlays(name.includes('Doc')?'docs-modal': name.includes('LB')?'lb-modal':'pro-modal'); return old.apply(this,args); };
+      wrapped._v3Wrapped=true; window[name]=wrapped;
+    }
+  });
+
+  // expose expected render names for older onclick hooks
+  window.renderPipelineV3=renderPipelineV3; window.renderFinanceV3=renderFinanceV3; window.renderReportsV3=renderReportsV3;
+  window.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ setupShellV3(); if($('#app') && $('#app').style.display!=='none') window.switchTab('dash'); },80));
+})();
