@@ -573,21 +573,110 @@ function hideForgotPassword() {
   document.getElementById('forgot-section').style.display='none';
   document.getElementById('signup-section').style.display='none';
   document.getElementById('login-main').style.display='block';
-  const ri=document.getElementById('recovery-code-input'); if(ri) ri.value='';
-  const fe=document.getElementById('forgot-error'); if(fe) fe.style.display='none';
-  const fr=document.getElementById('forgot-result'); if(fr) fr.style.display='none';
+  // Reset both steps back to step 1
+  const step1 = document.getElementById('recovery-step-1');
+  const step2 = document.getElementById('recovery-step-2');
+  if (step1) step1.style.display = 'block';
+  if (step2) step2.style.display = 'none';
+  // Clear all fields
+  ['recovery-code-input','recovery-username-input','recovery-new-pw','recovery-confirm-pw'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['forgot-error','forgot-error-2','forgot-success','forgot-result'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  _recoveryUsername = '';
 }
-function submitForgotPassword() {
-  const code=(document.getElementById('recovery-code-input').value||'').trim();
-  const errEl=document.getElementById('forgot-error');
-  const resEl=document.getElementById('forgot-result');
-  if (code!==RECOVERY_CODE) {
-    errEl.textContent='Incorrect recovery code.'; errEl.style.display='block'; resEl.style.display='none'; return;
+// Track which username is being reset
+let _recoveryUsername = '';
+
+function verifyRecoveryCode() {
+  const code = (document.getElementById('recovery-code-input').value || '').trim();
+  const username = (document.getElementById('recovery-username-input').value || '').trim().toLowerCase();
+  const errEl = document.getElementById('forgot-error');
+
+  // Validate recovery code
+  if (code !== RECOVERY_CODE) {
+    errEl.textContent = 'Incorrect recovery code. Please try again.';
+    errEl.style.display = 'block';
+    return;
   }
-  errEl.style.display='none';
-  resEl.innerHTML='<strong style="color:var(--green)">Recovery code accepted.</strong>'+
-    '<div style="margin-top:6px;color:var(--text-2)">For security, staff passwords are no longer displayed in the browser. Ask the administrator to reset the account from the profile/settings workflow or update the staff account list directly.</div>';
-  resEl.style.display='block';
+
+  // Validate username exists in accounts
+  const account = STAFF_ACCOUNTS[username];
+  if (!account) {
+    errEl.textContent = `No account found for username "${username}". Check spelling.`;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Code and username valid — advance to step 2
+  errEl.style.display = 'none';
+  _recoveryUsername = username;
+  document.getElementById('recovery-step-1').style.display = 'none';
+  document.getElementById('recovery-step-2').style.display = 'block';
+  const label = document.getElementById('recovery-step2-label');
+  if (label) label.textContent = `Setting new password for: ${account.display || username}`;
+  document.getElementById('recovery-new-pw').focus();
+}
+
+async function submitNewPassword() {
+  const newPw  = (document.getElementById('recovery-new-pw').value || '').trim();
+  const confPw = (document.getElementById('recovery-confirm-pw').value || '').trim();
+  const errEl  = document.getElementById('forgot-error-2');
+  const sucEl  = document.getElementById('forgot-success');
+
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (newPw.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPw !== confPw) {
+    errEl.textContent = 'Passwords do not match. Please try again.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!_recoveryUsername || !STAFF_ACCOUNTS[_recoveryUsername]) {
+    errEl.textContent = 'Session expired. Please start over.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    // Hash and save the new password
+    const account = STAFF_ACCOUNTS[_recoveryUsername];
+    await setAccountPassword(account, newPw);
+    await saveStaffAccounts();
+
+    // Clear sensitive fields
+    document.getElementById('recovery-new-pw').value = '';
+    document.getElementById('recovery-confirm-pw').value = '';
+    document.getElementById('recovery-code-input').value = '';
+    document.getElementById('recovery-username-input').value = '';
+
+    sucEl.textContent = 'Password updated successfully. You can now log in.';
+    sucEl.style.display = 'block';
+
+    // Pre-fill username on login form and go back after 2 seconds
+    setTimeout(() => {
+      const uInput = document.getElementById('username-input');
+      if (uInput) uInput.value = _recoveryUsername;
+      _recoveryUsername = '';
+      hideForgotPassword();
+    }, 2000);
+
+  } catch (err) {
+    errEl.textContent = 'Failed to save password: ' + (err.message || 'Unknown error');
+    errEl.style.display = 'block';
+  }
+}
+
+function submitForgotPassword() {
+  // Legacy alias — now handled by verifyRecoveryCode()
+  verifyRecoveryCode();
 }
 function showSignup() {
   document.getElementById('login-main').style.display='none';
