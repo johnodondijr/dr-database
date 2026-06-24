@@ -203,8 +203,13 @@ async function verifyAccountPassword(account, password) {
   return { ok: false, migrated: false };
 }
 async function loadStaffAccounts() {
-  // Step 1: Load local accounts first — these take priority for password hashes
-  // because a local reset must survive a cloud load.
+  // Snapshot the hardcoded defaults so cloud/local cannot corrupt them.
+  const hardcodedDefaults = {};
+  Object.entries(STAFF_ACCOUNTS).forEach(([u, a]) => {
+    if (a.passwordHash && a.passwordSalt) hardcodedDefaults[u] = { ...a };
+  });
+
+  // Step 1: Load local accounts
   let localAccounts = {};
   try {
     const saved = safeLocalGet(LOCAL_STAFF_KEY);
@@ -226,27 +231,44 @@ async function loadStaffAccounts() {
   }
 
   // Step 3: Merge — cloud first as the base, then local on top.
-  // For password fields specifically, local always wins over cloud
-  // so that a password reset (saved locally) is never overwritten
-  // by an older cloud hash.
   Object.assign(STAFF_ACCOUNTS, cloudAccounts);
   Object.keys(localAccounts).forEach(username => {
     const local = localAccounts[username];
     const existing = STAFF_ACCOUNTS[username];
     if (existing && local.passwordHash && local.passwordSalt) {
-      // Local has a hash — use it, keep everything else from cloud
       STAFF_ACCOUNTS[username] = { ...existing, ...local };
     } else if (local) {
       STAFF_ACCOUNTS[username] = { ...(existing || {}), ...local };
     }
   });
 
-  // Step 4: Persist the merged result locally for next time
+  // Step 4: Re-apply hardcoded password hashes — they must always win over
+  // stale cloud data. A local password change (saved via saveStaffAccounts)
+  // will overwrite this on the next load because local wins in Step 3.
+  Object.entries(hardcodedDefaults).forEach(([u, defaults]) => {
+    const current = STAFF_ACCOUNTS[u];
+    // Only restore if no local override exists (local would have been merged in Step 3)
+    const hasLocalOverride = localAccounts[u]?.passwordHash;
+    if (!hasLocalOverride && current) {
+      STAFF_ACCOUNTS[u] = { ...current, passwordHash: defaults.passwordHash, passwordSalt: defaults.passwordSalt, hashVersion: defaults.hashVersion };
+    } else if (!current) {
+      STAFF_ACCOUNTS[u] = { ...defaults };
+    }
+  });
+
+  // Step 5: Persist the merged result locally for next time
   safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
 
-  // Step 5: Normalise and clean up exactly once
+  // Step 6: Normalise and clean up exactly once
   normalizeAllAccounts();
   cleanupLegacyDestinyUsers();
+
+  // Step 7: Push corrected accounts back to cloud so stale hashes don't persist
+  if (db) {
+    try {
+      await db.from('app_settings').upsert({ key: CLOUD_ACCOUNTS_KEY, value: STAFF_ACCOUNTS }, { onConflict: 'key' });
+    } catch (_) {}
+  }
 }
 async function saveStaffAccounts() {
   normalizeAllAccounts();
