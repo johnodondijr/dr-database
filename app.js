@@ -84,12 +84,13 @@ function cleanupLegacyDestinyUsers() {
     };
     migratedLegacyFred = true;
   }
-  LEGACY_DESTINY_USERS.forEach(username => {
+  // Only remove blocked admin aliases and fred-after-migration.
+  // Never remove other legacy staff (robert, doreen, maxwell, consolata) —
+  // they are real accounts and must survive mobile first-login.
+  [...DEFAULT_ADMIN_BLOCKED_ALIASES, ...(migratedLegacyFred ? ['fred'] : [])].forEach(username => {
     const account = STAFF_ACCOUNTS[username];
     const isDefaultCompany = account && (account.companyId || DEFAULT_COMPANY.id) === DEFAULT_COMPANY.id;
-    const isOldSeedAccount = account && (account.password || account.passwordHash === LEGACY_DESTINY_HASHES[username]);
-    const isBlockedAdminAlias = DEFAULT_ADMIN_BLOCKED_ALIASES.includes(username);
-    if (isDefaultCompany && (isOldSeedAccount || isBlockedAdminAlias || (username === 'fred' && migratedLegacyFred))) delete STAFF_ACCOUNTS[username];
+    if (isDefaultCompany) delete STAFF_ACCOUNTS[username];
   });
   if (STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME]) {
     STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] = normalizeAccount(DEFAULT_ADMIN_USERNAME, {
