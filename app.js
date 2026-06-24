@@ -508,8 +508,42 @@ function hideLoading() { document.getElementById('loading-overlay').classList.re
 // SIDEBAR TOGGLE
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('collapsed');
+  const sb = document.getElementById('sidebar');
+  if (window.innerWidth <= 640) {
+    sb.classList.contains('mobile-open') ? closeMobileSidebar() : openMobileSidebar();
+  } else {
+    sb.classList.toggle('collapsed');
+  }
 }
+function openMobileSidebar() {
+  document.getElementById('sidebar').classList.add('mobile-open');
+  document.getElementById('sidebar-backdrop').classList.add('visible');
+}
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-backdrop').classList.remove('visible');
+}
+
+// Swipe-from-left-edge gesture
+(function() {
+  let touchStartX = 0, touchStartY = 0, dragging = false;
+  const EDGE_THRESHOLD = 28; // px from left edge to start swipe
+  const MIN_SWIPE = 60;      // px to trigger open
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    dragging = touchStartX <= EDGE_THRESHOLD;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!dragging) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    if (dx > MIN_SWIPE && dy < 80 && window.innerWidth <= 640) openMobileSidebar();
+    dragging = false;
+  }, { passive: true });
+})();
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // AUTH
@@ -1221,6 +1255,7 @@ function ppBadge(s){
 // TABS + MODALS
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function switchTab(tab){
+  if (window.innerWidth <= 640) closeMobileSidebar();
   // DV5 unified tab router — handles both legacy and new tabs
   const DV5_TABS = ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'];
   const DV5_ALIASES = {
@@ -2039,10 +2074,10 @@ function renderDash(){
       <div class="ref-board-grid">
         <div class="ref-main-column">
           <div class="ref-kpi-row">
-            ${renderRefKpi('Total Candidates',totalCandidates,'12%','ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
-            ${renderRefKpi('In Process',totalInProcess,'8%','ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
-            ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF','','openTravelledView()')}
-            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
+            ${renderRefKpi('Total Candidates',totalCandidates,'All active records','ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
+            ${renderRefKpi('In Process',totalInProcess,'Active pipeline','ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
+            ${renderRefKpi('Travelled',totalTravelled,'Successful placements','ti-plane-departure','#EFEAFF','','openTravelledView()')}
+            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'Revenue collected','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
           </div>
 
           ${renderSmartAlertsHTML()}
@@ -2418,9 +2453,9 @@ function renderHelpPage(){
   el.innerHTML=`<div class="settings-page-card"><h3>Daily workflow</h3><p>Use Dashboard for status, Pipeline Board for movement, Calendar for deadlines, and Reports for management review.</p><div class="setting-row"><span>Pipeline board</span><button onclick="switchTab('kanban')">Open</button></div><div class="setting-row"><span>Calendar</span><button onclick="switchTab('calendar')">Open</button></div></div><div class="settings-page-card"><h3>Records</h3><p>Professional Jobs and General Jobs are separate workflows. Travel combines both lists and sorts latest travel first.</p><div class="setting-row"><span>Professional Jobs</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General Jobs</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Finance</h3><p>Commissions focus on professional job income. Repayments only track travelled general-job clients. Expenses capture money spent on clients.</p><div class="setting-row"><span>Commissions</span><button onclick="switchTab('commissions')">Open</button></div><div class="setting-row"><span>Expenses</span><button onclick="switchTab('expenses')">Open</button></div></div><div class="settings-page-card"><h3>Support note</h3><p>For shared multi-user work, keep Supabase configured. Local mode is useful for solo testing, but cloud mode is better for office use.</p><div class="setting-row"><span>Settings</span><button onclick="switchTab('settings')">Open</button></div></div>`;
 }
 function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
-function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
+function renderRefKpi(label,value,sub,icon,bg,extra='',action=''){
   const onclick=action?` onclick="${action}"`:'';
-  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
+  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(String(value))}</strong><em>${escHTML(sub)}</em></div></div>`;
 }
 function renderRefTask(title,meta,due){
   return `<div class="ref-task"><span></span><div><strong>${escHTML(title)}</strong><small>${escHTML(meta)}</small></div><em>${escHTML(due)}</em></div>`;
@@ -3296,7 +3331,7 @@ function setUserDisplay(display, role) {
           }
         });
       });
-      bars.push({label:monthLabel, height:paid>0 ? Math.min(Math.round(paid/1000),100) : Math.floor(20+Math.random()*40)});
+      bars.push({label:monthLabel, height:paid>0 ? Math.min(Math.round(paid/1000),100) : 0});
     }
     return bars.map(b => `<div class="dv5-bar-wrap"><div class="dv5-bar" style="height:${b.height}%"></div><span>${h(b.label)}</span></div>`).join('');
   }
@@ -3952,6 +3987,17 @@ function setUserDisplay(display, role) {
       if (r.position) { jobCounts[r.position].count++; if(r.stage==='TRAVELLED') jobCounts[r.position].travelled++; jobCounts[r.position].commission+=Number(r.commission)||0; }
     });
     const topJobs = Object.entries(jobCounts).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
+    // Calculate real avg processing time: intake date → travel date for travelled candidates
+    let avgProcessing = '—';
+    const withDates = (proDB||[]).filter(r => r.stage==='TRAVELLED' && r.travel && (r.intake||r.created||r.createdAt));
+    if (withDates.length) {
+      const avgDays = Math.round(withDates.reduce((s,r) => {
+        const start = new Date(r.intake||r.created||r.createdAt);
+        const end   = new Date(r.travel);
+        return s + Math.max(0, (end-start)/(86400000));
+      }, 0) / withDates.length);
+      avgProcessing = avgDays > 0 ? avgDays + ' days' : '—';
+    }
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
@@ -3966,7 +4012,7 @@ function setUserDisplay(display, role) {
           ${kpi('Travelled',        travelled.length,   'Successful travel',  'ti-plane')}
           ${kpi('Success Rate',     rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%', 'Travelled / total','ti-target')}
           ${kpi('Collection Rate',  total?Math.round(paid/total*100)+'%':'0%', 'Finance health','ti-chart-line')}
-          ${kpi('Avg Processing',   '45 days',          'Estimate',           'ti-clock')}
+          ${kpi('Avg Processing',   avgProcessing,      withDates.length ? 'Intake → travel date' : 'No travel dates yet', 'ti-clock')}
         </div>
         <div class="dv5-two-col">
           <div class="dv5-card">
