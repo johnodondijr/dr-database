@@ -549,24 +549,26 @@ function toggleSidebar() {
 function openMobileSidebar() {
   const sb = document.getElementById('sidebar');
   if (!sb) return;
-  // Apply drawer styles inline — inline styles beat all CSS including !important,
-  // which is necessary because the stylesheet has many competing display:none rules.
-  Object.assign(sb.style, {
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'fixed',
-    top: '0', left: '0', bottom: '0',
-    width: 'min(280px, 85vw)',
-    height: '100%',
-    zIndex: '400',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    background: '#fff',
-    boxShadow: '6px 0 32px rgba(0,0,0,.45)',
-    borderRadius: '0',
-    borderRight: '1px solid #E2E8F0',
-    animation: 'drawerSlideIn .22s cubic-bezier(.4,0,.2,1) both',
-  });
+  // Must use setProperty with 'important' priority — CSS display:none!important
+  // beats normal inline styles, so we need inline !important to win the cascade.
+  const sp = (prop, val) => sb.style.setProperty(prop, val, 'important');
+  sp('display', 'flex');
+  sp('flex-direction', 'column');
+  sp('position', 'fixed');
+  sp('top', '0');
+  sp('left', '0');
+  sp('bottom', '0');
+  sp('width', 'min(280px, 85vw)');
+  sp('height', '100%');
+  sp('z-index', '400');
+  sp('overflow-y', 'auto');
+  sp('overflow-x', 'hidden');
+  sp('background', '#fff');
+  sp('box-shadow', '6px 0 32px rgba(0,0,0,.45)');
+  sp('border-radius', '0');
+  sp('border-right', '1px solid #E2E8F0');
+  sp('padding', '18px 12px 16px');
+  sb.style.animation = 'drawerSlideIn .22s cubic-bezier(.4,0,.2,1) both';
   sb.classList.add('mobile-open');
   document.getElementById('sidebar-backdrop')?.classList.add('visible');
   document.body.style.overflow = 'hidden';
@@ -2896,7 +2898,10 @@ function openDocs(type,id,name){
   const input=document.getElementById('docs-link-input');
   const openBtn=document.getElementById('docs-open-btn');
   input.value=existing; openBtn.disabled=!existing.trim(); renderDocChecklist(type,id);
-  document.getElementById('docs-modal').classList.add('open');
+  const dm=document.getElementById('docs-modal');
+  // Elevate z-index above any open profile/lb modal (z-index:200) so docs always appears on top
+  dm.style.setProperty('z-index','500','important');
+  dm.classList.add('open');
 }
 function onDocsLinkInput(){ document.getElementById('docs-open-btn').disabled=!document.getElementById('docs-link-input').value.trim(); }
 function openCurrentDocLink(){ const v=document.getElementById('docs-link-input').value.trim(); if(v) window.open(v,'_blank'); }
