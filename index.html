@@ -748,42 +748,10 @@
       .pagination{flex-direction:column;gap:6px;align-items:flex-start;padding:8px 12px}
     }
 
-    /* "-"- BOTTOM NAV BAR (disabled on mobile — replaced by swipe sidebar) "-"- */
+    /* "-"- BOTTOM NAV BAR — permanently disabled, replaced by swipe sidebar "-"- */
     .bottom-nav{ display:none !important; }
 
-    /* "-"- MOBILE SIDEBAR DRAWER "-"- */
-    @media(max-width:640px){
-      /* Sidebar becomes a fixed off-canvas drawer (overrides display:none from 760px rule) */
-      .sidebar{
-        display:flex !important;
-        position:fixed !important;
-        top:0 !important; left:0 !important; bottom:0 !important;
-        width:260px !important;
-        transform:translateX(-100%) !important;
-        transition:transform .28s cubic-bezier(.4,0,.2,1) !important;
-        z-index:300 !important;
-        box-shadow:none !important;
-      }
-      .sidebar.mobile-open{
-        transform:translateX(0) !important;
-        box-shadow:4px 0 24px rgba(0,0,0,.35) !important;
-      }
-      /* Hide the sidebar-toggle collapse button on mobile (we use hamburger instead) */
-      .sidebar .sidebar-toggle{ display:none !important; }
-      /* Sidebar backdrop */
-      .sidebar-backdrop{
-        display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:299;
-        -webkit-tap-highlight-color:transparent;
-      }
-      .sidebar-backdrop.visible{ display:block; }
-      /* Hamburger in topbar */
-      .topbar-hamburger{ display:flex !important; }
-      /* Push main area down to account for topbar only (no bottom nav) */
-      .main-area{ padding-bottom:0 !important; }
-      /* Swipe hint: invisible 20px edge on left to capture swipe */
-      .swipe-edge-hint{display:block !important;}
-    }
-    /* Hamburger hidden on desktop */
+    /* Hamburger hidden on desktop (shown on mobile via the @media block below) */
     .topbar-hamburger{
       display:none;align-items:center;justify-content:center;
       width:38px;height:38px;border:none;background:none;cursor:pointer;
@@ -798,12 +766,13 @@
 
     /* "-"- Login screen mobile "-"- */
     @media(max-width:640px){
-      #login-screen{padding:0;background:#fff}
-      .lp-window{border-radius:0;height:100dvh;height:100vh;box-shadow:none;border:none}
+      #login-screen{padding:0;background:#fff;align-items:flex-start;overflow-y:auto}
+      .lp-window{border-radius:0;min-height:100dvh;min-height:100vh;max-height:none;height:auto;box-shadow:none;border:none;flex-direction:column}
       .lp-media{display:none}
-      .lp-form-panel{padding:36px 24px 28px}
+      .lp-form-panel{flex:1 1 auto;padding:40px 24px 32px;min-height:100dvh;min-height:100vh;justify-content:center}
       .lp-header h1{font-size:22px}
       .lp-chips{flex-direction:column;gap:8px}
+      .lp-footer{padding-top:24px}
     }
     /* "-"- KANBAN "-"- */
     .kanban-col{flex:0 0 240px;background:var(--gray-light);border-radius:var(--radius-xl);padding:12px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--border)}
@@ -1484,7 +1453,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   .topbar-avatar{width:32px!important;height:32px!important;border-radius:11px!important}
   .profile-dropdown{position:fixed!important;top:62px!important;right:10px!important;left:10px!important;width:auto!important;max-width:none!important;max-height:calc(100dvh - 84px)!important;overflow:auto!important}
   .content-area{padding:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;background:#F8FAFC!important}
-  .content-area>div{padding:14px 12px 94px!important}
+  .content-area>div{padding:14px 12px 24px!important}
   .welcome-banner{border-radius:14px!important;padding:14px!important;margin-bottom:12px!important}
   .wb-left h2{font-size:18px!important}
   .wb-right{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;width:100%!important;overflow:visible!important}
@@ -1532,12 +1501,40 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   .modal-footer .btn{width:100%!important}
   .form-grid,.settings-grid,.settings-kpi-row,.candidate-summary,.action-grid{grid-template-columns:1fr!important}
   .candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .bottom-nav{height:64px!important;padding:0 4px env(safe-area-inset-bottom)!important;background:#fff!important;border-top:1px solid var(--nexus-line)!important;box-shadow:0 -10px 28px rgba(58,72,92,.08)!important}
-  .bottom-nav.visible{display:flex!important}
-  .bottom-nav-item{min-width:0!important;gap:2px!important;color:#7D8797!important;letter-spacing:0!important;text-transform:none!important}
-  .bottom-nav-item i{font-size:20px!important}
-  .bottom-nav-item span{font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
-  .bottom-nav-item.active{background:#EFEEFF!important;color:var(--nexus-purple)!important;border-radius:14px!important}
+}
+
+/* "-"- MOBILE SIDEBAR DRAWER — must be after the max-width:760px block to override display:none "-"- */
+@media(max-width:640px){
+  /* Sidebar becomes a fixed off-canvas drawer */
+  .sidebar{
+    display:flex !important;
+    flex-direction:column !important;
+    position:fixed !important;
+    top:0 !important; left:0 !important; bottom:0 !important;
+    width:260px !important;
+    height:100dvh !important;
+    transform:translateX(-100%) !important;
+    transition:transform .28s cubic-bezier(.4,0,.2,1) !important;
+    z-index:300 !important;
+    box-shadow:none !important;
+    overflow-y:auto !important;
+    border-radius:0 !important;
+  }
+  .sidebar.mobile-open{
+    transform:translateX(0) !important;
+    box-shadow:6px 0 32px rgba(0,0,0,.4) !important;
+  }
+  .sidebar .sidebar-toggle{ display:none !important; }
+  /* Backdrop overlay */
+  .sidebar-backdrop{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;
+    -webkit-tap-highlight-color:transparent;
+    backdrop-filter:blur(1px);
+  }
+  .sidebar-backdrop.visible{ display:block; }
+  /* Hamburger in topbar */
+  .topbar-hamburger{ display:flex !important; }
+  .swipe-edge-hint{ display:block !important; }
 }
 
 @media(max-width:420px){

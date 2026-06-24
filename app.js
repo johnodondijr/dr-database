@@ -36,7 +36,7 @@ const LEGACY_DESTINY_HASHES = {
 // STAFF ACCOUNTS
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 const STAFF_ACCOUNTS = {
-  johnfred: { passwordSalt: 'd66ed843dec2214091d4dcc1723179ef', passwordHash: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
+  johnfred: { passwordSalt: 'b82c14689cdb8a3aca838dd4cc8e7eb2', passwordHash: '9979506b17f4c70fc190c836355e6418452570f7605e5f7ebfaf1bdfbc31c136', hashVersion: 'pbkdf2-sha256-200k', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
 };
 // Recovery via shared code removed — password resets go through admin only.
 
