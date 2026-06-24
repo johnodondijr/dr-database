@@ -91,8 +91,16 @@ async function createAuthUser({ username, password, display, role, companyId, co
 }
 
 module.exports = async function handler(req, res) {
-  res.setHeader('access-control-allow-methods', 'POST, OPTIONS');
-  res.setHeader('access-control-allow-headers', 'content-type, authorization');
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || '';
+  const requestOrigin = req.headers.origin || '';
+  if (allowedOrigin && requestOrigin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else if (!allowedOrigin) {
+    // No restriction configured — allow same-origin requests only (no ACAO header)
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type, authorization');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
