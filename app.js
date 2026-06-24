@@ -468,7 +468,7 @@ function normalizeProRecord(r={}) {
     country:r.country||'',
     stage:r.stage||proStages[0],
     submitted:normalizeDateField(r.submitted),
-    interview:r.interview||null,
+    interview:normalizeDateField(r.interview),
     ol:normalizeDateField(r.ol),
     mol:normalizeDateField(r.mol),
     visa:normalizeDateField(r.visa),
@@ -2700,6 +2700,7 @@ async function savePro(){
     auditAction('Professional Jobs','Candidate added',rec.name);
     showToast('Candidate added ✓','success');
   }
+  editingProId = null;
   closeModal('pro-modal'); renderPro(); renderDash(); await saveProRecord(rec);
 }
 async function deletePro(id){
@@ -2879,6 +2880,7 @@ async function saveLB(){
     auditAction('General Jobs','Candidate added',rec.name);
     showToast('Candidate added ✓','success');
   }
+  editingLbId = null;
   closeModal('lb-modal'); renderLB(); renderDash(); await saveLBRecord(rec);
 }
 async function deleteLB(id){
@@ -2922,6 +2924,7 @@ async function saveDocs(){
   allDocs[dbKey]=link;
   addTimeline(type,id,link?'Documents link updated':'Documents link removed');
   auditAction('Documents',link?'Documents link updated':'Documents link removed',docsTarget.name||'Candidate');
+  docsTarget = null;
   closeModal('docs-modal'); showToast('Documents saved','success');
   if(type==='pro') renderPro(); else renderLB();
   await saveDocsToDB(dbKey,link);
