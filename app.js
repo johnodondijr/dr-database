@@ -146,24 +146,51 @@ function makePasswordSalt() {
   }
   return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
 }
-async function sha256Hex(value) {
+// PBKDF2 with 200,000 iterations – deliberately slow to resist offline brute-force.
+// SHA-256 (used previously) is a fast hash and unsuitable for passwords.
+// Legacy SHA-256 hashes are detected and transparently upgraded on next successful login.
+const PBKDF2_ITERATIONS = 200000;
+async function pbkdf2Hex(salt, password) {
   if (!window.crypto?.subtle) throw new Error('Secure password hashing requires HTTPS or localhost.');
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    'raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']
+  );
+  const bits = await window.crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: enc.encode(salt), iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    keyMaterial, 256
+  );
+  return Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
+}
+// Kept only for detecting and migrating old SHA-256 hashes.
+async function _legacySha256Hex(value) {
+  if (!window.crypto?.subtle) return '';
   const data = new TextEncoder().encode(value);
   const digest = await window.crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
 }
 async function setAccountPassword(account, password) {
   const salt = makePasswordSalt();
   account.passwordSalt = salt;
-  account.passwordHash = await sha256Hex(`${salt}:${password}`);
+  account.passwordHash = await pbkdf2Hex(salt, password);
+  account.hashVersion = 'pbkdf2-sha256-200k';
   delete account.password;
 }
 async function verifyAccountPassword(account, password) {
   if (!account) return { ok: false, migrated: false };
   if (account.passwordHash && account.passwordSalt) {
-    const hash = await sha256Hex(`${account.passwordSalt}:${password}`);
+    // Detect legacy SHA-256 hashes (no hashVersion tag) and upgrade them on login.
+    if (!account.hashVersion) {
+      const legacyHash = await _legacySha256Hex(`${account.passwordSalt}:${password}`);
+      if (legacyHash !== account.passwordHash) return { ok: false, migrated: false };
+      // Password correct — re-hash with PBKDF2 and save upgraded hash.
+      await setAccountPassword(account, password);
+      return { ok: true, migrated: true };
+    }
+    const hash = await pbkdf2Hex(account.passwordSalt, password);
     return { ok: hash === account.passwordHash, migrated: false };
   }
+  // Plaintext password (very old accounts) — upgrade immediately.
   if (account.password && account.password === password) {
     await setAccountPassword(account, password);
     return { ok: true, migrated: true };
@@ -659,6 +686,34 @@ async function doSignup() {
   });
 }
 
+// ── Login rate limiter ────────────────────────────────────────────────────────
+// Tracks failed attempts in memory per username. After MAX_FAILURES attempts
+// the account is locked for LOCKOUT_MS. State lives only in this session so a
+// hard refresh resets it – sufficient to block automated scripts without
+// requiring server-side state.
+const _loginAttempts = {};
+const MAX_FAILURES   = 5;
+const LOCKOUT_MS     = 30 * 1000; // 30 seconds
+
+function _recordLoginFailure(username) {
+  const entry = _loginAttempts[username] || { count: 0, lockedUntil: 0 };
+  entry.count += 1;
+  if (entry.count >= MAX_FAILURES) entry.lockedUntil = Date.now() + LOCKOUT_MS;
+  _loginAttempts[username] = entry;
+}
+function _checkLoginLockout(username) {
+  const entry = _loginAttempts[username];
+  if (!entry) return null;
+  if (entry.lockedUntil && Date.now() < entry.lockedUntil) {
+    const secsLeft = Math.ceil((entry.lockedUntil - Date.now()) / 1000);
+    return `Too many failed attempts. Try again in ${secsLeft} seconds.`;
+  }
+  return null;
+}
+function _clearLoginFailures(username) {
+  delete _loginAttempts[username];
+}
+
 async function doLogin() {
   await loadStaffAccounts();
   const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
@@ -671,6 +726,11 @@ async function doLogin() {
   };
   setLoginBusy(true);
   errEl.style.display='none';
+
+  // Rate-limiter check – must come before any credential work.
+  const lockoutMsg = _checkLoginLockout(username);
+  if (lockoutMsg) { fail(lockoutMsg); return; }
+
   if (DEFAULT_ADMIN_BLOCKED_ALIASES.includes(username)) {
     fail(`Use ${DEFAULT_ADMIN_USERNAME} to sign in.`);
     return;
@@ -678,6 +738,7 @@ async function doLogin() {
   try {
     const authLogin = await signInWithSupabaseAuth(username, password);
     if (authLogin?.account) {
+      _clearLoginFailures(username);
       STAFF_ACCOUNTS[username] = normalizeAccount(username, authLogin.account);
       await saveStaffAccounts();
       errEl.style.display = 'none';
@@ -704,7 +765,14 @@ async function doLogin() {
     fail(err.message || 'Login failed.');
     return;
   }
-  if (!passwordCheck.ok) { fail('Incorrect username or password.'); return; }
+  if (!passwordCheck.ok) {
+    _recordLoginFailure(username);
+    const remaining = MAX_FAILURES - (_loginAttempts[username]?.count || 0);
+    const hint = remaining > 0 ? ` (${remaining} attempt${remaining !== 1 ? 's' : ''} left)` : '';
+    fail(`Incorrect username or password.${hint}`);
+    return;
+  }
+  _clearLoginFailures(username);
   if (passwordCheck.migrated) await saveStaffAccounts();
   errEl.style.display = 'none';
   setLoginSuccessState();
@@ -750,6 +818,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     } catch { safeSessionRemove('dr_user'); }
   }
   rebuildStageSelects();
+  // Delegated listener for docs buttons – avoids interpolating candidate names
+  // into onclick attribute strings (XSS risk).
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.dreco-open-docs');
+    if (!btn) return;
+    e.stopPropagation();
+    openDocs(btn.dataset.type, Number(btn.dataset.id), btn.dataset.name || '');
+  });
   ['pro-modal','lb-modal','docs-modal','settings-modal','help-modal'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.addEventListener('click',e=>{ if(e.target===el) closeModal(id); });
@@ -1460,6 +1536,14 @@ async function saveWorkspaceSettings(){
 }
 function openHelp(){ closeProfileDropdown(); switchTab('help'); }
 function downloadBackup(){
+  // Strip credential fields before export – hashes must never leave the browser
+  // in a downloadable file that could end up in unintended hands.
+  const safeAccounts = Object.fromEntries(
+    Object.entries(STAFF_ACCOUNTS).map(([u, a]) => {
+      const { passwordHash, passwordSalt, password, hashVersion, ...safe } = a;
+      return [u, safe];
+    })
+  );
   const backup={
     exportedAt:new Date().toISOString(),
     storageMode:appStorageMode,
@@ -1469,7 +1553,7 @@ function downloadBackup(){
     timelines:allTimelines,
     proStages,
     lbStages,
-    staffAccounts:STAFF_ACCOUNTS,
+    staffAccounts: safeAccounts,
   };
   const a=Object.assign(document.createElement('a'),{
     href:URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'})),
@@ -1492,7 +1576,24 @@ function restoreBackupFromFile(file){
       proStages=Array.isArray(data.proStages)&&data.proStages.length?data.proStages:[...proStages];
       lbStages=Array.isArray(data.lbStages)&&data.lbStages.length?data.lbStages:[...lbStages];
       if(data.staffAccounts&&typeof data.staffAccounts==='object'){
-        Object.assign(STAFF_ACCOUNTS,data.staffAccounts);
+        // Validate each restored account before merging – a crafted backup file
+        // could otherwise inject accounts with arbitrary roles or credentials.
+        const ALLOWED_ROLES = new Set(['admin','staff','finance']);
+        const sanitized = Object.fromEntries(
+          Object.entries(data.staffAccounts)
+            .filter(([u, a]) =>
+              typeof u === 'string' &&
+              /^[a-z0-9._-]{1,64}$/.test(u) &&
+              a && typeof a === 'object' &&
+              ALLOWED_ROLES.has(a.role)
+            )
+            .map(([u, a]) => {
+              // Never restore credential fields from a backup file.
+              const { passwordHash, passwordSalt, password, hashVersion, ...safe } = a;
+              return [u, safe];
+            })
+        );
+        Object.assign(STAFF_ACCOUNTS, sanitized);
         saveStaffAccounts();
       }
       appStorageMode='local';
@@ -2261,7 +2362,6 @@ function renderPro(){
       const position=r.position ? escHTML(r.position) : '&mdash;';
       const company=r.company ? escHTML(r.company) : '&mdash;';
       const country=r.country ? escHTML(r.country) : '&mdash;';
-      const docsName=escJSString(r.name);
       return `<tr onclick="editPro(${r.id})">
         <td>${(proPage-1)*PER_PAGE+i+1}</td>
         <td><div class="name-cell">${name}</div><div class="pp-cell">${pp}</div></td>
@@ -2271,7 +2371,7 @@ function renderPro(){
         <td>${stageBadge(r.stage)}</td>
         <td>${comm}</td><td>${paid}</td>
         <td class="${bal&&bal>0?'balance-owed':''}">${balTxt}</td>
-        <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('pro',${r.id},'${docsName}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
+        <td onclick="event.stopPropagation()"><button class="action-btn docs dreco-open-docs" data-type="pro" data-id="${r.id}" data-name="${escHTML(r.name)}"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
         <td onclick="event.stopPropagation()"><button class="action-btn del" onclick="deletePro(${r.id})"><i class="ti ti-trash"></i></button></td>
       </tr>`;
     }).join('');
@@ -2416,7 +2516,6 @@ function renderLB(){
       const hd=hasDocs('lb',r.id);
       const name=escHTML(r.name);
       const phone=r.phone ? escHTML(r.phone) : '&mdash;';
-      const docsName=escJSString(r.name);
       return `<tr onclick="editLB(${r.id})">
         <td>${(lbPage-1)*PER_PAGE+i+1}</td>
         <td class="name-cell">${name}</td>
@@ -2428,7 +2527,7 @@ function renderLB(){
         <td>${rs==='N/A'?'&mdash;':moneyUSD(paid)}</td>
         <td class="${rs==='incomplete'?'balance-owed':''}">${bal}</td>
         <td>${refundBadge(rs)}</td>
-        <td onclick="event.stopPropagation()"><button class="action-btn docs" onclick="openDocs('lb',${r.id},'${docsName}')"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
+        <td onclick="event.stopPropagation()"><button class="action-btn docs dreco-open-docs" data-type="lb" data-id="${r.id}" data-name="${escHTML(r.name)}"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
         <td onclick="event.stopPropagation()"><button class="action-btn del" onclick="deleteLB(${r.id})"><i class="ti ti-trash"></i></button></td>
       </tr>`;
     }).join('');
