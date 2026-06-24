@@ -3524,7 +3524,8 @@ function setUserDisplay(display, role) {
   let candidateSearch = '';
   let candidateTypeFilter = '';
   let candidateStageFilter = '';
-  let candidateViewFilter = 'all'; // all | my | follow | short
+  let candidateViewFilter = 'all';
+  let selectedCandidates = new Set(); // 'type_id' strings
 
   function setCandidateSearch(v) { candidateSearch = v; renderCandidates(); }
   window.setCandidateSearch = setCandidateSearch;
@@ -3540,11 +3541,67 @@ function setUserDisplay(display, role) {
     return rows;
   }
 
+  function toggleCandSelect(key, checked) {
+    if (checked) selectedCandidates.add(key);
+    else selectedCandidates.delete(key);
+    const bar = document.getElementById('cand-bulk-bar');
+    const countEl = document.getElementById('cand-bulk-count');
+    if (bar) bar.style.display = selectedCandidates.size > 0 ? 'flex' : 'none';
+    if (countEl) countEl.textContent = selectedCandidates.size + ' selected';
+    const selectAll = document.getElementById('cand-select-all');
+    if (selectAll) {
+      const list = filterCandidates();
+      selectAll.indeterminate = selectedCandidates.size > 0 && selectedCandidates.size < list.length;
+      selectAll.checked = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
+    }
+  }
+  window.toggleCandSelect = toggleCandSelect;
+
+  function toggleSelectAll(checked) {
+    filterCandidates().forEach(r => {
+      const key = r.type+'_'+r.id;
+      if (checked) selectedCandidates.add(key); else selectedCandidates.delete(key);
+    });
+    renderCandidates();
+  }
+  window.toggleSelectAll = toggleSelectAll;
+
+  async function bulkChangeStage(stage) {
+    if (!stage || !selectedCandidates.size) return;
+    const list = filterCandidates().filter(r => selectedCandidates.has(r.type+'_'+r.id));
+    for (const r of list) {
+      const table = r.type==='pro' ? 'pro_candidates' : 'lb_candidates';
+      await dbUpdate(table, r.id, {stage});
+      const db2 = r.type==='pro' ? proDB : lbDB;
+      const idx = db2.findIndex(x => x.id===r.id);
+      if (idx >= 0) db2[idx].stage = stage;
+    }
+    selectedCandidates.clear();
+    renderCandidates();
+    showToast('Stage updated for '+list.length+' candidate'+(list.length!==1?'s':''), 'success');
+  }
+  window.bulkChangeStage = bulkChangeStage;
+
+  function bulkExportSelected() {
+    const rows = filterCandidates().filter(r => selectedCandidates.has(r.type+'_'+r.id));
+    if (!rows.length) return;
+    const proRows = rows.filter(r=>r.type==='pro');
+    const lbRows  = rows.filter(r=>r.type==='lb');
+    if (proRows.length) { lastProFiltered = proRows; exportCSV('pro'); }
+    if (lbRows.length)  { lastLBFiltered  = lbRows;  exportCSV('lb'); }
+  }
+  window.bulkExportSelected = bulkExportSelected;
+
   function renderCandidates() {
     const el = document.getElementById('candidates-section'); if (!el) return;
     const all = allRows();
     const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
     const list = filterCandidates();
+    const allSel = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
+    const someSel = selectedCandidates.size > 0;
+    const proStages = typeof PRO_STAGES !== 'undefined' ? PRO_STAGES : ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
+    const lbStages  = ['APPLIED','MEDICAL','VISA','TRAVELLED'];
+    const allStages = [...new Set([...proStages,...lbStages,...stageOptions])];
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
@@ -3553,6 +3610,15 @@ function setUserDisplay(display, role) {
             <button class="dv5-btn" onclick="openLBForm()"><i class="ti ti-briefcase"></i>Add General</button>
             <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Professional</button>
           </div>
+        </div>
+        <div class="dv5-bulk-bar" id="cand-bulk-bar" style="display:${someSel?'flex':'none'}">
+          <span id="cand-bulk-count">${selectedCandidates.size} selected</span>
+          <select class="dv5-select" onchange="bulkChangeStage(this.value);this.value=''">
+            <option value="">Change stage…</option>
+            ${allStages.map(s=>`<option value="${h(s)}">${h(s)}</option>`).join('')}
+          </select>
+          <button class="dv5-btn" onclick="bulkExportSelected()"><i class="ti ti-download"></i>Export selected</button>
+          <button class="dv5-btn" onclick="selectedCandidates.clear();renderCandidates()"><i class="ti ti-x"></i>Clear</button>
         </div>
         <div class="dv5-toolbar">
           <div class="dv5-toolbar-left">
@@ -3583,12 +3649,19 @@ function setUserDisplay(display, role) {
           <div class="dv5-table-wrap">
             <table class="dv5-table">
               <thead><tr>
+                <th style="width:36px"><input type="checkbox" id="cand-select-all" ${allSel?'checked':''} onchange="toggleSelectAll(this.checked)"></th>
                 <th>Name</th><th>Job Title</th><th>Company</th>
                 <th>Stage</th><th>Submitted</th><th>Next Action</th><th>Owner</th><th></th>
               </tr></thead>
               <tbody>
-                ${list.length ? list.map(r => `
-                  <tr onclick="openCandidateProfile('${r.type}',${r.id})">
+                ${list.length ? list.map(r => {
+                  const key = r.type+'_'+r.id;
+                  const sel = selectedCandidates.has(key);
+                  return `
+                  <tr class="${sel?'dv5-row-selected':''}" onclick="openCandidateProfile('${r.type}',${r.id})">
+                    <td onclick="event.stopPropagation()">
+                      <input type="checkbox" ${sel?'checked':''} onchange="toggleCandSelect('${key}',this.checked)">
+                    </td>
                     <td><div class="dv5-name-cell">
                       ${avatar(r.name)}
                       <div>
@@ -3610,7 +3683,8 @@ function setUserDisplay(display, role) {
                         <i class="ti ti-paperclip"></i>
                       </button>
                     </td>
-                  </tr>`).join('') : '<tr><td colspan="8"><div class="dv5-empty">No candidates found.</div></td></tr>'}
+                  </tr>`;
+                }).join('') : '<tr><td colspan="9"><div class="dv5-empty">No candidates found.</div></td></tr>'}
               </tbody>
             </table>
           </div>
@@ -3654,18 +3728,51 @@ function setUserDisplay(display, role) {
   window.renderTasksPage = renderTasks;
 
   // ── 5. FINANCE ────────────────────────────────────────────
+  let financeCompanyFilter = '';
+  window.setFinanceCompany = v => { financeCompanyFilter = v; renderFinance(); };
+
   function renderFinance() {
     const el = document.getElementById('finance-section'); if (!el) return;
-    const rows = allRows();
+    const allFinRows = allRows();
+    const companies = [...new Set(allFinRows.map(r=>r.company).filter(Boolean))].sort();
+    const rows = financeCompanyFilter ? allFinRows.filter(r=>r.company===financeCompanyFilter) : allFinRows;
     const total = rows.reduce((s,r)=>s+r.commission,0);
     const paid  = rows.reduce((s,r)=>s+r.paid,0);
     const bal   = rows.reduce((s,r)=>s+r.balance,0);
     const rate  = total ? Math.round(paid/total*100) : 0;
+
+    // Monthly breakdown (last 6 months, by r.submitted or created_at)
+    const now = new Date();
+    const months = Array.from({length:6},(_,i)=>{
+      const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
+      return { label: d.toLocaleString('default',{month:'short'})+' '+d.getFullYear().toString().slice(2), y: d.getFullYear(), m: d.getMonth() };
+    });
+    const monthly = months.map(({label,y,m}) => {
+      const mrs = rows.filter(r=>{
+        const d = new Date(r.submitted||r.created_at||'');
+        return !isNaN(d) && d.getFullYear()===y && d.getMonth()===m;
+      });
+      return { label, invoiced: mrs.reduce((s,r)=>s+r.commission,0), paid: mrs.reduce((s,r)=>s+r.paid,0) };
+    });
+
+    // Outstanding by company
+    const byCompany = {};
+    rows.filter(r=>r.balance>0).forEach(r => {
+      if (!byCompany[r.company]) byCompany[r.company] = {name:r.company,balance:0,count:0};
+      byCompany[r.company].balance += r.balance;
+      byCompany[r.company].count++;
+    });
+    const companyDebt = Object.values(byCompany).sort((a,b)=>b.balance-a.balance);
+
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Finance</h1><p>Commissions, payments, outstanding balances, and cash flow from real candidate data.</p></div>
+          <div><h1>Finance</h1><p>Commissions, payments, outstanding balances, and monthly cash flow.</p></div>
           <div class="dv5-head-actions">
+            <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:160px">
+              <option value="">All Companies</option>
+              ${companies.map(c=>`<option value="${h(c)}" ${financeCompanyFilter===c?'selected':''}>${h(c)}</option>`).join('')}
+            </select>
             <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export Pro</button>
             <button class="dv5-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button>
           </div>
@@ -3679,30 +3786,43 @@ function setUserDisplay(display, role) {
         </div>
         <div class="dv5-two-col">
           <div class="dv5-card">
-            <div class="dv5-card-head"><span class="dv5-card-title">Cash Flow</span><span class="dv5-card-sub">Last 6 months</span></div>
-            <div class="dv5-bar-chart">${cashFlowBars()}</div>
+            <div class="dv5-card-head"><span class="dv5-card-title">Monthly Breakdown</span><span class="dv5-card-sub">Last 6 months</span></div>
+            <div class="dv5-table-wrap">
+              <table class="dv5-table" style="min-width:0">
+                <thead><tr><th>Month</th><th>Invoiced</th><th>Collected</th><th>Outstanding</th></tr></thead>
+                <tbody>
+                  ${monthly.map(m=>`<tr>
+                    <td style="font-weight:700">${m.label}</td>
+                    <td>${money(m.invoiced)}</td>
+                    <td style="color:#16a34a;font-weight:700">${money(m.paid)}</td>
+                    <td style="color:${m.invoiced-m.paid>0?'#b91c1c':'#6b7280'}">${money(m.invoiced-m.paid)}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="dv5-card">
             <div class="dv5-card-head">
-              <span class="dv5-card-title">Outstanding by Candidate</span>
+              <span class="dv5-card-title">Outstanding by Company</span>
               <span class="dv5-card-sub">${money(bal)}</span>
             </div>
             <div class="dv5-task-list">
-              ${rows.filter(r=>r.balance>0).slice(0,8).map(r => `
-                <div class="dv5-task-item" onclick="openCandidateProfile('${r.type}',${r.id})">
-                  <div class="dv5-task-icon high"><i class="ti ti-coin"></i></div>
+              ${companyDebt.slice(0,8).map(c=>`
+                <div class="dv5-task-item" onclick="setFinanceCompany('${js(c.name)}')">
+                  <div class="dv5-task-icon high"><i class="ti ti-building"></i></div>
                   <div class="dv5-task-body">
-                    <div class="dv5-task-title">${h(r.name)}</div>
-                    <div class="dv5-task-meta">${h(r.company)} · ${money(r.balance)}</div>
+                    <div class="dv5-task-title">${h(c.name)}</div>
+                    <div class="dv5-task-meta">${c.count} candidate${c.count!==1?'s':''}</div>
                   </div>
-                  <span class="dv5-pill red">Unpaid</span>
+                  <span class="dv5-pill red">${money(c.balance)}</span>
                 </div>`).join('') || '<div class="dv5-empty">No outstanding balances.</div>'}
             </div>
           </div>
         </div>
         <div class="dv5-table-card" style="margin-top:16px">
           <div class="dv5-card-head" style="padding:12px 16px">
-            <span class="dv5-card-title">All Finance Records</span>
+            <span class="dv5-card-title">Finance Records${financeCompanyFilter?' — '+h(financeCompanyFilter):''}</span>
+            <span class="dv5-card-sub">${rows.length} records</span>
           </div>
           <div class="dv5-table-wrap">
             <table class="dv5-table">
@@ -3718,7 +3838,7 @@ function setUserDisplay(display, role) {
                     <td>${r.type==='pro'?'Professional':'General'}</td>
                     <td>${money(r.commission)}</td>
                     <td>${money(r.paid)}</td>
-                    <td>${r.balance>0?`<strong style="color:var(--red,#B83232)">${money(r.balance)}</strong>`:money(0)}</td>
+                    <td>${r.balance>0?`<strong style="color:#b91c1c">${money(r.balance)}</strong>`:money(0)}</td>
                     <td>${r.balance>0?'<span class="dv5-badge red">Unpaid</span>':'<span class="dv5-badge green">Paid</span>'}</td>
                     <td><button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">Open</button></td>
                   </tr>`).join('') : '<tr><td colspan="8"><div class="dv5-empty">No records yet.</div></td></tr>'}
@@ -3731,42 +3851,78 @@ function setUserDisplay(display, role) {
   window.renderFinancePage = renderFinance;
 
   // ── 6. DOCUMENTS ──────────────────────────────────────────
+  const DOC_CHECKLIST_PRO = ['Passport','CV','Offer Letter','MOL','Visa','Ticket'];
+  const DOC_CHECKLIST_LB  = ['Passport','CV','Medical','Visa','Ticket'];
+
+  function docChecklist(r) {
+    const items = r.type==='pro' ? DOC_CHECKLIST_PRO : DOC_CHECKLIST_LB;
+    const got = [];
+    if (r.pp)     got.push('Passport');
+    if (docLink(r)) got.push('CV');
+    if (r.type==='pro') {
+      if (r.ol)    got.push('Offer Letter');
+      if (r.mol)   got.push('MOL');
+      if (r.visa)  got.push('Visa');
+      if (r.travel)got.push('Ticket');
+    } else {
+      if (r.ppStatus && r.ppStatus!=='APPLIED') got.push('Medical');
+      if (r.travelStatus && r.travelStatus!=='NOT YET') got.push('Visa');
+      if (r.travelDate) got.push('Ticket');
+    }
+    const done = items.filter(i=>got.includes(i)).length;
+    return { items, done, total: items.length, pct: Math.round(done/items.length*100) };
+  }
+
   function renderDocuments() {
     const el = document.getElementById('documents-section'); if (!el) return;
     const rows = allRows();
-    const withDocs = rows.filter(hasDoc);
+    const complete = rows.filter(r=>{ const c=docChecklist(r); return c.done===c.total; }).length;
+    const partial  = rows.filter(r=>{ const c=docChecklist(r); return c.done>0&&c.done<c.total; }).length;
+    const missing  = rows.filter(r=>docChecklist(r).done===0).length;
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Documents</h1><p>Document links, passport records, visa/ticket dates, and compliance status per candidate.</p></div>
+          <div><h1>Documents</h1><p>Per-candidate document checklist — passport, offer letter, MOL, visa, and travel dates.</p></div>
           <div class="dv5-head-actions">
             <button class="dv5-btn primary" onclick="switchTab('candidates')"><i class="ti ti-paperclip"></i>Attach to Candidate</button>
           </div>
         </div>
         <div class="dv5-kpi-grid">
-          ${kpi('With Documents', withDocs.length,                           'Candidates with links',     'ti-folder-check')}
-          ${kpi('Missing',        rows.length - withDocs.length,             'Needs upload',              'ti-folder-x')}
-          ${kpi('Passports',      rows.filter(r=>r.pp).length,               'Recorded',                  'ti-id')}
-          ${kpi('Visa Dates',     (proDB||[]).filter(r=>r.visa).length,      'Visa dates entered',        'ti-id-badge-2')}
-          ${kpi('Travel Dates',   (proDB||[]).filter(r=>r.travel).length,    'Travel dates entered',      'ti-plane')}
+          ${kpi('Complete',  complete,        'All documents present',  'ti-folder-check')}
+          ${kpi('Partial',   partial,         'Some files uploaded',    'ti-folder-minus')}
+          ${kpi('Missing',   missing,         'No documents yet',       'ti-folder-x')}
+          ${kpi('Passports', rows.filter(r=>r.pp).length, 'Recorded',  'ti-id')}
+          ${kpi('Total',     rows.length,     'All candidates',         'ti-users')}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
             <table class="dv5-table">
-              <thead><tr><th>Candidate</th><th>Category</th><th>Company</th><th>Passport</th><th>Status</th><th>Link</th><th>Action</th></tr></thead>
+              <thead><tr><th>Candidate</th><th>Type</th><th>Company</th><th>Passport</th><th>Checklist</th><th>Progress</th><th>Drive Link</th><th>Action</th></tr></thead>
               <tbody>
                 ${rows.map(r => {
+                  const cl = docChecklist(r);
                   const link = docLink(r);
                   const safeLink = safeUrl(link);
+                  const bar = `<div style="display:flex;align-items:center;gap:6px">
+                    <div style="flex:1;height:6px;background:#eef1f6;border-radius:999px;overflow:hidden">
+                      <div style="width:${cl.pct}%;height:100%;background:${cl.pct===100?'#16a34a':cl.pct>0?'#5347CE':'#e5e7eb'};border-radius:999px"></div>
+                    </div>
+                    <span style="font-size:10px;font-weight:700;color:#6b7280;white-space:nowrap">${cl.done}/${cl.total}</span>
+                  </div>`;
+                  const chips = cl.items.map(item=>{
+                    const have = cl.items.slice(0,cl.done).includes(item);
+                    return `<span style="font-size:9px;padding:2px 5px;border-radius:4px;background:${have?'#dcfce7':'#fee2e2'};color:${have?'#15803d':'#b91c1c'}">${item}</span>`;
+                  }).join('');
                   return `<tr onclick="openCandidateProfile('${r.type}',${r.id})">
                     <td><div class="dv5-name-cell">${avatar(r.name)}<div>
                       <div class="dv5-name">${h(r.name)}</div>
-                      <div class="dv5-sub">${r.type==='pro'?'Professional':'General'}</div>
+                      <div class="dv5-sub">${h(r.phone||'—')}</div>
                     </div></div></td>
-                    <td>${h(r.position)}</td>
+                    <td>${r.type==='pro'?'Professional':'General'}</td>
                     <td>${h(r.company)}</td>
                     <td>${h(r.pp||'—')}</td>
-                    <td>${link?'<span class="dv5-badge green">Uploaded</span>':'<span class="dv5-badge red">Missing</span>'}</td>
+                    <td><div style="display:flex;flex-wrap:wrap;gap:3px">${chips}</div></td>
+                    <td style="min-width:120px">${bar}</td>
                     <td>${safeLink?`<button class="dv5-action-btn" onclick="event.stopPropagation();window.open('${h(safeLink)}','_blank')"><i class="ti ti-external-link"></i>Open</button>`:'—'}</td>
                     <td><button class="dv5-action-btn" onclick="event.stopPropagation();openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')">Manage</button></td>
                   </tr>`;
@@ -3866,13 +4022,21 @@ function setUserDisplay(display, role) {
   window.renderReportsPage = renderReports;
 
   // ── 8. CLIENTS ────────────────────────────────────────────
+  let expandedClient = null;
+
   function renderClients() {
     const el = document.getElementById('clients-section'); if (!el) return;
     const clients = buildClients();
+    const rows = allRows();
+
+    function clientCandidates(name) {
+      return rows.filter(r=>r.company===name);
+    }
+
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Clients</h1><p>Employer companies aggregated from candidate placement records.</p></div>
+          <div><h1>Clients</h1><p>Employer companies — click any row to see their candidates inline.</p></div>
           <div class="dv5-head-actions">
             <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate for Client</button>
           </div>
@@ -3887,35 +4051,55 @@ function setUserDisplay(display, role) {
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
             <table class="dv5-table">
-              <thead><tr><th>Client Name</th><th>Country</th><th>Active Jobs</th><th>Total Hired</th><th>Due Amount</th><th>Collected</th><th>Manager</th><th></th></tr></thead>
+              <thead><tr><th></th><th>Client Name</th><th>Country</th><th>Active</th><th>Total</th><th>Outstanding</th><th>Collected</th><th>Manager</th></tr></thead>
               <tbody>
-                ${clients.length ? clients.map(c => `
-                  <tr>
+                ${clients.length ? clients.map(c => {
+                  const isOpen = expandedClient === c.name;
+                  const cands  = isOpen ? clientCandidates(c.name) : [];
+                  return `
+                  <tr class="dv5-client-row${isOpen?' dv5-client-open':''}" onclick="window._toggleClient('${js(c.name)}')" style="cursor:pointer">
+                    <td style="width:28px"><i class="ti ${isOpen?'ti-chevron-down':'ti-chevron-right'}" style="font-size:12px;color:#9ca3af"></i></td>
                     <td><div class="dv5-name-cell">
                       <div class="dv5-avatar" style="background:#EEF2FF;color:#4338CA"><i class="ti ti-building" style="font-size:13px"></i></div>
                       <div>
                         <div class="dv5-name">${h(c.name)}</div>
-                        <div class="dv5-sub">Client account</div>
+                        <div class="dv5-sub">${h(c.country||'—')}</div>
                       </div>
                     </div></td>
-                    <td>${h(c.country)}</td>
+                    <td>${h(c.country||'—')}</td>
                     <td>${c.active}</td>
                     <td>${c.total}</td>
-                    <td>${c.due>0?`<strong style="color:var(--red,#B83232)">${money(c.due)}</strong>`:money(0)}</td>
+                    <td>${c.due>0?`<strong style="color:#b91c1c">${money(c.due)}</strong>`:money(0)}</td>
                     <td>${money(c.paid)}</td>
-                    <td>${h(c.manager)}</td>
-                    <td>
-                      <button class="dv5-action-btn" onclick="setCandidateSearch('${js(c.name)}');switchTab('candidates')">
-                        View
-                      </button>
-                    </td>
-                  </tr>`).join('') : '<tr><td colspan="8"><div class="dv5-empty">Clients appear automatically when you add candidates with company names.</div></td></tr>'}
+                    <td>${h(c.manager||'—')}</td>
+                  </tr>
+                  ${isOpen ? `<tr class="dv5-expand-row"><td colspan="8" style="padding:0 0 8px 40px;background:#f8fafc">
+                    <table class="dv5-table" style="min-width:0;border:0;box-shadow:none">
+                      <thead><tr><th>Name</th><th>Job Title</th><th>Stage</th><th>Submitted</th><th>Invoice</th><th>Balance</th><th></th></tr></thead>
+                      <tbody>
+                        ${cands.map(r=>`<tr>
+                          <td>${h(r.name)}</td>
+                          <td>${h(r.position)}</td>
+                          <td>${badge(r.stage)}</td>
+                          <td>${h(fmt(r.submitted))}</td>
+                          <td>${money(r.commission)}</td>
+                          <td>${r.balance>0?`<strong style="color:#b91c1c">${money(r.balance)}</strong>`:money(0)}</td>
+                          <td><button class="dv5-action-btn" onclick="event.stopPropagation();openCandidateProfile('${r.type}',${r.id})">View</button></td>
+                        </tr>`).join('')}
+                      </tbody>
+                    </table>
+                  </td></tr>` : ''}`;
+                }).join('') : '<tr><td colspan="8"><div class="dv5-empty">Clients appear automatically when you add candidates with company names.</div></td></tr>'}
               </tbody>
             </table>
           </div>
         </div>
       </div>`;
   }
+  window._toggleClient = function(name) {
+    expandedClient = expandedClient === name ? null : name;
+    renderClients();
+  };
   window.renderClientsPage = renderClients;
 
   // ── 9. SETTINGS (pass-through to existing) ────────────────
@@ -4196,6 +4380,14 @@ function setUserDisplay(display, role) {
 .dv5-view-tabs { display:flex; border:1px solid var(--border,#E8E8E8); border-radius:8px; overflow:hidden; }
 .dv5-view-tab { padding:0 12px; height:32px; font-size:11px; font-weight:700; border:none; background:#fff; cursor:pointer; color:var(--text-3,#999); }
 .dv5-view-tab.active { background:#5347CE; color:#fff; }
+
+/* Bulk action bar */
+.dv5-bulk-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 12px; background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px; margin-bottom:10px; font-size:12px; font-weight:700; color:#3730A3; }
+.dv5-bulk-bar .dv5-select { height:30px; font-size:11px; }
+.dv5-bulk-bar .dv5-btn { height:30px; font-size:11px; }
+.dv5-row-selected td { background:#F5F3FF !important; }
+.dv5-client-row.dv5-client-open td { background:#F8F6FF; }
+.dv5-expand-row td { padding:0 !important; }
 
 /* Pipeline Kanban */
 .dv5-kanban { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:60vh; }
