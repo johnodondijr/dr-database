@@ -38,7 +38,7 @@ const LEGACY_DESTINY_HASHES = {
 const STAFF_ACCOUNTS = {
   johnfred: { passwordSalt: 'd66ed843dec2214091d4dcc1723179ef', passwordHash: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
 };
-const RECOVERY_CODE = 'DR-RESET-2025';
+// Recovery via shared code removed — password resets go through admin only.
 
 function normalizeAccount(username, account = {}) {
   let companyName = (account.companyName || DEFAULT_COMPANY.name).trim();
@@ -618,33 +618,9 @@ function hideForgotPassword() {
 let _recoveryUsername = '';
 
 function verifyRecoveryCode() {
-  const code = (document.getElementById('recovery-code-input').value || '').trim();
-  const username = (document.getElementById('recovery-username-input').value || '').trim().toLowerCase();
   const errEl = document.getElementById('forgot-error');
-
-  // Validate recovery code
-  if (code !== RECOVERY_CODE) {
-    errEl.textContent = 'Incorrect recovery code. Please try again.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  // Validate username exists in accounts
-  const account = STAFF_ACCOUNTS[username];
-  if (!account) {
-    errEl.textContent = `No account found for username "${username}". Check spelling.`;
-    errEl.style.display = 'block';
-    return;
-  }
-
-  // Code and username valid — advance to step 2
-  errEl.style.display = 'none';
-  _recoveryUsername = username;
-  document.getElementById('recovery-step-1').style.display = 'none';
-  document.getElementById('recovery-step-2').style.display = 'block';
-  const label = document.getElementById('recovery-step2-label');
-  if (label) label.textContent = `Setting new password for: ${account.display || username}`;
-  document.getElementById('recovery-new-pw').focus();
+  errEl.textContent = 'Self-service password reset is not available. Please ask your workspace admin to reset your password from the Team page.';
+  errEl.style.display = 'block';
 }
 
 async function submitNewPassword() {
@@ -1057,15 +1033,11 @@ async function dbInsert(table, rec) {
 }
 async function dbUpdate(table, id, rec) {
   const ts={...rec, company_id:getCompanyId()}; delete ts.id;
-  let query=db.from(table).update(ts).eq('id',id);
-  if(getCompanyId()!==DEFAULT_COMPANY.id) query=query.eq('company_id',getCompanyId());
-  const {error}=await query;
+  const {error}=await db.from(table).update(ts).eq('id',id).eq('company_id',getCompanyId());
   if(error) throw error;
 }
 async function dbDelete(table, id) {
-  let query=db.from(table).delete().eq('id',id);
-  if(getCompanyId()!==DEFAULT_COMPANY.id) query=query.eq('company_id',getCompanyId());
-  const {error}=await query;
+  const {error}=await db.from(table).delete().eq('id',id).eq('company_id',getCompanyId());
   if(error) throw error;
 }
 function fallBackToLocal(err) {
