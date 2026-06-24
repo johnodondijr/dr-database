@@ -3821,126 +3821,345 @@ function setUserDisplay(display, role) {
   window.drecoTuneMobile=tuneMobile;
 })();
 
-/* ========================================================================
-   DRECO V7 UX POLISH PATCH
-   - Workflow-first dashboard
-   - Candidate right drawer with tabs
-   - Stage move checklist + undo
-   - Cleaner Professional/General candidate views
-   - Command search
-   - Mobile IA cleanup
-======================================================================== */
-(function(){
-  'use strict';
-  const $=(s,r=document)=>r.querySelector(s);
-  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const js=v=>String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');
-  const num=v=>{ const n=Number(String(v??'').replace(/[^0-9.-]/g,'')); return Number.isFinite(n)?n:0; };
-  const money=v=>'KES '+Math.round(num(v)).toLocaleString('en-KE');
-  const initials=n=>String(n||'U').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'U';
-  const date=v=>{ if(!v) return '—'; let d=typeof v==='number'?new Date(Math.round((v-25569)*86400*1000)):new Date(v); return isNaN(d)?String(v):d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
-  const todayISO=()=>new Date().toISOString().slice(0,10);
-  const userName=()=>{ try{return window.currentUser?.display||currentUser?.display||'John Fred';}catch{return 'John Fred';} };
+/* DRECO STABILIZATION PASS
+   Adds safe auth/nav state, modal discipline, local backups, render guards,
+   mobile table labels, storage readiness diagnostics and a small health check.
+   This patch is intentionally additive: it does not replace the login screen,
+   logo, Supabase config, existing renderers, or candidate data model. */
+(function drecoStabilizationPass(){
+  if (window.__drecoStabilizationPass) return;
+  window.__drecoStabilizationPass = true;
 
-  const PRO_STAGES=['Submitted','Interview','Offer','MOL','Medical','Visa','Commission','Ticket','Travelled','Onboarded'];
-  const GEN_STAGES=['Registered','Documents','Payment','Ticket','Travelled','Closed'];
-  const PRO_SOURCE={Submitted:'PENDING OFFER LETTER',Interview:'PENDING OFFER LETTER',Offer:'PENDING OFFER LETTER',MOL:'PENDING MOL',Medical:'PENDING VISA',Visa:'PENDING VISA',Commission:'PENDING VISA',Ticket:'PENDING TRAVEL',Travelled:'TRAVELLED',Onboarded:'TRAVELLED'};
-  const DOCS={pro:[['passport','Passport'],['good_conduct','Good Conduct'],['cv','CV'],['photo','Photo'],['offer_letter','Offer Letter'],['mol','MOL'],['medical','Medical / GAMCA'],['visa','Visa'],['ticket','Ticket'],['contract','Contract']],lb:[['passport','Passport'],['good_conduct','Good Conduct'],['cv','CV'],['photo','Photo'],['payment_receipt','Payment Receipt'],['ticket','Ticket'],['contract','Contract'],['other','Other Supporting Document']]};
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const BACKUP_INDEX_KEY = 'dreco_backup_index_v1';
+  const MAX_BACKUPS = 8;
 
-  function proStage(r){
-    const s=String(r.stage||'').toUpperCase();
-    if(r.onboarded) return 'Onboarded';
-    if(r.travel || s==='TRAVELLED') return 'Travelled';
-    if(s.includes('TRAVEL')) return 'Ticket';
-    if(r.visa || s.includes('VISA')) return num(r.commission)>0 && num(r.paid)<num(r.commission) ? 'Commission' : 'Visa';
-    if(r.medical) return 'Medical';
-    if(r.mol || s.includes('MOL')) return 'MOL';
-    if(r.ol || s.includes('OFFER')) return 'Offer';
-    if(r.interview) return 'Interview';
-    return 'Submitted';
+  function appIsVisible(){
+    const app = $('#app');
+    if (!app) return false;
+    return app.style.display !== 'none' && getComputedStyle(app).display !== 'none';
   }
-  function genStage(r){
-    const s=String(r.travelStatus||r.travel_status||r.stage||'').toUpperCase();
-    const paid=num(r.r1Amt||r.r1_amt)+num(r.r2Amt||r.r2_amt)+num(r.paid); const comm=num(r.toRefund||r.to_refund||r.commission);
-    if(s.includes('TRAVELLED')) return 'Travelled';
-    if(s.includes('NOT TRAVELLED')||s.includes('PENDING TRAVEL')) return 'Ticket';
-    if(comm && paid<comm) return 'Payment';
-    if(r.pp||r.passport) return 'Documents';
-    return 'Registered';
+
+  function syncAuthShellState(){
+    const logged = !!currentUser && appIsVisible();
+    document.body.classList.toggle('logged-in', logged);
+    const nav = $('#bottom-nav');
+    if (nav) {
+      nav.classList.toggle('visible', logged);
+      nav.setAttribute('aria-hidden', logged ? 'false' : 'true');
+      if (!logged) nav.querySelectorAll('.bottom-nav-item.active').forEach(btn => btn.classList.remove('active'));
+    }
   }
-  function allRows(type='all'){
-    let pro=[], lb=[];
-    try{ pro=(window.proDB||proDB||[]).map(r=>({type:'pro',raw:r,id:r.id,name:r.name||'Unnamed',pp:r.pp||'',phone:r.phone||'',position:r.position||'—',company:r.company||'—',country:r.country||'—',stage:r.stage||'PENDING OFFER LETTER',opsStage:proStage(r),submitted:r.submitted,commission:num(r.commission),paid:num(r.paid),balance:Math.max(num(r.commission)-num(r.paid),0),owner:r.owner||userName()})); }catch{}
-    try{ lb=(window.lbDB||lbDB||[]).map(r=>{ const paid=num(r.r1Amt||r.r1_amt)+num(r.r2Amt||r.r2_amt)+num(r.paid); const comm=num(r.toRefund||r.to_refund||r.commission); return {type:'lb',raw:r,id:r.id,name:r.name||'Unnamed',pp:r.pp||r.passport||'',phone:r.phone||'',position:r.position||'General Job',company:r.company||r.country||'General Jobs',country:r.country||r.destination||'—',stage:r.travelStatus||r.travel_status||'NOT YET',opsStage:genStage(r),submitted:r.submitted||r.travelDate||r.travel_date,commission:comm,paid,balance:Math.max(comm-paid,0),owner:r.owner||userName()}; }); }catch{}
-    if(type==='pro') return pro; if(type==='lb'||type==='general') return lb; return pro.concat(lb);
+
+  function showHealthMessage(title, body){
+    let el = $('#dreco-health-badge');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'dreco-health-badge';
+      el.className = 'dreco-health-badge';
+      document.body.appendChild(el);
+    }
+    el.innerHTML = `<strong>${title}</strong>${body}`;
+    el.classList.add('show');
+    clearTimeout(window.__drecoHealthTimer);
+    window.__drecoHealthTimer = setTimeout(()=>el.classList.remove('show'), 7000);
   }
-  function docsFor(x){ try{return window.drecoCandidateDocs ? window.drecoCandidateDocs(x.type,x.id) : {}; }catch{return {};} }
-  function docProgress(x){ try{return window.drecoDocCompletion ? window.drecoDocCompletion(x.type,x.id) : {done:Object.keys(docsFor(x)).length,total:(DOCS[x.type]||DOCS.pro).length,pct:0};}catch{return {done:0,total:(DOCS[x.type]||DOCS.pro).length,pct:0};} }
-  function avatar(n){return `<span class="ux-avatar">${esc(initials(n))}</span>`;}
-  function badge(v){return `<span class="ux-badge ${String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-')}">${esc(v||'—')}</span>`;}
-  function nextAction(x){ if(docProgress(x).done===0 && !['Submitted','Registered'].includes(x.opsStage)) return 'Upload missing documents'; if(x.balance>0) return 'Collect commission balance'; const map={Submitted:'Schedule interview',Interview:'Update interview result',Offer:'Upload offer letter',MOL:'Follow MOL approval',Medical:'Upload medical result',Visa:'Confirm visa status',Commission:'Confirm payment',Ticket:'Upload ticket',Travelled:'Confirm onboarding',Onboarded:'Completed',Registered:'Collect documents',Documents:'Verify documents',Payment:'Follow payment',Closed:'Completed'}; return map[x.opsStage]||'Review record'; }
-  function blocker(x){ const p=docProgress(x); if(p.done===0 && !['Submitted','Registered'].includes(x.opsStage)) return 'Missing docs'; if(x.balance>0) return 'Unpaid'; return 'Clear'; }
-  function due(x){ const d=typeof x.submitted==='number'?new Date(Math.round((x.submitted-25569)*86400*1000)):new Date(x.submitted||Date.now()); if(isNaN(d)) return 'No due'; d.setDate(d.getDate()+7); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); }
-  function closeOverlays(){ $$('.modal.open,.modal-bg.open,.v4-modal.open,.ux-drawer.open,.ux-command.open,.ux-move.open').forEach(el=>el.classList.remove('open')); }
-  function persist(x){ try{ if(x.type==='pro' && typeof saveProRecord==='function') return saveProRecord(x.raw); if(x.type==='lb' && typeof saveLBRecord==='function') return saveLBRecord(x.raw); if(typeof saveLocalStore==='function') saveLocalStore(); }catch(e){console.warn(e);} return Promise.resolve(); }
 
-  function page(title,sub,actions=''){return `<div class="ux-page-head"><div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div><div class="ux-actions">${actions}</div></div>`;}
-  function empty(title,body,action=''){return `<div class="ux-empty"><i class="ti ti-folder-open"></i><strong>${esc(title)}</strong><span>${esc(body)}</span>${action}</div>`;}
-  function kpi(label,value,note,icon){return `<button class="ux-kpi"><i class="ti ${icon}"></i><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(note)}</small></button>`;}
+  function getStoreKey(){
+    try { return `${LOCAL_STORE_KEY}_${getCompanyId()}`; } catch { return `${LOCAL_STORE_KEY}_unknown`; }
+  }
 
-  window.renderDashUX=function(){
-    const el=$('#dash-section'); if(!el) return; const r=allRows(); const tasks=taskList(); const docs=r.filter(x=>docProgress(x).done===0).length; const unpaid=r.filter(x=>x.balance>0).length; const tickets=r.filter(x=>x.opsStage==='Ticket').length; const active=r.filter(x=>!['Travelled','Onboarded','Closed'].includes(x.opsStage)).length;
-    el.innerHTML=`<div class="ux-page ux-dashboard">${page(`Good morning, ${userName().split(' ')[0]||'there'}`,'Your operations queue for today.',`<button class="dreco-btn" onclick="openCommandUX()"><i class="ti ti-command"></i>Search</button><button class="dreco-btn primary" onclick="switchTab('pro')"><i class="ti ti-plus"></i>Add Candidate</button>`)}
-      <section class="ux-focus"><div><span>Resume work</span><h2>${tasks.length} candidates need action</h2><p>${docs} missing document sets • ${unpaid} unpaid balances • ${tickets} tickets pending • ${active} active files</p></div><button onclick="switchTab('kanban')">Open pipeline <i class="ti ti-arrow-right"></i></button></section>
-      <div class="ux-kpis">${kpi('Need action',tasks.length,'Generated from real records','ti-checkbox')}${kpi('Missing docs',docs,'Checklist not started','ti-file-alert')}${kpi('Unpaid',unpaid,money(r.reduce((s,x)=>s+x.balance,0)),'ti-coin')}${kpi('Ticketing',tickets,'Candidates awaiting travel','ti-plane')}</div>
-      <div class="ux-grid two"><div class="ux-card"><div class="ux-card-title">Priority queue <button onclick="switchTab('kanban')">View board</button></div><div class="ux-task-list">${tasks.slice(0,8).map(t=>taskRow(t)).join('')||empty('No urgent work','Everything is clear for now.')}</div></div><div class="ux-card"><div class="ux-card-title">Recent candidates <button onclick="switchTab('pro')">Open candidates</button></div><div class="ux-list">${r.slice().sort((a,b)=>num(b.id)-num(a.id)).slice(0,8).map(candidateMini).join('')||empty('No candidates yet','Add your first candidate to begin.',`<button class="dreco-btn primary" onclick="switchTab('pro')">Add candidate</button>`)}</div></div></div></div>`;
-  };
-  function taskList(){ const out=[]; allRows().forEach(x=>{ if(docProgress(x).done===0 && !['Submitted','Registered'].includes(x.opsStage)) out.push({x,title:'Upload documents',p:'High'}); if(x.balance>0) out.push({x,title:'Collect commission balance',p:'High'}); if(['MOL','Visa','Ticket'].includes(x.opsStage)) out.push({x,title:nextAction(x),p:'Medium'}); }); return out; }
-  function taskRow(t){return `<button class="ux-task" onclick="openCandidateDrawer('${t.x.type}','${js(t.x.id)}')"><b>${esc(t.title)}</b><span>${esc(t.x.name)} • ${esc(t.x.company)}</span>${badge(t.p)}</button>`;}
-  function candidateMini(x){return `<button class="ux-mini" onclick="openCandidateDrawer('${x.type}','${js(x.id)}')">${avatar(x.name)}<span><b>${esc(x.name)}</b><small>${esc(x.position)} • ${esc(x.company)}</small></span>${badge(x.opsStage)}</button>`;}
+  function currentSnapshot(){
+    return {
+      pro: Array.isArray(proDB) ? proDB : [],
+      lb: Array.isArray(lbDB) ? lbDB : [],
+      docs: allDocs && typeof allDocs === 'object' ? allDocs : {},
+      timelines: allTimelines && typeof allTimelines === 'object' ? allTimelines : {},
+      proStages: Array.isArray(proStages) ? proStages : [],
+      lbStages: Array.isArray(lbStages) ? lbStages : [],
+      at: new Date().toISOString(),
+      companyId: (typeof getCompanyId === 'function' ? getCompanyId() : 'unknown')
+    };
+  }
 
-  window.renderCandidatesUX=function(type){
-    const tab=type||sessionStorage.getItem('ux_candidate_type')||'pro'; sessionStorage.setItem('ux_candidate_type',tab); const data=allRows(tab); const other=tab==='pro'?'lb':'pro'; const q=String(sessionStorage.getItem('ux_candidate_q')||'').toLowerCase(); const stage=sessionStorage.getItem('ux_candidate_stage')||''; let list=data.filter(x=>(!q||[x.name,x.pp,x.phone,x.company,x.position,x.opsStage].some(v=>String(v||'').toLowerCase().includes(q))) && (!stage||x.opsStage===stage)); const stages=tab==='pro'?PRO_STAGES:GEN_STAGES; const el=$(tab==='pro'?'#pro-section':'#lb-section'); if(!el) return;
-    el.innerHTML=`<div class="ux-page">${page(tab==='pro'?'Professional Candidates':'General Candidates',tab==='pro'?'Full Gulf professional recruitment workflow.':'General jobs workflow with simpler documents, payments and travel tracking.',`<button class="dreco-btn ${tab==='pro'?'primary':''}" onclick="switchTab('pro')">Professional</button><button class="dreco-btn ${tab==='lb'?'primary':''}" onclick="switchTab('lb')">General</button><button class="dreco-btn primary" onclick="${tab==='pro'?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add</button>`)}
-      <div class="ux-toolbar"><input placeholder="Search name, passport, company..." value="${esc(sessionStorage.getItem('ux_candidate_q')||'')}" oninput="sessionStorage.setItem('ux_candidate_q',this.value);renderCandidatesUX('${tab}')"><select onchange="sessionStorage.setItem('ux_candidate_stage',this.value);renderCandidatesUX('${tab}')"><option value="">All workflow stages</option>${stages.map(s=>`<option ${stage===s?'selected':''}>${esc(s)}</option>`).join('')}</select><span>${list.length} of ${data.length}</span></div>
-      <div class="ux-card no-pad"><table class="ux-table"><thead><tr><th>Candidate</th><th>Workflow</th><th>Next action</th><th>Documents</th><th>Finance</th><th>Owner</th><th></th></tr></thead><tbody>${list.map(candidateRow).join('')||`<tr><td colspan="7">${empty('No candidates found','Try clearing your search or stage filter.')}</td></tr>`}</tbody></table></div></div>`;
-  };
-  function candidateRow(x){ const p=docProgress(x); return `<tr onclick="openCandidateDrawer('${x.type}','${js(x.id)}')"><td><div class="ux-name">${avatar(x.name)}<span><b>${esc(x.name)}</b><small>${esc(x.pp||'No passport')} • ${esc(x.phone||'No phone')}</small></span></div></td><td>${badge(x.opsStage)}</td><td>${esc(nextAction(x))}</td><td><div class="ux-doc-mini"><b>${p.done}/${p.total}</b><i><span style="width:${p.pct}%"></span></i></div></td><td>${x.balance>0?`<b class="danger">${money(x.balance)}</b>`:'Clear'}</td><td>${esc(x.owner)}</td><td><button class="dreco-btn tiny" onclick="event.stopPropagation();${x.type==='pro'?`editPro(${JSON.stringify(x.id)})`:`editLB(${JSON.stringify(x.id)})`}">Edit</button></td></tr>`; }
+  function hasUsefulData(snapshot){
+    return (snapshot.pro?.length || 0) + (snapshot.lb?.length || 0) + Object.keys(snapshot.docs || {}).length > 0;
+  }
 
-  window.renderPipelineUX=function(){
-    const mode=sessionStorage.getItem('ux_pipe_type')||'pro'; const data=allRows(mode); const stages=mode==='pro'?PRO_STAGES:GEN_STAGES; const el=$('#kanban-section'); if(!el) return;
-    el.innerHTML=`<div class="ux-page">${page('Pipeline','Drag-style workflow board with blocker, owner, due date and checklist context.',`<button class="dreco-btn ${mode==='pro'?'primary':''}" onclick="sessionStorage.setItem('ux_pipe_type','pro');renderPipelineUX()">Professional</button><button class="dreco-btn ${mode==='lb'?'primary':''}" onclick="sessionStorage.setItem('ux_pipe_type','lb');renderPipelineUX()">General</button>`)}<div class="ux-pipeline">${stages.map(s=>`<section class="ux-col"><header><b>${esc(s)}</b><span>${data.filter(x=>x.opsStage===s).length}</span></header><div>${data.filter(x=>x.opsStage===s).slice(0,40).map(pipeCard).join('')||'<p class="ux-col-empty">No candidates</p>'}</div></section>`).join('')}</div></div>`;
-  };
-  function pipeCard(x){ const p=docProgress(x); return `<article class="ux-pipe-card" onclick="openCandidateDrawer('${x.type}','${js(x.id)}')"><div class="ux-name">${avatar(x.name)}<span><b>${esc(x.name)}</b><small>${esc(x.position)} • ${esc(x.company)}</small></span></div><div class="ux-pipe-meta"><span>${esc(blocker(x))}</span><span>Due ${due(x)}</span><span>${esc(x.owner)}</span></div><div class="ux-doc-mini"><b>Docs ${p.done}/${p.total}</b><i><span style="width:${p.pct}%"></span></i></div><div class="ux-pipe-actions"><button onclick="event.stopPropagation();openMovePanel('${x.type}','${js(x.id)}')">Move stage</button><button onclick="event.stopPropagation();openDocs('${x.type}',${JSON.stringify(x.id)},'${js(x.name)}')">Docs</button></div></article>`; }
+  function readStoredSnapshot(){
+    try {
+      const raw = safeLocalGet(getStoreKey());
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }
 
-  window.renderFinanceUX=function(){ const el=$('#commissions-section'); if(!el) return; const r=allRows(); const total=r.reduce((s,x)=>s+x.commission,0), paid=r.reduce((s,x)=>s+x.paid,0), bal=r.reduce((s,x)=>s+x.balance,0); const tx=r.filter(x=>x.commission||x.paid||x.balance).sort((a,b)=>num(b.submitted)-num(a.submitted));
-    el.innerHTML=`<div class="ux-page">${page('Finance','Commission health, recent transactions and payment follow-ups from candidate data.',`<button class="dreco-btn primary" onclick="switchTab('pro')">Open Candidates</button>`)}<div class="ux-kpis">${kpi('Invoiced',money(total),'Expected commission','ti-receipt')}${kpi('Collected',money(paid),'Paid so far','ti-wallet')}${kpi('Outstanding',money(bal),'Needs follow-up','ti-alert-circle')}${kpi('Collection rate',total?Math.round(paid/total*100)+'%':'0%','Paid / invoiced','ti-chart-line')}</div><div class="ux-grid two"><div class="ux-card"><div class="ux-card-title">Monthly cash flow</div>${cashBars(r)}</div><div class="ux-card"><div class="ux-card-title">Outstanding aging</div>${agingBars(r)}</div></div><div class="ux-card no-pad"><div class="ux-card-title pad-title">Recent transactions</div><table class="ux-table"><thead><tr><th>Candidate</th><th>Company</th><th>Commission</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead><tbody>${tx.slice(0,20).map(x=>`<tr onclick="openCandidateDrawer('${x.type}','${js(x.id)}')"><td>${esc(x.name)}</td><td>${esc(x.company)}</td><td>${money(x.commission)}</td><td>${money(x.paid)}</td><td>${x.balance?`<b class="danger">${money(x.balance)}</b>`:money(0)}</td><td>${badge(x.balance?'Unpaid':'Paid')}</td></tr>`).join('')||`<tr><td colspan="6">${empty('No transactions yet','Add commission and payment data to candidates.')}</td></tr>`}</tbody></table></div></div>`; };
-  function cashBars(r){ const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const paid=Array(12).fill(0), inv=Array(12).fill(0); r.forEach(x=>{ const d=typeof x.submitted==='number'?new Date(Math.round((x.submitted-25569)*86400*1000)):new Date(x.submitted||Date.now()); const i=isNaN(d)?new Date().getMonth():d.getMonth(); paid[i]+=x.paid; inv[i]+=x.commission; }); const max=Math.max(1,...paid,...inv); return `<div class="ux-bars">${m.map((mm,i)=>`<span><i style="height:${Math.max(3,inv[i]/max*120)}px"></i><b style="height:${Math.max(3,paid[i]/max*120)}px"></b><em>${mm}</em></span>`).join('')}</div><div class="ux-legend"><span>Invoiced</span><span>Paid</span></div>`; }
-  function agingBars(r){ const buckets=[['0-30',0],['31-60',0],['61-90',0],['90+',0]]; const now=Date.now(); r.filter(x=>x.balance>0).forEach(x=>{ const d=typeof x.submitted==='number'?new Date(Math.round((x.submitted-25569)*86400*1000)):new Date(x.submitted||Date.now()); const days=(now-d.getTime())/86400000; buckets[days>90?3:days>60?2:days>30?1:0][1]+=x.balance; }); const max=Math.max(1,...buckets.map(b=>b[1])); return `<div class="ux-aging">${buckets.map(b=>`<div><label>${b[0]} days</label><i><span style="width:${b[1]/max*100}%"></span></i><strong>${money(b[1])}</strong></div>`).join('')}</div>`; }
+  function createBackup(reason='manual'){
+    try {
+      const stored = readStoredSnapshot() || currentSnapshot();
+      if (!hasUsefulData(stored)) return null;
+      const id = `dreco_backup_${(typeof getCompanyId === 'function' ? getCompanyId() : 'company')}_${Date.now()}`;
+      const payload = { ...stored, backupReason: reason, backupAt: new Date().toISOString() };
+      safeLocalSet(id, JSON.stringify(payload));
+      const index = JSON.parse(safeLocalGet(BACKUP_INDEX_KEY) || '[]').filter(Boolean);
+      index.unshift({ id, reason, companyId: payload.companyId || (typeof getCompanyId === 'function' ? getCompanyId() : ''), at: payload.backupAt, pro: payload.pro?.length || 0, lb: payload.lb?.length || 0 });
+      const trimmed = index.slice(0, MAX_BACKUPS);
+      index.slice(MAX_BACKUPS).forEach(item => { try { localStorage.removeItem(item.id); } catch {} });
+      safeLocalSet(BACKUP_INDEX_KEY, JSON.stringify(trimmed));
+      return id;
+    } catch (err) {
+      console.warn('Dreco backup could not be created:', err);
+      return null;
+    }
+  }
 
-  window.renderReportsUX=function(){ const el=$('#reports-section'); if(!el) return; const mode=sessionStorage.getItem('ux_report_type')||'all'; const r=allRows(mode==='all'?'all':mode); const stages=(mode==='lb'?GEN_STAGES:PRO_STAGES).map(s=>({label:s,value:r.filter(x=>x.opsStage===s).length})).filter(x=>x.value); const travelled=r.filter(x=>['Travelled','Onboarded','Closed'].includes(x.opsStage)).length;
-    el.innerHTML=`<div class="ux-page">${page('Reports','Visual performance overview by stage, monthly trend, company and finance health.',`<button class="dreco-btn ${mode==='all'?'primary':''}" onclick="sessionStorage.setItem('ux_report_type','all');renderReportsUX()">All</button><button class="dreco-btn ${mode==='pro'?'primary':''}" onclick="sessionStorage.setItem('ux_report_type','pro');renderReportsUX()">Professional</button><button class="dreco-btn ${mode==='lb'?'primary':''}" onclick="sessionStorage.setItem('ux_report_type','lb');renderReportsUX()">General</button>`)}<div class="ux-kpis">${kpi('Total',r.length,'Candidate records','ti-users')}${kpi('Completed',travelled,'Travelled/onboarded','ti-plane')}${kpi('Success rate',r.length?Math.round(travelled/r.length*100)+'%':'0%','Completed / total','ti-target')}${kpi('Open tasks',taskList().length,'Current blockers','ti-checkbox')}</div><div class="ux-grid two"><div class="ux-card"><div class="ux-card-title">Candidates by stage</div>${stageChart(stages)}</div><div class="ux-card"><div class="ux-card-title">Monthly trends</div>${trendChart(r)}</div></div><div class="ux-card no-pad"><div class="ux-card-title pad-title">Top client companies</div>${clientTable(r)}</div></div>`; };
-  function stageChart(items){ const max=Math.max(1,...items.map(x=>x.value)); return `<div class="ux-stage-chart">${items.map(x=>`<div><label>${esc(x.label)}</label><i><span style="width:${x.value/max*100}%"></span></i><b>${x.value}</b></div>`).join('')||empty('No stage data','There are no candidates in this report filter.')}</div>`; }
-  function trendChart(r){ const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const sub=Array(12).fill(0), done=Array(12).fill(0); r.forEach(x=>{ const d=typeof x.submitted==='number'?new Date(Math.round((x.submitted-25569)*86400*1000)):new Date(x.submitted||Date.now()); const i=isNaN(d)?new Date().getMonth():d.getMonth(); sub[i]++; if(['Travelled','Onboarded','Closed'].includes(x.opsStage)) done[i]++; }); const max=Math.max(1,...sub,...done); return `<svg class="ux-line" viewBox="0 0 640 200" preserveAspectRatio="none"><polyline fill="none" stroke="currentColor" stroke-width="5" points="${sub.map((v,i)=>`${i*58},${180-v/max*150}`).join(' ')}"/><polyline fill="none" stroke="currentColor" stroke-width="3" opacity=".45" points="${done.map((v,i)=>`${i*58},${180-v/max*150}`).join(' ')}"/>${m.map((x,i)=>`<text x="${i*58}" y="198">${x}</text>`).join('')}</svg><div class="ux-legend"><span>Submitted</span><span>Completed</span></div>`; }
-  function clientTable(r){ const m={}; r.forEach(x=>{ const k=x.company||'Unknown'; if(!m[k])m[k]={name:k,total:0,active:0,due:0}; m[k].total++; if(!['Travelled','Onboarded','Closed'].includes(x.opsStage))m[k].active++; m[k].due+=x.balance; }); const list=Object.values(m).sort((a,b)=>b.total-a.total).slice(0,12); return `<table class="ux-table"><thead><tr><th>Company</th><th>Total</th><th>Active</th><th>Outstanding</th></tr></thead><tbody>${list.map(c=>`<tr><td>${esc(c.name)}</td><td>${c.total}</td><td>${c.active}</td><td>${money(c.due)}</td></tr>`).join('')}</tbody></table>`; }
+  function latestBackup(){
+    try {
+      const index = JSON.parse(safeLocalGet(BACKUP_INDEX_KEY) || '[]');
+      const companyId = typeof getCompanyId === 'function' ? getCompanyId() : '';
+      return index.find(x => !companyId || x.companyId === companyId) || index[0] || null;
+    } catch { return null; }
+  }
 
-  function ensureDrawer(){ if($('#ux-drawer')) return; document.body.insertAdjacentHTML('beforeend',`<aside class="ux-drawer" id="ux-drawer"><button class="ux-close" onclick="closeCandidateDrawer()"><i class="ti ti-x"></i></button><div id="ux-drawer-body"></div></aside><div class="ux-drawer-scrim" id="ux-drawer-scrim" onclick="closeCandidateDrawer()"></div><div class="ux-move" id="ux-move"><div id="ux-move-body"></div></div><div class="ux-command" id="ux-command"><div class="ux-command-card"><input id="ux-command-input" placeholder="Search candidate, passport, company, invoice..." oninput="renderCommandUX()"><div id="ux-command-results"></div></div></div><div class="ux-undo" id="ux-undo"></div>`); }
-  window.closeCandidateDrawer=function(){ $('#ux-drawer')?.classList.remove('open'); $('#ux-drawer-scrim')?.classList.remove('open'); };
-  window.openCandidateDrawer=function(type,id){ ensureDrawer(); closeOverlays(); const x=allRows(type).find(r=>String(r.id)===String(id)); if(!x) return; const stages=x.type==='pro'?PRO_STAGES:GEN_STAGES; const p=docProgress(x); const docs=docsFor(x); $('#ux-drawer-body').innerHTML=`<div class="ux-profile-head">${avatar(x.name)}<div><h2>${esc(x.name)}</h2><p>${esc(x.position)} • ${esc(x.company)}</p><div><span>${esc(x.pp||'No passport')}</span><span>${esc(x.phone||'No phone')}</span><span>${esc(x.country||'—')}</span></div></div>${badge(x.opsStage)}</div><div class="ux-progress">${stages.map(s=>`<span class="${stages.indexOf(s)<=stages.indexOf(x.opsStage)?'done':''}"><i></i>${esc(s)}</span>`).join('')}</div><div class="ux-drawer-actions"><button class="dreco-btn primary" onclick="openMovePanel('${x.type}','${js(x.id)}')">Move stage</button><button class="dreco-btn" onclick="openDocs('${x.type}',${JSON.stringify(x.id)},'${js(x.name)}')">Documents</button><button class="dreco-btn" onclick="${x.type==='pro'?`editPro(${JSON.stringify(x.id)})`:`editLB(${JSON.stringify(x.id)})`}">Edit</button></div><div class="ux-profile-grid"><section class="ux-card"><div class="ux-card-title">Next action</div><h3>${esc(nextAction(x))}</h3><p class="ux-muted">Owner: ${esc(x.owner)} • Due ${due(x)}</p></section><section class="ux-card"><div class="ux-card-title">Finance</div><div class="ux-detail"><span>Commission</span><b>${money(x.commission)}</b></div><div class="ux-detail"><span>Paid</span><b>${money(x.paid)}</b></div><div class="ux-detail"><span>Balance</span><b class="${x.balance>0?'danger':''}">${money(x.balance)}</b></div></section></div><section class="ux-card"><div class="ux-card-title">Document checklist <button onclick="openDocs('${x.type}',${JSON.stringify(x.id)},'${js(x.name)}')">Manage</button></div><div class="ux-doc-list">${(DOCS[x.type]||DOCS.pro).map(([k,l])=>{const d=docs[k];return `<div class="${d?'done':''}"><i class="ti ${d?'ti-circle-check-filled':'ti-circle'}"></i><span>${esc(l)}</span>${d?`<button onclick="drecoViewDoc('${x.type}','${js(x.id)}','${js(k)}')">View</button>`:`<label>Upload<input type="file" hidden onchange="drecoUploadDoc('${x.type}','${js(x.id)}','${js(k)}',this)"></label>`}</div>`;}).join('')}</div><div class="ux-doc-mini big"><b>${p.done}/${p.total} uploaded</b><i><span style="width:${p.pct}%"></span></i></div></section><section class="ux-card"><div class="ux-card-title">Activity</div><div class="ux-timeline"><div><i></i><b>Current stage: ${esc(x.opsStage)}</b><span>${date(new Date())}</span></div><div><i></i><b>Candidate submitted/imported</b><span>${date(x.submitted)}</span></div></div></section>`; $('#ux-drawer').classList.add('open'); $('#ux-drawer-scrim').classList.add('open'); };
+  function restoreLatestBackup(){
+    const item = latestBackup();
+    if (!item) return false;
+    try {
+      const backup = JSON.parse(safeLocalGet(item.id) || '{}');
+      if (!hasUsefulData(backup)) return false;
+      proDB = (backup.pro || []).map(typeof normalizeProRecord === 'function' ? normalizeProRecord : x => x);
+      lbDB = (backup.lb || []).map(typeof normalizeLBRecord === 'function' ? normalizeLBRecord : x => x);
+      allDocs = backup.docs || {};
+      allTimelines = backup.timelines || {};
+      if (backup.proStages?.length) proStages = backup.proStages;
+      if (backup.lbStages?.length) lbStages = backup.lbStages;
+      if (typeof saveLocalStore === 'function') saveLocalStore();
+      if (typeof switchTab === 'function') switchTab(sessionStorage.getItem('dreco_active_tab') || 'dash');
+      if (typeof showToast === 'function') showToast('Restored latest local backup.', 'success');
+      return true;
+    } catch (err) {
+      console.warn('Dreco backup restore failed:', err);
+      return false;
+    }
+  }
 
-  window.openMovePanel=function(type,id){ ensureDrawer(); const x=allRows(type).find(r=>String(r.id)===String(id)); if(!x) return; const stages=x.type==='pro'?PRO_STAGES:GEN_STAGES; const i=stages.indexOf(x.opsStage); const next=stages[Math.min(i+1,stages.length-1)]; $('#ux-move-body').innerHTML=`<button class="ux-close" onclick="document.getElementById('ux-move').classList.remove('open')"><i class="ti ti-x"></i></button><h2>Move ${esc(x.name)}</h2><p>${esc(x.opsStage)} → <b>${esc(next)}</b></p><div class="ux-card"><div class="ux-card-title">Checklist before moving</div>${moveChecklist(x,next)}</div><div class="ux-drawer-actions"><button class="dreco-btn" onclick="document.getElementById('ux-move').classList.remove('open')">Cancel</button><button class="dreco-btn primary" onclick="confirmMoveStage('${x.type}','${js(x.id)}','${js(next)}')">Confirm move</button></div>`; $('#ux-move').classList.add('open'); };
-  function moveChecklist(x,next){ const p=docProgress(x); const checks=[['Candidate details captured',!!x.name&&!!x.position],['Passport number captured',!!x.pp],['Documents started',p.done>0||['Submitted','Registered','Interview'].includes(x.opsStage)],['Finance reviewed',x.balance<=0||!['Commission','Ticket','Travelled','Onboarded'].includes(next)]]; return `<div class="ux-doc-list checks">${checks.map(c=>`<div class="${c[1]?'done':''}"><i class="ti ${c[1]?'ti-circle-check-filled':'ti-alert-circle'}"></i><span>${esc(c[0])}</span></div>`).join('')}</div>`; }
-  window.confirmMoveStage=async function(type,id,next){ const x=allRows(type).find(r=>String(r.id)===String(id)); if(!x) return; const before={stage:x.raw.stage,interview:x.raw.interview,ol:x.raw.ol,mol:x.raw.mol,visa:x.raw.visa,travel:x.raw.travel,onboarded:x.raw.onboarded,travelStatus:x.raw.travelStatus}; if(type==='pro'){ x.raw.stage=PRO_SOURCE[next]||x.raw.stage; if(next==='Interview'&&!x.raw.interview)x.raw.interview=todayISO(); if(next==='Offer'&&!x.raw.ol)x.raw.ol=todayISO(); if(next==='MOL'&&!x.raw.mol)x.raw.mol=todayISO(); if(next==='Visa'&&!x.raw.visa)x.raw.visa=todayISO(); if(next==='Travelled'&&!x.raw.travel)x.raw.travel=todayISO(); if(next==='Onboarded')x.raw.onboarded=true; } else { if(next==='Ticket')x.raw.travelStatus='NOT TRAVELLED'; if(next==='Travelled')x.raw.travelStatus='TRAVELLED'; if(next==='Closed')x.raw.closed=true; }
-    await persist(x); $('#ux-move')?.classList.remove('open'); openCandidateDrawer(type,id); refreshActive(); showUndo(`Moved to ${next}`,async()=>{Object.assign(x.raw,before); await persist(x); refreshActive(); openCandidateDrawer(type,id);}); };
-  function showUndo(msg,fn){ ensureDrawer(); const el=$('#ux-undo'); el.innerHTML=`<span>${esc(msg)}</span><button>Undo</button>`; el.classList.add('open'); el.querySelector('button').onclick=async()=>{el.classList.remove('open'); await fn();}; setTimeout(()=>el.classList.remove('open'),7000); }
+  function installStorageGuard(){
+    if (typeof saveLocalStore !== 'function' || saveLocalStore.__drecoGuarded) return;
+    const original = saveLocalStore;
+    saveLocalStore = function guardedSaveLocalStore(){
+      const before = readStoredSnapshot();
+      const next = currentSnapshot();
+      const beforeCount = (before?.pro?.length || 0) + (before?.lb?.length || 0);
+      const nextCount = (next.pro?.length || 0) + (next.lb?.length || 0);
+      if (beforeCount > 0 && nextCount === 0) {
+        console.error('Blocked unsafe empty data save. Existing candidate data was preserved.');
+        showHealthMessage('Unsafe save blocked', 'Dreco prevented an empty candidate state from overwriting saved data.');
+        return;
+      }
+      if (beforeCount > 0) createBackup('before-save');
+      return original.apply(this, arguments);
+    };
+    saveLocalStore.__drecoGuarded = true;
+  }
 
-  window.openCommandUX=function(){ ensureDrawer(); closeOverlays(); $('#ux-command').classList.add('open'); $('#ux-command-input').value=''; renderCommandUX(); setTimeout(()=>$('#ux-command-input')?.focus(),30); };
-  window.renderCommandUX=function(){ const q=String($('#ux-command-input')?.value||'').toLowerCase(); const res=allRows().filter(x=>!q||[x.name,x.pp,x.company,x.position,x.phone,x.opsStage].some(v=>String(v||'').toLowerCase().includes(q))).slice(0,12); $('#ux-command-results').innerHTML=res.map(x=>`<button onclick="document.getElementById('ux-command').classList.remove('open');openCandidateDrawer('${x.type}','${js(x.id)}')">${avatar(x.name)}<span><b>${esc(x.name)}</b><small>${esc(x.pp||'No passport')} • ${esc(x.opsStage)} • ${esc(x.company)}</small></span></button>`).join('')||'<p class="ux-muted">No results found.</p>'; };
+  function closeAllModalsExcept(active){
+    const activeId = typeof active === 'string' ? active : active?.id;
+    const openModals = $$('.modal-bg.open,.modal-backdrop.open,#candidate-profile-modal.open,#candidate-profile-modal-v4.open,#v4-command.open,#command-modal.open,#quick-country-modal.open');
+    openModals.forEach(el => {
+      if (el.id && el.id === activeId) return;
+      el.classList.remove('open','show','dreco-modal-active');
+      if (el.classList.contains('modal-backdrop')) el.style.display = 'none';
+    });
+    const activeEl = activeId ? document.getElementById(activeId) : null;
+    if (activeEl) activeEl.classList.add('dreco-modal-active');
+    document.body.classList.toggle('dreco-modal-open', !!activeEl || openModals.length > 0);
+  }
 
-  function refreshActive(){ const tab=sessionStorage.getItem('dreco_active_tab')||''; if(tab==='dash')renderDashUX(); if(tab==='pro')renderCandidatesUX('pro'); if(tab==='lb')renderCandidatesUX('lb'); if(tab==='kanban')renderPipelineUX(); if(tab==='commissions')renderFinanceUX(); if(tab==='reports')renderReportsUX(); }
-  const oldSwitch=window.switchTab;
-  window.switchTab=function(tab='dash'){ if(typeof oldSwitch==='function') oldSwitch(tab); sessionStorage.setItem('dreco_active_tab',tab); setTimeout(()=>{ ensureDrawer(); if(tab==='dash')renderDashUX(); if(tab==='pro')renderCandidatesUX('pro'); if(tab==='lb')renderCandidatesUX('lb'); if(tab==='kanban')renderPipelineUX(); if(tab==='commissions')renderFinanceUX(); if(tab==='reports')renderReportsUX(); if(tab==='documents'&&window.renderDocumentsV4)window.renderDocumentsV4(); const search=$('.topbar-search input'); if(search&&!search.dataset.ux){search.placeholder='Search anything...'; search.readOnly=true; search.onclick=openCommandUX; search.dataset.ux='1';} },40); };
-  document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='k'){e.preventDefault();openCommandUX();} if(e.key==='Escape'){closeOverlays();closeCandidateDrawer();} });
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ensureDrawer(); if($('#app')&&getComputedStyle($('#app')).display!=='none') window.switchTab(sessionStorage.getItem('dreco_active_tab')||'dash');},250));
+  function installModalManager(){
+    if (window.__drecoModalManagerInstalled) return;
+    window.__drecoModalManagerInstalled = true;
+
+    const observe = new MutationObserver(records => {
+      const opened = records
+        .map(r => r.target)
+        .filter(el => el instanceof HTMLElement && (el.classList.contains('open') || el.classList.contains('show')))
+        .filter(el => el.matches('.modal-bg,.modal-backdrop,#candidate-profile-modal,#candidate-profile-modal-v4,#v4-command,#command-modal,#quick-country-modal'));
+      if (!opened.length) {
+        document.body.classList.toggle('dreco-modal-open', $$('.modal-bg.open,.modal-backdrop.open,#candidate-profile-modal.open,#candidate-profile-modal-v4.open,#v4-command.open,#command-modal.open,#quick-country-modal.open').length > 0);
+        return;
+      }
+      const last = opened[opened.length - 1];
+      setTimeout(() => closeAllModalsExcept(last), 0);
+    });
+    document.addEventListener('DOMContentLoaded', () => observe.observe(document.body, { subtree:true, attributes:true, attributeFilter:['class'] }));
+
+    const originalClose = typeof closeModal === 'function' ? closeModal : null;
+    if (originalClose && !originalClose.__drecoManaged) {
+      closeModal = function managedCloseModal(id){
+        const out = originalClose.apply(this, arguments);
+        setTimeout(()=>{
+          document.body.classList.toggle('dreco-modal-open', $$('.modal-bg.open,.modal-backdrop.open,#candidate-profile-modal.open,#candidate-profile-modal-v4.open,#v4-command.open,#command-modal.open,#quick-country-modal.open').length > 0);
+        }, 0);
+        return out;
+      };
+      closeModal.__drecoManaged = true;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const open = $$('.modal-bg.open,.modal-backdrop.open,#candidate-profile-modal.open,#candidate-profile-modal-v4.open,#v4-command.open,#command-modal.open,#quick-country-modal.open').pop();
+      if (!open) return;
+      open.classList.remove('open','show','dreco-modal-active');
+      open.style.display = '';
+      document.body.classList.toggle('dreco-modal-open', $$('.modal-bg.open,.modal-backdrop.open,#candidate-profile-modal.open,#candidate-profile-modal-v4.open,#v4-command.open,#command-modal.open,#quick-country-modal.open').length > 0);
+    });
+  }
+
+  function labelMobileTables(root=document){
+    $$('table', root).forEach(table => {
+      const heads = $$('thead th', table).map(th => th.textContent.trim()).filter(Boolean);
+      if (!heads.length) return;
+      table.classList.add('dreco-mobile-table');
+      $$('tbody tr', table).forEach(row => {
+        Array.from(row.children).forEach((td, i) => {
+          if (!td.getAttribute('data-label')) td.setAttribute('data-label', heads[i] || 'Details');
+        });
+      });
+    });
+  }
+
+  function ensureEmptyStates(root=document){
+    $$('.panel,.v4-card,.dreco-card', root).forEach(card => {
+      const tbody = $('tbody', card);
+      if (tbody && !tbody.children.length && !$('.dreco-empty-state', card)) {
+        const row = document.createElement('tr');
+        const colCount = Math.max(1, $$('thead th', card).length || 1);
+        row.innerHTML = `<td colspan="${colCount}"><div class="dreco-empty-state">No records found yet.</div></td>`;
+        tbody.appendChild(row);
+      }
+    });
+  }
+
+  function installRenderGuards(){
+    const names = ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderTasks','renderClients','renderPro','renderLB','renderKanban','renderCommissions','renderRepayments','renderExpenses','renderTravel'];
+    names.forEach(name => {
+      const fn = window[name] || (typeof globalThis !== 'undefined' ? globalThis[name] : null);
+      if (typeof fn !== 'function' || fn.__drecoGuarded) return;
+      const wrapped = function guardedRender(){
+        try {
+          const out = fn.apply(this, arguments);
+          setTimeout(()=>{ labelMobileTables(); ensureEmptyStates(); syncAuthShellState(); }, 20);
+          return out;
+        } catch (err) {
+          console.error(`${name} failed:`, err);
+          showHealthMessage('View render failed', `${name} hit an error. Existing data was not changed.`);
+          return null;
+        }
+      };
+      wrapped.__drecoGuarded = true;
+      window[name] = wrapped;
+      try { eval(`${name}=window[name]`); } catch {}
+    });
+  }
+
+  function installAuthStateWrappers(){
+    ['doLogin','doSignup','doLogout','loadAllData','switchTab'].forEach(name => {
+      const fn = window[name];
+      if (typeof fn !== 'function' || fn.__drecoAuthWrapped) return;
+      window[name] = function drecoAuthWrapped(){
+        const result = fn.apply(this, arguments);
+        Promise.resolve(result).finally(()=>{
+          setTimeout(syncAuthShellState, 0);
+          setTimeout(syncAuthShellState, 160);
+          setTimeout(()=>{ labelMobileTables(); ensureEmptyStates(); }, 180);
+        });
+        return result;
+      };
+      window[name].__drecoAuthWrapped = true;
+      try { eval(`${name}=window[name]`); } catch {}
+    });
+  }
+
+  async function checkStorageReadiness(){
+    const status = {
+      mode: typeof getStorageLabel === 'function' ? getStorageLabel() : 'Unknown',
+      supabaseClient: !!db,
+      storageBucket: 'candidate-documents',
+      bucketReachable: false,
+      error: ''
+    };
+    if (!db?.storage) return status;
+    try {
+      const { data, error } = await db.storage.from('candidate-documents').list('', { limit:1 });
+      if (error) throw error;
+      status.bucketReachable = Array.isArray(data);
+    } catch (err) {
+      status.error = err.message || 'Candidate document bucket is not reachable.';
+    }
+    return status;
+  }
+
+  async function runHealthCheck(){
+    const storage = await checkStorageReadiness();
+    const result = {
+      loggedIn: !!currentUser,
+      appVisible: appIsVisible(),
+      candidates: { professional: Array.isArray(proDB) ? proDB.length : 0, general: Array.isArray(lbDB) ? lbDB.length : 0 },
+      documents: allDocs ? Object.keys(allDocs).length : 0,
+      timelines: allTimelines ? Object.keys(allTimelines).length : 0,
+      storage,
+      latestBackup: latestBackup(),
+      openModals: $$('.modal-bg.open,.modal-backdrop.open,#candidate-profile-modal.open,#candidate-profile-modal-v4.open,#v4-command.open,#command-modal.open,#quick-country-modal.open').map(x => x.id || x.className)
+    };
+    console.table(result.candidates);
+    console.log('Dreco health check:', result);
+    return result;
+  }
+
+  function installMutationStabilizer(){
+    const mo = new MutationObserver(() => {
+      clearTimeout(window.__drecoStabilityTick);
+      window.__drecoStabilityTick = setTimeout(()=>{
+        syncAuthShellState();
+        labelMobileTables();
+        ensureEmptyStates();
+      }, 100);
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+      mo.observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','style'] });
+    });
+  }
+
+  window.drecoRunHealthCheck = runHealthCheck;
+  window.drecoCreateBackup = createBackup;
+  window.drecoRestoreLatestBackup = restoreLatestBackup;
+  window.drecoCloseAllModalsExcept = closeAllModalsExcept;
+  window.drecoSyncAuthShellState = syncAuthShellState;
+
+  installStorageGuard();
+  installModalManager();
+  installRenderGuards();
+  installAuthStateWrappers();
+  installMutationStabilizer();
+
+  document.addEventListener('DOMContentLoaded', () => {
+    syncAuthShellState();
+    labelMobileTables();
+    ensureEmptyStates();
+    setTimeout(syncAuthShellState, 250);
+    setTimeout(()=>runHealthCheck().then(res => {
+      if (res.storage.supabaseClient && !res.storage.bucketReachable) {
+        console.warn('Candidate document storage bucket check:', res.storage.error || 'Bucket not reachable');
+      }
+    }), 1200);
+  });
+
+  window.addEventListener('error', event => {
+    console.error('Dreco runtime error:', event.error || event.message);
+    showHealthMessage('Runtime issue caught', 'A script error was caught. Your saved candidate data was not overwritten.');
+  });
+  window.addEventListener('unhandledrejection', event => {
+    console.error('Dreco async error:', event.reason);
+    showHealthMessage('Sync/action issue caught', 'An action failed safely. Check the console for details.');
+  });
 })();
