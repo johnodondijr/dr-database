@@ -3105,16 +3105,16 @@ function setUserDisplay(display, role) {
   let candidateMode = sessionStorage.getItem('dreco_candidate_mode_v3') || 'professional';
 
   function rows(type='all'){
-    const pro = (Array.isArray(window.proDB)?window.proDB:[]).map(r=>({
+    const pro = (Array.isArray(proDB)?proDB:[]).map(r=>({
       type:'pro', id:r.id, name:r.name, pp:r.pp, phone:r.phone, position:r.position||'—', company:r.company||'—', country:r.country||'—',
       stage:r.stage||'PENDING OFFER LETTER', opsStage:opsStageForPro(r), submitted:r.submitted, interview:r.interview, ol:r.ol, mol:r.mol, visa:r.visa, travel:r.travel,
-      commission:num(r.commission), paid:num(r.paid), balance:Math.max(num(r.commission)-num(r.paid),0), owner:window.currentUser?.display||'Team', raw:r
+      commission:num(r.commission), paid:num(r.paid), balance:Math.max(num(r.commission)-num(r.paid),0), owner:currentUser?.display||'Team', raw:r
     }));
-    const lb = (Array.isArray(window.lbDB)?window.lbDB:[]).map(r=>{
+    const lb = (Array.isArray(lbDB)?lbDB:[]).map(r=>{
       const paid = num(r.r1Amt||r.r1_amt)+num(r.r2Amt||r.r2_amt); const comm=num(r.toRefund||r.to_refund||r.commission);
       return {type:'lb', id:r.id, name:r.name, pp:r.pp||r.passport, phone:r.phone, position:r.position||'General Job', company:r.company||r.country||'General Jobs', country:r.country||'',
       stage:r.travelStatus||r.travel_status||'NOT YET', opsStage:opsStageForGeneral(r,paid,comm), submitted:r.submitted||r.travelDate||r.travel_date,
-      commission:comm, paid, balance:Math.max(comm-paid,0), owner:window.currentUser?.display||'Team', raw:r};
+      commission:comm, paid, balance:Math.max(comm-paid,0), owner:currentUser?.display||'Team', raw:r};
     });
     if(type==='pro') return pro; if(type==='lb') return lb; return [...pro,...lb];
   }
@@ -3137,7 +3137,7 @@ function setUserDisplay(display, role) {
     return 'Registered';
   }
   function hasDoc(type,id){
-    const docs = window.allDocs || {};
+    const docs = allDocs || {};
     return !!(docs[`${type}_${id}`] || docs[id] || docs[String(id)]);
   }
   function setActiveNav(t){
