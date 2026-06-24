@@ -951,6 +951,7 @@ async function loadAllData() {
     rebuildStageSelects();
     restoreUserFilters();
     hideLoading();
+    if (typeof window.dv5Init === 'function') window.dv5Init();
     switchTab('dash');
     return;
   }
@@ -1007,6 +1008,8 @@ async function loadAllData() {
   rebuildStageSelects();
   restoreUserFilters();
   hideLoading();
+  // Signal DV5 that data is ready - ensure sidebar and sections exist before render
+  if (typeof window.dv5Init === 'function') window.dv5Init();
   switchTab('dash');
 }
 
@@ -3327,7 +3330,7 @@ function setUserDisplay(display, role) {
     const t = ALIASES[tab] || tab || 'dash';
     TABS.forEach(x => {
       const sec = document.getElementById(`${x}-section`);
-      if (sec) sec.style.display = (x===t) ? '' : 'none';
+      if (sec) sec.style.display = (x===t) ? 'block' : 'none';
     });
     // Also hide legacy sections not in TABS
     ['pro-section','lb-section','kanban-section','calendar-section',
@@ -4050,8 +4053,15 @@ function setUserDisplay(display, role) {
     }
   }
 
-  window.addEventListener('DOMContentLoaded', () => setTimeout(init, 50));
-  // Also re-init if called after data load
+  // Run init immediately if DOM is already ready (post-login scenario)
+  // AND hook DOMContentLoaded for page-load scenario
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', () => setTimeout(init, 50));
+  } else {
+    // DOM already loaded (IIFE runs after DOMContentLoaded) — init now
+    setTimeout(init, 0);
+  }
+  // Exposed so loadAllData can call it after data arrives
   window.dv5Init = init;
 
   // ══════════════════════════════════════════════════════════
@@ -4520,12 +4530,8 @@ function setUserDisplay(display, role) {
     const missing = all.filter(x=>completion(x.type,x.id).done===0).length;
     el.innerHTML = `<div class="v4-page"><div class="v4-head"><div><h1>Documents</h1><p>Direct per-candidate uploads with checklist status, view, replace and delete actions.</p></div><div class="v4-actions"><button class="dreco-btn primary" onclick="switchTab('candidates')">Open Candidates</button></div></div><div class="v4-kpi-grid"><div class="v4-kpi"><span>Complete</span><strong>${complete}</strong><small>All required files</small></div><div class="v4-kpi"><span>Partial</span><strong>${partial}</strong><small>Some files uploaded</small></div><div class="v4-kpi"><span>Missing</span><strong>${missing}</strong><small>No documents yet</small></div><div class="v4-kpi"><span>Total files</span><strong>${all.reduce((s,x)=>s+uploadedCount(x.type,x.id),0)}</strong><small>Uploaded records</small></div></div><div class="v4-card"><table class="v4-table"><thead><tr><th>Candidate</th><th>Type</th><th>Required Checklist</th><th>Progress</th><th>Status</th><th>Action</th></tr></thead><tbody>${rowsHTML}</tbody></table></div></div>`;
   };
-  const prevSwitch = window.switchTab;
-  window.switchTab = function(tab='dash'){
-    if(typeof prevSwitch === 'function') prevSwitch(tab);
-    sessionStorage.setItem('dreco_active_tab', tab);
-    setTimeout(()=>{ if(tab === 'documents') window.renderDocumentsV4(); }, 20);
-  };
+  // switchTab wrapper removed — DV5 handles tab routing.
+  // renderDocumentsV4 is available globally for direct calls if needed.
 })();
 
 // =============================================================
