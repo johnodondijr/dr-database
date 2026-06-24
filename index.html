@@ -3500,6 +3500,10 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
                   <option value="outstanding">Outstanding balance</option>
                   <option value="no-docs">Missing docs link</option>
                 </select>
+                <span style="font-size:11px;color:var(--text-3);white-space:nowrap">Submitted:</span>
+                <input type="date" id="pro-date-from" class="toolbar-select" style="width:130px" title="From date" onchange="renderPro()">
+                <input type="date" id="pro-date-to" class="toolbar-select" style="width:130px" title="To date" onchange="renderPro()">
+                <button class="btn" onclick="clearProDates()" title="Clear date filter"><i class="ti ti-x"></i></button>
                 <button class="btn export" onclick="exportCSV('pro')"><i class="ti ti-download"></i> Export</button>
                 <button class="btn" onclick="addCustomStage('pro')" title="Add stage"><i class="ti ti-settings"></i></button>
                 <button class="btn primary" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
@@ -3564,6 +3568,10 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
                   <option value="incomplete-refund">Incomplete refund</option>
                   <option value="no-docs">Missing docs link</option>
                 </select>
+                <span style="font-size:11px;color:var(--text-3);white-space:nowrap">Travel date:</span>
+                <input type="date" id="lb-date-from" class="toolbar-select" style="width:130px" title="From date" onchange="renderLB()">
+                <input type="date" id="lb-date-to" class="toolbar-select" style="width:130px" title="To date" onchange="renderLB()">
+                <button class="btn" onclick="clearLBDates()" title="Clear date filter"><i class="ti ti-x"></i></button>
                 <button class="btn export" onclick="exportCSV('lb')"><i class="ti ti-download"></i> Export</button>
                 <button class="btn" onclick="addCustomStage('lb')" title="Add status"><i class="ti ti-settings"></i></button>
                 <button class="btn primary" onclick="openLBForm()"><i class="ti ti-plus"></i> Add</button>

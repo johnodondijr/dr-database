@@ -2432,21 +2432,40 @@ function buildConic(items,total){
 }
 // PROFESSIONAL
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
+let lastProFiltered=[];
+let lastLBFiltered=[];
 function getFilteredPro(){
   const q=(document.getElementById('pro-search')?.value||'').toLowerCase();
   const stage=window.proStagePillFilter||'';
   const comp=document.getElementById('pro-company-f')?.value||'';
   const pos=document.getElementById('pro-position-f')?.value||'';
   const action=document.getElementById('pro-action-f')?.value||'';
-  return proDB.filter(r=>{
+  const dateFrom=document.getElementById('pro-date-from')?.value||'';
+  const dateTo=document.getElementById('pro-date-to')?.value||'';
+  lastProFiltered=proDB.filter(r=>{
     const text=`${r.name} ${r.pp||''} ${r.company||''} ${r.position||''}`.toLowerCase();
     const outstanding=proBalance(r)>0;
     const actionMatch=!action ||
       (action==='needs-action'&&proNeedsAction(r)) ||
       (action==='outstanding'&&outstanding) ||
       (action==='no-docs'&&!hasDocs('pro',r.id));
-    return (!q||text.includes(q))&&(!stage||r.stage===stage)&&(!comp||r.company===comp)&&(!pos||r.position===pos)&&actionMatch;
+    let dateMatch=true;
+    if(dateFrom||dateTo){
+      const sub=toInput(r.submitted);
+      if(!sub){ dateMatch=false; }
+      else {
+        if(dateFrom&&sub<dateFrom) dateMatch=false;
+        if(dateTo&&sub>dateTo) dateMatch=false;
+      }
+    }
+    return (!q||text.includes(q))&&(!stage||r.stage===stage)&&(!comp||r.company===comp)&&(!pos||r.position===pos)&&actionMatch&&dateMatch;
   });
+  return lastProFiltered;
+}
+function clearProDates(){
+  const f=document.getElementById('pro-date-from'); if(f) f.value='';
+  const t=document.getElementById('pro-date-to'); if(t) t.value='';
+  renderPro();
 }
 function renderPro(){
   let totalComm=0,totalPaid=0;
@@ -2583,7 +2602,9 @@ function getFilteredLB(){
   const refund=document.getElementById('lb-refund-f')?.value||'';
   const action=document.getElementById('lb-action-f')?.value||'';
   const country=getActiveGeneralCountry();
-  return lbDB.filter(r=>{
+  const dateFrom=document.getElementById('lb-date-from')?.value||'';
+  const dateTo=document.getElementById('lb-date-to')?.value||'';
+  lastLBFiltered=lbDB.filter(r=>{
     const text=`${r.name} ${r.phone||''}`.toLowerCase();
     const ts=r.travelStatus||r.travel_status||'';
     const ps=r.ppStatus||r.pp_status||'';
@@ -2593,8 +2614,23 @@ function getFilteredLB(){
       (action==='needs-action'&&lbNeedsAction(r)) ||
       (action==='incomplete-refund'&&rs==='incomplete') ||
       (action==='no-docs'&&!hasDocs('lb',r.id));
-    return rcountry===country&&(!q||text.includes(q))&&(!travel||ts===travel)&&(!pp||ps===pp)&&(!refund||rs===refund)&&actionMatch;
+    let dateMatch=true;
+    if(dateFrom||dateTo){
+      const td=toInput(r.travelDate||r.travel_date);
+      if(!td){ dateMatch=false; }
+      else {
+        if(dateFrom&&td<dateFrom) dateMatch=false;
+        if(dateTo&&td>dateTo) dateMatch=false;
+      }
+    }
+    return rcountry===country&&(!q||text.includes(q))&&(!travel||ts===travel)&&(!pp||ps===pp)&&(!refund||rs===refund)&&actionMatch&&dateMatch;
   });
+  return lastLBFiltered;
+}
+function clearLBDates(){
+  const f=document.getElementById('lb-date-from'); if(f) f.value='';
+  const t=document.getElementById('lb-date-to'); if(t) t.value='';
+  renderLB();
 }
 function renderLB(){
   renderGeneralCountryTabs();
@@ -2776,23 +2812,27 @@ async function saveDocs(){
 // EXPORT CSV
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function exportCSV(type){
-  let headers,rows,filename;
+  let headers,rows,filename,isFiltered=false;
   if(type==='pro'){
     headers=['#','Name','Passport','Phone','Position','Company','Country','Stage','Commission (KES)','Paid (KES)','Balance (KES)','Submitted','Interview','Offer Letter','MOL','Visa','Travel Date'];
-    rows=proDB.map((r,i)=>[i+1,r.name,r.pp||'',r.phone||'',r.position||'',r.company||'',r.country||'',r.stage,
+    const src=lastProFiltered.length?lastProFiltered:proDB;
+    isFiltered=src.length<proDB.length;
+    rows=src.map((r,i)=>[i+1,r.name,r.pp||'',r.phone||'',r.position||'',r.company||'',r.country||'',r.stage,
       r.commission||'',r.paid||'',(r.commission&&r.paid)?Number(r.commission)-Number(r.paid):'',
       fmtDate(r.submitted),fmtDate(r.interview),fmtDate(r.ol),fmtDate(r.mol),fmtDate(r.visa),fmtDate(r.travel)]);
-    filename='Dreco_Professional';
+    filename=isFiltered?'Dreco_Professional_Filtered':'Dreco_Professional';
   } else {
     headers=['#','Name','Phone','Passport Status','Travel Status','Travel Date','To Refund (USD)','Refunded (USD)','Balance (USD)','Refund Status','Notes'];
-    rows=lbDB.map((r,i)=>{
+    const src=lastLBFiltered.length?lastLBFiltered:lbDB;
+    isFiltered=src.length<lbDB.length;
+    rows=src.map((r,i)=>{
       const rs=getRefundStatus(r); const toR=Number(r.toRefund||r.to_refund)||0;
       const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
       return [i+1,r.name,r.phone||'',r.ppStatus||r.pp_status||'',r.travelStatus||r.travel_status||'',
         fmtDate(r.travelDate||r.travel_date),rs==='N/A'?'':toR,rs==='N/A'?'':paid,
         (rs==='N/A'||rs==='RETURNED')?'':toR-paid,rs,r.notes||''];
     });
-    filename='Dreco_LB';
+    filename=isFiltered?'Dreco_General_Filtered':'Dreco_LB';
   }
   const esc=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
   const csv=[headers.map(esc).join(','),...rows.map(r=>r.map(esc).join(','))].join('\n');
