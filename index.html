@@ -2964,51 +2964,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 .save-dot.saving{background:var(--amber)!important;animation:pulse .8s infinite alternate}
 @keyframes pulse{to{opacity:.5}}
 
-/* Mobile navigation parity: every desktop section is reachable on phones. */
-@media(max-width:760px){
-  .bottom-nav{
-    display:none;
-    height:72px!important;
-    padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;
-    gap:6px!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    justify-content:flex-start!important;
-    align-items:center!important;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-    background:rgba(255,255,255,.96)!important;
-    border-top:1px solid #DDE4F8!important;
-    box-shadow:0 -10px 30px rgba(31,42,73,.08)!important;
-    z-index:70!important;
-  }
-  .bottom-nav.visible{display:flex!important;}
-  .bottom-nav::-webkit-scrollbar{display:none;}
-  .bottom-nav-item{
-    flex:0 0 74px!important;
-    min-width:74px!important;
-    height:56px!important;
-    border:0!important;
-    border-radius:14px!important;
-    background:transparent!important;
-    color:#7B8496!important;
-  }
-  .bottom-nav-item i{font-size:19px!important;}
-  .bottom-nav-item span{
-    font-size:9px!important;
-    line-height:1.1!important;
-    white-space:nowrap!important;
-    max-width:68px!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  .bottom-nav-item.active{
-    background:#F0EEFF!important;
-    color:var(--dreco-purple,#5347CE)!important;
-  }
-  .bottom-nav-item.active i{color:var(--dreco-purple,#5347CE)!important;}
-  .content-area>div{padding-bottom:104px!important;}
-}
+/* Bottom nav removed — navigation is now via left sidebar drawer on mobile. */
 
 
 /* =========================================================

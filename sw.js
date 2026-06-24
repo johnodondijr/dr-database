@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dreco-v4';
+const CACHE_NAME = 'dreco-v5';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -11,6 +11,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
+  // Take over immediately without waiting for old tabs to close
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -19,7 +21,7 @@ self.addEventListener('activate', (event) => {
       Promise.all(
         keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       )
-    )
+    ).then(() => self.clients.claim()) // Control all open tabs right away
   );
 });
 
