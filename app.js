@@ -171,28 +171,27 @@ async function verifyAccountPassword(account, password) {
   return { ok: false, migrated: false };
 }
 async function loadStaffAccounts() {
-  normalizeAllAccounts();
-  cleanupLegacyDestinyUsers();
+  // Merge local overrides first
   try {
     const saved = safeLocalGet(LOCAL_STAFF_KEY);
     if (saved) Object.assign(STAFF_ACCOUNTS, JSON.parse(saved));
-    normalizeAllAccounts();
-    cleanupLegacyDestinyUsers();
   } catch (err) {
     console.warn('Saved staff accounts could not be loaded:', err);
   }
+  // Then merge cloud overrides on top (if available)
   if (db) {
     try {
       const { data, error } = await db.from('app_settings').select('value').eq('key', CLOUD_ACCOUNTS_KEY).maybeSingle();
       if (error) throw error;
       if (data?.value) Object.assign(STAFF_ACCOUNTS, data.value);
-      normalizeAllAccounts();
-      cleanupLegacyDestinyUsers();
       safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
     } catch (err) {
       console.warn('Cloud staff accounts could not be loaded:', err);
     }
   }
+  // Normalise and clean up exactly once, after all sources are merged
+  normalizeAllAccounts();
+  cleanupLegacyDestinyUsers();
 }
 async function saveStaffAccounts() {
   normalizeAllAccounts();
@@ -575,15 +574,38 @@ function hideSignup() {
   document.getElementById('login-main').style.display='block';
 }
 
+// ── Centralised post-login entry point ───────────────────────────────────────
+// Replaces three near-identical blocks that previously existed in doLogin,
+// doSignup, and the DOMContentLoaded session-restore handler.
+function enterApp(user) {
+  currentUser = user;
+  setCurrentWorkspace(currentUser);
+  safeSessionSet('dr_user', JSON.stringify(currentUser));
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('bottom-nav')?.classList.add('visible');
+  setUserDisplay(currentUser.display, currentUser.role);
+  appStorageMode = db ? 'cloud' : 'local';
+  loadAllData();
+}
+
 function setUserDisplay(display, role) {
-  const parts=display.replace(/[^a-zA-Z ]/g,'').trim().split(' ');
-  const initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():display.substring(0,2).toUpperCase();
-  ['user-chip','sidebar-user-name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=display; });
-  ['topbar-avatar','sidebar-avatar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=initials; });
-  const rEl=document.getElementById('sidebar-user-role');
-  if(rEl) rEl.textContent=(role==='admin'?'Administrator':'Staff');
-  const orgEl=document.querySelector('.suc-org');
-  if(orgEl) orgEl.textContent=getCompanyName();
+  const parts = display.replace(/[^a-zA-Z ]/g, '').trim().split(' ');
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : display.substring(0, 2).toUpperCase();
+  ['user-chip', 'sidebar-user-name'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = display;
+  });
+  ['topbar-avatar', 'sidebar-avatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = initials;
+  });
+  const rEl = document.getElementById('sidebar-user-role');
+  if (rEl) rEl.textContent = role === 'admin' ? 'Administrator' : 'Staff';
+  const orgEl = document.querySelector('.suc-org');
+  if (orgEl) orgEl.textContent = getCompanyName();
   updateWorkspaceLabels();
 }
 
@@ -624,17 +646,17 @@ async function doSignup() {
     }
   }
   await saveStaffAccounts();
-  errEl.style.display='none';
+  errEl.style.display = 'none';
   const account = STAFF_ACCOUNTS[username];
-  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries,authUserId:account.authUserId};
-  setCurrentWorkspace(currentUser);
-  safeSessionSet('dr_user',JSON.stringify(currentUser));
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('bottom-nav')?.classList.add('visible');
-  setUserDisplay(display,'admin');
-  appStorageMode = db ? 'cloud' : 'local';
-  loadAllData();
+  enterApp({
+    username,
+    role: account.role,
+    display: account.display,
+    companyId: account.companyId,
+    companyName: account.companyName,
+    generalJobsCountries: account.generalJobsCountries,
+    authUserId: account.authUserId,
+  });
 }
 
 async function doLogin() {
@@ -656,19 +678,19 @@ async function doLogin() {
   try {
     const authLogin = await signInWithSupabaseAuth(username, password);
     if (authLogin?.account) {
-      STAFF_ACCOUNTS[username]=normalizeAccount(username, authLogin.account);
+      STAFF_ACCOUNTS[username] = normalizeAccount(username, authLogin.account);
       await saveStaffAccounts();
-      errEl.style.display='none';
+      errEl.style.display = 'none';
       setLoginSuccessState();
-      currentUser={username,role:authLogin.account.role,display:authLogin.account.display,companyId:authLogin.account.companyId,companyName:authLogin.account.companyName,generalJobsCountries:authLogin.account.generalJobsCountries,authUserId:authLogin.account.authUserId};
-      setCurrentWorkspace(currentUser);
-      safeSessionSet('dr_user',JSON.stringify(currentUser));
-      document.getElementById('login-screen').style.display='none';
-      document.getElementById('app').style.display='block';
-      document.getElementById('bottom-nav')?.classList.add('visible');
-      setUserDisplay(authLogin.account.display, authLogin.account.role);
-      appStorageMode = db ? 'cloud' : 'local';
-      loadAllData();
+      enterApp({
+        username,
+        role: authLogin.account.role,
+        display: authLogin.account.display,
+        companyId: authLogin.account.companyId,
+        companyName: authLogin.account.companyName,
+        generalJobsCountries: authLogin.account.generalJobsCountries,
+        authUserId: authLogin.account.authUserId,
+      });
       return;
     }
   } catch (err) {
@@ -684,17 +706,16 @@ async function doLogin() {
   }
   if (!passwordCheck.ok) { fail('Incorrect username or password.'); return; }
   if (passwordCheck.migrated) await saveStaffAccounts();
-  errEl.style.display='none';
+  errEl.style.display = 'none';
   setLoginSuccessState();
-  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
-  setCurrentWorkspace(currentUser);
-  safeSessionSet('dr_user',JSON.stringify(currentUser));
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('bottom-nav')?.classList.add('visible');
-  setUserDisplay(account.display, account.role);
-  appStorageMode = db ? 'cloud' : 'local';
-  loadAllData();
+  enterApp({
+    username,
+    role: account.role,
+    display: account.display,
+    companyId: account.companyId,
+    companyName: account.companyName,
+    generalJobsCountries: account.generalJobsCountries,
+  });
 }
 function doLogout() {
   if (db?.auth) db.auth.signOut().catch(err => console.warn('Supabase sign out failed:', err));
@@ -715,18 +736,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   const saved=safeSessionGet('dr_user');
   if (saved) {
     try {
-      const parsed=JSON.parse(saved);
-      const account=STAFF_ACCOUNTS[parsed.username];
-      if(!account) throw new Error('Unknown saved user');
-      currentUser={username:parsed.username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
-      setCurrentWorkspace(currentUser);
-      safeSessionSet('dr_user',JSON.stringify(currentUser));
-      document.getElementById('login-screen').style.display='none';
-      document.getElementById('app').style.display='block';
-      document.getElementById('bottom-nav')?.classList.add('visible');
-      setUserDisplay(currentUser.display, currentUser.role);
-      appStorageMode = db ? 'cloud' : 'local';
-      loadAllData();
+      const parsed = JSON.parse(saved);
+      const account = STAFF_ACCOUNTS[parsed.username];
+      if (!account) throw new Error('Unknown saved user');
+      enterApp({
+        username: parsed.username,
+        role: account.role,
+        display: account.display,
+        companyId: account.companyId,
+        companyName: account.companyName,
+        generalJobsCountries: account.generalJobsCountries,
+      });
     } catch { safeSessionRemove('dr_user'); }
   }
   rebuildStageSelects();
@@ -870,10 +890,15 @@ async function dbDelete(table, id) {
 }
 function fallBackToLocal(err) {
   console.error(err);
-  appStorageMode='local';
-  lastSyncError=err.message||'Supabase write failed';
+  appStorageMode = 'local';
+  lastSyncError = err.message || 'Supabase write failed';
   saveLocalStore();
-  showToast('Cloud save failed. Saved locally instead.','error');
+  showToast('Cloud save failed. Saved locally instead.', 'error');
+  // Keep a visible persistent indicator so users know they are in degraded mode
+  const dot = document.getElementById('save-dot');
+  const lbl = document.getElementById('save-label');
+  if (dot) dot.className = 'save-dot save-dot-warn';
+  if (lbl) lbl.textContent = 'Local only – cloud unavailable';
 }
 async function saveProRecord(rec) {
   setSaveStatus('saving');
@@ -925,10 +950,45 @@ async function saveLBRecord(rec) {
     setSaveStatus('saved');
   } catch(e){ fallBackToLocal(e); setSaveStatus('saved'); }
 }
-async function deleteProRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('pro_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
-async function deleteLBRecord(id){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ await dbDelete('lb_candidates',id); setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
-async function saveDocsToDB(key,data){ setSaveStatus('saving'); if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; } try{ const {error}=await db.from('documents').upsert({key:getCompanyScopedKey(key),data,company_id:getCompanyId()},{onConflict:'key'}); if(error) throw error; setSaveStatus('saved'); }catch(e){fallBackToLocal(e);setSaveStatus('saved');} }
-async function saveTimeline(key){ if(!allTimelines[key]) return; if(!useCloud()){ saveLocalStore(); return; } try{ const {error}=await db.from('timelines').upsert({key:getCompanyScopedKey(key),entries:allTimelines[key],company_id:getCompanyId()},{onConflict:'key'}); if(error) throw error; }catch(e){fallBackToLocal(e);} }
+async function deleteProRecord(id) {
+  setSaveStatus('saving');
+  if (!useCloud()) { saveLocalStore(); setSaveStatus('saved'); return; }
+  try {
+    await dbDelete('pro_candidates', id);
+    setSaveStatus('saved');
+  } catch (e) { fallBackToLocal(e); setSaveStatus('saved'); }
+}
+async function deleteLBRecord(id) {
+  setSaveStatus('saving');
+  if (!useCloud()) { saveLocalStore(); setSaveStatus('saved'); return; }
+  try {
+    await dbDelete('lb_candidates', id);
+    setSaveStatus('saved');
+  } catch (e) { fallBackToLocal(e); setSaveStatus('saved'); }
+}
+async function saveDocsToDB(key, data) {
+  setSaveStatus('saving');
+  if (!useCloud()) { saveLocalStore(); setSaveStatus('saved'); return; }
+  try {
+    const { error } = await db.from('documents').upsert(
+      { key: getCompanyScopedKey(key), data, company_id: getCompanyId() },
+      { onConflict: 'key' }
+    );
+    if (error) throw error;
+    setSaveStatus('saved');
+  } catch (e) { fallBackToLocal(e); setSaveStatus('saved'); }
+}
+async function saveTimeline(key) {
+  if (!allTimelines[key]) return;
+  if (!useCloud()) { saveLocalStore(); return; }
+  try {
+    const { error } = await db.from('timelines').upsert(
+      { key: getCompanyScopedKey(key), entries: allTimelines[key], company_id: getCompanyId() },
+      { onConflict: 'key' }
+    );
+    if (error) throw error;
+  } catch (e) { fallBackToLocal(e); }
+}
 async function saveStages(){
   setSaveStatus('saving');
   if(!useCloud()){ saveLocalStore(); setSaveStatus('saved'); return; }
@@ -4043,9 +4103,9 @@ function setUserDisplay(display, role) {
   function installRenderGuards(){
     const names = ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderTasks','renderClients','renderPro','renderLB','renderKanban','renderCommissions','renderRepayments','renderExpenses','renderTravel'];
     names.forEach(name => {
-      const fn = window[name] || (typeof globalThis !== 'undefined' ? globalThis[name] : null);
+      const fn = window[name];
       if (typeof fn !== 'function' || fn.__drecoGuarded) return;
-      const wrapped = function guardedRender(){
+      window[name] = function guardedRender(){
         try {
           const out = fn.apply(this, arguments);
           setTimeout(()=>{ labelMobileTables(); ensureEmptyStates(); syncAuthShellState(); }, 20);
@@ -4056,9 +4116,7 @@ function setUserDisplay(display, role) {
           return null;
         }
       };
-      wrapped.__drecoGuarded = true;
-      window[name] = wrapped;
-      try { eval(`${name}=window[name]`); } catch {}
+      window[name].__drecoGuarded = true;
     });
   }
 
@@ -4076,7 +4134,6 @@ function setUserDisplay(display, role) {
         return result;
       };
       window[name].__drecoAuthWrapped = true;
-      try { eval(`${name}=window[name]`); } catch {}
     });
   }
 
