@@ -171,7 +171,7 @@ When you log in for the first time after connecting Supabase:
 | Maxwell    | maxwell    | Maxwell@2025  |
 | Consolata  | consolata  | Consol@2025   |
 
-**Recovery code** (for forgot password): `DR-RESET-2025`
+**Forgot password:** Ask a workspace admin to reset the password from the Team page.
 
 ---
 
