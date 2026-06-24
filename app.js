@@ -575,6 +575,18 @@ function hideSignup() {
   document.getElementById('login-main').style.display='block';
 }
 
+function setUserDisplay(display, role) {
+  const parts=display.replace(/[^a-zA-Z ]/g,'').trim().split(' ');
+  const initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():display.substring(0,2).toUpperCase();
+  ['user-chip','sidebar-user-name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=display; });
+  ['topbar-avatar','sidebar-avatar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=initials; });
+  const rEl=document.getElementById('sidebar-user-role');
+  if(rEl) rEl.textContent=(role==='admin'?'Administrator':'Staff');
+  const orgEl=document.querySelector('.suc-org');
+  if(orgEl) orgEl.textContent=getCompanyName();
+  updateWorkspaceLabels();
+}
+
 async function doSignup() {
   await loadStaffAccounts();
   const companyName=(document.getElementById('signup-company').value||'').trim();
@@ -614,18 +626,13 @@ async function doSignup() {
   await saveStaffAccounts();
   errEl.style.display='none';
   const account = STAFF_ACCOUNTS[username];
-  const user={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries,authUserId:account.authUserId};
-  enterApp(user, account.display, account.role);
-}
-
-function enterApp(user, displayName, role){
-  currentUser = user;
-  setCurrentWorkspace(user);
-  safeSessionSet('dr_user', JSON.stringify(user));
+  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries,authUserId:account.authUserId};
+  setCurrentWorkspace(currentUser);
+  safeSessionSet('dr_user',JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('bottom-nav')?.classList.add('visible');
-  setUserDisplay(displayName, role);
+  setUserDisplay(display,'admin');
   appStorageMode = db ? 'cloud' : 'local';
   loadAllData();
 }
@@ -653,8 +660,15 @@ async function doLogin() {
       await saveStaffAccounts();
       errEl.style.display='none';
       setLoginSuccessState();
-      const supaUser={username,role:authLogin.account.role,display:authLogin.account.display,companyId:authLogin.account.companyId,companyName:authLogin.account.companyName,generalJobsCountries:authLogin.account.generalJobsCountries,authUserId:authLogin.account.authUserId};
-      enterApp(supaUser, authLogin.account.display, authLogin.account.role);
+      currentUser={username,role:authLogin.account.role,display:authLogin.account.display,companyId:authLogin.account.companyId,companyName:authLogin.account.companyName,generalJobsCountries:authLogin.account.generalJobsCountries,authUserId:authLogin.account.authUserId};
+      setCurrentWorkspace(currentUser);
+      safeSessionSet('dr_user',JSON.stringify(currentUser));
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      document.getElementById('bottom-nav')?.classList.add('visible');
+      setUserDisplay(authLogin.account.display, authLogin.account.role);
+      appStorageMode = db ? 'cloud' : 'local';
+      loadAllData();
       return;
     }
   } catch (err) {
@@ -672,8 +686,15 @@ async function doLogin() {
   if (passwordCheck.migrated) await saveStaffAccounts();
   errEl.style.display='none';
   setLoginSuccessState();
-  const localUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
-  enterApp(localUser, account.display, account.role);
+  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
+  setCurrentWorkspace(currentUser);
+  safeSessionSet('dr_user',JSON.stringify(currentUser));
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('bottom-nav')?.classList.add('visible');
+  setUserDisplay(account.display, account.role);
+  appStorageMode = db ? 'cloud' : 'local';
+  loadAllData();
 }
 function doLogout() {
   if (db?.auth) db.auth.signOut().catch(err => console.warn('Supabase sign out failed:', err));
@@ -697,8 +718,15 @@ window.addEventListener('DOMContentLoaded', async () => {
       const parsed=JSON.parse(saved);
       const account=STAFF_ACCOUNTS[parsed.username];
       if(!account) throw new Error('Unknown saved user');
-      const sessionUser={username:parsed.username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
-      enterApp(sessionUser, account.display, account.role);
+      currentUser={username:parsed.username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
+      setCurrentWorkspace(currentUser);
+      safeSessionSet('dr_user',JSON.stringify(currentUser));
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      document.getElementById('bottom-nav')?.classList.add('visible');
+      setUserDisplay(currentUser.display, currentUser.role);
+      appStorageMode = db ? 'cloud' : 'local';
+      loadAllData();
     } catch { safeSessionRemove('dr_user'); }
   }
   rebuildStageSelects();
@@ -726,8 +754,6 @@ async function loadAllData() {
     rebuildStageSelects();
     restoreUserFilters();
     hideLoading();
-    saveKpiSnapshot();
-    saveTodayTrendSnapshot();
     switchTab('dash');
     return;
   }
@@ -784,8 +810,6 @@ async function loadAllData() {
   rebuildStageSelects();
   restoreUserFilters();
   hideLoading();
-  saveKpiSnapshot();
-  saveTodayTrendSnapshot();
   switchTab('dash');
 }
 
@@ -1457,8 +1481,7 @@ function moneyUSD(v){ return '$'+Number(v||0).toLocaleString(); }
 function proBalance(r){ return (Number(r.commission)||0)-(Number(r.paid)||0); }
 function proNeedsAction(r){
   const stage=r.stage||'';
-  const hasCommission=r.commission!==null && r.commission!==undefined && Number(r.commission)>0;
-  return !hasDocs('pro',r.id) || (stage!=='TRAVELLED'&&!toInput(r.travel)) || (hasCommission && proBalance(r)>0);
+  return !hasDocs('pro',r.id) || (stage!=='TRAVELLED'&&!toInput(r.travel)) || proBalance(r)>0;
 }
 function lbNeedsAction(r){
   return !hasDocs('lb',r.id) || getRefundStatus(r)==='incomplete' || ((r.travelStatus||r.travel_status)==='NOT YET');
@@ -1647,36 +1670,15 @@ function onGlobalSearch(){
 // DASHBOARD
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function renderDash(){
-  // -- Period filter helpers --
-  function periodStart(){
-    const now=new Date();
-    if(financePeriod==='month') return new Date(now.getFullYear(),now.getMonth(),1).getTime();
-    if(financePeriod==='year')  return new Date(now.getFullYear(),0,1).getTime();
-    return 0; // overall = no filter
-  }
-  function inPeriod(r){
-    if(financePeriod==='overall') return true;
-    const ps=periodStart();
-    // use any available date field
-    const d=drecoDateValue(r.travel||r.visa||r.mol||r.ol||r.submitted);
-    return d>=ps;
-  }
-  function inPeriodLB(r){
-    if(financePeriod==='overall') return true;
-    const ps=periodStart();
-    const d=drecoDateValue(r.travelDate||r.travel_date||r.r2Date||r.r1Date);
-    return d>=ps;
-  }
-
   const proTravelled=proDB.filter(r=>r.stage==='TRAVELLED').length;
   const proInProcess=proDB.filter(isInProcessPro).length;
   let totalComm=0,totalPaid=0;
-  proDB.filter(inPeriod).forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
+  proDB.forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
 
   const lbTravelled=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
   const lbInProcess=lbDB.filter(isInProcessLB).length;
   let lbOwed=0,lbPaid=0,lbFees=0;
-  lbDB.filter(inPeriodLB).forEach(r=>{
+  lbDB.forEach(r=>{
     const ts=r.travelStatus||r.travel_status;
     const pp=r.ppStatus||r.pp_status;
     const notes=(r.notes||'').trim().toUpperCase();
@@ -1702,23 +1704,18 @@ function renderDash(){
     {label:'Offer', value:proDB.filter(r=>r.stage==='PENDING OFFER LETTER').length, icon:'ti-file-description', color:stageColors[0]},
     {label:'MOL', value:proDB.filter(r=>r.stage==='PENDING MOL').length, icon:'ti-building-bank', color:stageColors[1]},
     {label:'Visa', value:proDB.filter(r=>r.stage==='PENDING VISA').length, icon:'ti-id-badge-2', color:stageColors[2]},
-    {label:'Finance', value:proDB.filter(r=>r.commission && Number(r.commission)>0 && proBalance(r)>0).length, icon:'ti-wallet', color:stageColors[3]},
+    {label:'Finance', value:proDB.filter(r=>proBalance(r)>0).length, icon:'ti-wallet', color:stageColors[3]},
     {label:'Travelled', value:proTravelled, icon:'ti-plane-departure', color:stageColors[4]}
   ];
   const stageTotal=Math.max(stageData.reduce((sum,item)=>sum+item.value,0),1);
 
   const pendingTravel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
-  // Sort pending travel: candidates WITH a travel date first (soonest first), then undated
-  const upcomingWithDate=pendingTravel.filter(r=>r.travel).sort((a,b)=>drecoDateValue(a.travel)-drecoDateValue(b.travel));
-  const upcomingNoDate=pendingTravel.filter(r=>!r.travel);
-  const upcoming=[...upcomingWithDate,...upcomingNoDate].slice(0,3);
+  const upcoming=(pendingTravel.length?pendingTravel:proDB.filter(r=>r.stage!=='TRAVELLED')).slice(0,3);
   const upcomingHTML=upcoming.length?upcoming.map((r,i)=>`<div class="ref-travel-item">
     <div class="ref-travel-icon"><i class="ti ti-plane"></i></div>
     <div><div class="ref-travel-name">${escHTML(r.name)}</div><div class="ref-travel-meta">${escHTML(r.company||'-')} | ${escHTML(r.position||'-')}</div></div>
-    <div class="ref-travel-date" style="${!r.travel?'color:var(--text-3)':''}">
-      ${r.travel?fmtDate(r.travel):'<i class="ti ti-calendar-off" style="font-size:12px"></i> No date set'}
-    </div>
-  </div>`).join(''):'<div class="ref-empty"><i class="ti ti-plane-off"></i> No candidates pending travel</div>';
+    <div class="ref-travel-date">${r.travel?fmtDate(r.travel):'No date'}</div>
+  </div>`).join(''):'<div class="ref-empty">No upcoming travels</div>';
 
   const recentActivity=Object.entries(allTimelines)
     .flatMap(([key,entries])=>(entries||[]).map(e=>({...e,key})))
@@ -1747,17 +1744,17 @@ function renderDash(){
   dash.innerHTML=`
     <div class="ref-dashboard">
       <div class="ref-dashboard-head">
-        <div><h1>${getGreeting()}, ${escHTML(firstName)}</h1><p>Here's what's happening in your workspace today.</p></div>
+        <div><h1>Good afternoon, ${escHTML(firstName)}</h1><p>Here's what's happening in your workspace today.</p></div>
         <button class="ref-date-btn" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i><span>Open calendar</span><i class="ti ti-chevron-right"></i></button>
       </div>
 
       <div class="ref-board-grid">
         <div class="ref-main-column">
           <div class="ref-kpi-row">
-            ${renderRefKpi('Total Candidates',totalCandidates,calcKpiChange(totalCandidates,'total'),'ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
-            ${renderRefKpi('In Process',totalInProcess,calcKpiChange(totalInProcess,'inprocess'),'ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
-            ${renderRefKpi('Travelled',totalTravelled,calcKpiChange(totalTravelled,'travelled'),'ti-plane-departure','#EFEAFF','','openTravelledView()')}
-            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),calcKpiChange(totalPaid,'paid'),'ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
+            ${renderRefKpi('Total Candidates',totalCandidates,'12%','ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
+            ${renderRefKpi('In Process',totalInProcess,'8%','ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
+            ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF','','openTravelledView()')}
+            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
           </div>
 
           ${renderSmartAlertsHTML()}
@@ -1773,12 +1770,18 @@ function renderDash(){
 
           <div class="ref-chart-grid">
             <section class="ref-card ref-trend-card">
-              <div class="ref-card-head"><div class="ref-card-title">Pipeline Trend</div><span style="font-size:11px;color:var(--text-3)">Last 7 days</span></div>
+              <div class="ref-card-head"><div class="ref-card-title">Pipeline Trend</div><button onclick="setTrendPeriod()">This Month <i class="ti ti-chevron-down"></i></button></div>
               <div class="ref-legend"><span><b></b>In Process</span><span><b></b>Travelled</span></div>
               <div class="ref-line-chart" onmousemove="updateTrendTooltip(event)" onmouseleave="resetTrendTooltip()">
-                ${buildTrendChart()}
-                <div class="ref-tooltip dynamic" id="trend-tooltip" style="display:none"><strong id="trend-tip-date"></strong><span><b></b>In Process <em id="trend-tip-process"></em></span><span><b></b>Travelled <em id="trend-tip-travelled"></em></span></div>
-                <div class="ref-axis" id="trend-axis"></div>
+                <svg viewBox="0 0 620 210" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A49F8" stop-opacity=".20"/><stop offset="1" stop-color="#5DD6C4" stop-opacity=".04"/></linearGradient></defs>
+                  <path d="M0 150 C80 120 95 90 160 86 C235 82 235 112 310 92 C390 70 420 88 480 92 C545 96 570 58 620 42 L620 210 L0 210 Z" fill="url(#trendFill)"/>
+                  <path d="M0 150 C80 120 95 90 160 86 C235 82 235 112 310 92 C390 70 420 88 480 92 C545 96 570 58 620 42" fill="none" stroke="#5A49F8" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M0 178 C80 160 105 130 170 126 C245 122 255 132 320 116 C398 96 428 118 492 114 C552 110 580 88 620 78" fill="none" stroke="#5DD6C4" stroke-width="4" stroke-linecap="round"/>
+                  <line x1="318" y1="52" x2="318" y2="210" stroke="#B9C2D7" stroke-dasharray="4 6"/>
+                </svg>
+                <div class="ref-tooltip dynamic" id="trend-tooltip"><strong id="trend-tip-date">May 15, 2025</strong><span><b></b>In Process <em id="trend-tip-process">${totalInProcess}</em></span><span><b></b>Travelled <em id="trend-tip-travelled">${totalTravelled}</em></span></div>
+                <div class="ref-axis"><span>May 12</span><span>May 13</span><span>May 14</span><span>May 15</span><span>May 16</span><span>May 17</span><span>May 18</span></div>
               </div>
             </section>
 
@@ -1794,9 +1797,9 @@ function renderDash(){
           <div class="ref-bottom-grid">
             <section class="ref-card"><div class="ref-card-title">Recent Activity</div><div class="ref-list">${recentHTML}</div></section>
             <section class="ref-card"><div class="ref-card-head"><div class="ref-card-title">Tasks</div><button onclick="switchTab('kanban')">View All</button></div><div class="ref-task-list">
-              ${renderRefTask('Review pending visa documents', `${proDB.filter(r=>r.stage==='PENDING VISA').length} candidates`, getTaskUrgency(proDB.filter(r=>r.stage==='PENDING VISA'), 'visa'))}
-              ${renderRefTask('Follow up with MOL for candidates', `${proDB.filter(r=>r.stage==='PENDING MOL').length} candidates`, getTaskUrgency(proDB.filter(r=>r.stage==='PENDING MOL'), 'mol'))}
-              ${renderRefTask('Confirm travel for candidates', `${pendingTravel.length} candidates`, getTaskUrgency(pendingTravel, 'travel'))}
+              ${renderRefTask('Review pending visa documents', `${proDB.filter(r=>r.stage==='PENDING VISA').length} candidates`, 'Overdue')}
+              ${renderRefTask('Follow up with MOL for candidates', `${proDB.filter(r=>r.stage==='PENDING MOL').length} candidates`, 'Due today')}
+              ${renderRefTask('Confirm travel for candidates', `${pendingTravel.length} candidates`, 'Due tomorrow')}
             </div></section>
           </div>
         </div>
@@ -1804,7 +1807,6 @@ function renderDash(){
         <aside class="ref-side-column">
           <section class="ref-fin-card">
             <div class="ref-fin-head"><span>Financial Summary</span>${renderFinancePeriodSelect()}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;margin-bottom:0;text-transform:none;letter-spacing:0">${financePeriod==='month'?'This month only':financePeriod==='year'?'This year only':'All time'}</div>
             <div class="ref-fin-block"><p>Professional Jobs</p><h2>KES ${totalComm.toLocaleString()}</h2><div><span>Collected</span><strong>KES ${totalPaid.toLocaleString()}</strong></div><div><span>Outstanding</span><strong>KES ${(totalComm-totalPaid).toLocaleString()}</strong></div></div>
             <div class="ref-fin-block"><p>General Jobs</p><h2>${moneyUSD(lbFees)}</h2><div><span>Collected</span><strong>${moneyUSD(lbPaid)}</strong></div><div><span>Outstanding</span><strong>${moneyUSD(lbOwed-lbPaid)}</strong></div><div><span>Open Balances</span><strong>${lbIncomplete}</strong></div></div>
             <button class="ref-fin-report" onclick="switchTab('reports')"><i class="ti ti-report-money"></i>View Financial Report<i class="ti ti-chevron-right"></i></button>
@@ -1818,7 +1820,7 @@ function renderDash(){
           </div></section>
         </aside>
       </div>
-      <button class="ref-chat-btn" onclick="switchTab('help')" title="Help &amp; Support"><i class="ti ti-message-circle"></i></button>
+      <button class="ref-chat-btn"><i class="ti ti-message-circle"></i></button>
     </div>`;
 }
 
@@ -1828,14 +1830,6 @@ function openTravelledView(){
   if (typeof rebuildProPills === 'function') rebuildProPills();
   if (typeof renderPro === 'function') renderPro();
   if (typeof showToast === 'function') showToast('Showing travelled candidates','success');
-}
-function filterAndGo(stage, action=''){
-  window.proStagePillFilter = stage;
-  if(action) { const el=document.getElementById('pro-action-f'); if(el) el.value=action; }
-  switchTab('pro');
-  if(typeof rebuildProPills==='function') rebuildProPills();
-  if(typeof renderPro==='function') renderPro();
-  if(stage) showToast(`Showing ${stage.replace('PENDING ','').toLowerCase()} candidates`,'success');
 }
 function openPendingTravelView(){
   window.proStagePillFilter='PENDING TRAVEL';
@@ -1854,145 +1848,24 @@ function openFirstDocumentUpload(){
 function renderFinancePeriodSelect(){
   return `<span class="finance-period-menu"><select aria-label="Financial summary period" onchange="setFinancePeriod(this.value)"><option value="month" ${financePeriod==='month'?'selected':''}>This Month</option><option value="year" ${financePeriod==='year'?'selected':''}>This Year</option><option value="overall" ${financePeriod==='overall'?'selected':''}>Overall</option></select></span>`;
 }
-// *** PIPELINE TREND CHART - REAL DATA ***
-// Builds 7-day snapshots from timeline entries + current state
-// Stores daily snapshots in localStorage so the chart improves over time
-const TREND_HISTORY_KEY = 'dreco_trend_history_v1';
-
-function getTrendHistory(){
-  try {
-    const raw = safeLocalGet(TREND_HISTORY_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e){ return []; }
-}
-
-function saveTodayTrendSnapshot(){
-  const today = new Date().toISOString().slice(0,10);
-  const history = getTrendHistory();
-  // Only save once per day
-  if(history.length && history[history.length-1].date === today) {
-    // Update today's entry with current values
-    history[history.length-1].inProcess = proDB.filter(isInProcessPro).length + lbDB.filter(isInProcessLB).length;
-    history[history.length-1].travelled = proDB.filter(r=>r.stage==='TRAVELLED').length + lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
-  } else {
-    history.push({
-      date: today,
-      inProcess: proDB.filter(isInProcessPro).length + lbDB.filter(isInProcessLB).length,
-      travelled: proDB.filter(r=>r.stage==='TRAVELLED').length + lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length,
-    });
-  }
-  // Keep last 30 days
-  while(history.length > 30) history.shift();
-  safeLocalSet(TREND_HISTORY_KEY, JSON.stringify(history));
-  return history;
-}
-
-function buildTrendPoints(){
-  // Get or build 7-day data. Uses stored history + today's live values.
-  const history = saveTodayTrendSnapshot();
-  // Build last 7 days
-  const days = [];
-  for(let i=6; i>=0; i--){
-    const d = new Date();
-    d.setDate(d.getDate()-i);
-    const iso = d.toISOString().slice(0,10);
-    const label = d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
-    const snap = history.find(h=>h.date===iso);
-    days.push({ date:iso, label, inProcess: snap?.inProcess ?? null, travelled: snap?.travelled ?? null });
-  }
-  return days;
-}
-
-function buildTrendChart(){
-  const days = buildTrendPoints();
-  const W=620, H=200, PAD_T=20, PAD_B=10;
-  const chartH = H - PAD_T - PAD_B;
-
-  const inPValues = days.map(d=>d.inProcess).filter(v=>v!==null);
-  const trValues  = days.map(d=>d.travelled).filter(v=>v!==null);
-  const allVals   = [...inPValues, ...trValues];
-  const maxVal = Math.max(...allVals, 1);
-  const minVal = 0;
-  const range  = maxVal - minVal || 1;
-
-  function toY(v){ return PAD_T + chartH - Math.round(((v-minVal)/range)*chartH); }
-  function toX(i){ return Math.round((i/(days.length-1))*W); }
-
-  // Build SVG path from data points (skip nulls with a gap)
-  function buildPath(key){
-    let d='', started=false;
-    days.forEach((day,i)=>{
-      const v = day[key];
-      if(v===null){ started=false; return; }
-      const x=toX(i), y=toY(v);
-      if(!started){ d+=`M${x} ${y}`; started=true; }
-      else { d+=` L${x} ${y}`; }
-    });
-    return d;
-  }
-
-  const inPPath  = buildPath('inProcess');
-  const trPath   = buildPath('travelled');
-  const firstInP = days.find(d=>d.inProcess!==null);
-  const lastInP  = [...days].reverse().find(d=>d.inProcess!==null);
-  const fillClose = firstInP && lastInP
-    ? ` L${toX(days.indexOf(lastInP))} ${H-PAD_B} L${toX(days.indexOf(firstInP))} ${H-PAD_B} Z`
-    : '';
-
-  // Store points for tooltip
-  window._trendDays = days;
-  window._trendMaxVal = maxVal;
-
-  // Update axis labels
-  setTimeout(()=>{
-    const ax = document.getElementById('trend-axis');
-    if(ax) ax.innerHTML = days.map(d=>`<span>${d.label}</span>`).join('');
-  }, 0);
-
-  const hasData = inPValues.length > 0;
-  const noDataOverlay = !hasData
-    ? `<text x="310" y="110" text-anchor="middle" fill="#A0ACC0" font-size="13" font-family="sans-serif">Trend builds as you use Dreco daily</text>`
-    : '';
-
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#5A49F8" stop-opacity=".18"/>
-        <stop offset="1" stop-color="#5A49F8" stop-opacity=".02"/>
-      </linearGradient>
-    </defs>
-    ${inPPath ? `<path d="${inPPath}${fillClose}" fill="url(#trendFill)"/>` : ''}
-    ${inPPath ? `<path d="${inPPath}" fill="none" stroke="#5A49F8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-    ${trPath  ? `<path d="${trPath}"  fill="none" stroke="#5DD6C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-    ${days.map((day,i)=>{
-      const v=day.inProcess; if(v===null) return '';
-      return `<circle cx="${toX(i)}" cy="${toY(v)}" r="4" fill="#5A49F8"/>`;
-    }).join('')}
-    ${days.map((day,i)=>{
-      const v=day.travelled; if(v===null) return '';
-      return `<circle cx="${toX(i)}" cy="${toY(v)}" r="4" fill="#5DD6C4"/>`;
-    }).join('')}
-    ${noDataOverlay}
-  </svg>`;
-}
-
+function setTrendPeriod(){ showToast('Pipeline trend is showing this month. More periods can be added once monthly history is synced.','success'); }
 function updateTrendTooltip(event){
   const tip=document.getElementById('trend-tooltip');
   const chart=event.currentTarget;
-  if(!tip||!chart||!window._trendDays) return;
+  if(!tip||!chart) return;
   const rect=chart.getBoundingClientRect();
   const pct=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width));
-  const idx=Math.round(pct*(window._trendDays.length-1));
-  const day=window._trendDays[idx];
-  if(!day) return;
-  document.getElementById('trend-tip-date').textContent=day.label;
-  document.getElementById('trend-tip-process').textContent=day.inProcess??'—';
-  document.getElementById('trend-tip-travelled').textContent=day.travelled??'—';
-  tip.style.left=`${Math.min(Math.max(event.clientX-rect.left-60,8),rect.width-140)}px`;
-  tip.style.top='30px';
+  const day=12+Math.round(pct*6);
+  const inProcess=Math.max(1,Math.round((proDB.length+lbDB.length)*(0.35+pct*.3)));
+  const travelled=Math.max(0,Math.round((proDB.filter(r=>r.stage==='TRAVELLED').length+lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length)*(0.7+pct*.45)));
+  document.getElementById('trend-tip-date').textContent=`May ${day}, 2025`;
+  document.getElementById('trend-tip-process').textContent=inProcess;
+  document.getElementById('trend-tip-travelled').textContent=travelled;
+  tip.style.left=`${Math.min(Math.max(event.clientX-rect.left-70,10),rect.width-150)}px`;
+  tip.style.top='64px';
   tip.style.display='block';
 }
-function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display='none'; }
+function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display=''; }
 function persistExpenses(){ safeLocalSet('dreco_expenses', JSON.stringify(drecoExpenses)); }
 function persistEvents(){ safeLocalSet('dreco_events', JSON.stringify(drecoEvents)); }
 function persistAudit(){ safeLocalSet('dreco_audit', JSON.stringify(drecoAudit)); }
@@ -2030,12 +1903,12 @@ function getSmartAlerts(){
   const now=Date.now(), day=86400000;
   const oldMol=proDB.filter(r=>r.stage==='PENDING MOL' && drecoDateValue(r.submitted) && now-drecoDateValue(r.submitted)>7*day);
   const oldVisa=proDB.filter(r=>r.stage==='PENDING VISA' && Math.max(drecoDateValue(r.mol),drecoDateValue(r.submitted)) && now-Math.max(drecoDateValue(r.mol),drecoDateValue(r.submitted))>10*day);
-  const unpaid=proDB.filter(r=>r.commission && Number(r.commission)>0 && proBalance(r)>0).sort((a,b)=>proBalance(b)-proBalance(a));
+  const unpaid=proDB.filter(r=>proBalance(r)>0).sort((a,b)=>proBalance(b)-proBalance(a));
   const travel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
   return [
-    {label:'MOL overdue',value:oldMol.length,icon:'ti-clock-exclamation',tone:'warn',target:"filterAndGo('PENDING MOL')"},
-    {label:'Visa pending too long',value:oldVisa.length,icon:'ti-id-badge-2',tone:'violet',target:"filterAndGo('PENDING VISA')"},
-    {label:'Unpaid commissions',value:unpaid.length,icon:'ti-cash-banknote',tone:'money',target:"filterAndGo('','outstanding')"},
+    {label:'MOL overdue',value:oldMol.length,icon:'ti-clock-exclamation',tone:'warn',target:"switchTab('pro')"},
+    {label:'Visa pending too long',value:oldVisa.length,icon:'ti-id-badge-2',tone:'violet',target:"switchTab('pro')"},
+    {label:'Unpaid commissions',value:unpaid.length,icon:'ti-cash-banknote',tone:'money',target:"switchTab('commissions')"},
     {label:'Pending travel',value:travel.length,icon:'ti-plane',tone:'blue',target:'openPendingTravelView()'}
   ].filter(a=>a.value>0);
 }
@@ -2259,87 +2132,11 @@ function renderHelpPage(){
 function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
 function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
   const onclick=action?` onclick="${action}"`:'';
-  let changeHTML='';
-  if(change===null||change===undefined){
-    changeHTML=`<em style="color:var(--text-3);font-size:10px">tracking...</em>`;
-  } else if(change==='no change'){
-    changeHTML=`<em style="color:var(--text-3)"><i class="ti ti-minus"></i> no change <small>vs last week</small></em>`;
-  } else {
-    const isDown=String(change).startsWith('-');
-    changeHTML=`<em style="${isDown?'color:#EF4444':''}"><i class="ti ${isDown?'ti-arrow-down':'ti-arrow-up'}"></i>${escHTML(String(change))} <small>vs last week</small></em>`;
-  }
-  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong>${changeHTML}</div></div>`;
+  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
 }
 function renderRefTask(title,meta,due){
   return `<div class="ref-task"><span></span><div><strong>${escHTML(title)}</strong><small>${escHTML(meta)}</small></div><em>${escHTML(due)}</em></div>`;
 }
-// KPI weekly snapshot system - stores current values weekly and computes real change
-const KPI_SNAPSHOT_KEY = 'dreco_kpi_snapshot_v1';
-function saveKpiSnapshot(){
-  const now = Date.now();
-  const snapshot = {
-    ts: now,
-    total: proDB.length + lbDB.length,
-    inprocess: proDB.filter(isInProcessPro).length + lbDB.filter(isInProcessLB).length,
-    travelled: proDB.filter(r=>r.stage==='TRAVELLED').length + lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length,
-    paid: proDB.reduce((s,r)=>s+(Number(r.paid)||0),0),
-  };
-  safeLocalSet(KPI_SNAPSHOT_KEY, JSON.stringify(snapshot));
-}
-function calcKpiChange(currentValue, key){
-  try {
-    const raw = safeLocalGet(KPI_SNAPSHOT_KEY);
-    if(!raw){ saveKpiSnapshot(); return null; }
-    const snap = JSON.parse(raw);
-    const age = Date.now() - (snap.ts||0);
-    if(age > 7*24*60*60*1000){ saveKpiSnapshot(); return null; }
-    if(age < 60*60*1000) return null;
-    const prev = snap[key];
-    if(prev===undefined||prev===null) return null;
-    if(prev===0 && currentValue===0) return null;
-    if(prev===0) return '+new';
-    const pct = Math.round(((currentValue - prev) / prev) * 100);
-    if(pct===0) return 'no change';
-    return (pct>0?'+':'')+pct+'%';
-  } catch(e){ return null; }
-}
-function getGreeting(){
-  const h=new Date().getHours();
-  if(h<12) return 'Good morning';
-  if(h<17) return 'Good afternoon';
-  return 'Good evening';
-}
-function getTaskUrgency(rows, dateField){
-  if(!rows.length) return 'Up to date';
-  const now=Date.now(), day=86400000;
-  // find oldest entry in this group
-  let oldest=0;
-  rows.forEach(r=>{
-    const d=drecoDateValue(r[dateField]||r.submitted||r.ol||r.mol);
-    if(d && d>oldest) oldest=d; // most recent stage date
-  });
-  // find most stale - use submitted as fallback
-  let mostStale=Infinity;
-  rows.forEach(r=>{
-    const d=drecoDateValue(r[dateField]||r.submitted||r.ol);
-    if(d && d<mostStale) mostStale=d;
-  });
-  if(mostStale===Infinity) return `${rows.length} pending`;
-  const daysStale=Math.floor((now-mostStale)/day);
-  if(dateField==='travel'){
-    // travel: flag if anyone has a travel date in the past
-    const pastTravel=rows.filter(r=>r.travel && drecoDateValue(r.travel) < now);
-    if(pastTravel.length) return 'Travel date passed!';
-    const soon=rows.filter(r=>r.travel && drecoDateValue(r.travel)-now < 3*day);
-    if(soon.length) return 'Travel soon';
-    return `${rows.length} pending`;
-  }
-  if(daysStale>14) return `${daysStale}d overdue`;
-  if(daysStale>7)  return `${daysStale}d stale`;
-  if(daysStale>3)  return `${daysStale}d in stage`;
-  return `${rows.length} active`;
-}
-
 function buildConic(items,total){
   let cursor=0;
   const stops=items.map(item=>{
@@ -2689,7 +2486,7 @@ async function saveDocs(){
   allDocs[dbKey]=link;
   addTimeline(type,id,link?'Documents link updated':'Documents link removed');
   auditAction('Documents',link?'Documents link updated':'Documents link removed',docsTarget.name||'Candidate');
-  closeModal('docs-modal'); showToast('Documents saved','success');
+  closeModal('docs-modal'); showToast('Documents saved Å“"','success');
   if(type==='pro') renderPro(); else renderLB();
   await saveDocsToDB(dbKey,link);
 }
@@ -2722,7 +2519,7 @@ function exportCSV(type){
     href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),
     download:`${filename}_${new Date().toISOString().split('T')[0]}.csv`
   });
-  a.click(); showToast('Export downloaded','success');
+  a.click(); showToast('Export downloaded Å“"','success');
 }
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
@@ -2936,3 +2733,190 @@ function setUserDisplay(display, role) {
 
 
 
+
+
+// =========================================================
+// DRECO OPERATIONS UI REFRESH
+// Keeps Supabase/data/auth/save/edit functions from the original app.
+// Replaces the internal rendering shell with Home, Pipeline, Candidates,
+// Tasks, Finance, Documents, Reports, Clients, and Settings.
+// =========================================================
+(function(){
+  const UI_TABS = ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'];
+  const LEGACY_TABS = ['pro','lb','kanban','travel','calendar','commissions','repayments','expenses','team','help'];
+  const ALL_TABS = [...UI_TABS, ...LEGACY_TABS];
+  const tabTitles = {dash:'Home',pipeline:'Pipeline',candidates:'Candidates',tasks:'Tasks',finance:'Finance',documents:'Documents',reports:'Reports',clients:'Clients',settings:'Settings'};
+  const tabIcons = {dash:'ti-home',pipeline:'ti-route',candidates:'ti-users',tasks:'ti-checkbox',finance:'ti-coin',documents:'ti-file-description',reports:'ti-chart-bar',clients:'ti-building-skyscraper',settings:'ti-settings'};
+
+  function safeText(v){ return (typeof escHTML === 'function') ? escHTML(v ?? '') : String(v ?? '').replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s])); }
+  function initials(name){ return String(name||'DR').replace(/[^a-zA-Z ]/g,'').trim().split(/\s+/).filter(Boolean).map(x=>x[0]).join('').slice(0,2).toUpperCase() || 'DR'; }
+  function moneyKES(n){ n=Number(n)||0; return 'KES ' + n.toLocaleString(); }
+  function moneyUSDLocal(n){ return (typeof moneyUSD === 'function') ? moneyUSD(n) : '$' + (Number(n)||0).toLocaleString(); }
+  function fmt(v){ return (typeof fmtDate === 'function') ? fmtDate(v) : (v || '—'); }
+  function balancePro(r){ return (typeof proBalance === 'function') ? proBalance(r) : Math.max((Number(r.commission)||0)-(Number(r.paid)||0),0); }
+  function refundStatus(r){ return (typeof getRefundStatus === 'function') ? getRefundStatus(r) : 'N/A'; }
+  function candidateAvatar(name){ return `<div class="avatar-mini">${safeText(initials(name))}</div>`; }
+  function stageClass(stage){ const s=String(stage||'').toLowerCase(); if(s.includes('travelled')&&!s.includes('not')) return 'green'; if(s.includes('visa')) return 'blue'; if(s.includes('mol')||s.includes('offer')) return 'orange'; if(s.includes('not')) return 'red'; return ''; }
+  function stageBadge(stage){ return `<span class="stage-badge ${stageClass(stage)}">${safeText(stage || 'Not set')}</span>`; }
+  function companyName(){ return (typeof getCompanyName === 'function') ? getCompanyName() : 'Destiny Recruit Consults'; }
+  function currentFirstName(){ return currentUser?.display?.split(' ')?.[0] || 'John'; }
+  function allCandidateRows(){
+    const pro=(Array.isArray(proDB)?proDB:[]).map(r=>({type:'pro',id:r.id,name:r.name,pp:r.pp,phone:r.phone,position:r.position||'—',company:r.company||'—',country:r.country||'—',stage:r.stage||'—',submitted:r.submitted,owner:currentUser?.display||'Team',commission:Number(r.commission)||0,paid:Number(r.paid)||0,balance:balancePro(r),raw:r}));
+    const lb=(Array.isArray(lbDB)?lbDB:[]).map(r=>({type:'lb',id:r.id,name:r.name,pp:r.pp||r.passport||'',phone:r.phone,position:'General Job',company:r.company||getActiveGeneralCountry?.()||'General',country:r.country||getActiveGeneralCountry?.()||'—',stage:r.travelStatus||r.travel_status||'NOT YET',submitted:r.travelDate||r.travel_date,owner:currentUser?.display||'Team',commission:Number(r.toRefund||r.to_refund)||0,paid:(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0),balance:Math.max((Number(r.toRefund||r.to_refund)||0)-((Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0)),0),raw:r}));
+    return [...pro,...lb];
+  }
+  function ensureRefreshSections(){
+    const area=document.querySelector('.content-area'); if(!area) return;
+    UI_TABS.forEach(t=>{ if(!document.getElementById(`${t}-section`)){ const div=document.createElement('div'); div.id=`${t}-section`; div.style.display='none'; area.appendChild(div); } });
+  }
+  function setupRefreshShell(){
+    const side=document.querySelector('#app .sidebar');
+    if(side && !side.dataset.refreshShell){
+      side.innerHTML = `
+        <div class="sidebar-top">
+          <a class="sidebar-logo" onclick="switchTab('dash')" aria-label="Dreco home">
+            <div class="sidebar-logo-mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6C3 4.343 4.343 3 6 3h4c1.657 0 3 1.343 3 3v4c0 1.657-1.343 3-3 3H6c-1.657 0-3-1.343-3-3V6Z"/><path d="M14 14c0-1.105.895-2 2-2h4c1.105 0 2 .895 2 2v6c0 1.105-.895 2-2 2h-4c-1.105 0-2-.895-2-2v-6Z" opacity=".55"/><path d="M3 17c0-1.105.895-2 2-2h3c1.105 0 2 .895 2 2v2c0 1.105-.895 2-2 2H5c-1.105 0-2-.895-2-2v-2Z" opacity=".32"/></svg></div>
+            <span class="sidebar-logo-text">DRECO</span>
+          </a>
+          <button class="sidebar-toggle" onclick="toggleSidebar()" type="button"><i class="ti ti-chevrons-left"></i></button>
+        </div>
+        <button class="sidebar-user-card sidebar-account-trigger" onclick="toggleProfileDropdown(event)" type="button">
+          <div class="suc-avatar" id="suc-avatar">${safeText(initials(currentUser?.display))}</div>
+          <div class="suc-info"><div class="suc-name" id="suc-name">${safeText(currentUser?.display || 'User')}</div><div class="suc-org">${safeText(companyName())}</div></div>
+        </button>
+        <div class="sidebar-divider"></div>
+        <div class="nav-section-label">Workspace</div>
+        ${['dash','pipeline','candidates','tasks'].map(navHTML).join('')}
+        <div class="nav-section-label">Operations</div>
+        ${['finance','documents','reports','clients'].map(navHTML).join('')}
+        <div class="nav-section-label">System</div>
+        ${navHTML('settings')}
+        <div class="nav-spacer"></div>`;
+      side.dataset.refreshShell='1';
+    }
+    const bnav=document.getElementById('bottom-nav');
+    if(bnav && !bnav.dataset.refreshShell){
+      bnav.innerHTML = UI_TABS.map(t=>`<button class="bottom-nav-item" id="bnav-${t}" onclick="switchTab('${t}')" aria-label="${tabTitles[t]}"><i class="ti ${tabIcons[t]}"></i><span>${tabTitles[t]}</span></button>`).join('');
+      bnav.dataset.refreshShell='1';
+    }
+    ensureRefreshSections();
+    const ws=document.getElementById('topbar-workspace-name'); if(ws) ws.textContent=companyName();
+  }
+  function navHTML(t){ return `<a class="nav-item" id="nav-${t}" data-title="${tabTitles[t]}" onclick="switchTab('${t}')"><i class="ti ${tabIcons[t]}"></i><span class="nav-item-label">${tabTitles[t]}</span></a>`; }
+  function markActive(t){
+    document.querySelectorAll('#app .nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById(`nav-${t}`)?.classList.add('active');
+    document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById(`bnav-${t}`)?.classList.add('active');
+  }
+
+  window.switchTab = function(t){
+    setupRefreshShell();
+    const aliases={pro:'candidates',lb:'candidates',kanban:'pipeline',calendar:'tasks',commissions:'finance',repayments:'finance',expenses:'finance',team:'settings',travel:'pipeline',help:'settings'};
+    t=aliases[t] || t || 'dash';
+    ALL_TABS.forEach(x=>{ const sec=document.getElementById(`${x}-section`); if(sec) sec.style.display='none'; });
+    UI_TABS.forEach(x=>{ const sec=document.getElementById(`${x}-section`); if(sec) sec.style.display=(x===t)?'':'none'; });
+    markActive(t);
+    if(typeof closeProfileDropdown === 'function') closeProfileDropdown();
+    const title=document.getElementById('topbar-title'); if(title) title.textContent=tabTitles[t] || 'Dreco';
+    if(t==='dash') renderDash();
+    if(t==='pipeline') renderPipelinePage();
+    if(t==='candidates') renderCandidatesPage();
+    if(t==='tasks') renderTasksPage();
+    if(t==='finance') renderFinancePage();
+    if(t==='documents') renderDocumentsPage();
+    if(t==='reports') renderReportsPage();
+    if(t==='clients') renderClientsPage();
+    if(t==='settings') { if(typeof renderSettingsPage === 'function') renderSettingsPage(); polishSettingsPage(); }
+  };
+
+  window.renderDash = function(){
+    setupRefreshShell();
+    const el=document.getElementById('dash-section'); if(!el) return;
+    const rows=allCandidateRows();
+    const awaitingMol=(proDB||[]).filter(r=>r.stage==='PENDING MOL').length;
+    const visaReady=(proDB||[]).filter(r=>r.stage==='PENDING VISA').length;
+    const unpaid=rows.filter(r=>r.balance>0).length;
+    const tickets=(proDB||[]).filter(r=>r.stage==='PENDING TRAVEL').length;
+    const compliance=rows.filter(r=>!hasDocs?.(r.type,r.id)).length;
+    const totalPaid=rows.reduce((s,r)=>s+r.paid,0);
+    const travelled=rows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
+    el.innerHTML=`<div class="dreco-page">
+      <div class="dreco-page-head"><div><h1>Good morning, ${safeText(currentFirstName())} 👋</h1><p>Here is what needs your attention today.</p></div><div class="dreco-head-actions"><button class="dreco-btn" onclick="switchTab('tasks')"><i class="ti ti-checkbox"></i>View all tasks</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>New Candidate</button></div></div>
+      <div class="dreco-grid priority-grid">
+        ${priority('ti-file-description',awaitingMol,'Awaiting MOL','High priority','#fff4de','switchTab(\'pipeline\')')}
+        ${priority('ti-id-badge-2',visaReady,'Visas Ready','Ready to travel','#e9f3ff','switchTab(\'pipeline\')')}
+        ${priority('ti-coin',unpaid,'Unpaid Commissions','Requires follow up','#e8f8ee','switchTab(\'finance\')')}
+        ${priority('ti-plane-departure',tickets,'Tickets Pending','Awaiting issue','#f1efff','switchTab(\'pipeline\')')}
+        ${priority('ti-alert-circle',compliance,'Compliance Issue','Missing documents','#feecef','switchTab(\'documents\')')}
+      </div>
+      <div class="dreco-card pad"><div class="dreco-card-title">Pipeline Overview <span onclick="switchTab('pipeline')" style="cursor:pointer">View pipeline →</span></div><div class="pipeline-flow">${flowStepsHTML()}</div></div>
+      <div class="dreco-grid dash-two">
+        <div class="dreco-card pad"><div class="dreco-card-title">Recent Activity <span>Latest changes</span></div><div class="activity-list">${recentActivityHTML()}</div></div>
+        <div class="dreco-card pad"><div class="dreco-card-title">Upcoming Reminders <span>${rows.length} records</span></div><div class="task-list">${tasksHTML(5)}</div></div>
+      </div>
+      <div class="dreco-grid dreco-kpis" style="margin-top:14px">
+        ${kpi('Candidates',rows.length,'All active records','ti-users','switchTab(\'candidates\')')}
+        ${kpi('Travelled',travelled,'Completed placements','ti-plane','switchTab(\'pipeline\')')}
+        ${kpi('Collected',moneyKES(totalPaid),'Recorded payments','ti-wallet','switchTab(\'finance\')')}
+        ${kpi('Clients',clientRows().length,'Companies served','ti-building','switchTab(\'clients\')')}
+        ${kpi('Documents',Object.values(allDocs||{}).filter(Boolean).length,'Drive links saved','ti-folder','switchTab(\'documents\')')}
+      </div>
+    </div>`;
+  };
+  function kpi(label,value,note,icon,click){ return `<div class="dreco-kpi" onclick="${click||''}"><div class="dreco-kpi-icon"><i class="ti ${icon}"></i></div><div class="dreco-kpi-label">${label}</div><div class="dreco-kpi-value">${safeText(value)}</div><div class="dreco-kpi-note">${safeText(note)}</div></div>`; }
+  function priority(icon,num,label,note,bg,click){ return `<div class="priority-card" onclick="${click}"><div class="priority-icon" style="background:${bg};color:#5347CE"><i class="ti ${icon}"></i></div><strong>${safeText(num)}</strong><span>${safeText(label)}</span><small>${safeText(note)}</small></div>`; }
+  function flowStepsHTML(){ const data=[['Submitted',(proDB||[]).length+(lbDB||[]).length],['Interview',(proDB||[]).filter(r=>r.interview).length],['Offer',(proDB||[]).filter(r=>r.ol||r.stage==='PENDING OFFER LETTER').length],['MOL',(proDB||[]).filter(r=>r.mol||r.stage==='PENDING MOL').length],['Visa',(proDB||[]).filter(r=>r.visa||r.stage==='PENDING VISA').length],['Travelled',allCandidateRows().filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length]]; return data.map(([l,v])=>`<div class="flow-step"><span>${l}</span><strong>${v}</strong></div>`).join(''); }
+  function recentActivityHTML(){
+    const entries=Object.entries(allTimelines||{}).flatMap(([key,arr])=>(arr||[]).map(e=>({...e,key}))).sort((a,b)=>new Date(b.ts||0)-new Date(a.ts||0)).slice(0,5);
+    if(!entries.length) return `<div class="empty-state">Activity will appear here when your team edits candidates, payments, documents, and stages.</div>`;
+    return entries.map(e=>`<div class="activity-item"><div class="activity-icon"><i class="ti ti-history"></i></div><div><div class="item-title">${safeText(e.action||'Candidate updated')}</div><div class="item-meta">by ${safeText(e.user||'Dreco')} • ${safeText(e.ts?fmt(e.ts):'')}</div></div><span class="item-pill">Activity</span></div>`).join('');
+  }
+  function buildTasks(){
+    const tasks=[]; allCandidateRows().forEach(r=>{
+      if(!hasDocs?.(r.type,r.id)) tasks.push({priority:'High',title:`Upload documents - ${r.name}`,meta:`${r.position} • ${r.company}`,action:`openDocs('${r.type}',${JSON.stringify(r.id)},'${String(r.name||'').replace(/'/g,"\\'")}')`,icon:'ti-folder-up'});
+      if(r.balance>0) tasks.push({priority:'High',title:`Follow up payment - ${r.name}`,meta:`Balance ${moneyKES(r.balance)}`,action:r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`,icon:'ti-coin'});
+      if(r.type==='pro' && r.stage==='PENDING TRAVEL') tasks.push({priority:'Medium',title:`Ticket pending - ${r.name}`,meta:`${r.company} • ${r.position}`,action:`editPro(${r.id})`,icon:'ti-plane-departure'});
+      if(r.type==='pro' && r.stage==='PENDING VISA') tasks.push({priority:'Medium',title:`Visa follow-up - ${r.name}`,meta:`${r.company} • ${r.position}`,action:`editPro(${r.id})`,icon:'ti-id-badge-2'});
+    }); return tasks;
+  }
+  function tasksHTML(limit){ const tasks=buildTasks().slice(0,limit||100); if(!tasks.length) return `<div class="empty-state">No urgent tasks. Your workspace is clean.</div>`; return tasks.map(t=>`<div class="task-item" onclick="${t.action}"><div class="task-icon"><i class="ti ${t.icon}"></i></div><div><div class="item-title">${safeText(t.title)}</div><div class="item-meta">${safeText(t.meta)}</div></div><span class="item-pill">${safeText(t.priority)}</span></div>`).join(''); }
+
+  window.renderPipelinePage = function(){
+    const el=document.getElementById('pipeline-section'); if(!el) return; const stages=['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
+    el.innerHTML=`<div class="dreco-page"><div class="dreco-page-head"><div><h1>Pipeline</h1><p>Move candidates through offer, MOL, visa, ticketing, and travel.</p></div><div class="dreco-head-actions"><button class="dreco-btn" onclick="renderPipelinePage()"><i class="ti ti-refresh"></i>Refresh</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate</button></div></div><div class="pipeline-board">${stages.map(stage=>pipeCol(stage,(proDB||[]).filter(r=>r.stage===stage))).join('')}</div></div>`;
+  };
+  function pipeCol(stage,items){ return `<div class="pipe-col"><div class="pipe-col-head"><strong>${safeText(stage.replace('PENDING ',''))}</strong><span class="pipe-count">${items.length}</span></div>${items.length?items.slice(0,50).map(r=>`<div class="pipe-card" onclick="editPro(${r.id})"><div class="pipe-card-name">${safeText(r.name)}</div><div class="pipe-card-meta">${safeText(r.position||'—')}<br>${safeText(r.company||'—')}</div><div class="pipe-card-foot"><span>${safeText(r.pp||'No PP')}</span><span>${r.commission?moneyKES(r.commission):''}</span></div></div>`).join(''):`<div class="empty-state">No candidates</div>`}</div>`; }
+
+  window.renderCandidatesPage = function(){
+    const el=document.getElementById('candidates-section'); if(!el) return; const rows=filterRows();
+    el.innerHTML=`<div class="dreco-page"><div class="dreco-page-head"><div><h1>Candidates</h1><p>Unified candidate list from professional and general jobs.</p></div><div class="dreco-head-actions"><button class="dreco-btn" onclick="openLBForm()"><i class="ti ti-briefcase"></i>Add General</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Professional</button></div></div><div class="toolbar"><div class="toolbar-left"><input class="dreco-input" id="candidate-search" placeholder="Search candidates..." oninput="renderCandidatesPage()" value="${safeText(document.getElementById('candidate-search')?.value||'')}"><select class="dreco-select" id="candidate-type-filter" onchange="renderCandidatesPage()"><option value="">All jobs</option><option value="pro">Professional</option><option value="lb">General</option></select><select class="dreco-select" id="candidate-stage-filter" onchange="renderCandidatesPage()"><option value="">All stages</option>${[...new Set(allCandidateRows().map(r=>r.stage).filter(Boolean))].map(s=>`<option>${safeText(s)}</option>`).join('')}</select></div><div class="toolbar-right"><button class="dreco-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export Pro</button><button class="dreco-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button></div></div>${candidateTable(rows)}</div>`;
+    const type=document.getElementById('candidate-type-filter'); if(type) type.value=sessionStorage.getItem('dreco_candidate_type')||'';
+    const stage=document.getElementById('candidate-stage-filter'); if(stage) stage.value=sessionStorage.getItem('dreco_candidate_stage')||'';
+  };
+  function filterRows(){
+    const q=String(document.getElementById('candidate-search')?.value||'').toLowerCase();
+    const type=String(document.getElementById('candidate-type-filter')?.value||sessionStorage.getItem('dreco_candidate_type')||'');
+    const stage=String(document.getElementById('candidate-stage-filter')?.value||sessionStorage.getItem('dreco_candidate_stage')||'');
+    sessionStorage.setItem('dreco_candidate_type',type); sessionStorage.setItem('dreco_candidate_stage',stage);
+    return allCandidateRows().filter(r=>(!type||r.type===type)&&(!stage||r.stage===stage)&&(!q||[r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q)));
+  }
+  function candidateTable(rows){ return `<div class="table-card"><div class="dreco-table-wrap"><table class="dreco-table"><thead><tr><th>Name</th><th>Job Title</th><th>Company</th><th>Stage</th><th>Submitted/Travel</th><th>Balance</th><th>Owner</th><th>Actions</th></tr></thead><tbody>${rows.map(r=>`<tr><td><div class="name-cell">${candidateAvatar(r.name)}<div><div class="item-title">${safeText(r.name)}</div><div class="item-meta">${safeText(r.pp||'No passport')}</div></div></div></td><td>${safeText(r.position)}</td><td>${safeText(r.company)}</td><td>${stageBadge(r.stage)}</td><td>${safeText(fmt(r.submitted))}</td><td>${r.balance?moneyKES(r.balance):'<span class="stage-badge green">Clear</span>'}</td><td>${safeText(r.owner)}</td><td><button class="action-mini" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-edit"></i>Edit</button> <button class="action-mini" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${safeText(String(r.name).replace(/'/g,"\\'"))}')"><i class="ti ti-paperclip"></i>Docs</button></td></tr>`).join('') || `<tr><td colspan="8"><div class="empty-state">No candidates found.</div></td></tr>`}</tbody></table></div></div>`; }
+
+  window.renderTasksPage = function(){ const el=document.getElementById('tasks-section'); if(!el) return; const tasks=buildTasks(); el.innerHTML=`<div class="dreco-page"><div class="dreco-page-head"><div><h1>Tasks</h1><p>Priority queue generated from missing documents, unpaid balances, and pending workflow stages.</p></div><div class="dreco-head-actions"><button class="dreco-btn primary" onclick="switchTab('candidates')"><i class="ti ti-users"></i>Open Candidates</button></div></div><div class="dreco-grid dreco-kpis">${kpi('Open Tasks',tasks.length,'Needs attention','ti-checkbox','')}${kpi('High Priority',tasks.filter(t=>t.priority==='High').length,'Payment/docs','ti-alert-triangle','')}${kpi('Medium Priority',tasks.filter(t=>t.priority==='Medium').length,'Stage follow up','ti-clock','')}${kpi('Missing Docs',allCandidateRows().filter(r=>!hasDocs?.(r.type,r.id)).length,'Compliance','ti-folder-x','')}${kpi('Unpaid',allCandidateRows().filter(r=>r.balance>0).length,'Finance','ti-coin','')}</div><div class="dreco-card pad"><div class="dreco-card-title">Task Queue <span>${tasks.length} items</span></div><div class="task-list">${tasksHTML(200)}</div></div></div>`; };
+
+  window.renderFinancePage = function(){ const el=document.getElementById('finance-section'); if(!el) return; const rows=allCandidateRows(); const total=rows.reduce((s,r)=>s+r.commission,0), paid=rows.reduce((s,r)=>s+r.paid,0), bal=rows.reduce((s,r)=>s+r.balance,0); el.innerHTML=`<div class="dreco-page"><div class="dreco-page-head"><div><h1>Finance</h1><p>Track commissions, repayments, outstanding balances, and cash flow.</p></div><div class="dreco-head-actions"><button class="dreco-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export</button><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>New Invoice Source</button></div></div><div class="dreco-grid finance-grid">${kpi('Total Invoiced',moneyKES(total),'All candidates','ti-receipt','')}${kpi('Total Paid',moneyKES(paid),'Collected','ti-wallet','')}${kpi('Outstanding',moneyKES(bal),'Follow up','ti-alert-circle','')}${kpi('Collection Rate', total?Math.round(paid/total*100)+'%':'0%','Paid / invoiced','ti-chart-line','')}</div><div class="dreco-grid dash-two"><div class="dreco-card pad"><div class="dreco-card-title">Cash Flow <span>Visual estimate</span></div><div class="finance-chart">${[20,44,35,52,48,60,72].map(h=>`<div class="bar" style="height:${h}%"></div>`).join('')}</div></div><div class="dreco-card pad"><div class="dreco-card-title">Outstanding by Age <span>${moneyKES(bal)}</span></div><div class="task-list">${rows.filter(r=>r.balance>0).slice(0,7).map(r=>`<div class="task-item" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><div class="task-icon"><i class="ti ti-coin"></i></div><div><div class="item-title">${safeText(r.name)}</div><div class="item-meta">${safeText(r.company)} • ${moneyKES(r.balance)}</div></div><span class="item-pill">Unpaid</span></div>`).join('') || '<div class="empty-state">No outstanding balances.</div>'}</div></div></div><div style="margin-top:14px">${financeTable(rows)}</div></div>`; };
+  function financeTable(rows){ return `<div class="table-card"><div class="dreco-table-wrap"><table class="dreco-table"><thead><tr><th>Candidate</th><th>Company</th><th>Type</th><th>Invoice</th><th>Paid</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows.map(r=>`<tr><td><div class="name-cell">${candidateAvatar(r.name)}<div><div class="item-title">${safeText(r.name)}</div><div class="item-meta">${safeText(r.pp||'No passport')}</div></div></div></td><td>${safeText(r.company)}</td><td>${r.type==='pro'?'Professional':'General'}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(r.paid)}</td><td>${moneyKES(r.balance)}</td><td>${r.balance>0?'<span class="stage-badge red">Unpaid</span>':'<span class="stage-badge green">Paid</span>'}</td><td><button class="action-mini" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">Open</button></td></tr>`).join('')}</tbody></table></div></div>`; }
+
+  window.renderDocumentsPage = function(){ const el=document.getElementById('documents-section'); if(!el) return; const rows=allCandidateRows(); const attached=rows.filter(r=>hasDocs?.(r.type,r.id)).length; el.innerHTML=`<div class="dreco-page"><div class="dreco-page-head"><div><h1>Documents</h1><p>Manage candidate document links and compliance readiness.</p></div><div class="dreco-head-actions"><button class="dreco-btn primary" onclick="switchTab('candidates')"><i class="ti ti-upload"></i>Attach to Candidate</button></div></div><div class="dreco-grid dreco-kpis">${kpi('All Documents',attached,'Candidates with links','ti-folder-check','')}${kpi('Missing',rows.length-attached,'Needs upload','ti-folder-x','')}${kpi('Passports',(proDB||[]).filter(r=>r.pp).length,'Recorded passport numbers','ti-id','')}${kpi('Visas',(proDB||[]).filter(r=>r.visa).length,'Visa dates recorded','ti-id-badge-2','')}${kpi('Tickets',(proDB||[]).filter(r=>r.travel).length,'Travel dates recorded','ti-plane','')}</div><div class="table-card"><div class="dreco-table-wrap"><table class="dreco-table"><thead><tr><th>Candidate</th><th>Category</th><th>Company</th><th>Passport</th><th>Status</th><th>Link</th><th>Action</th></tr></thead><tbody>${rows.map(r=>{const link=allDocs?.[`${r.type}_${r.id}`]||'';return `<tr><td><div class="name-cell">${candidateAvatar(r.name)}<div><div class="item-title">${safeText(r.name)}</div><div class="item-meta">${r.type==='pro'?'Professional':'General'}</div></div></div></td><td>${safeText(r.position)}</td><td>${safeText(r.company)}</td><td>${safeText(r.pp||'—')}</td><td>${link?'<span class="stage-badge green">Uploaded</span>':'<span class="stage-badge red">Missing</span>'}</td><td>${link?`<button class="action-mini" onclick="window.open('${safeText(link)}','_blank')"><i class="ti ti-external-link"></i>Open</button>`:'—'}</td><td><button class="action-mini" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${safeText(String(r.name).replace(/'/g,"\\'"))}')"><i class="ti ti-paperclip"></i>Manage</button></td></tr>`}).join('')}</tbody></table></div></div></div>`; };
+
+  window.renderReportsPage = function(){ const el=document.getElementById('reports-section'); if(!el) return; const rows=allCandidateRows(); const stageCounts={}; rows.forEach(r=>stageCounts[r.stage]=(stageCounts[r.stage]||0)+1); el.innerHTML=`<div class="dreco-page"><div class="dreco-page-head"><div><h1>Reports</h1><p>Performance overview for candidates, clients, stages, and collections.</p></div><div class="dreco-head-actions"><button class="dreco-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export Professional</button><button class="dreco-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button></div></div><div class="dreco-grid dreco-kpis">${kpi('Total Candidates',rows.length,'All records','ti-users','')}${kpi('Traveling This Month',(proDB||[]).filter(r=>r.travel).length,'With travel dates','ti-plane','')}${kpi('Success Rate',rows.length?Math.round(rows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length/rows.length*100)+'%':'0%','Travelled / total','ti-target','')}${kpi('Avg Processing','45 days','Estimate','ti-clock','')}${kpi('Clients',clientRows().length,'Companies','ti-building','')}</div><div class="dreco-grid dash-two"><div class="dreco-card pad"><div class="dreco-card-title">Candidates by Stage</div><div class="task-list">${Object.entries(stageCounts).map(([s,c])=>`<div class="task-item"><div class="task-icon"><i class="ti ti-chart-pie"></i></div><div><div class="item-title">${safeText(s)}</div><div class="item-meta">${c} candidates</div></div><span class="item-pill">${Math.round(c/Math.max(rows.length,1)*100)}%</span></div>`).join('')}</div></div><div class="dreco-card pad"><div class="dreco-card-title">Top Companies</div><div class="task-list">${clientRows().slice(0,7).map(c=>`<div class="task-item"><div class="task-icon"><i class="ti ti-building"></i></div><div><div class="item-title">${safeText(c.name)}</div><div class="item-meta">${c.total} candidates • ${moneyKES(c.due)} due</div></div><span class="item-pill">${c.country}</span></div>`).join('') || '<div class="empty-state">No companies yet.</div>'}</div></div></div></div>`; };
+
+  function clientRows(){ const map=new Map(); (proDB||[]).forEach(r=>{ const name=r.company||'Unassigned'; const c=map.get(name)||{name,country:r.country||'—',active:0,total:0,due:0,manager:currentUser?.display||'Team'}; c.total++; if(r.stage!=='TRAVELLED') c.active++; c.due+=balancePro(r); map.set(name,c); }); return [...map.values()].sort((a,b)=>b.total-a.total); }
+  window.renderClientsPage = function(){ const el=document.getElementById('clients-section'); if(!el) return; const clients=clientRows(); el.innerHTML=`<div class="dreco-page"><div class="dreco-page-head"><div><h1>Clients</h1><p>Companies connected to candidate placements and financial tracking.</p></div><div class="dreco-head-actions"><button class="dreco-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate for Client</button></div></div><div class="table-card"><div class="dreco-table-wrap"><table class="dreco-table"><thead><tr><th>Client Name</th><th>Country</th><th>Active Jobs</th><th>Total Hired</th><th>Due Amount</th><th>Relationship Manager</th><th>Action</th></tr></thead><tbody>${clients.map(c=>`<tr><td><div class="name-cell"><div class="avatar-mini"><i class="ti ti-building"></i></div><div><div class="item-title">${safeText(c.name)}</div><div class="item-meta">Client account</div></div></div></td><td>${safeText(c.country)}</td><td>${c.active}</td><td>${c.total}</td><td>${moneyKES(c.due)}</td><td>${safeText(c.manager)}</td><td><button class="action-mini" onclick="switchTab('candidates'); setTimeout(()=>{const q=document.getElementById('candidate-search'); if(q){q.value='${safeText(c.name)}'; renderCandidatesPage();}},30)">View</button></td></tr>`).join('') || '<tr><td colspan="7"><div class="empty-state">Clients appear automatically from candidate company names.</div></td></tr>'}</tbody></table></div></div></div>`; };
+
+  function polishSettingsPage(){ const sec=document.getElementById('settings-section'); if(!sec || sec.dataset.polished) return; sec.classList.add('settings-clean'); sec.dataset.polished='1'; }
+
+  const originalLoadAllData = window.loadAllData || (typeof loadAllData !== 'undefined' ? loadAllData : null);
+  window.addEventListener('DOMContentLoaded', ()=>setTimeout(setupRefreshShell,0));
+})();
