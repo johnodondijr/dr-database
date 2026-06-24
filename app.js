@@ -575,18 +575,6 @@ function hideSignup() {
   document.getElementById('login-main').style.display='block';
 }
 
-function setUserDisplay(display, role) {
-  const parts=display.replace(/[^a-zA-Z ]/g,'').trim().split(' ');
-  const initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():display.substring(0,2).toUpperCase();
-  ['user-chip','sidebar-user-name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=display; });
-  ['topbar-avatar','sidebar-avatar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=initials; });
-  const rEl=document.getElementById('sidebar-user-role');
-  if(rEl) rEl.textContent=(role==='admin'?'Administrator':'Staff');
-  const orgEl=document.querySelector('.suc-org');
-  if(orgEl) orgEl.textContent=getCompanyName();
-  updateWorkspaceLabels();
-}
-
 async function doSignup() {
   await loadStaffAccounts();
   const companyName=(document.getElementById('signup-company').value||'').trim();
@@ -626,13 +614,18 @@ async function doSignup() {
   await saveStaffAccounts();
   errEl.style.display='none';
   const account = STAFF_ACCOUNTS[username];
-  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries,authUserId:account.authUserId};
-  setCurrentWorkspace(currentUser);
-  safeSessionSet('dr_user',JSON.stringify(currentUser));
+  const user={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries,authUserId:account.authUserId};
+  enterApp(user, account.display, account.role);
+}
+
+function enterApp(user, displayName, role){
+  currentUser = user;
+  setCurrentWorkspace(user);
+  safeSessionSet('dr_user', JSON.stringify(user));
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('bottom-nav')?.classList.add('visible');
-  setUserDisplay(display,'admin');
+  setUserDisplay(displayName, role);
   appStorageMode = db ? 'cloud' : 'local';
   loadAllData();
 }
@@ -660,15 +653,8 @@ async function doLogin() {
       await saveStaffAccounts();
       errEl.style.display='none';
       setLoginSuccessState();
-      currentUser={username,role:authLogin.account.role,display:authLogin.account.display,companyId:authLogin.account.companyId,companyName:authLogin.account.companyName,generalJobsCountries:authLogin.account.generalJobsCountries,authUserId:authLogin.account.authUserId};
-      setCurrentWorkspace(currentUser);
-      safeSessionSet('dr_user',JSON.stringify(currentUser));
-      document.getElementById('login-screen').style.display='none';
-      document.getElementById('app').style.display='block';
-      document.getElementById('bottom-nav')?.classList.add('visible');
-      setUserDisplay(authLogin.account.display, authLogin.account.role);
-      appStorageMode = db ? 'cloud' : 'local';
-      loadAllData();
+      const supaUser={username,role:authLogin.account.role,display:authLogin.account.display,companyId:authLogin.account.companyId,companyName:authLogin.account.companyName,generalJobsCountries:authLogin.account.generalJobsCountries,authUserId:authLogin.account.authUserId};
+      enterApp(supaUser, authLogin.account.display, authLogin.account.role);
       return;
     }
   } catch (err) {
@@ -686,15 +672,8 @@ async function doLogin() {
   if (passwordCheck.migrated) await saveStaffAccounts();
   errEl.style.display='none';
   setLoginSuccessState();
-  currentUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
-  setCurrentWorkspace(currentUser);
-  safeSessionSet('dr_user',JSON.stringify(currentUser));
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('bottom-nav')?.classList.add('visible');
-  setUserDisplay(account.display, account.role);
-  appStorageMode = db ? 'cloud' : 'local';
-  loadAllData();
+  const localUser={username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
+  enterApp(localUser, account.display, account.role);
 }
 function doLogout() {
   if (db?.auth) db.auth.signOut().catch(err => console.warn('Supabase sign out failed:', err));
@@ -718,15 +697,8 @@ window.addEventListener('DOMContentLoaded', async () => {
       const parsed=JSON.parse(saved);
       const account=STAFF_ACCOUNTS[parsed.username];
       if(!account) throw new Error('Unknown saved user');
-      currentUser={username:parsed.username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
-      setCurrentWorkspace(currentUser);
-      safeSessionSet('dr_user',JSON.stringify(currentUser));
-      document.getElementById('login-screen').style.display='none';
-      document.getElementById('app').style.display='block';
-      document.getElementById('bottom-nav')?.classList.add('visible');
-      setUserDisplay(currentUser.display, currentUser.role);
-      appStorageMode = db ? 'cloud' : 'local';
-      loadAllData();
+      const sessionUser={username:parsed.username,role:account.role,display:account.display,companyId:account.companyId,companyName:account.companyName,generalJobsCountries:account.generalJobsCountries};
+      enterApp(sessionUser, account.display, account.role);
     } catch { safeSessionRemove('dr_user'); }
   }
   rebuildStageSelects();
@@ -754,6 +726,8 @@ async function loadAllData() {
     rebuildStageSelects();
     restoreUserFilters();
     hideLoading();
+    saveKpiSnapshot();
+    saveTodayTrendSnapshot();
     switchTab('dash');
     return;
   }
@@ -810,6 +784,8 @@ async function loadAllData() {
   rebuildStageSelects();
   restoreUserFilters();
   hideLoading();
+  saveKpiSnapshot();
+  saveTodayTrendSnapshot();
   switchTab('dash');
 }
 
@@ -1481,7 +1457,8 @@ function moneyUSD(v){ return '$'+Number(v||0).toLocaleString(); }
 function proBalance(r){ return (Number(r.commission)||0)-(Number(r.paid)||0); }
 function proNeedsAction(r){
   const stage=r.stage||'';
-  return !hasDocs('pro',r.id) || (stage!=='TRAVELLED'&&!toInput(r.travel)) || proBalance(r)>0;
+  const hasCommission=r.commission!==null && r.commission!==undefined && Number(r.commission)>0;
+  return !hasDocs('pro',r.id) || (stage!=='TRAVELLED'&&!toInput(r.travel)) || (hasCommission && proBalance(r)>0);
 }
 function lbNeedsAction(r){
   return !hasDocs('lb',r.id) || getRefundStatus(r)==='incomplete' || ((r.travelStatus||r.travel_status)==='NOT YET');
@@ -1670,15 +1647,36 @@ function onGlobalSearch(){
 // DASHBOARD
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function renderDash(){
+  // -- Period filter helpers --
+  function periodStart(){
+    const now=new Date();
+    if(financePeriod==='month') return new Date(now.getFullYear(),now.getMonth(),1).getTime();
+    if(financePeriod==='year')  return new Date(now.getFullYear(),0,1).getTime();
+    return 0; // overall = no filter
+  }
+  function inPeriod(r){
+    if(financePeriod==='overall') return true;
+    const ps=periodStart();
+    // use any available date field
+    const d=drecoDateValue(r.travel||r.visa||r.mol||r.ol||r.submitted);
+    return d>=ps;
+  }
+  function inPeriodLB(r){
+    if(financePeriod==='overall') return true;
+    const ps=periodStart();
+    const d=drecoDateValue(r.travelDate||r.travel_date||r.r2Date||r.r1Date);
+    return d>=ps;
+  }
+
   const proTravelled=proDB.filter(r=>r.stage==='TRAVELLED').length;
   const proInProcess=proDB.filter(isInProcessPro).length;
   let totalComm=0,totalPaid=0;
-  proDB.forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
+  proDB.filter(inPeriod).forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
 
   const lbTravelled=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
   const lbInProcess=lbDB.filter(isInProcessLB).length;
   let lbOwed=0,lbPaid=0,lbFees=0;
-  lbDB.forEach(r=>{
+  lbDB.filter(inPeriodLB).forEach(r=>{
     const ts=r.travelStatus||r.travel_status;
     const pp=r.ppStatus||r.pp_status;
     const notes=(r.notes||'').trim().toUpperCase();
@@ -1704,18 +1702,23 @@ function renderDash(){
     {label:'Offer', value:proDB.filter(r=>r.stage==='PENDING OFFER LETTER').length, icon:'ti-file-description', color:stageColors[0]},
     {label:'MOL', value:proDB.filter(r=>r.stage==='PENDING MOL').length, icon:'ti-building-bank', color:stageColors[1]},
     {label:'Visa', value:proDB.filter(r=>r.stage==='PENDING VISA').length, icon:'ti-id-badge-2', color:stageColors[2]},
-    {label:'Finance', value:proDB.filter(r=>proBalance(r)>0).length, icon:'ti-wallet', color:stageColors[3]},
+    {label:'Finance', value:proDB.filter(r=>r.commission && Number(r.commission)>0 && proBalance(r)>0).length, icon:'ti-wallet', color:stageColors[3]},
     {label:'Travelled', value:proTravelled, icon:'ti-plane-departure', color:stageColors[4]}
   ];
   const stageTotal=Math.max(stageData.reduce((sum,item)=>sum+item.value,0),1);
 
   const pendingTravel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
-  const upcoming=(pendingTravel.length?pendingTravel:proDB.filter(r=>r.stage!=='TRAVELLED')).slice(0,3);
+  // Sort pending travel: candidates WITH a travel date first (soonest first), then undated
+  const upcomingWithDate=pendingTravel.filter(r=>r.travel).sort((a,b)=>drecoDateValue(a.travel)-drecoDateValue(b.travel));
+  const upcomingNoDate=pendingTravel.filter(r=>!r.travel);
+  const upcoming=[...upcomingWithDate,...upcomingNoDate].slice(0,3);
   const upcomingHTML=upcoming.length?upcoming.map((r,i)=>`<div class="ref-travel-item">
     <div class="ref-travel-icon"><i class="ti ti-plane"></i></div>
     <div><div class="ref-travel-name">${escHTML(r.name)}</div><div class="ref-travel-meta">${escHTML(r.company||'-')} | ${escHTML(r.position||'-')}</div></div>
-    <div class="ref-travel-date">${r.travel?fmtDate(r.travel):'No date'}</div>
-  </div>`).join(''):'<div class="ref-empty">No upcoming travels</div>';
+    <div class="ref-travel-date" style="${!r.travel?'color:var(--text-3)':''}">
+      ${r.travel?fmtDate(r.travel):'<i class="ti ti-calendar-off" style="font-size:12px"></i> No date set'}
+    </div>
+  </div>`).join(''):'<div class="ref-empty"><i class="ti ti-plane-off"></i> No candidates pending travel</div>';
 
   const recentActivity=Object.entries(allTimelines)
     .flatMap(([key,entries])=>(entries||[]).map(e=>({...e,key})))
@@ -1744,17 +1747,17 @@ function renderDash(){
   dash.innerHTML=`
     <div class="ref-dashboard">
       <div class="ref-dashboard-head">
-        <div><h1>Good afternoon, ${escHTML(firstName)}</h1><p>Here's what's happening in your workspace today.</p></div>
+        <div><h1>${getGreeting()}, ${escHTML(firstName)}</h1><p>Here's what's happening in your workspace today.</p></div>
         <button class="ref-date-btn" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i><span>Open calendar</span><i class="ti ti-chevron-right"></i></button>
       </div>
 
       <div class="ref-board-grid">
         <div class="ref-main-column">
           <div class="ref-kpi-row">
-            ${renderRefKpi('Total Candidates',totalCandidates,'12%','ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
-            ${renderRefKpi('In Process',totalInProcess,'8%','ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
-            ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF','','openTravelledView()')}
-            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
+            ${renderRefKpi('Total Candidates',totalCandidates,calcKpiChange(totalCandidates,'total'),'ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
+            ${renderRefKpi('In Process',totalInProcess,calcKpiChange(totalInProcess,'inprocess'),'ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
+            ${renderRefKpi('Travelled',totalTravelled,calcKpiChange(totalTravelled,'travelled'),'ti-plane-departure','#EFEAFF','','openTravelledView()')}
+            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),calcKpiChange(totalPaid,'paid'),'ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
           </div>
 
           ${renderSmartAlertsHTML()}
@@ -1770,18 +1773,12 @@ function renderDash(){
 
           <div class="ref-chart-grid">
             <section class="ref-card ref-trend-card">
-              <div class="ref-card-head"><div class="ref-card-title">Pipeline Trend</div><button onclick="setTrendPeriod()">This Month <i class="ti ti-chevron-down"></i></button></div>
+              <div class="ref-card-head"><div class="ref-card-title">Pipeline Trend</div><span style="font-size:11px;color:var(--text-3)">Last 7 days</span></div>
               <div class="ref-legend"><span><b></b>In Process</span><span><b></b>Travelled</span></div>
               <div class="ref-line-chart" onmousemove="updateTrendTooltip(event)" onmouseleave="resetTrendTooltip()">
-                <svg viewBox="0 0 620 210" preserveAspectRatio="none" aria-hidden="true">
-                  <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A49F8" stop-opacity=".20"/><stop offset="1" stop-color="#5DD6C4" stop-opacity=".04"/></linearGradient></defs>
-                  <path d="M0 150 C80 120 95 90 160 86 C235 82 235 112 310 92 C390 70 420 88 480 92 C545 96 570 58 620 42 L620 210 L0 210 Z" fill="url(#trendFill)"/>
-                  <path d="M0 150 C80 120 95 90 160 86 C235 82 235 112 310 92 C390 70 420 88 480 92 C545 96 570 58 620 42" fill="none" stroke="#5A49F8" stroke-width="4" stroke-linecap="round"/>
-                  <path d="M0 178 C80 160 105 130 170 126 C245 122 255 132 320 116 C398 96 428 118 492 114 C552 110 580 88 620 78" fill="none" stroke="#5DD6C4" stroke-width="4" stroke-linecap="round"/>
-                  <line x1="318" y1="52" x2="318" y2="210" stroke="#B9C2D7" stroke-dasharray="4 6"/>
-                </svg>
-                <div class="ref-tooltip dynamic" id="trend-tooltip"><strong id="trend-tip-date">May 15, 2025</strong><span><b></b>In Process <em id="trend-tip-process">${totalInProcess}</em></span><span><b></b>Travelled <em id="trend-tip-travelled">${totalTravelled}</em></span></div>
-                <div class="ref-axis"><span>May 12</span><span>May 13</span><span>May 14</span><span>May 15</span><span>May 16</span><span>May 17</span><span>May 18</span></div>
+                ${buildTrendChart()}
+                <div class="ref-tooltip dynamic" id="trend-tooltip" style="display:none"><strong id="trend-tip-date"></strong><span><b></b>In Process <em id="trend-tip-process"></em></span><span><b></b>Travelled <em id="trend-tip-travelled"></em></span></div>
+                <div class="ref-axis" id="trend-axis"></div>
               </div>
             </section>
 
@@ -1797,9 +1794,9 @@ function renderDash(){
           <div class="ref-bottom-grid">
             <section class="ref-card"><div class="ref-card-title">Recent Activity</div><div class="ref-list">${recentHTML}</div></section>
             <section class="ref-card"><div class="ref-card-head"><div class="ref-card-title">Tasks</div><button onclick="switchTab('kanban')">View All</button></div><div class="ref-task-list">
-              ${renderRefTask('Review pending visa documents', `${proDB.filter(r=>r.stage==='PENDING VISA').length} candidates`, 'Overdue')}
-              ${renderRefTask('Follow up with MOL for candidates', `${proDB.filter(r=>r.stage==='PENDING MOL').length} candidates`, 'Due today')}
-              ${renderRefTask('Confirm travel for candidates', `${pendingTravel.length} candidates`, 'Due tomorrow')}
+              ${renderRefTask('Review pending visa documents', `${proDB.filter(r=>r.stage==='PENDING VISA').length} candidates`, getTaskUrgency(proDB.filter(r=>r.stage==='PENDING VISA'), 'visa'))}
+              ${renderRefTask('Follow up with MOL for candidates', `${proDB.filter(r=>r.stage==='PENDING MOL').length} candidates`, getTaskUrgency(proDB.filter(r=>r.stage==='PENDING MOL'), 'mol'))}
+              ${renderRefTask('Confirm travel for candidates', `${pendingTravel.length} candidates`, getTaskUrgency(pendingTravel, 'travel'))}
             </div></section>
           </div>
         </div>
@@ -1807,6 +1804,7 @@ function renderDash(){
         <aside class="ref-side-column">
           <section class="ref-fin-card">
             <div class="ref-fin-head"><span>Financial Summary</span>${renderFinancePeriodSelect()}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;margin-bottom:0;text-transform:none;letter-spacing:0">${financePeriod==='month'?'This month only':financePeriod==='year'?'This year only':'All time'}</div>
             <div class="ref-fin-block"><p>Professional Jobs</p><h2>KES ${totalComm.toLocaleString()}</h2><div><span>Collected</span><strong>KES ${totalPaid.toLocaleString()}</strong></div><div><span>Outstanding</span><strong>KES ${(totalComm-totalPaid).toLocaleString()}</strong></div></div>
             <div class="ref-fin-block"><p>General Jobs</p><h2>${moneyUSD(lbFees)}</h2><div><span>Collected</span><strong>${moneyUSD(lbPaid)}</strong></div><div><span>Outstanding</span><strong>${moneyUSD(lbOwed-lbPaid)}</strong></div><div><span>Open Balances</span><strong>${lbIncomplete}</strong></div></div>
             <button class="ref-fin-report" onclick="switchTab('reports')"><i class="ti ti-report-money"></i>View Financial Report<i class="ti ti-chevron-right"></i></button>
@@ -1820,7 +1818,7 @@ function renderDash(){
           </div></section>
         </aside>
       </div>
-      <button class="ref-chat-btn"><i class="ti ti-message-circle"></i></button>
+      <button class="ref-chat-btn" onclick="switchTab('help')" title="Help &amp; Support"><i class="ti ti-message-circle"></i></button>
     </div>`;
 }
 
@@ -1830,6 +1828,14 @@ function openTravelledView(){
   if (typeof rebuildProPills === 'function') rebuildProPills();
   if (typeof renderPro === 'function') renderPro();
   if (typeof showToast === 'function') showToast('Showing travelled candidates','success');
+}
+function filterAndGo(stage, action=''){
+  window.proStagePillFilter = stage;
+  if(action) { const el=document.getElementById('pro-action-f'); if(el) el.value=action; }
+  switchTab('pro');
+  if(typeof rebuildProPills==='function') rebuildProPills();
+  if(typeof renderPro==='function') renderPro();
+  if(stage) showToast(`Showing ${stage.replace('PENDING ','').toLowerCase()} candidates`,'success');
 }
 function openPendingTravelView(){
   window.proStagePillFilter='PENDING TRAVEL';
@@ -1848,24 +1854,145 @@ function openFirstDocumentUpload(){
 function renderFinancePeriodSelect(){
   return `<span class="finance-period-menu"><select aria-label="Financial summary period" onchange="setFinancePeriod(this.value)"><option value="month" ${financePeriod==='month'?'selected':''}>This Month</option><option value="year" ${financePeriod==='year'?'selected':''}>This Year</option><option value="overall" ${financePeriod==='overall'?'selected':''}>Overall</option></select></span>`;
 }
-function setTrendPeriod(){ showToast('Pipeline trend is showing this month. More periods can be added once monthly history is synced.','success'); }
+// *** PIPELINE TREND CHART - REAL DATA ***
+// Builds 7-day snapshots from timeline entries + current state
+// Stores daily snapshots in localStorage so the chart improves over time
+const TREND_HISTORY_KEY = 'dreco_trend_history_v1';
+
+function getTrendHistory(){
+  try {
+    const raw = safeLocalGet(TREND_HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+
+function saveTodayTrendSnapshot(){
+  const today = new Date().toISOString().slice(0,10);
+  const history = getTrendHistory();
+  // Only save once per day
+  if(history.length && history[history.length-1].date === today) {
+    // Update today's entry with current values
+    history[history.length-1].inProcess = proDB.filter(isInProcessPro).length + lbDB.filter(isInProcessLB).length;
+    history[history.length-1].travelled = proDB.filter(r=>r.stage==='TRAVELLED').length + lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
+  } else {
+    history.push({
+      date: today,
+      inProcess: proDB.filter(isInProcessPro).length + lbDB.filter(isInProcessLB).length,
+      travelled: proDB.filter(r=>r.stage==='TRAVELLED').length + lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length,
+    });
+  }
+  // Keep last 30 days
+  while(history.length > 30) history.shift();
+  safeLocalSet(TREND_HISTORY_KEY, JSON.stringify(history));
+  return history;
+}
+
+function buildTrendPoints(){
+  // Get or build 7-day data. Uses stored history + today's live values.
+  const history = saveTodayTrendSnapshot();
+  // Build last 7 days
+  const days = [];
+  for(let i=6; i>=0; i--){
+    const d = new Date();
+    d.setDate(d.getDate()-i);
+    const iso = d.toISOString().slice(0,10);
+    const label = d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+    const snap = history.find(h=>h.date===iso);
+    days.push({ date:iso, label, inProcess: snap?.inProcess ?? null, travelled: snap?.travelled ?? null });
+  }
+  return days;
+}
+
+function buildTrendChart(){
+  const days = buildTrendPoints();
+  const W=620, H=200, PAD_T=20, PAD_B=10;
+  const chartH = H - PAD_T - PAD_B;
+
+  const inPValues = days.map(d=>d.inProcess).filter(v=>v!==null);
+  const trValues  = days.map(d=>d.travelled).filter(v=>v!==null);
+  const allVals   = [...inPValues, ...trValues];
+  const maxVal = Math.max(...allVals, 1);
+  const minVal = 0;
+  const range  = maxVal - minVal || 1;
+
+  function toY(v){ return PAD_T + chartH - Math.round(((v-minVal)/range)*chartH); }
+  function toX(i){ return Math.round((i/(days.length-1))*W); }
+
+  // Build SVG path from data points (skip nulls with a gap)
+  function buildPath(key){
+    let d='', started=false;
+    days.forEach((day,i)=>{
+      const v = day[key];
+      if(v===null){ started=false; return; }
+      const x=toX(i), y=toY(v);
+      if(!started){ d+=`M${x} ${y}`; started=true; }
+      else { d+=` L${x} ${y}`; }
+    });
+    return d;
+  }
+
+  const inPPath  = buildPath('inProcess');
+  const trPath   = buildPath('travelled');
+  const firstInP = days.find(d=>d.inProcess!==null);
+  const lastInP  = [...days].reverse().find(d=>d.inProcess!==null);
+  const fillClose = firstInP && lastInP
+    ? ` L${toX(days.indexOf(lastInP))} ${H-PAD_B} L${toX(days.indexOf(firstInP))} ${H-PAD_B} Z`
+    : '';
+
+  // Store points for tooltip
+  window._trendDays = days;
+  window._trendMaxVal = maxVal;
+
+  // Update axis labels
+  setTimeout(()=>{
+    const ax = document.getElementById('trend-axis');
+    if(ax) ax.innerHTML = days.map(d=>`<span>${d.label}</span>`).join('');
+  }, 0);
+
+  const hasData = inPValues.length > 0;
+  const noDataOverlay = !hasData
+    ? `<text x="310" y="110" text-anchor="middle" fill="#A0ACC0" font-size="13" font-family="sans-serif">Trend builds as you use Dreco daily</text>`
+    : '';
+
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#5A49F8" stop-opacity=".18"/>
+        <stop offset="1" stop-color="#5A49F8" stop-opacity=".02"/>
+      </linearGradient>
+    </defs>
+    ${inPPath ? `<path d="${inPPath}${fillClose}" fill="url(#trendFill)"/>` : ''}
+    ${inPPath ? `<path d="${inPPath}" fill="none" stroke="#5A49F8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+    ${trPath  ? `<path d="${trPath}"  fill="none" stroke="#5DD6C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+    ${days.map((day,i)=>{
+      const v=day.inProcess; if(v===null) return '';
+      return `<circle cx="${toX(i)}" cy="${toY(v)}" r="4" fill="#5A49F8"/>`;
+    }).join('')}
+    ${days.map((day,i)=>{
+      const v=day.travelled; if(v===null) return '';
+      return `<circle cx="${toX(i)}" cy="${toY(v)}" r="4" fill="#5DD6C4"/>`;
+    }).join('')}
+    ${noDataOverlay}
+  </svg>`;
+}
+
 function updateTrendTooltip(event){
   const tip=document.getElementById('trend-tooltip');
   const chart=event.currentTarget;
-  if(!tip||!chart) return;
+  if(!tip||!chart||!window._trendDays) return;
   const rect=chart.getBoundingClientRect();
   const pct=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width));
-  const day=12+Math.round(pct*6);
-  const inProcess=Math.max(1,Math.round((proDB.length+lbDB.length)*(0.35+pct*.3)));
-  const travelled=Math.max(0,Math.round((proDB.filter(r=>r.stage==='TRAVELLED').length+lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length)*(0.7+pct*.45)));
-  document.getElementById('trend-tip-date').textContent=`May ${day}, 2025`;
-  document.getElementById('trend-tip-process').textContent=inProcess;
-  document.getElementById('trend-tip-travelled').textContent=travelled;
-  tip.style.left=`${Math.min(Math.max(event.clientX-rect.left-70,10),rect.width-150)}px`;
-  tip.style.top='64px';
+  const idx=Math.round(pct*(window._trendDays.length-1));
+  const day=window._trendDays[idx];
+  if(!day) return;
+  document.getElementById('trend-tip-date').textContent=day.label;
+  document.getElementById('trend-tip-process').textContent=day.inProcess??'—';
+  document.getElementById('trend-tip-travelled').textContent=day.travelled??'—';
+  tip.style.left=`${Math.min(Math.max(event.clientX-rect.left-60,8),rect.width-140)}px`;
+  tip.style.top='30px';
   tip.style.display='block';
 }
-function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display=''; }
+function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display='none'; }
 function persistExpenses(){ safeLocalSet('dreco_expenses', JSON.stringify(drecoExpenses)); }
 function persistEvents(){ safeLocalSet('dreco_events', JSON.stringify(drecoEvents)); }
 function persistAudit(){ safeLocalSet('dreco_audit', JSON.stringify(drecoAudit)); }
@@ -1903,12 +2030,12 @@ function getSmartAlerts(){
   const now=Date.now(), day=86400000;
   const oldMol=proDB.filter(r=>r.stage==='PENDING MOL' && drecoDateValue(r.submitted) && now-drecoDateValue(r.submitted)>7*day);
   const oldVisa=proDB.filter(r=>r.stage==='PENDING VISA' && Math.max(drecoDateValue(r.mol),drecoDateValue(r.submitted)) && now-Math.max(drecoDateValue(r.mol),drecoDateValue(r.submitted))>10*day);
-  const unpaid=proDB.filter(r=>proBalance(r)>0).sort((a,b)=>proBalance(b)-proBalance(a));
+  const unpaid=proDB.filter(r=>r.commission && Number(r.commission)>0 && proBalance(r)>0).sort((a,b)=>proBalance(b)-proBalance(a));
   const travel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
   return [
-    {label:'MOL overdue',value:oldMol.length,icon:'ti-clock-exclamation',tone:'warn',target:"switchTab('pro')"},
-    {label:'Visa pending too long',value:oldVisa.length,icon:'ti-id-badge-2',tone:'violet',target:"switchTab('pro')"},
-    {label:'Unpaid commissions',value:unpaid.length,icon:'ti-cash-banknote',tone:'money',target:"switchTab('commissions')"},
+    {label:'MOL overdue',value:oldMol.length,icon:'ti-clock-exclamation',tone:'warn',target:"filterAndGo('PENDING MOL')"},
+    {label:'Visa pending too long',value:oldVisa.length,icon:'ti-id-badge-2',tone:'violet',target:"filterAndGo('PENDING VISA')"},
+    {label:'Unpaid commissions',value:unpaid.length,icon:'ti-cash-banknote',tone:'money',target:"filterAndGo('','outstanding')"},
     {label:'Pending travel',value:travel.length,icon:'ti-plane',tone:'blue',target:'openPendingTravelView()'}
   ].filter(a=>a.value>0);
 }
@@ -2132,11 +2259,87 @@ function renderHelpPage(){
 function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
 function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
   const onclick=action?` onclick="${action}"`:'';
-  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
+  let changeHTML='';
+  if(change===null||change===undefined){
+    changeHTML=`<em style="color:var(--text-3);font-size:10px">tracking...</em>`;
+  } else if(change==='no change'){
+    changeHTML=`<em style="color:var(--text-3)"><i class="ti ti-minus"></i> no change <small>vs last week</small></em>`;
+  } else {
+    const isDown=String(change).startsWith('-');
+    changeHTML=`<em style="${isDown?'color:#EF4444':''}"><i class="ti ${isDown?'ti-arrow-down':'ti-arrow-up'}"></i>${escHTML(String(change))} <small>vs last week</small></em>`;
+  }
+  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong>${changeHTML}</div></div>`;
 }
 function renderRefTask(title,meta,due){
   return `<div class="ref-task"><span></span><div><strong>${escHTML(title)}</strong><small>${escHTML(meta)}</small></div><em>${escHTML(due)}</em></div>`;
 }
+// KPI weekly snapshot system - stores current values weekly and computes real change
+const KPI_SNAPSHOT_KEY = 'dreco_kpi_snapshot_v1';
+function saveKpiSnapshot(){
+  const now = Date.now();
+  const snapshot = {
+    ts: now,
+    total: proDB.length + lbDB.length,
+    inprocess: proDB.filter(isInProcessPro).length + lbDB.filter(isInProcessLB).length,
+    travelled: proDB.filter(r=>r.stage==='TRAVELLED').length + lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length,
+    paid: proDB.reduce((s,r)=>s+(Number(r.paid)||0),0),
+  };
+  safeLocalSet(KPI_SNAPSHOT_KEY, JSON.stringify(snapshot));
+}
+function calcKpiChange(currentValue, key){
+  try {
+    const raw = safeLocalGet(KPI_SNAPSHOT_KEY);
+    if(!raw){ saveKpiSnapshot(); return null; }
+    const snap = JSON.parse(raw);
+    const age = Date.now() - (snap.ts||0);
+    if(age > 7*24*60*60*1000){ saveKpiSnapshot(); return null; }
+    if(age < 60*60*1000) return null;
+    const prev = snap[key];
+    if(prev===undefined||prev===null) return null;
+    if(prev===0 && currentValue===0) return null;
+    if(prev===0) return '+new';
+    const pct = Math.round(((currentValue - prev) / prev) * 100);
+    if(pct===0) return 'no change';
+    return (pct>0?'+':'')+pct+'%';
+  } catch(e){ return null; }
+}
+function getGreeting(){
+  const h=new Date().getHours();
+  if(h<12) return 'Good morning';
+  if(h<17) return 'Good afternoon';
+  return 'Good evening';
+}
+function getTaskUrgency(rows, dateField){
+  if(!rows.length) return 'Up to date';
+  const now=Date.now(), day=86400000;
+  // find oldest entry in this group
+  let oldest=0;
+  rows.forEach(r=>{
+    const d=drecoDateValue(r[dateField]||r.submitted||r.ol||r.mol);
+    if(d && d>oldest) oldest=d; // most recent stage date
+  });
+  // find most stale - use submitted as fallback
+  let mostStale=Infinity;
+  rows.forEach(r=>{
+    const d=drecoDateValue(r[dateField]||r.submitted||r.ol);
+    if(d && d<mostStale) mostStale=d;
+  });
+  if(mostStale===Infinity) return `${rows.length} pending`;
+  const daysStale=Math.floor((now-mostStale)/day);
+  if(dateField==='travel'){
+    // travel: flag if anyone has a travel date in the past
+    const pastTravel=rows.filter(r=>r.travel && drecoDateValue(r.travel) < now);
+    if(pastTravel.length) return 'Travel date passed!';
+    const soon=rows.filter(r=>r.travel && drecoDateValue(r.travel)-now < 3*day);
+    if(soon.length) return 'Travel soon';
+    return `${rows.length} pending`;
+  }
+  if(daysStale>14) return `${daysStale}d overdue`;
+  if(daysStale>7)  return `${daysStale}d stale`;
+  if(daysStale>3)  return `${daysStale}d in stage`;
+  return `${rows.length} active`;
+}
+
 function buildConic(items,total){
   let cursor=0;
   const stops=items.map(item=>{
@@ -2486,7 +2689,7 @@ async function saveDocs(){
   allDocs[dbKey]=link;
   addTimeline(type,id,link?'Documents link updated':'Documents link removed');
   auditAction('Documents',link?'Documents link updated':'Documents link removed',docsTarget.name||'Candidate');
-  closeModal('docs-modal'); showToast('Documents saved Å“"','success');
+  closeModal('docs-modal'); showToast('Documents saved','success');
   if(type==='pro') renderPro(); else renderLB();
   await saveDocsToDB(dbKey,link);
 }
@@ -2519,7 +2722,7 @@ function exportCSV(type){
     href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),
     download:`${filename}_${new Date().toISOString().split('T')[0]}.csv`
   });
-  a.click(); showToast('Export downloaded Å“"','success');
+  a.click(); showToast('Export downloaded','success');
 }
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
