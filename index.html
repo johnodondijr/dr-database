@@ -599,6 +599,12 @@
     .pd-msg{font-size:11px;padding:2px 14px 4px;font-weight:500}
     .pd-msg.ok{color:var(--green)}.pd-msg.err{color:var(--red)}
 
+    /* Screen-reader only utility */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    /* Button loading state */
+    .btn-loading{opacity:0.7;cursor:not-allowed;pointer-events:none}
+
     /* "-"- TOAST "-"- */
     .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px}
     .toast i{font-size:14px}
@@ -731,7 +737,7 @@
       .cal-header-cell{font-size:8px;padding:7px 0}
 
       /* profile dropdown: full width */
-      .profile-dropdown{width:calc(100vw - 28px);right:-10px}
+      .profile-dropdown{width:calc(100vw - 28px);right:0}
 
       /* pagination: compact */
       .pagination{flex-direction:column;gap:6px;align-items:flex-start;padding:8px 12px}
@@ -3041,6 +3047,10 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 @media(max-width:1180px){.dreco-kpis,.priority-grid{grid-template-columns:repeat(2,1fr)}.pipeline-board.v2{grid-template-columns:repeat(2,minmax(220px,1fr))}.cp-grid{grid-template-columns:1fr}.cp-steps{grid-template-columns:repeat(4,1fr)}.dash-two{grid-template-columns:1fr}}
 @media(max-width:760px){#app .sidebar{display:none!important}.topbar{height:auto!important;min-height:60px!important;flex-wrap:wrap!important;padding:10px 14px!important}.topbar-title{width:100%!important}.topbar-search{max-width:none!important;flex:1 1 100%!important}.content-area>div{padding:16px 12px 96px!important}.dreco-page-head{flex-direction:column}.dreco-kpis,.priority-grid,.pipeline-flow,.pipeline-board.v2{grid-template-columns:1fr!important}.dreco-input,.dreco-select{width:100%;min-width:0}.cp-profile{grid-template-columns:1fr;text-align:left}.cp-stage{text-align:left;align-items:flex-start}.candidate-profile-modal,.command-modal{padding:10px}.cp-steps{grid-template-columns:repeat(2,1fr)}}
 
+    /* High-contrast mode: ensure focus is visible even without box-shadow */
+    @media (forced-colors: active) {
+      input:focus, button:focus, select:focus, textarea:focus { outline: 2px solid ButtonText; }
+    }
 </style>
 </head>
 <body>
@@ -3094,7 +3104,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               <div class="lp-input-wrap">
                 <i class="ti ti-lock lp-input-icon"></i>
                 <input type="password" id="pw-input" placeholder="Enter your password" required autocomplete="current-password">
-                <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
+                <button class="lp-pw-toggle" type="button" id="pw-toggle" aria-label="Show password" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
               </div>
               <div class="lp-field-hint" id="caps-lock-hint" aria-live="polite">Caps Lock is on</div>
             </div>
@@ -3140,13 +3150,13 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               <label for="signup-password">Password</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-lock lp-input-icon"></i>
-                <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password">
+                <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password" aria-describedby="signup-password-hint">
               </div>
-              <span class="auth-helper">Minimum 6 characters. Use something your team will not guess.</span>
+              <span class="auth-helper" id="signup-password-hint">Minimum 6 characters. Use something your team will not guess.</span>
             </div>
             <button type="submit" class="lp-submit">Create workspace</button>
           </form>
-          <div class="login-error" id="signup-error" style="display:none"></div>
+          <div class="login-error" id="signup-error" role="alert" style="display:none"></div>
           <span class="lp-forgot auth-back-link" onclick="hideSignup()"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
 
@@ -3174,7 +3184,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               </div>
               <button type="submit" class="lp-submit" style="margin-top:16px">Verify Code</button>
             </form>
-            <div class="login-error" id="forgot-error" style="display:none"></div>
+            <div class="login-error" id="forgot-error" role="alert" style="display:none"></div>
           </div>
           <!-- Step 2: Set new password (shown after code verified) -->
           <div id="recovery-step-2" style="display:none">
@@ -3199,8 +3209,8 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               </div>
               <button type="submit" class="lp-submit" style="margin-top:16px">Save New Password</button>
             </form>
-            <div class="login-error" id="forgot-error-2" style="display:none"></div>
-            <div class="login-error" id="forgot-success" style="display:none;background:var(--green-light,#E3F5EE);color:var(--green,#22A06B);border-color:var(--green-light,#E3F5EE)"></div>
+            <div class="login-error" id="forgot-error-2" role="alert" style="display:none"></div>
+            <div class="login-error" id="forgot-success" role="status" aria-live="polite" style="display:none;background:var(--green-light,#E3F5EE);color:var(--green,#22A06B);border-color:var(--green-light,#E3F5EE)"></div>
           </div>
           <span class="lp-forgot auth-back-link" onclick="hideForgotPassword()" style="margin-top:16px;display:inline-block"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
@@ -3276,7 +3286,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           </div>
           <span class="sidebar-logo-text">Dreco</span>
         </a>
-        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
+        <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">
           <i class="ti ti-layout-sidebar-left-collapse"></i>
         </button>
       </div>
@@ -3293,51 +3303,51 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
       <div class="sidebar-divider"></div>
 
                         <div class="nav-section-label">General</div>
-      <a class="nav-item active" id="nav-dash" data-title="Dashboard" onclick="switchTab('dash')">
+      <button type="button" class="nav-item active" id="nav-dash" data-title="Dashboard" aria-label="Dashboard" onclick="switchTab('dash')">
         <i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span>
-      </a>
+      </button>
 
       <div class="nav-section-label">Workflows</div>
-      <a class="nav-item" id="nav-pro" data-title="Professional Jobs" onclick="switchTab('pro')">
+      <button type="button" class="nav-item" id="nav-pro" data-title="Professional Jobs" aria-label="Professional Jobs" onclick="switchTab('pro')">
         <i class="ti ti-users"></i><span class="nav-item-label">Professional Jobs</span>
-      </a>
-      <a class="nav-item" id="nav-lb" data-title="General Jobs" onclick="switchTab('lb')">
+      </button>
+      <button type="button" class="nav-item" id="nav-lb" data-title="General Jobs" aria-label="General Jobs" onclick="switchTab('lb')">
         <i class="ti ti-briefcase"></i><span class="nav-item-label">General Jobs</span>
-      </a>
-      <a class="nav-item" id="nav-kanban" data-title="Pipeline Board" onclick="switchTab('kanban')">
+      </button>
+      <button type="button" class="nav-item" id="nav-kanban" data-title="Pipeline Board" aria-label="Pipeline Board" onclick="switchTab('kanban')">
         <i class="ti ti-route"></i><span class="nav-item-label">Pipeline Board</span>
-      </a>
-      <a class="nav-item" id="nav-travel" data-title="Travel" onclick="switchTab('travel')">
+      </button>
+      <button type="button" class="nav-item" id="nav-travel" data-title="Travel" aria-label="Travel" onclick="switchTab('travel')">
         <i class="ti ti-plane-departure"></i><span class="nav-item-label">Travel</span>
-      </a>
-      <a class="nav-item" id="nav-calendar" data-title="Calendar" onclick="switchTab('calendar')">
+      </button>
+      <button type="button" class="nav-item" id="nav-calendar" data-title="Calendar" aria-label="Calendar" onclick="switchTab('calendar')">
         <i class="ti ti-calendar-check"></i><span class="nav-item-label">Calendar</span>
-      </a>
+      </button>
 
       <div class="nav-section-label">Finance</div>
-      <a class="nav-item" id="nav-commissions" data-title="Commissions" onclick="switchTab('commissions')">
+      <button type="button" class="nav-item" id="nav-commissions" data-title="Commissions" aria-label="Commissions" onclick="switchTab('commissions')">
         <i class="ti ti-coin"></i><span class="nav-item-label">Commissions</span>
-      </a>
-      <a class="nav-item" id="nav-repayments" data-title="Repayments" onclick="switchTab('repayments')">
+      </button>
+      <button type="button" class="nav-item" id="nav-repayments" data-title="Repayments" aria-label="Repayments" onclick="switchTab('repayments')">
         <i class="ti ti-receipt-refund"></i><span class="nav-item-label">Repayments</span>
-      </a>
-      <a class="nav-item" id="nav-expenses" data-title="Expenses" onclick="switchTab('expenses')">
+      </button>
+      <button type="button" class="nav-item" id="nav-expenses" data-title="Expenses" aria-label="Expenses" onclick="switchTab('expenses')">
         <i class="ti ti-wallet"></i><span class="nav-item-label">Expenses</span>
-      </a>
-      <a class="nav-item" id="nav-reports" data-title="Reports" onclick="switchTab('reports')">
+      </button>
+      <button type="button" class="nav-item" id="nav-reports" data-title="Reports" aria-label="Reports" onclick="switchTab('reports')">
         <i class="ti ti-chart-bar"></i><span class="nav-item-label">Reports</span>
-      </a>
+      </button>
 
       <div class="nav-section-label">Team & Settings</div>
-      <a class="nav-item" id="nav-team" data-title="Team" onclick="switchTab('team')">
+      <button type="button" class="nav-item" id="nav-team" data-title="Team" aria-label="Team" onclick="switchTab('team')">
         <i class="ti ti-users-group"></i><span class="nav-item-label">Team</span>
-      </a>
-      <a class="nav-item" id="nav-settings" data-title="Settings" onclick="switchTab('settings')">
+      </button>
+      <button type="button" class="nav-item" id="nav-settings" data-title="Settings" aria-label="Settings" onclick="switchTab('settings')">
         <i class="ti ti-settings"></i><span class="nav-item-label">Settings</span>
-      </a>
-      <a class="nav-item" id="nav-help" data-title="Help & Support" onclick="openHelp()">
+      </button>
+      <button type="button" class="nav-item" id="nav-help" data-title="Help & Support" aria-label="Help & Support" onclick="openHelp()">
         <i class="ti ti-help-circle"></i><span class="nav-item-label">Help & Support</span>
-      </a>
+      </button>
 
       <div class="nav-spacer"></div>
 </aside>
@@ -3354,7 +3364,8 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <i class="ti ti-chevron-down"></i>
         </button>
         <div class="topbar-search">
-          <i class="ti ti-search"></i>
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <label for="global-search" class="sr-only">Search candidates, jobs, clients</label>
           <input type="text" placeholder="Search candidates, jobs, clients..." id="global-search" oninput="onGlobalSearch()">
         </div>
         <button class="topbar-icon-btn" type="button" onclick="openHelp()" title="Help & Support"><i class="ti ti-help-circle"></i></button>
@@ -3362,9 +3373,9 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
         <span class="save-label" id="save-label">Saved</span>
         <div class="profile-wrap">
           <!-- Icon-only profile button -->
-          <div class="topbar-profile-btn topbar-avatar-static" id="topbar-profile-btn" title="Account">
+          <button type="button" class="topbar-profile-btn topbar-avatar-static" id="topbar-profile-btn" aria-label="Account menu" title="Account" onclick="toggleProfileDropdown(event)">
             <div class="topbar-avatar" id="topbar-avatar">-</div>
-          </div>
+          </button>
 
           <!-- Rich profile dropdown -->
           <div class="profile-dropdown" id="profile-dropdown">
@@ -3394,25 +3405,25 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               </div>
               <div class="pd-section">Display name</div>
               <div class="pd-field">
-                <label>Name shown in Dreco</label>
+                <label for="pd-display-name">Name shown in Dreco</label>
                 <input type="text" id="pd-display-name" placeholder="e.g. Fred">
               </div>
               <div class="pd-section">Change username</div>
               <div class="pd-field">
-                <label>New username</label>
+                <label for="pd-new-username">New username</label>
                 <input type="text" id="pd-new-username" placeholder="e.g. fred_admin" autocomplete="off">
               </div>
               <div class="pd-section">Change password</div>
               <div class="pd-field">
-                <label>Current password</label>
+                <label for="pd-current-pw">Current password</label>
                 <input type="password" id="pd-current-pw" placeholder="Current password">
               </div>
               <div class="pd-field">
-                <label>New password</label>
+                <label for="pd-new-pw">New password</label>
                 <input type="password" id="pd-new-pw" placeholder="New password">
               </div>
               <div class="pd-field">
-                <label>Confirm new password</label>
+                <label for="pd-confirm-pw">Confirm new password</label>
                 <input type="password" id="pd-confirm-pw" placeholder="Repeat new password">
               </div>
               <div class="pd-msg" id="pd-msg"></div>
@@ -3472,7 +3483,8 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               <div class="panel-actions">
                 <div class="pill-tabs" id="pro-stage-pills"></div>
                 <div class="search-wrap">
-                  <i class="ti ti-search"></i>
+                  <i class="ti ti-search" aria-hidden="true"></i>
+                  <label for="pro-search" class="sr-only">Search professional candidates</label>
                   <input type="text" id="pro-search" placeholder="Search..." oninput="renderPro()">
                 </div>
                 <select class="toolbar-select" id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
@@ -3530,7 +3542,8 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               </div>
               <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
                 <div class="search-wrap">
-                  <i class="ti ti-search"></i>
+                  <i class="ti ti-search" aria-hidden="true"></i>
+                  <label for="lb-search" class="sr-only">Search general candidates</label>
                   <input type="text" id="lb-search" placeholder="Search..." oninput="renderLB()">
                 </div>
                 <select class="toolbar-select" id="lb-refund-f" onchange="renderLB()">
@@ -3685,11 +3698,11 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
   <div class="modal quick-modal">
     <div class="modal-header"><h3>Add user</h3><button class="modal-close" onclick="closeModal('quick-user-modal')">x</button></div>
     <div class="modal-body"><div class="form-grid">
-      <div class="field form-full"><label>Display name *</label><input id="quick-user-display" type="text" placeholder="e.g. Mary Wanjiku"></div>
-      <div class="field"><label>Username *</label><input id="quick-user-username" type="text" placeholder="e.g. mary" autocomplete="off"></div>
-      <div class="field"><label>Role</label><select id="quick-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
-      <div class="field form-full"><label>Temporary password *</label><input id="quick-user-password" type="password" placeholder="At least 6 characters"></div>
-    </div><div class="login-error" id="quick-user-error" style="display:none"></div></div>
+      <div class="field form-full"><label for="quick-user-display">Display name *</label><input id="quick-user-display" type="text" placeholder="e.g. Mary Wanjiku"></div>
+      <div class="field"><label for="quick-user-username">Username *</label><input id="quick-user-username" type="text" placeholder="e.g. mary" autocomplete="off"></div>
+      <div class="field"><label for="quick-user-role">Role</label><select id="quick-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+      <div class="field form-full"><label for="quick-user-password">Temporary password *</label><input id="quick-user-password" type="password" placeholder="At least 6 characters" aria-describedby="quick-user-pw-hint"><small id="quick-user-pw-hint" class="sr-only">At least 6 characters required</small></div>
+    </div><div class="login-error" id="quick-user-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-user-modal')">Cancel</button><button class="btn primary" onclick="submitQuickUser()">Add user</button></div>
   </div>
 </div>
@@ -3698,12 +3711,12 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
   <div class="modal quick-modal">
     <div class="modal-header"><h3>Add expense</h3><button class="modal-close" onclick="closeModal('quick-expense-modal')">x</button></div>
     <div class="modal-body"><div class="form-grid">
-      <div class="field"><label>Date</label><input id="quick-expense-date" type="date"></div>
-      <div class="field"><label>Amount (KES) *</label><input id="quick-expense-amount" type="number" min="0" placeholder="e.g. 2500"></div>
-      <div class="field"><label>Category</label><select id="quick-expense-category"><option>Documents</option><option>Transport</option><option>Processing</option><option>Communication</option><option>Other</option></select></div>
-      <div class="field"><label>Client / candidate *</label><input id="quick-expense-client" type="text" placeholder="Name" list="expense-candidate-options"><datalist id="expense-candidate-options"></datalist></div>
-      <div class="field form-full"><label>Notes</label><textarea id="quick-expense-notes" rows="3" placeholder="What was this expense for?"></textarea></div>
-    </div><div class="login-error" id="quick-expense-error" style="display:none"></div></div>
+      <div class="field"><label for="quick-expense-date">Date</label><input id="quick-expense-date" type="date"></div>
+      <div class="field"><label for="quick-expense-amount">Amount (KES) *</label><input id="quick-expense-amount" type="number" min="0" placeholder="e.g. 2500"></div>
+      <div class="field"><label for="quick-expense-category">Category</label><select id="quick-expense-category"><option>Documents</option><option>Transport</option><option>Processing</option><option>Communication</option><option>Other</option></select></div>
+      <div class="field"><label for="quick-expense-client">Client / candidate *</label><input id="quick-expense-client" type="text" placeholder="Name" list="expense-candidate-options"><datalist id="expense-candidate-options"></datalist></div>
+      <div class="field form-full"><label for="quick-expense-notes">Notes</label><textarea id="quick-expense-notes" rows="3" placeholder="What was this expense for?"></textarea></div>
+    </div><div class="login-error" id="quick-expense-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-expense-modal')">Cancel</button><button class="btn primary" onclick="submitQuickExpense()">Save expense</button></div>
   </div>
 </div>
@@ -3712,10 +3725,10 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
   <div class="modal quick-modal">
     <div class="modal-header"><h3 id="quick-event-heading">Record calendar event</h3><button class="modal-close" onclick="closeModal('quick-event-modal')">x</button></div>
     <div class="modal-body"><div class="form-grid">
-      <div class="field"><label>Date *</label><input id="quick-event-date" type="date"></div>
-      <div class="field"><label>Title *</label><input id="quick-event-title" type="text" placeholder="e.g. Embassy appointment"></div>
-      <div class="field form-full"><label>Notes</label><textarea id="quick-event-notes" rows="3" placeholder="Optional details"></textarea></div>
-    </div><div class="login-error" id="quick-event-error" style="display:none"></div></div>
+      <div class="field"><label for="quick-event-date">Date *</label><input id="quick-event-date" type="date"></div>
+      <div class="field"><label for="quick-event-title">Title *</label><input id="quick-event-title" type="text" placeholder="e.g. Embassy appointment"></div>
+      <div class="field form-full"><label for="quick-event-notes">Notes</label><textarea id="quick-event-notes" rows="3" placeholder="Optional details"></textarea></div>
+    </div><div class="login-error" id="quick-event-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" id="quick-event-delete" onclick="deleteCalendarEvent()" style="display:none">Delete</button><button class="btn" onclick="closeModal('quick-event-modal')">Cancel</button><button class="btn primary" onclick="submitCalendarEvent()">Save event</button></div>
   </div>
 </div>
@@ -3723,7 +3736,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 <div class="modal-bg" id="quick-country-modal">
   <div class="modal quick-modal">
     <div class="modal-header"><h3>Add destination country</h3><button class="modal-close" onclick="closeModal('quick-country-modal')">x</button></div>
-    <div class="modal-body"><div class="field"><label>Country name *</label><input id="quick-country-name" type="text" placeholder="e.g. Qatar"></div><div class="login-error" id="quick-country-error" style="display:none"></div></div>
+    <div class="modal-body"><div class="field"><label for="quick-country-name">Country name *</label><input id="quick-country-name" type="text" placeholder="e.g. Qatar"></div><div class="login-error" id="quick-country-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-country-modal')">Cancel</button><button class="btn primary" onclick="submitQuickCountry()">Add country</button></div>
   </div>
 </div>
@@ -3731,7 +3744,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 <div class="modal-bg" id="quick-stage-modal">
   <div class="modal quick-modal">
     <div class="modal-header"><h3 id="quick-stage-heading">Add stage</h3><button class="modal-close" onclick="closeModal('quick-stage-modal')">x</button></div>
-    <div class="modal-body"><div class="field"><label>Name *</label><input id="quick-stage-name" type="text" placeholder="e.g. Medical"></div><div class="login-error" id="quick-stage-error" style="display:none"></div></div>
+    <div class="modal-body"><div class="field"><label for="quick-stage-name">Name *</label><input id="quick-stage-name" type="text" placeholder="e.g. Medical"></div><div class="login-error" id="quick-stage-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-stage-modal')">Cancel</button><button class="btn primary" onclick="submitQuickStage()">Add</button></div>
   </div>
 </div>
@@ -3752,29 +3765,29 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
     <div class="modal-body">
       <div id="pro-tab-details">
         <div class="form-grid">
-          <div class="field form-full"><label>Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
-          <div class="field"><label>Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
-          <div class="field"><label>Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
-          <div class="field"><label>Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
-          <div class="field"><label>Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
-          <div class="field"><label>Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
-          <div class="field"><label>Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
-          <div class="field"><label>Date submitted</label><input type="date" id="pf-submitted"></div>
+          <div class="field form-full"><label for="pf-name">Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
+          <div class="field"><label for="pf-pp">Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
+          <div class="field"><label for="pf-phone">Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
+          <div class="field"><label for="pf-position">Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
+          <div class="field"><label for="pf-company">Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
+          <div class="field"><label for="pf-country">Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
+          <div class="field"><label for="pf-stage">Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
+          <div class="field"><label for="pf-submitted">Date submitted</label><input type="date" id="pf-submitted"></div>
         </div>
       </div>
       <div id="pro-tab-pipeline" style="display:none">
         <div class="form-grid">
-          <div class="field"><label>Interview / selection date</label><input type="date" id="pf-interview"></div>
-          <div class="field"><label>Offer letter date</label><input type="date" id="pf-ol"></div>
-          <div class="field"><label>MOL date</label><input type="date" id="pf-mol"></div>
-          <div class="field"><label>Visa date</label><input type="date" id="pf-visa"></div>
-          <div class="field form-full"><label>Travel date</label><input type="date" id="pf-travel"></div>
+          <div class="field"><label for="pf-interview">Interview / selection date</label><input type="date" id="pf-interview"></div>
+          <div class="field"><label for="pf-ol">Offer letter date</label><input type="date" id="pf-ol"></div>
+          <div class="field"><label for="pf-mol">MOL date</label><input type="date" id="pf-mol"></div>
+          <div class="field"><label for="pf-visa">Visa date</label><input type="date" id="pf-visa"></div>
+          <div class="field form-full"><label for="pf-travel">Travel date</label><input type="date" id="pf-travel"></div>
         </div>
       </div>
       <div id="pro-tab-commission" style="display:none">
         <div class="form-grid">
-          <div class="field"><label>Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
-          <div class="field"><label>Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
+          <div class="field"><label for="pf-comm">Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
+          <div class="field"><label for="pf-paid">Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
         </div>
       </div>
       <div id="pro-tab-timeline" style="display:none">
@@ -3804,9 +3817,9 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
     <div class="modal-body">
       <div id="lb-tab-details">
         <div class="form-grid">
-          <div class="field form-full"><label>Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
-          <div class="field"><label>Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
-          <div class="field"><label>Passport status *</label>
+          <div class="field form-full"><label for="lf-name">Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
+          <div class="field"><label for="lf-phone">Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
+          <div class="field"><label for="lf-pp">Passport status *</label>
             <select id="lf-pp">
               <option value="APPLIED">Applied</option>
               <option value="HAD PP">Had PP</option>
@@ -3814,18 +3827,18 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               <option value="PUSHED">Pushed</option>
             </select>
           </div>
-          <div class="field"><label>Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
-          <div class="field"><label>Travel date</label><input type="date" id="lf-tdate"></div>
-          <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+          <div class="field"><label for="lf-travel">Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
+          <div class="field"><label for="lf-tdate">Travel date</label><input type="date" id="lf-tdate"></div>
+          <div class="field"><label for="lf-notes">Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
         </div>
       </div>
       <div id="lb-tab-refunds" style="display:none">
         <div class="form-grid">
-          <div class="field form-full"><label>Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
-          <div class="field"><label>1st payment date</label><input type="date" id="lf-r1date"></div>
-          <div class="field"><label>1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
-          <div class="field"><label>2nd payment date</label><input type="date" id="lf-r2date"></div>
-          <div class="field"><label>2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+          <div class="field form-full"><label for="lf-torefund">Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
+          <div class="field"><label for="lf-r1date">1st payment date</label><input type="date" id="lf-r1date"></div>
+          <div class="field"><label for="lf-r1amt">1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
+          <div class="field"><label for="lf-r2date">2nd payment date</label><input type="date" id="lf-r2date"></div>
+          <div class="field"><label for="lf-r2amt">2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
         </div>
       </div>
       <div id="lb-tab-timeline" style="display:none">
@@ -3853,7 +3866,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
       </p>
       <div id="docs-checklist" class="doc-checklist"></div>
       <div class="field">
-        <label>Documents folder link</label>
+        <label for="docs-link-input">Documents folder link</label>
         <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link..." oninput="onDocsLinkInput()">
       </div>
     </div>
@@ -3882,7 +3895,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <strong>Workspace</strong>
           <span>Set the company name shown across this Dreco workspace.</span>
           <div class="form-grid" style="margin-top:12px">
-            <div class="field"><label>Company name</label><input type="text" id="settings-company-name"></div>
+            <div class="field"><label for="settings-company-name">Company name</label><input type="text" id="settings-company-name"></div>
           </div>
           <button class="btn primary" style="margin-top:10px" onclick="saveWorkspaceSettings()"><i class="ti ti-device-floppy"></i> Save workspace</button>
         </div>
@@ -3894,9 +3907,9 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <span>Manage the destination country tabs used in General Jobs for this company.</span>
           <div id="settings-countries-list" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"></div>
           <div class="form-grid" style="margin-top:12px">
-            <div class="field"><label>Add country</label><input type="text" id="settings-new-country" placeholder="e.g. Qatar"></div>
+            <div class="field"><label for="settings-new-country">Add country</label><input type="text" id="settings-new-country" placeholder="e.g. Qatar"></div>
           </div>
-          <div class="login-error" id="settings-country-error" style="display:none;text-align:left"></div>
+          <div class="login-error" id="settings-country-error" role="alert" style="display:none;text-align:left"></div>
           <button class="btn primary" style="margin-top:10px" onclick="addSettingsCountry()"><i class="ti ti-plus"></i> Add country</button>
         </div>
       </div>
@@ -3907,12 +3920,12 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <span>Admins can add users for this company workspace. New users sign in with the username and temporary password set here.</span>
           <div id="settings-users-list" style="display:grid;gap:8px;margin-top:12px"></div>
           <div class="form-grid" style="margin-top:12px">
-            <div class="field"><label>Display name</label><input type="text" id="new-user-display" placeholder="e.g. Jane Doe"></div>
-            <div class="field"><label>Username</label><input type="text" id="new-user-username" placeholder="e.g. jane" autocomplete="off"></div>
-            <div class="field"><label>Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
-            <div class="field"><label>Temporary password</label><input type="password" id="new-user-password" placeholder="At least 6 characters" autocomplete="new-password"></div>
+            <div class="field"><label for="new-user-display">Display name</label><input type="text" id="new-user-display" placeholder="e.g. Jane Doe"></div>
+            <div class="field"><label for="new-user-username">Username</label><input type="text" id="new-user-username" placeholder="e.g. jane" autocomplete="off"></div>
+            <div class="field"><label for="new-user-role">Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+            <div class="field"><label for="new-user-password">Temporary password</label><input type="password" id="new-user-password" placeholder="At least 6 characters" autocomplete="new-password" aria-describedby="new-user-pw-hint"><small id="new-user-pw-hint" class="sr-only">At least 6 characters required</small></div>
           </div>
-          <div class="login-error" id="new-user-error" style="display:none;text-align:left"></div>
+          <div class="login-error" id="new-user-error" role="alert" style="display:none;text-align:left"></div>
           <button class="btn primary" style="margin-top:10px" onclick="createCompanyUser()"><i class="ti ti-user-plus"></i> Add user</button>
         </div>
       </div>
@@ -4019,7 +4032,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 </nav>
 
 <!-- TOAST -->
-<div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toast-msg">Saved</span></div>
+<div class="toast" id="toast" role="alert" aria-live="polite"><i class="ti ti-circle-check"></i><span id="toast-msg">Saved</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data.js"></script>
