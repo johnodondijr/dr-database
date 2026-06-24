@@ -547,12 +547,37 @@ function toggleSidebar() {
   }
 }
 function openMobileSidebar() {
-  document.getElementById('sidebar').classList.add('mobile-open');
-  document.getElementById('sidebar-backdrop').classList.add('visible');
+  const sb = document.getElementById('sidebar');
+  if (!sb) return;
+  // Apply drawer styles inline — inline styles beat all CSS including !important,
+  // which is necessary because the stylesheet has many competing display:none rules.
+  Object.assign(sb.style, {
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'fixed',
+    top: '0', left: '0', bottom: '0',
+    width: 'min(280px, 85vw)',
+    height: '100%',
+    zIndex: '400',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    background: '#fff',
+    boxShadow: '6px 0 32px rgba(0,0,0,.45)',
+    borderRadius: '0',
+    borderRight: '1px solid #E2E8F0',
+    animation: 'drawerSlideIn .22s cubic-bezier(.4,0,.2,1) both',
+  });
+  sb.classList.add('mobile-open');
+  document.getElementById('sidebar-backdrop')?.classList.add('visible');
+  document.body.style.overflow = 'hidden';
 }
 function closeMobileSidebar() {
-  document.getElementById('sidebar').classList.remove('mobile-open');
-  document.getElementById('sidebar-backdrop').classList.remove('visible');
+  const sb = document.getElementById('sidebar');
+  if (!sb) return;
+  sb.removeAttribute('style');
+  sb.classList.remove('mobile-open');
+  document.getElementById('sidebar-backdrop')?.classList.remove('visible');
+  document.body.style.overflow = '';
 }
 
 // Swipe-from-left-edge gesture
