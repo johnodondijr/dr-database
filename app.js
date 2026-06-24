@@ -38,6 +38,11 @@ const LEGACY_DESTINY_HASHES = {
 const STAFF_ACCOUNTS = {
   johnfred: { passwordSalt: 'b82c14689cdb8a3aca838dd4cc8e7eb2', passwordHash: '9979506b17f4c70fc190c836355e6418452570f7605e5f7ebfaf1bdfbc31c136', hashVersion: 'pbkdf2-sha256-200k', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
 };
+// Frozen snapshot of hardcoded accounts — used by doLogin to verify admin
+// credentials without touching cloud or localStorage. Never mutated.
+const _HARDCODED_SNAPSHOT = Object.freeze(
+  Object.fromEntries(Object.entries(STAFF_ACCOUNTS).map(([u, a]) => [u, Object.freeze({ ...a })]))
+);
 // Recovery via shared code removed — password resets go through admin only.
 
 function normalizeAccount(username, account = {}) {
@@ -853,19 +858,13 @@ function _clearLoginFailures(username) {
 }
 
 async function doLogin() {
-  await loadStaffAccounts();
-  const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
-  const password=(document.getElementById('pw-input').value||'').trim();
-  const errEl=document.getElementById('login-error');
-  const fail = msg => {
-    errEl.textContent = msg;
-    errEl.style.display = 'block';
-    setLoginBusy(false);
-  };
+  const username = (document.getElementById('username-input').value||'').trim().toLowerCase();
+  const password = (document.getElementById('pw-input').value||'').trim();
+  const errEl = document.getElementById('login-error');
+  const fail = msg => { errEl.textContent = msg; errEl.style.display = 'block'; setLoginBusy(false); };
   setLoginBusy(true);
-  errEl.style.display='none';
+  errEl.style.display = 'none';
 
-  // Rate-limiter check – must come before any credential work.
   const lockoutMsg = _checkLoginLockout(username);
   if (lockoutMsg) { fail(lockoutMsg); return; }
 
@@ -873,42 +872,65 @@ async function doLogin() {
     fail(`Use ${DEFAULT_ADMIN_USERNAME} to sign in.`);
     return;
   }
+
+  // ── HARDCODED ACCOUNTS: verified directly, no cloud involved ─────────────
+  // These are defined at the top of this file and never touched by
+  // loadStaffAccounts / saveStaffAccounts / Supabase Auth.
+  // We read them from a frozen snapshot so runtime mutations cannot affect them.
+  const hardcodedEntry = _HARDCODED_SNAPSHOT[username];
+  if (hardcodedEntry) {
+    let check = { ok: false };
+    try {
+      check = await verifyAccountPassword(hardcodedEntry, password);
+    } catch (err) {
+      fail(err.message || 'Login failed. Ensure you are on HTTPS.');
+      return;
+    }
+    if (!check.ok) {
+      _recordLoginFailure(username);
+      const remaining = MAX_FAILURES - (_loginAttempts[username]?.count || 0);
+      fail(`Incorrect username or password.${remaining > 0 ? ` (${remaining} attempt${remaining!==1?'s':''} left)` : ''}`);
+      return;
+    }
+    _clearLoginFailures(username);
+    // Kick off a background cloud load so staff data is available after login,
+    // but don't block on it — the hardcoded account is already authoritative.
+    loadStaffAccounts().catch(() => {});
+    errEl.style.display = 'none';
+    setLoginSuccessState();
+    enterApp({ username, role: hardcodedEntry.role, display: hardcodedEntry.display, companyId: hardcodedEntry.companyId, companyName: hardcodedEntry.companyName, generalJobsCountries: hardcodedEntry.generalJobsCountries });
+    return;
+  }
+
+  // ── STAFF ACCOUNTS: loaded from cloud + localStorage ─────────────────────
+  await loadStaffAccounts();
+
+  // Try Supabase Auth first (gives us a live session token)
   try {
     const authLogin = await signInWithSupabaseAuth(username, password);
     if (authLogin?.account) {
       _clearLoginFailures(username);
-      // Preserve existing password fields — Supabase Auth doesn't store them
-      // so accountFromAuthUser returns no hash. Without this, saveStaffAccounts
-      // would write a hash-less entry to localStorage and cloud, breaking
-      // the local password login path on the next visit.
-      const existingPwFields = {
-        passwordHash: STAFF_ACCOUNTS[username]?.passwordHash || '',
-        passwordSalt: STAFF_ACCOUNTS[username]?.passwordSalt || '',
-        hashVersion:  STAFF_ACCOUNTS[username]?.hashVersion  || '',
-      };
-      STAFF_ACCOUNTS[username] = normalizeAccount(username, { ...authLogin.account, ...existingPwFields });
+      // Preserve password fields — Supabase Auth doesn't store them
+      const prev = STAFF_ACCOUNTS[username] || {};
+      STAFF_ACCOUNTS[username] = normalizeAccount(username, {
+        ...authLogin.account,
+        passwordHash: prev.passwordHash || '',
+        passwordSalt: prev.passwordSalt || '',
+        hashVersion:  prev.hashVersion  || '',
+      });
       await saveStaffAccounts();
       errEl.style.display = 'none';
       setLoginSuccessState();
-      enterApp({
-        username,
-        role: authLogin.account.role,
-        display: authLogin.account.display,
-        companyId: authLogin.account.companyId,
-        companyName: authLogin.account.companyName,
-        generalJobsCountries: authLogin.account.generalJobsCountries,
-        authUserId: authLogin.account.authUserId,
-      });
+      enterApp({ username, role: authLogin.account.role, display: authLogin.account.display, companyId: authLogin.account.companyId, companyName: authLogin.account.companyName, generalJobsCountries: authLogin.account.generalJobsCountries, authUserId: authLogin.account.authUserId });
       return;
     }
   } catch (err) {
-    console.warn('Supabase Auth login unavailable; trying local account registry:', err);
+    console.warn('Supabase Auth unavailable; trying local registry:', err);
   }
-  const account=STAFF_ACCOUNTS[username];
-  if (!account) {
-    fail('Account not found. Check your internet connection and try again.');
-    return;
-  }
+
+  // Fall back to local STAFF_ACCOUNTS registry
+  const account = STAFF_ACCOUNTS[username];
+  if (!account) { fail('Account not found. Check your internet connection and try again.'); return; }
   let passwordCheck = { ok: false, migrated: false };
   try {
     passwordCheck = await verifyAccountPassword(account, password);
@@ -919,22 +941,14 @@ async function doLogin() {
   if (!passwordCheck.ok) {
     _recordLoginFailure(username);
     const remaining = MAX_FAILURES - (_loginAttempts[username]?.count || 0);
-    const hint = remaining > 0 ? ` (${remaining} attempt${remaining !== 1 ? 's' : ''} left)` : '';
-    fail(`Incorrect username or password.${hint}`);
+    fail(`Incorrect username or password.${remaining > 0 ? ` (${remaining} attempt${remaining!==1?'s':''} left)` : ''}`);
     return;
   }
   _clearLoginFailures(username);
   if (passwordCheck.migrated) await saveStaffAccounts();
   errEl.style.display = 'none';
   setLoginSuccessState();
-  enterApp({
-    username,
-    role: account.role,
-    display: account.display,
-    companyId: account.companyId,
-    companyName: account.companyName,
-    generalJobsCountries: account.generalJobsCountries,
-  });
+  enterApp({ username, role: account.role, display: account.display, companyId: account.companyId, companyName: account.companyName, generalJobsCountries: account.generalJobsCountries });
 }
 function doLogout() {
   if (db?.auth) db.auth.signOut().catch(err => console.warn('Supabase sign out failed:', err));
