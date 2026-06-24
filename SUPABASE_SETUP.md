@@ -45,6 +45,7 @@ Supabase is a free cloud database. Once connected, ALL staff will see the SAME d
 -- text labels like "CV SELECTION" or "INTERVIEW" instead of actual dates.
 CREATE TABLE pro_candidates (
   id          BIGSERIAL PRIMARY KEY,
+  company_id  TEXT NOT NULL,
   name        TEXT NOT NULL,
   pp          TEXT,
   phone       TEXT,
@@ -66,6 +67,7 @@ CREATE TABLE pro_candidates (
 -- LB candidates table
 CREATE TABLE lb_candidates (
   id            BIGSERIAL PRIMARY KEY,
+  company_id    TEXT NOT NULL,
   name          TEXT NOT NULL,
   phone         TEXT,
   "ppStatus"    TEXT DEFAULT 'APPLIED',
@@ -81,35 +83,59 @@ CREATE TABLE lb_candidates (
 );
 
 -- Documents storage (Google Drive links)
+-- key format: "<company_id>:<doc_key>"
 CREATE TABLE documents (
   key   TEXT PRIMARY KEY,
   data  JSONB
 );
 
 -- Activity timelines
+-- key format: "<company_id>:<timeline_key>"
 CREATE TABLE timelines (
   key     TEXT PRIMARY KEY,
   entries JSONB
 );
 
 -- App settings (custom stages etc.)
+-- key format: "<company_id>:<setting_key>"
 CREATE TABLE app_settings (
   key   TEXT PRIMARY KEY,
   value JSONB
 );
 
--- Allow public access (since we handle auth ourselves)
+-- Row Level Security — each company only sees its own data.
+-- The app uses Supabase Auth; company_id is stored in app_metadata.
 ALTER TABLE pro_candidates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lb_candidates  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE timelines      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_settings   ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow all" ON pro_candidates FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all" ON lb_candidates  FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all" ON documents      FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all" ON timelines      FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all" ON app_settings   FOR ALL USING (true) WITH CHECK (true);
+-- Candidates: enforce company_id matches the authenticated user's company
+CREATE POLICY "Company isolation" ON pro_candidates
+  FOR ALL USING (company_id = (auth.jwt()->'app_metadata'->>'company_id'))
+  WITH CHECK (company_id = (auth.jwt()->'app_metadata'->>'company_id'));
+
+CREATE POLICY "Company isolation" ON lb_candidates
+  FOR ALL USING (company_id = (auth.jwt()->'app_metadata'->>'company_id'))
+  WITH CHECK (company_id = (auth.jwt()->'app_metadata'->>'company_id'));
+
+-- Documents/timelines/settings: key must start with the user's company_id prefix
+CREATE POLICY "Company isolation" ON documents
+  FOR ALL USING (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'))
+  WITH CHECK (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'));
+
+CREATE POLICY "Company isolation" ON timelines
+  FOR ALL USING (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'))
+  WITH CHECK (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'));
+
+CREATE POLICY "Company isolation" ON app_settings
+  FOR ALL USING (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'))
+  WITH CHECK (key LIKE ((auth.jwt()->'app_metadata'->>'company_id') || ':%'));
+
+-- If you have existing data without company_id, run this after creating the column:
+-- UPDATE pro_candidates SET company_id = 'destiny-recruitment-consults' WHERE company_id IS NULL;
+-- UPDATE lb_candidates  SET company_id = 'destiny-recruitment-consults' WHERE company_id IS NULL;
 ```
 
 4. You should see **"Success. No rows returned"** — that means it worked.
