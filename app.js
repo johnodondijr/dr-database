@@ -3459,3 +3459,293 @@ function setUserDisplay(display, role) {
   window.renderCandidatesV4=renderCandidates; window.renderPipelineV4=renderPipeline; window.renderFinanceV4=renderFinance; window.renderReportsV4=renderReports;
   window.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ ensureSidebarUser(); ensureCommand(); if($('#app') && getComputedStyle($('#app')).display!=='none') window.switchTab('dash'); },150));
 })();
+
+/* ========================================================================
+   DRECO V5 - DIRECT CANDIDATE DOCUMENT UPLOADS
+   Replaces Google Drive folder links with per-candidate checklist uploads.
+   Uses Supabase Storage bucket: candidate-documents when available.
+   Falls back to local metadata/data URL for offline testing.
+======================================================================== */
+(function(){
+  const BUCKET = 'candidate-documents';
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const js = v => String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');
+  const nowISO = () => new Date().toISOString();
+  const currentDisplay = () => (window.currentUser?.display || window.currentUser?.username || 'User');
+  const companyIdSafe = () => {
+    try { return (typeof getCompanyId === 'function' ? getCompanyId() : (window.currentUser?.companyId || 'default-company')); }
+    catch { return 'default-company'; }
+  };
+  const recordByType = (type,id) => (type === 'pro' ? (window.proDB || proDB || []) : (window.lbDB || lbDB || [])).find(r => String(r.id) === String(id)) || {};
+  const docKey = (type,id) => `${type}_${id}`;
+  const fmtBytes = bytes => {
+    const n = Number(bytes || 0);
+    if(!n) return '';
+    if(n < 1024) return `${n} B`;
+    if(n < 1024*1024) return `${(n/1024).toFixed(1)} KB`;
+    return `${(n/1024/1024).toFixed(1)} MB`;
+  };
+  const safeFileName = name => String(name || 'document').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(0,90);
+  const DOC_DEFS = {
+    pro: [
+      ['passport','Passport'],
+      ['good_conduct','Good Conduct'],
+      ['cv','CV'],
+      ['photo','Photo'],
+      ['offer_letter','Offer Letter'],
+      ['mol','MOL'],
+      ['medical','Medical / GAMCA'],
+      ['visa','Visa'],
+      ['ticket','Ticket'],
+      ['contract','Contract']
+    ],
+    lb: [
+      ['passport','Passport'],
+      ['good_conduct','Good Conduct'],
+      ['cv','CV'],
+      ['photo','Photo'],
+      ['payment_receipt','Payment Receipt'],
+      ['ticket','Ticket'],
+      ['contract','Contract'],
+      ['other','Other Supporting Document']
+    ]
+  };
+  function getDefs(type){ return DOC_DEFS[type] || DOC_DEFS.pro; }
+  function normalizeDocStore(value){
+    if(value && typeof value === 'object' && !Array.isArray(value)){
+      if(value.items && typeof value.items === 'object') return value;
+      return { version: 2, items: value, updatedAt: value.updatedAt || nowISO() };
+    }
+    if(typeof value === 'string' && value.trim()){
+      return { version: 2, legacyFolderLink: value.trim(), items: { legacy_folder: { label:'Legacy Drive Folder', fileName:'Google Drive folder', url:value.trim(), uploadedAt:'', uploadedBy:'Legacy', legacy:true } } };
+    }
+    return { version: 2, items: {} };
+  }
+  function getDocStore(type,id){
+    window.allDocs = window.allDocs || (typeof allDocs !== 'undefined' ? allDocs : {});
+    return normalizeDocStore(window.allDocs[docKey(type,id)]);
+  }
+  function setDocStore(type,id,store){
+    window.allDocs = window.allDocs || (typeof allDocs !== 'undefined' ? allDocs : {});
+    store.version = 2;
+    store.updatedAt = nowISO();
+    window.allDocs[docKey(type,id)] = store;
+    try { if(typeof allDocs !== 'undefined') allDocs = window.allDocs; } catch {}
+  }
+  function docItems(type,id){ return getDocStore(type,id).items || {}; }
+  function uploadedCount(type,id){ return Object.values(docItems(type,id)).filter(Boolean).length; }
+  function completion(type,id){ const total = getDefs(type).length; return { done: uploadedCount(type,id), total, pct: Math.round(uploadedCount(type,id) / Math.max(1,total) * 100) }; }
+
+  function hasAnyDoc(type,id){ return uploadedCount(type,id) > 0; }
+  window.hasDocs = function(a,b){
+    if(typeof a === 'object' && a){ return hasAnyDoc(a.type, a.id); }
+    return hasAnyDoc(a,b);
+  };
+  window.drecoDocCompletion = function(type,id){ return completion(type,id); };
+  window.drecoCandidateDocs = function(type,id){ return docItems(type,id); };
+
+  async function persistDocs(type,id,store){
+    setDocStore(type,id,store);
+    const key = docKey(type,id);
+    if(typeof saveDocsToDB === 'function') await saveDocsToDB(key, store);
+    else if(typeof saveLocalStore === 'function') saveLocalStore();
+    refreshDocsUI(type,id);
+  }
+  function refreshDocsUI(type,id){
+    try { renderDocChecklist(type,id); } catch {}
+    const active = sessionStorage.getItem('dreco_active_tab') || '';
+    try { if(typeof renderDocumentsV4 === 'function') renderDocumentsV4(); } catch {}
+    try { if(typeof renderCandidatesV4 === 'function' && active === 'candidates') renderCandidatesV4(); } catch {}
+    try { if(typeof renderPipelineV4 === 'function' && active === 'pipeline') renderPipelineV4(); } catch {}
+    try { if(typeof renderTasks === 'function' && active === 'tasks') renderTasks(); } catch {}
+  }
+  function closeOverlays(exceptId){
+    $$('.modal-bg.open,.modal.open,.v4-modal.open').forEach(el => { if(el.id !== exceptId) el.classList.remove('open'); });
+  }
+
+  window.openDocs = function(type,id,name){
+    closeOverlays('docs-modal');
+    window.docsTarget = { type, id, name };
+    try { docsTarget = window.docsTarget; } catch {}
+    const modal = $('#docs-modal');
+    if(!modal) return;
+    const title = $('#docs-modal-title');
+    if(title) title.textContent = `Documents - ${name || 'Candidate'}`;
+    const panel = modal.querySelector('.modal');
+    if(panel) panel.style.maxWidth = '920px';
+    const body = modal.querySelector('.modal-body');
+    if(body){
+      body.innerHTML = `
+        <div class="dreco-upload-intro">
+          <div>
+            <strong>Candidate document checklist</strong>
+            <span>Upload files directly into Dreco. Uploaded items show status, date, uploader, view, replace, and delete actions.</span>
+          </div>
+          <div id="dreco-doc-progress" class="dreco-doc-progress"></div>
+        </div>
+        <div id="docs-checklist" class="doc-checklist dreco-upload-list"></div>
+      `;
+    }
+    const footer = modal.querySelector('.modal-footer');
+    if(footer){
+      footer.style.justifyContent = 'space-between';
+      footer.innerHTML = `
+        <button class="btn" onclick="drecoDownloadDocIndex()"><i class="ti ti-list-details"></i> Document Index</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="closeModal('docs-modal')">Close</button>
+        </div>
+      `;
+    }
+    renderDocChecklist(type,id);
+    modal.classList.add('open');
+  };
+
+  window.renderDocChecklist = function(type,id){
+    const el = $('#docs-checklist'); if(!el) return;
+    const store = getDocStore(type,id);
+    const items = store.items || {};
+    const defs = getDefs(type);
+    const c = completion(type,id);
+    const progress = $('#dreco-doc-progress');
+    if(progress) progress.innerHTML = `<strong>${c.done}/${c.total}</strong><span>${c.pct}% complete</span><i><b style="width:${Math.min(100,c.pct)}%"></b></i>`;
+    el.innerHTML = defs.map(([key,label]) => {
+      const d = items[key];
+      const uploaded = !!d;
+      return `
+        <div class="dreco-doc-item ${uploaded ? 'uploaded' : 'missing'}">
+          <div class="dreco-doc-main">
+            <div class="dreco-doc-status"><i class="ti ${uploaded ? 'ti-circle-check-filled' : 'ti-cloud-upload'}"></i></div>
+            <div class="dreco-doc-copy">
+              <strong>${esc(label)}</strong>
+              ${uploaded ? `<span>${esc(d.fileName || 'Uploaded file')} ${d.size ? '• '+fmtBytes(d.size) : ''}</span><small>Uploaded ${esc(formatDocDate(d.uploadedAt))} by ${esc(d.uploadedBy || 'User')}</small>` : `<span>Missing</span><small>Accepted: PDF, image, Word, Excel, text files</small>`}
+            </div>
+          </div>
+          <div class="dreco-doc-actions">
+            ${uploaded ? `<button class="btn tiny" onclick="drecoViewDoc('${js(type)}','${js(id)}','${js(key)}')"><i class="ti ti-eye"></i> View</button>` : ''}
+            <label class="btn tiny primary">
+              <i class="ti ${uploaded ? 'ti-refresh' : 'ti-upload'}"></i> ${uploaded ? 'Replace' : 'Upload'}
+              <input type="file" hidden onchange="drecoUploadDoc('${js(type)}','${js(id)}','${js(key)}',this)">
+            </label>
+            ${uploaded ? `<button class="btn tiny danger" onclick="drecoDeleteDoc('${js(type)}','${js(id)}','${js(key)}')"><i class="ti ti-trash"></i></button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  };
+  function formatDocDate(v){
+    if(!v) return 'previously';
+    const d = new Date(v);
+    return isNaN(d) ? String(v) : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  }
+  async function fileToDataUrl(file){
+    return new Promise((resolve,reject)=>{ const r = new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file); });
+  }
+  async function uploadToSupabase(path,file){
+    if(!window.db && typeof db === 'undefined') return null;
+    const client = window.db || db;
+    if(!client?.storage) return null;
+    const { error } = await client.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type || 'application/octet-stream' });
+    if(error) throw error;
+    const { data } = client.storage.from(BUCKET).getPublicUrl(path);
+    return data?.publicUrl || '';
+  }
+  window.drecoUploadDoc = async function(type,id,docType,input){
+    const file = input?.files?.[0];
+    if(!file) return;
+    const defs = Object.fromEntries(getDefs(type));
+    const label = defs[docType] || docType;
+    const store = getDocStore(type,id);
+    store.items = store.items || {};
+    const path = `${companyIdSafe()}/${type}/${id}/${docType}/${Date.now()}-${safeFileName(file.name)}`;
+    try{
+      if(typeof showToast === 'function') showToast('Uploading document...', 'info');
+      let url = '';
+      let storage = 'supabase';
+      try { url = await uploadToSupabase(path,file); }
+      catch(storageErr){
+        console.warn('Supabase Storage upload failed. Falling back to local file preview:', storageErr);
+        url = await fileToDataUrl(file);
+        storage = 'local-preview';
+      }
+      store.items[docType] = { label, fileName:file.name, mimeType:file.type, size:file.size, path, url, uploadedAt:nowISO(), uploadedBy:currentDisplay(), storage };
+      await persistDocs(type,id,store);
+      try { addTimeline(type,id,`${label} uploaded`); } catch {}
+      try { auditAction('Documents',`${label} uploaded`, recordByType(type,id).name || 'Candidate'); } catch {}
+      if(typeof showToast === 'function') showToast(`${label} uploaded ✓`, 'success');
+    }catch(err){
+      console.error(err);
+      if(typeof showToast === 'function') showToast(err.message || 'Upload failed', 'error');
+      else alert(err.message || 'Upload failed');
+    }finally{ if(input) input.value=''; }
+  };
+  window.drecoViewDoc = function(type,id,docType){
+    const d = docItems(type,id)[docType];
+    if(!d?.url){ alert('File not available.'); return; }
+    window.open(d.url, '_blank', 'noopener,noreferrer');
+  };
+  window.drecoDeleteDoc = async function(type,id,docType){
+    const store = getDocStore(type,id); const d = store.items?.[docType];
+    if(!d) return;
+    if(!confirm(`Delete ${d.label || docType}?`)) return;
+    try{
+      const client = window.db || (typeof db !== 'undefined' ? db : null);
+      if(client?.storage && d.storage === 'supabase' && d.path){
+        await client.storage.from(BUCKET).remove([d.path]).catch(()=>{});
+      }
+      delete store.items[docType];
+      await persistDocs(type,id,store);
+      try { addTimeline(type,id,`${d.label || docType} deleted`); } catch {}
+      try { auditAction('Documents',`${d.label || docType} deleted`, recordByType(type,id).name || 'Candidate'); } catch {}
+      if(typeof showToast === 'function') showToast('Document deleted', 'success');
+    }catch(err){
+      console.error(err);
+      if(typeof showToast === 'function') showToast(err.message || 'Delete failed', 'error');
+    }
+  };
+  window.drecoDownloadDocIndex = function(){
+    const t = window.docsTarget || (typeof docsTarget !== 'undefined' ? docsTarget : null);
+    if(!t) return;
+    const items = docItems(t.type,t.id);
+    const rows = [['Document','File name','Uploaded at','Uploaded by','URL']];
+    Object.values(items).forEach(d => rows.push([d.label||'', d.fileName||'', d.uploadedAt||'', d.uploadedBy||'', d.url||'']));
+    const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${(t.name||'candidate').replace(/[^a-z0-9]+/gi,'-')}-documents.csv`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+  // Legacy handlers now no-op/compatibility wrappers.
+  window.onDocsLinkInput = function(){};
+  window.openCurrentDocLink = function(){
+    const t = window.docsTarget || (typeof docsTarget !== 'undefined' ? docsTarget : null); if(!t) return;
+    const first = Object.values(docItems(t.type,t.id))[0]; if(first?.url) window.open(first.url,'_blank');
+  };
+  window.saveDocs = async function(){
+    const t = window.docsTarget || (typeof docsTarget !== 'undefined' ? docsTarget : null); if(!t) return;
+    await persistDocs(t.type,t.id,getDocStore(t.type,t.id));
+    if(typeof showToast === 'function') showToast('Documents saved ✓','success');
+    closeModal('docs-modal');
+  };
+
+  // Upgrade document page to checklist-aware status.
+  window.renderDocumentsV4 = function(){
+    const el = $('#documents-section'); if(!el) return;
+    const all = (typeof rows === 'function' ? rows() : [ ...(window.proDB||[]).map(r=>({...r,type:'pro'})), ...(window.lbDB||[]).map(r=>({...r,type:'lb'})) ]);
+    const rowsHTML = all.map(x=>{
+      const c = completion(x.type,x.id);
+      const req = getDefs(x.type).map(d=>d[1]).slice(0,6).join(', ') + (getDefs(x.type).length>6?'...':'');
+      return `<tr onclick="openDocs('${js(x.type)}','${js(x.id)}','${js(x.name)}')"><td><div class="v4-name"><div class="v4-avatar">${esc((x.name||'?').split(/\s+/).map(p=>p[0]).join('').slice(0,2))}</div><div><strong>${esc(x.name)}</strong><span>${esc(x.pp || 'No passport')}</span></div></div></td><td>${esc(x.type==='pro'?'Professional':'General')}</td><td>${esc(req)}</td><td><div class="doc-table-progress"><b>${c.done}/${c.total}</b><i><span style="width:${c.pct}%"></span></i></div></td><td>${c.done ? '<span class="v4-doc-ok">Uploaded</span>' : '<span class="v4-doc-miss">Missing</span>'}</td><td><button class="dreco-btn" onclick="event.stopPropagation();openDocs('${js(x.type)}','${js(x.id)}','${js(x.name)}')">Manage</button></td></tr>`;
+    }).join('');
+    const complete = all.filter(x=>completion(x.type,x.id).pct >= 100).length;
+    const partial = all.filter(x=>{ const c=completion(x.type,x.id); return c.done>0 && c.pct<100; }).length;
+    const missing = all.filter(x=>completion(x.type,x.id).done===0).length;
+    el.innerHTML = `<div class="v4-page"><div class="v4-head"><div><h1>Documents</h1><p>Direct per-candidate uploads with checklist status, view, replace and delete actions.</p></div><div class="v4-actions"><button class="dreco-btn primary" onclick="switchTab('candidates')">Open Candidates</button></div></div><div class="v4-kpi-grid"><div class="v4-kpi"><span>Complete</span><strong>${complete}</strong><small>All required files</small></div><div class="v4-kpi"><span>Partial</span><strong>${partial}</strong><small>Some files uploaded</small></div><div class="v4-kpi"><span>Missing</span><strong>${missing}</strong><small>No documents yet</small></div><div class="v4-kpi"><span>Total files</span><strong>${all.reduce((s,x)=>s+uploadedCount(x.type,x.id),0)}</strong><small>Uploaded records</small></div></div><div class="v4-card"><table class="v4-table"><thead><tr><th>Candidate</th><th>Type</th><th>Required Checklist</th><th>Progress</th><th>Status</th><th>Action</th></tr></thead><tbody>${rowsHTML}</tbody></table></div></div>`;
+  };
+  const prevSwitch = window.switchTab;
+  window.switchTab = function(tab='dash'){
+    if(typeof prevSwitch === 'function') prevSwitch(tab);
+    sessionStorage.setItem('dreco_active_tab', tab);
+    setTimeout(()=>{ if(tab === 'documents') window.renderDocumentsV4(); }, 20);
+  };
+})();
