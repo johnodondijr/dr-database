@@ -3172,6 +3172,16 @@ th { padding: 9px 14px !important; }
 .cmd-item-sub { font-size: 11px; color: var(--text-3,#999); }
 .cmd-item-badge { font-size: 10px; font-weight: 700; color: #5347CE; background: #EEF2FF; border-radius: 6px; padding: 2px 6px; }
 #cmd-empty { padding: 32px; text-align: center; font-size: 13px; color: var(--text-3,#999); }
+/* Fix stray text cursor on non-input elements */
+body, #app, .sidebar, .content-area, .dv5-page, .dv5-card, .dv5-kpi, .dv5-priority {
+  cursor: default;
+}
+a, button, [onclick], .nav-item, .dv5-btn, .dv5-link, .dv5-action-btn, .dv5-table tbody tr, .dv5-priority, .dv5-pipe-card, .dv5-task-item, .cmd-item {
+  cursor: pointer;
+}
+input, textarea, select, [contenteditable] {
+  cursor: text;
+}
 </style>
 </head>
 <body>
@@ -3499,12 +3509,11 @@ th { padding: 9px 14px !important; }
           <span id="topbar-workspace-name">Destiny Recruitment Consults</span>
           <i class="ti ti-chevron-down"></i>
         </button>
-        <div class="topbar-search">
+        <div class="topbar-search" onclick="openCmd()" style="cursor:pointer" title="Search or press ⌘K">
           <i class="ti ti-search" aria-hidden="true"></i>
           <label for="global-search" class="sr-only">Search candidates, jobs, clients</label>
-          <input type="text" placeholder="Search candidates, jobs, clients..." id="global-search" oninput="onGlobalSearch()">
+          <div id="global-search" class="topbar-search-fake" style="flex:1;color:var(--text-3,#999);font-size:12px;font-weight:500;user-select:none">Search candidates, tabs… <kbd style="font-size:10px;font-weight:700;background:var(--bg,#F3F3F3);border:1px solid var(--border,#E8E8E8);border-radius:4px;padding:1px 5px;color:var(--text-3,#999);font-family:inherit">⌘K</kbd></div>
         </div>
-        <button class="topbar-icon-btn" type="button" onclick="openCmd()" title="Command palette (⌘K)" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--text-3,#999);padding:0 10px;width:auto;border:1px solid var(--border,#E8E8E8);border-radius:8px;height:32px;background:#fff"><i class="ti ti-search"></i><span style="display:none" class="cmd-kb-hint">⌘K</span></button>
         <button class="topbar-icon-btn" type="button" onclick="openHelp()" title="Help & Support"><i class="ti ti-help-circle"></i></button>
         <div class="save-dot" id="save-dot"></div>
         <span class="save-label" id="save-label">Saved</span>

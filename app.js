@@ -3358,6 +3358,51 @@ function setUserDisplay(display, role) {
     return Math.round(cl.filter(x=>x.done).length / cl.length * 100);
   }
 
+  // ── Chart helpers ─────────────────────────────────────────
+  function buildBarChart(rows) {
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ label: d.toLocaleString('default',{month:'short'}), key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, count:0 });
+    }
+    rows.forEach(r => {
+      if (String(r.stage).toUpperCase() !== 'TRAVELLED') return;
+      const d = r.date ? new Date(r.date) : null; if (!d || isNaN(d)) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const m = months.find(x => x.key === key); if (m) m.count++;
+    });
+    const max = Math.max(...months.map(m => m.count), 1);
+    return `<div style="display:flex;align-items:flex-end;gap:6px;height:140px;padding:0 0 4px">
+      ${months.map(b => {
+        const pct = Math.max(Math.round((b.count/max)*100), b.count>0?6:2);
+        return `<div class="dv5-bar-col" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;position:relative">
+          <div class="dv5-bar-tip" style="position:absolute;bottom:calc(${pct}% + 10px);left:50%;transform:translateX(-50%);background:#18191B;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${b.count} placed</div>
+          <div style="width:100%;border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#5347CE 0%,#9B8CFF 100%);height:${pct}%;min-height:3px;transition:height .4s cubic-bezier(.4,0,.2,1),opacity .12s;cursor:default" onmouseenter="this.previousElementSibling.style.opacity=1;this.style.opacity=.7" onmouseleave="this.previousElementSibling.style.opacity=0;this.style.opacity=1"></div>
+          <span style="font-size:10px;color:var(--text-3,#999);font-weight:700">${h(b.label)}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  function buildFunnelChart(flowSteps) {
+    const max = Math.max(...flowSteps.map(([,v]) => v), 1);
+    const colors = ['#5347CE','#6B5FDB','#8370E8','#9B82F4','#B39CFF','#CABFFF'];
+    return `<div style="display:flex;flex-direction:column;gap:8px;padding:8px 0;justify-content:center;height:100%">
+      ${flowSteps.map(([label,val],i) => {
+        const pct = Math.max(Math.round((val/max)*100), val>0?4:1);
+        return `<div style="display:flex;align-items:center;gap:10px;position:relative" class="dv5-funnel-row">
+          <span style="font-size:10px;font-weight:700;color:var(--text-3,#999);width:56px;flex-shrink:0;text-align:right">${h(label)}</span>
+          <div style="flex:1;height:18px;background:var(--bg,#F3F3F3);border-radius:4px;overflow:hidden;position:relative" onmouseenter="this.nextElementSibling.style.opacity=1" onmouseleave="this.nextElementSibling.style.opacity=0">
+            <div style="width:${pct}%;height:100%;background:${colors[i]||colors[5]};border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
+          </div>
+          <span style="font-size:11px;font-weight:800;color:var(--text,#18191B);width:22px;text-align:right;flex-shrink:0">${h(String(val))}</span>
+          <div style="position:absolute;right:30px;top:-26px;background:#18191B;color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${h(label)}: ${h(String(val))}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
   // ── KPI card helper ───────────────────────────────────────
   function kpi(label, value, note, icon, action='', color='purple', trend='') {
     const click = action ? `onclick="${action}"` : '';
@@ -3468,8 +3513,8 @@ function setUserDisplay(display, role) {
     const side = document.querySelector('#app .sidebar');
     if (!side) return;
     const navItem = t => `<a class="nav-item" id="nav-${t}" onclick="switchTab('${t}')" title="${h(TITLES[t])}">
-      <i class="ti ${h(ICONS[t])}"></i>
-      <span class="nav-item-label">${h(TITLES[t])}</span>
+      <i class="ti ${h(ICONS[t])}" style="font-size:15px;width:16px;flex-shrink:0"></i>
+      <span class="nav-item-label" style="font-size:12.5px;font-weight:500;letter-spacing:0">${h(TITLES[t])}</span>
     </a>`;
     side.innerHTML = `
       <div class="sidebar-top">
@@ -3496,11 +3541,11 @@ function setUserDisplay(display, role) {
         <i class="ti ti-dots-vertical" style="font-size:14px;color:rgba(255,255,255,.4);margin-left:auto;flex-shrink:0"></i>
       </button>
       <div class="sidebar-divider"></div>
-      <div class="nav-section-label">Workspace</div>
+      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Workspace</div>
       ${['dash','pipeline','candidates','tasks'].map(navItem).join('')}
-      <div class="nav-section-label">Operations</div>
+      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Operations</div>
       ${['finance','documents','reports','clients'].map(navItem).join('')}
-      <div class="nav-section-label">System</div>
+      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">System</div>
       ${navItem('settings')}
       <div class="nav-spacer"></div>
       <div class="sidebar-divider"></div>
@@ -3601,7 +3646,28 @@ function setUserDisplay(display, role) {
           </div>
         </div>
 
-        <div class="dv5-kpi-grid" style="margin-top:16px">
+        <div class="dv5-two-col" style="margin-bottom:12px">
+          <div class="dv5-card" style="margin-bottom:0">
+            <div class="dv5-card-head">
+              <div>
+                <span class="dv5-card-title">Placements by Month</span>
+                <div class="dv5-card-sub">Candidates who travelled — last 6 months</div>
+              </div>
+            </div>
+            ${buildBarChart(rows)}
+          </div>
+          <div class="dv5-card" style="margin-bottom:0">
+            <div class="dv5-card-head">
+              <div>
+                <span class="dv5-card-title">Pipeline Funnel</span>
+                <div class="dv5-card-sub">Candidates per stage</div>
+              </div>
+            </div>
+            ${buildFunnelChart(flowSteps)}
+          </div>
+        </div>
+
+        <div class="dv5-kpi-grid" style="margin-top:0">
           ${kpi('Total Candidates', rows.length,    'All active records',     'ti-users',              "switchTab('candidates')",'purple', rows.length>0?'+'+rows.length+' total':'')}
           ${kpi('Travelled',        travelled,       'Completed placements',   'ti-plane',              "switchTab('pipeline')",'green',  travelled>0?'+'+travelled+' placed':'')}
           ${kpi('Collected',        money(totalPaid),'Recorded payments',      'ti-wallet',             "switchTab('finance')",'amber',   totalPaid>0?'All time':'No payments')}
