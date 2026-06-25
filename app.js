@@ -4632,6 +4632,9 @@ function setUserDisplay(display, role) {
 }
   `;
 
+  // Expose allRows for the command palette (different IIFE scope)
+  window._drecoAllRows = allRows;
+
 })();
 
 // =============================================================
@@ -5367,7 +5370,7 @@ function setUserDisplay(display, role) {
 
     const tabs = CMD_TABS.filter(t => !q || t.label.toLowerCase().includes(q));
     const candidates = q.length >= 2
-      ? (allRows ? allRows() : []).filter(r =>
+      ? (typeof window._drecoAllRows === 'function' ? window._drecoAllRows() : []).filter(r =>
           (r.name||'').toLowerCase().includes(q) ||
           (r.pp||'').toLowerCase().includes(q) ||
           (r.company||'').toLowerCase().includes(q)
