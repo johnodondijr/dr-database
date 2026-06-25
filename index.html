@@ -3824,17 +3824,18 @@ input, textarea, select, [contenteditable] {
                 <button class="btn" onclick="clearLBDates()" title="Clear date filter"><i class="ti ti-x"></i></button>
                 <button class="btn export" onclick="exportCSV('lb')"><i class="ti ti-download"></i> Export</button>
                 <button class="btn" onclick="addCustomStage('lb')" title="Add status"><i class="ti ti-settings"></i></button>
+                <button id="lb-batch-send-btn" class="btn primary" style="display:none;background:#7c3aed" onclick="batchSendProfiles()"><i class="ti ti-send"></i> Send Profiles</button>
                 <button class="btn primary" onclick="openLBForm()"><i class="ti ti-plus"></i> Add</button>
               </div>
             </div>
             <div class="table-scroll">
               <table>
                 <thead><tr>
-                  <th>#</th><th>Full name</th><th>Phone</th><th>Passport</th>
-                  <th>Travel status</th><th>Travel date</th><th>To refund</th>
+                  <th style="width:28px"></th><th>#</th><th>Full name</th><th>Phone</th><th>Passport</th>
+                  <th>Stage</th><th>Travel date</th><th>To refund</th>
                   <th>Refunded</th><th>Balance</th><th>Refund status</th><th>Docs</th><th></th>
                 </tr></thead>
-                <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loading...</div></td></tr></tbody>
+                <tbody id="lb-tbody"><tr><td colspan="13"><div class="empty">Loading...</div></td></tr></tbody>
               </table>
             </div>
             <div class="click-hint"><i class="ti ti-hand-click"></i> Click any row to edit that candidate</div>
@@ -4042,6 +4043,7 @@ input, textarea, select, [contenteditable] {
         <div class="form-grid">
           <div class="field"><label for="pf-interview">Interview / selection date</label><input type="date" id="pf-interview"></div>
           <div class="field"><label for="pf-ol">Offer letter date</label><input type="date" id="pf-ol"></div>
+          <div class="field"><label for="pf-medical">Medical &amp; Attestation date</label><input type="date" id="pf-medical"></div>
           <div class="field"><label for="pf-mol">MOL date</label><input type="date" id="pf-mol"></div>
           <div class="field"><label for="pf-visa">Visa date</label><input type="date" id="pf-visa"></div>
           <div class="field form-full"><label for="pf-travel">Travel date</label><input type="date" id="pf-travel"></div>
@@ -4049,8 +4051,10 @@ input, textarea, select, [contenteditable] {
       </div>
       <div id="pro-tab-commission" style="display:none">
         <div class="form-grid">
-          <div class="field"><label for="pf-comm">Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
-          <div class="field"><label for="pf-paid">Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
+          <div class="field form-full"><label for="pf-comm">Total Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
+          <div class="field"><label for="pf-paid1">Paid at Offer Letter (KES)</label><input type="number" id="pf-paid1" placeholder="e.g. 65000"></div>
+          <div class="field"><label for="pf-paid2">Paid at Visa (KES)</label><input type="number" id="pf-paid2" placeholder="e.g. 65000"></div>
+          <input type="hidden" id="pf-paid">
         </div>
       </div>
       <div id="pro-tab-timeline" style="display:none">
@@ -4082,26 +4086,41 @@ input, textarea, select, [contenteditable] {
         <div class="form-grid">
           <div class="field form-full"><label for="lf-name">Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
           <div class="field"><label for="lf-phone">Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
-          <div class="field"><label for="lf-pp">Passport status *</label>
+          <div class="field"><label for="lf-stage">Stage *</label><select id="lf-stage" onchange="handleStageSelectChange('lb',this)"></select></div>
+          <div class="field"><label for="lf-pp">Passport status</label>
             <select id="lf-pp">
               <option value="APPLIED">Applied</option>
-              <option value="HAD PP">Had PP</option>
+              <option value="HAD PP">Had PP (own passport)</option>
               <option value="NOT APPLIED">Not applied</option>
               <option value="PUSHED">Pushed</option>
             </select>
           </div>
-          <div class="field"><label for="lf-travel">Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
+          <div class="field" style="display:flex;align-items:center;gap:8px;padding-top:20px">
+            <input type="checkbox" id="lf-own-passport" onchange="toggleLBOwnPassport(this.checked)" style="width:16px;height:16px;cursor:pointer">
+            <label for="lf-own-passport" style="cursor:pointer;margin:0">Own passport (no refund)</label>
+          </div>
+          <div class="field"><label for="lf-submitted-date">Docs submitted date</label><input type="date" id="lf-submitted-date"></div>
+          <div class="field"><label for="lf-selected-date">Selected date</label><input type="date" id="lf-selected-date"></div>
+          <div class="field"><label for="lf-passport-date">Passport applied date</label><input type="date" id="lf-passport-date"></div>
+          <div class="field"><label for="lf-visa-date">Visa date</label><input type="date" id="lf-visa-date"></div>
           <div class="field"><label for="lf-tdate">Travel date</label><input type="date" id="lf-tdate"></div>
           <div class="field"><label for="lf-notes">Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+          <!-- keep hidden lf-travel for backward-compat with rebuildStageSelects -->
+          <select id="lf-travel" style="display:none" onchange="handleStageSelectChange('lb',this)"></select>
         </div>
       </div>
       <div id="lb-tab-refunds" style="display:none">
-        <div class="form-grid">
-          <div class="field form-full"><label for="lf-torefund">Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
-          <div class="field"><label for="lf-r1date">1st payment date</label><input type="date" id="lf-r1date"></div>
-          <div class="field"><label for="lf-r1amt">1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
-          <div class="field"><label for="lf-r2date">2nd payment date</label><input type="date" id="lf-r2date"></div>
-          <div class="field"><label for="lf-r2amt">2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+        <div id="lb-refund-section">
+          <div class="form-grid">
+            <div class="field form-full"><label for="lf-torefund">Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
+            <div class="field"><label for="lf-r1date">1st payment date</label><input type="date" id="lf-r1date"></div>
+            <div class="field"><label for="lf-r1amt">1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
+            <div class="field"><label for="lf-r2date">2nd payment date</label><input type="date" id="lf-r2date"></div>
+            <div class="field"><label for="lf-r2amt">2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+          </div>
+        </div>
+        <div id="lb-no-refund-notice" style="display:none;padding:16px;background:#f0fdf4;border-radius:8px;color:#16a34a;font-size:13px;font-weight:600">
+          Own passport — no refund required for this candidate.
         </div>
       </div>
       <div id="lb-tab-timeline" style="display:none">
