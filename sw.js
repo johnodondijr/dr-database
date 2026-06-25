@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dreco-v10';
+const CACHE_NAME = 'dreco-v11';
 const APP_SHELL = [
   '/',
   '/index.html',

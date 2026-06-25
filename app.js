@@ -4695,14 +4695,42 @@ function setUserDisplay(display, role) {
   .dv5-progress-steps { grid-template-columns:repeat(3,1fr); }
 }
 @media (max-width:760px) {
-  .dv5-page { padding:16px 12px 80px; }
+  .dv5-page { padding:12px 12px 80px; }
+  .dv5-page-head { margin-bottom:14px; gap:10px; }
+  .dv5-page-head h1 { font-size:20px; }
   .dv5-kanban { grid-template-columns:1fr 1fr; }
-  .dv5-priority-grid,.dv5-kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .dv5-priority-grid,.dv5-kpi-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  /* Last odd card spans full width */
+  .dv5-priority-grid > *:last-child:nth-child(odd),
+  .dv5-kpi-grid > *:last-child:nth-child(odd) { grid-column: 1 / -1; flex-direction:row; align-items:center; gap:14px; }
+  .dv5-priority-grid > *:last-child:nth-child(odd) .dv5-priority-icon,
+  .dv5-kpi-grid > *:last-child:nth-child(odd) .dv5-kpi-icon { margin-bottom:0; }
+  .dv5-priority-grid > *:last-child:nth-child(odd) strong { margin-bottom:0; }
   .dv5-profile-hero { grid-template-columns:1fr; }
   .dv5-profile-stage { align-items:flex-start; text-align:left; }
   .dv5-toolbar { flex-direction:column; align-items:stretch; }
   .dv5-toolbar-left,.dv5-toolbar-right { flex-wrap:wrap; }
   .dv5-input,.dv5-select { width:100%; }
+  .dv5-two-col { grid-template-columns:1fr; }
+  .dv5-head-actions { flex-wrap:wrap; width:100%; }
+  .dv5-head-actions .dv5-btn { flex:1; justify-content:center; min-width:120px; }
+  /* Cards: tighter on mobile */
+  .dv5-card { padding:14px; }
+  .dv5-kpi { padding:14px; }
+  .dv5-priority { padding:14px; }
+  /* Table: horizontal scroll */
+  .dv5-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .dv5-table { min-width:480px; }
+  /* Pipeline flow: horizontal scroll on mobile */
+  .dv5-pipeline-flow { overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; }
+  .dv5-flow-step { min-width:64px; flex-shrink:0; }
+  /* Kanban: single column on small */
+  .dv5-kanban { grid-template-columns:1fr; }
+}
+@media (max-width:480px) {
+  .dv5-page { padding:10px 10px 80px; }
+  .dv5-priority-grid,.dv5-kpi-grid { gap:8px; }
+  .dv5-card-pipeline { padding:14px 12px; }
 }
   `;
 
