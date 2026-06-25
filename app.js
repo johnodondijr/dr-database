@@ -3586,7 +3586,7 @@ function setUserDisplay(display, role) {
           <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
           <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
         </div>
-        <i class="ti ti-chevrons-up-down" style="font-size:14px;color:#9AA0B0;margin-left:auto;flex-shrink:0"></i>
+        <i class="ti ti-dots-vertical" style="font-size:15px;color:#A1A1AA;margin-left:auto;flex-shrink:0"></i>
       </button>`;
     sidebarBuilt = true;
   }
@@ -4580,29 +4580,29 @@ function setUserDisplay(display, role) {
 /* === DV5 Component System === */
 .dv5-section { display: none; }
 /* Override all legacy sidebar-user-card styles for the new card */
-.dv5-suc.sidebar-user-card { background:#F7F8FA!important; border:1px solid #E8EAF0!important; border-radius:10px!important; padding:9px 10px!important; margin-top:0!important; margin-bottom:6px!important; min-height:unset!important; }
+.dv5-suc.sidebar-user-card { background:#fff!important; border:1px solid #E4E4E7!important; border-radius:8px!important; padding:10px 12px!important; margin:0 0 8px!important; min-height:unset!important; }
 .dv5-suc.sidebar-user-card::after { content:none!important; }
 
 /* Shadcn-style sidebar user card */
-.dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:9px 10px!important; border-radius:10px!important; background:#F7F8FA!important; border:1px solid #E8EAF0!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .15s,border-color .15s!important; margin-bottom:6px!important; }
-.dv5-suc:hover { background:#EEEEF3!important; border-color:#D8DAE5!important; }
-.dv5-suc-av { width:34px!important; height:34px!important; border-radius:50%!important; background:#18191B!important; color:#fff!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:11px!important; font-weight:900!important; flex-shrink:0!important; }
+.dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 12px!important; border-radius:8px!important; background:#fff!important; border:1px solid #E4E4E7!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .12s!important; margin-bottom:8px!important; box-sizing:border-box!important; }
+.dv5-suc:hover { background:#F4F4F5!important; }
+.dv5-suc-av { width:32px!important; height:32px!important; border-radius:6px!important; background:#18181B!important; color:#fff!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:11px!important; font-weight:800!important; flex-shrink:0!important; letter-spacing:.02em!important; }
 .dv5-suc-body { min-width:0!important; flex:1!important; }
-.dv5-suc-name { font-size:12.5px!important; font-weight:750!important; color:#18191B!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.3!important; }
-.dv5-suc-email { font-size:10.5px!important; color:#8A8F9E!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; }
+.dv5-suc-name { font-size:13px!important; font-weight:600!important; color:#09090B!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.35!important; }
+.dv5-suc-email { font-size:11px!important; color:#71717A!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; margin-top:1px!important; }
 
-/* Shadcn-style profile dropdown — anchored above bottom user card */
-.dv5-pd { position:fixed!important; left:16px!important; bottom:74px!important; top:auto!important; right:auto!important; width:268px!important; background:#fff!important; border:1px solid #E4E4E7!important; border-radius:12px!important; box-shadow:0 4px 24px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.06)!important; z-index:9000!important; overflow:hidden!important; display:none; }
-.dv5-pd.open { display:block!important; }
-.dv5-pd-head { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #F1F1F1; }
-.dv5-pd-av { width:38px; height:38px; border-radius:9px; background:#18191B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; flex-shrink:0; }
-.dv5-pd-name { font-size:13px; font-weight:750; color:#18191B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dv5-pd-email { font-size:11px; color:#999; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dv5-pd-items { padding:6px; }
-.dv5-pd-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; font-size:13px; font-weight:500; color:#18191B; background:none; border:none; width:100%; text-align:left; cursor:pointer; font-family:inherit; transition:background .1s; }
-.dv5-pd-item:hover { background:#F5F5F5; }
-.dv5-pd-item i { font-size:16px; color:#666; flex-shrink:0; width:20px; }
-.dv5-pd-sep { height:1px; background:#F1F1F1; margin:4px 6px; }
+/* Shadcn-style profile dropdown — slide up from user card */
+.dv5-pd { position:fixed!important; left:16px!important; bottom:70px!important; top:auto!important; right:auto!important; width:268px!important; background:#fff!important; border:1px solid #E4E4E7!important; border-radius:10px!important; box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06)!important; z-index:9000!important; overflow:hidden!important; visibility:hidden!important; opacity:0!important; transform:translateY(8px)!important; transition:opacity .15s ease,transform .15s ease,visibility 0s .15s!important; pointer-events:none!important; }
+.dv5-pd.open { visibility:visible!important; opacity:1!important; transform:translateY(0)!important; transition:opacity .15s ease,transform .15s ease,visibility 0s 0s!important; pointer-events:auto!important; }
+.dv5-pd-head { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #F4F4F5; }
+.dv5-pd-av { width:36px; height:36px; border-radius:7px; background:#18181B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; letter-spacing:.02em; }
+.dv5-pd-name { font-size:13px; font-weight:600; color:#09090B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.35; }
+.dv5-pd-email { font-size:11px; color:#71717A; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-pd-items { padding:4px; }
+.dv5-pd-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:6px; font-size:13px; font-weight:500; color:#09090B; background:none; border:none; width:100%; text-align:left; cursor:pointer; font-family:inherit; transition:background .1s; }
+.dv5-pd-item:hover { background:#F4F4F5; }
+.dv5-pd-item i { font-size:15px; color:#71717A; flex-shrink:0; width:18px; }
+.dv5-pd-sep { height:1px; background:#F4F4F5; margin:3px 6px; }
 .dv5-pd-item.danger { color:#DC2626; }
 .dv5-pd-item.danger i { color:#DC2626; }
 .dv5-pd-item.danger:hover { background:#FEF2F2; }
