@@ -3949,8 +3949,8 @@ function setUserDisplay(display, role) {
     const list = filterCandidates();
     const allSel = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
     const someSel = selectedCandidates.size > 0;
-    const proStages = typeof PRO_STAGES !== 'undefined' ? PRO_STAGES : ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStages  = ['APPLIED','MEDICAL','VISA','TRAVELLED'];
+    const proStages = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+    const lbStages  = window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
     const allStages = [...new Set([...proStages,...lbStages,...stageOptions])];
     el.innerHTML = `
       <div class="dv5-page">
@@ -4024,11 +4024,14 @@ function setUserDisplay(display, role) {
                     <td>${badge(r.stage)}</td>
                     <td>${h(fmt(r.submitted))}</td>
                     <td onclick="event.stopPropagation()">
-                      <button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
+                      <button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}" title="Edit">
                         <i class="ti ti-edit"></i>
                       </button>
-                      <button class="dv5-action-btn" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')">
+                      <button class="dv5-action-btn" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')" title="Documents">
                         <i class="ti ti-paperclip"></i>
+                      </button>
+                      <button class="dv5-action-btn primary" onclick="window.advanceStage('${r.type}',${r.id})" title="Advance to next stage" style="background:#5347CE;color:#fff;border-color:#5347CE">
+                        <i class="ti ti-arrow-right"></i>
                       </button>
                     </td>
                   </tr>`;
@@ -4040,6 +4043,26 @@ function setUserDisplay(display, role) {
       </div>`;
   }
   window.renderCandidatesPage = renderCandidates;
+
+  window.advanceStage = async function(type, id) {
+    const stages = type === 'pro'
+      ? (window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'])
+      : (window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
+    const db = type === 'pro' ? proDB : lbDB;
+    const rec = db.find(r => r.id == id);
+    if (!rec) return;
+    const cur = (rec.stage || stages[0]).toUpperCase();
+    const idx = stages.findIndex(s => s.toUpperCase() === cur);
+    if (idx === -1 || idx >= stages.length - 1) { showToast('Already at final stage','info'); return; }
+    const nextStage = stages[idx + 1];
+    rec.stage = nextStage;
+    showToast(`Moved to ${nextStage}`, 'success');
+    renderCandidates();
+    try {
+      const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
+      await dbUpdate(table, id, { stage: nextStage });
+    } catch(e) { console.warn('advanceStage save error', e); }
+  };
 
   // ── 4. TASKS ──────────────────────────────────────────────
   function renderTasks() {
@@ -4079,9 +4102,11 @@ function setUserDisplay(display, role) {
   let financeCompanyFilter = '';
   let financeTab = 'latest'; // 'latest' | 'upcoming'
   let financeDatePreset = 'all'; // 'all','this_month','last_month','this_quarter','this_year'
+  let financeClientSearch = '';
   window.setFinanceCompany    = v => { financeCompanyFilter = v; renderFinance(); };
   window.setFinanceTab        = v => { financeTab = v; renderFinance(); };
   window.setFinanceDatePreset = v => { financeDatePreset = v; renderFinance(); };
+  window.setFinanceClientSearch = v => { financeClientSearch = v; renderFinance(); };
 
   function renderFinance() {
     const el = document.getElementById('finance-section'); if (!el) return;
@@ -4143,9 +4168,26 @@ function setUserDisplay(display, role) {
       return true;
     }
     const dateRows = rows.filter(inPreset);
-    const latestRows = dateRows.filter(r => r.paid > 0).sort((a,b) => new Date(b.submitted||b.created_at||0) - new Date(a.submitted||a.created_at||0));
+    // Expand to per-payment entries for "latest" tab
+    const paymentEntries = [];
+    dateRows.forEach(r => {
+      if (r.type === 'pro') {
+        if (r.paid1 > 0) paymentEntries.push({ r, label: `${r.name} — 1st Commission`, amt: r.paid1, date: r.interview || r.submitted || r.created_at, isUSD: false });
+        if (r.paid2 > 0) paymentEntries.push({ r, label: `${r.name} — 2nd Commission`, amt: r.paid2, date: r.ol || r.submitted || r.created_at, isUSD: false });
+        if (!r.paid1 && !r.paid2 && r.paid > 0) paymentEntries.push({ r, label: `${r.name} — Commission`, amt: r.paid, date: r.submitted || r.created_at, isUSD: false });
+      } else {
+        if (r.r1Amt > 0) paymentEntries.push({ r, label: `${r.name} — 1st Refund`, amt: r.r1Amt, date: r.r1Date || r.travelDate || r.created_at, isUSD: true });
+        if (r.r2Amt > 0) paymentEntries.push({ r, label: `${r.name} — 2nd Refund`, amt: r.r2Amt, date: r.r2Date || r.travelDate || r.created_at, isUSD: true });
+        const lbPaid = (r.r1Amt||0) + (r.r2Amt||0);
+        if (!r.r1Amt && !r.r2Amt && lbPaid > 0) paymentEntries.push({ r, label: `${r.name} — Refund`, amt: lbPaid, date: r.created_at, isUSD: true });
+      }
+    });
+    paymentEntries.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
     const upcomingRows = dateRows.filter(r => r.balance > 0).sort((a,b) => b.balance - a.balance);
-    const txRows = financeTab === 'latest' ? latestRows : upcomingRows;
+    const searchQ = financeClientSearch.trim().toLowerCase();
+    const filteredPayments = searchQ ? paymentEntries.filter(e => e.label.toLowerCase().includes(searchQ) || (e.r.company||'').toLowerCase().includes(searchQ)) : paymentEntries;
+    const filteredUpcoming = searchQ ? upcomingRows.filter(r => (r.name||'').toLowerCase().includes(searchQ) || (r.company||'').toLowerCase().includes(searchQ)) : upcomingRows;
+    const txRows = financeTab === 'latest' ? filteredPayments : filteredUpcoming;
     const presets = [
       ['all','All Time'],['this_month','This Month'],['last_month','Last Month'],
       ['this_quarter','This Quarter'],['this_year','This Year']
@@ -4156,6 +4198,7 @@ function setUserDisplay(display, role) {
         <div class="dv5-page-head">
           <div><h1>Finance</h1><p>Commissions, payments, outstanding balances, and monthly cash flow.</p></div>
           <div class="dv5-head-actions">
+            <input class="dv5-input" placeholder="Search client…" value="${h(financeClientSearch)}" oninput="window.setFinanceClientSearch(this.value)" style="min-width:160px">
             <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:140px">
               <option value="">All Companies</option>
               ${companies.map(c=>`<option value="${h(c)}" ${financeCompanyFilter===c?'selected':''}>${h(c)}</option>`).join('')}
@@ -4221,7 +4264,7 @@ function setUserDisplay(display, role) {
           <div class="dv5-tx-header">
             <div>
               <div class="dv5-card-title">Transactions${financeCompanyFilter?' — '+h(financeCompanyFilter):''}</div>
-              <div class="dv5-card-sub" style="margin-top:2px">${txRows.length} records</div>
+              <div class="dv5-card-sub" style="margin-top:2px">${financeTab==='latest'?filteredPayments.length:filteredUpcoming.length} records${searchQ?' (filtered)':''}</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
               <div class="dv5-date-presets">
@@ -4235,24 +4278,36 @@ function setUserDisplay(display, role) {
             <button class="dv5-tx-tab${financeTab==='upcoming'?' active':''}" onclick="window.setFinanceTab('upcoming')">Upcoming</button>
           </div>
           <div class="dv5-tx-list">
-            ${txRows.length ? txRows.map(r => {
-              const d = new Date(r.submitted||r.created_at||'');
-              const dateStr = isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-              const isIncoming = financeTab === 'latest';
-              const amt = isIncoming ? r.paid : r.balance;
-              const amtStr = (isIncoming ? '+' : '-') + money(amt);
-              const amtColor = isIncoming ? '#16a34a' : '#dc2626';
-              const status = r.balance > 0 ? 'Unpaid' : 'Completed';
-              return `<div class="dv5-tx-row" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
-                <div class="dv5-tx-date">${dateStr}</div>
-                <div class="dv5-tx-info">
-                  <div class="dv5-tx-name">${h(isIncoming ? 'Payment from '+r.company : 'Balance — '+r.name)}</div>
-                  <div class="dv5-tx-status">${status}</div>
-                </div>
-                <div class="dv5-tx-amt" style="color:${amtColor}">${amtStr}</div>
-                <button class="dv5-tx-arrow" onclick="event.stopPropagation();${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-chevron-right"></i></button>
-              </div>`;
-            }).join('') : `<div class="dv5-empty" style="padding:32px">${financeTab==='latest'?'No payments recorded.':'No outstanding balances.'}</div>`}
+            ${financeTab === 'latest'
+              ? (filteredPayments.length ? filteredPayments.map(({r, label, amt, date, isUSD}) => {
+                  const d = new Date(date||'');
+                  const dateStr = isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+                  const amtStr = '+' + (isUSD ? moneyUSD(amt) : money(amt));
+                  return `<div class="dv5-tx-row" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
+                    <div class="dv5-tx-date">${dateStr}</div>
+                    <div class="dv5-tx-info">
+                      <div class="dv5-tx-name">${h(label)}</div>
+                      <div class="dv5-tx-status" style="color:#6b7280">${h(r.company||'—')} · ${h(r.type==='pro'?'Professional':'General')}</div>
+                    </div>
+                    <div class="dv5-tx-amt" style="color:#16a34a">${amtStr}</div>
+                    <button class="dv5-tx-arrow" onclick="event.stopPropagation();${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-chevron-right"></i></button>
+                  </div>`;
+                }).join('') : '<div class="dv5-empty" style="padding:32px">No payments recorded.</div>')
+              : (filteredUpcoming.length ? filteredUpcoming.map(r => {
+                  const d = new Date(r.submitted||r.created_at||'');
+                  const dateStr = isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+                  const amtStr = '-' + (r.type==='lb' ? moneyUSD(r.balance) : money(r.balance));
+                  return `<div class="dv5-tx-row" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
+                    <div class="dv5-tx-date">${dateStr}</div>
+                    <div class="dv5-tx-info">
+                      <div class="dv5-tx-name">${h(r.name)} — Balance Due</div>
+                      <div class="dv5-tx-status" style="color:#6b7280">${h(r.company||'—')} · ${h(r.stage||'—')}</div>
+                    </div>
+                    <div class="dv5-tx-amt" style="color:#dc2626">${amtStr}</div>
+                    <button class="dv5-tx-arrow" onclick="event.stopPropagation();${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-chevron-right"></i></button>
+                  </div>`;
+                }).join('') : '<div class="dv5-empty" style="padding:32px">No outstanding balances.</div>')
+            }
           </div>
         </div>
       </div>`;
@@ -4263,26 +4318,38 @@ function setUserDisplay(display, role) {
   const DOC_CHECKLIST_PRO = ['Passport','Offer Letter','Medical Cert','MOL','Visa','Ticket'];
   const DOC_CHECKLIST_LB  = ['National ID','Birth Certificate','Parent ID','Photo','Passport Copy'];
 
+  // Doc ticks stored in localStorage keyed as "type_id_docname"
+  let docTicks = JSON.parse(safeLocalGet('dreco_doc_ticks') || '{}');
+  function saveDocTicks() { try { localStorage.setItem('dreco_doc_ticks', JSON.stringify(docTicks)); } catch(e){} }
+  window.toggleDocTick = function(type, id, docName) {
+    const key = `${type}_${id}_${docName}`;
+    docTicks[key] = !docTicks[key];
+    saveDocTicks();
+    renderDocuments();
+  };
+
   function docChecklist(r) {
     const items = r.type==='pro' ? DOC_CHECKLIST_PRO : DOC_CHECKLIST_LB;
-    const got = [];
+    const got = new Set();
     if (r.type==='pro') {
-      if (r.pp)      got.push('Passport');
-      if (r.ol)      got.push('Offer Letter');
-      if (r.medical) got.push('Medical Cert');
-      if (r.mol)     got.push('MOL');
-      if (r.visa)    got.push('Visa');
-      if (r.travel)  got.push('Ticket');
+      if (r.pp)      got.add('Passport');
+      if (r.ol)      got.add('Offer Letter');
+      if (r.medical) got.add('Medical Cert');
+      if (r.mol)     got.add('MOL');
+      if (r.visa)    got.add('Visa');
+      if (r.travel)  got.add('Ticket');
     } else {
       const rid = r.id;
-      if (allDocs?.[`lb_${rid}_id`])         got.push('National ID');
-      if (allDocs?.[`lb_${rid}_birth`])       got.push('Birth Certificate');
-      if (allDocs?.[`lb_${rid}_parent_id`])   got.push('Parent ID');
-      if (allDocs?.[`lb_${rid}_photo`])       got.push('Photo');
-      if (allDocs?.[`lb_${rid}_passport`])    got.push('Passport Copy');
+      if (allDocs?.[`lb_${rid}_id`])         got.add('National ID');
+      if (allDocs?.[`lb_${rid}_birth`])       got.add('Birth Certificate');
+      if (allDocs?.[`lb_${rid}_parent_id`])   got.add('Parent ID');
+      if (allDocs?.[`lb_${rid}_photo`])       got.add('Photo');
+      if (allDocs?.[`lb_${rid}_passport`])    got.add('Passport Copy');
     }
-    const done = items.filter(i=>got.includes(i)).length;
-    return { items, done, total: items.length, pct: Math.round(done/items.length*100) };
+    // merge manual ticks
+    items.forEach(doc => { if (docTicks[`${r.type}_${r.id}_${doc}`]) got.add(doc); });
+    const done = items.filter(i=>got.has(i)).length;
+    return { items, got, done, total: items.length, pct: Math.round(done/items.length*100) };
   }
 
   function renderDocuments() {
@@ -4321,8 +4388,10 @@ function setUserDisplay(display, role) {
                     <span style="font-size:10px;font-weight:700;color:#6b7280;white-space:nowrap">${cl.done}/${cl.total}</span>
                   </div>`;
                   const chips = cl.items.map(item=>{
-                    const have = cl.items.slice(0,cl.done).includes(item);
-                    return `<span style="font-size:9px;padding:2px 5px;border-radius:4px;background:${have?'#dcfce7':'#fee2e2'};color:${have?'#15803d':'#b91c1c'}">${item}</span>`;
+                    const have = cl.got.has(item);
+                    return `<button onclick="event.stopPropagation();window.toggleDocTick('${r.type}',${JSON.stringify(r.id)},'${js(item)}')"
+                      style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid ${have?'#86efac':'#fca5a5'};background:${have?'#dcfce7':'#fee2e2'};color:${have?'#15803d':'#b91c1c'};cursor:pointer;display:inline-flex;align-items:center;gap:3px">
+                      ${have?'<i class="ti ti-check" style="font-size:8px"></i>':'<i class="ti ti-square" style="font-size:8px"></i>'}${item}</button>`;
                   }).join('');
                   return `<tr onclick="openCandidateProfile('${r.type}',${r.id})">
                     <td><div class="dv5-name-cell">${avatar(r.name)}<div>
