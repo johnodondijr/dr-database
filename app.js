@@ -3424,6 +3424,44 @@ function setUserDisplay(display, role) {
     </div>`;
   }
 
+  // ── Colored stat card (shadcn hotel style) ───────────────
+  // bgColor: CSS color string for card background
+  // iconBg: CSS color string for icon square background
+  function statCard(icon, value, label, sub, bgColor, iconBg, iconColor, action='') {
+    const click = action ? `onclick="${action}"` : '';
+    const cursor = action ? 'cursor:pointer' : 'cursor:default';
+    return `<div class="dv5-stat-card" style="background:${bgColor};${cursor}" ${click}>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="dv5-stat-icon" style="background:${iconBg};color:${iconColor}"><i class="ti ${h(icon)}"></i></div>
+        <i class="ti ti-dots-vertical" style="font-size:15px;color:${iconColor};opacity:.5"></i>
+      </div>
+      <div class="dv5-stat-val">${h(String(value))}</div>
+      <div class="dv5-stat-label">${h(label)}</div>
+      <div class="dv5-stat-sub">${h(sub)}</div>
+    </div>`;
+  }
+
+  // ── File manager card (shadcn file manager) ───────────────
+  function fileCard(icon, iconColor, barColor, label, count, total, caption, action='') {
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    const click = action ? `onclick="${action}"` : '';
+    return `<div class="dv5-file-card" ${click}>
+      <div class="dv5-file-card-head">
+        <span class="dv5-file-card-label">${h(label)}</span>
+        <i class="ti ${h(icon)}" style="font-size:18px;color:${iconColor}"></i>
+      </div>
+      <div class="dv5-file-count">${h(String(count))}</div>
+      <div class="dv5-file-bar-wrap">
+        <div class="dv5-file-bar" style="width:${pct}%;background:${barColor}"></div>
+      </div>
+      <div class="dv5-file-foot">
+        <span>${h(caption)}</span>
+        <span>${pct}%</span>
+      </div>
+      <div class="dv5-file-link">View more <i class="ti ti-arrow-right" style="font-size:11px"></i></div>
+    </div>`;
+  }
+
   // ── Priority card helper ──────────────────────────────────
   function priority(icon, num, label, note, color, action='') {
     const click = action ? `onclick="${action}"` : '';
@@ -3675,12 +3713,11 @@ function setUserDisplay(display, role) {
           </div>
         </div>
 
-        <div class="dv5-kpi-grid" style="margin-top:0">
-          ${kpi('Total Candidates', rows.length,    'All active records',     'ti-users',              "switchTab('candidates')",'purple', rows.length>0?'+'+rows.length+' total':'')}
-          ${kpi('Travelled',        travelled,       'Completed placements',   'ti-plane',              "switchTab('pipeline')",'green',  travelled>0?'+'+travelled+' placed':'')}
-          ${kpi('Collected',        money(totalPaid),'Recorded payments',      'ti-wallet',             "switchTab('finance')",'amber',   totalPaid>0?'All time':'No payments')}
-          ${kpi('Clients',          buildClients().length, 'Companies served', 'ti-building',           "switchTab('clients')",'blue',    buildClients().length>0?'+'+buildClients().length+' active':'')}
-          ${kpi('Documents',        Object.values(allDocs||{}).filter(Boolean).length, 'Drive links saved','ti-folder', "switchTab('documents')",'teal', '')}
+        <div class="dv5-stat-grid" style="margin-top:0">
+          ${statCard('ti-users',    rows.length,    'Total Candidates', `Active records: ${rows.length}`,  '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
+          ${statCard('ti-plane',    travelled,      'Placements',       `Completed: ${travelled}`,          '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
+          ${statCard('ti-users-group', (proDB||[]).filter(r=>!['TRAVELLED'].includes(r.stage)).length + (lbDB||[]).filter(r=>!['TRAVELLED'].includes(r.stage)).length, 'Active Pipeline', `In progress: ${rows.filter(r=>String(r.stage).toUpperCase()!=='TRAVELLED').length}`, '#FCE7F3','#9D174D','#fff', "switchTab('pipeline')")}
+          ${statCard('ti-wallet',   money(totalPaid),'Revenue Collected', `Commission tracked`, '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
         </div>
       </div>`;
   }
@@ -3933,7 +3970,11 @@ function setUserDisplay(display, role) {
 
   // ── 5. FINANCE ────────────────────────────────────────────
   let financeCompanyFilter = '';
-  window.setFinanceCompany = v => { financeCompanyFilter = v; renderFinance(); };
+  let financeTab = 'latest'; // 'latest' | 'upcoming'
+  let financeDatePreset = 'all'; // 'all','this_month','last_month','this_quarter','this_year'
+  window.setFinanceCompany    = v => { financeCompanyFilter = v; renderFinance(); };
+  window.setFinanceTab        = v => { financeTab = v; renderFinance(); };
+  window.setFinanceDatePreset = v => { financeDatePreset = v; renderFinance(); };
 
   function renderFinance() {
     const el = document.getElementById('finance-section'); if (!el) return;
@@ -3968,12 +4009,33 @@ function setUserDisplay(display, role) {
     });
     const companyDebt = Object.values(byCompany).sort((a,b)=>b.balance-a.balance);
 
+    // Date range preset filter
+    const now2 = new Date();
+    function inPreset(r) {
+      const d = new Date(r.submitted || r.created_at || '');
+      if (isNaN(d) || financeDatePreset === 'all') return true;
+      const y = d.getFullYear(), mo = d.getMonth();
+      if (financeDatePreset === 'this_month') return y === now2.getFullYear() && mo === now2.getMonth();
+      if (financeDatePreset === 'last_month') { const lm = new Date(now2.getFullYear(), now2.getMonth()-1,1); return y === lm.getFullYear() && mo === lm.getMonth(); }
+      if (financeDatePreset === 'this_quarter') { const q = Math.floor(now2.getMonth()/3); return y === now2.getFullYear() && Math.floor(mo/3) === q; }
+      if (financeDatePreset === 'this_year') return y === now2.getFullYear();
+      return true;
+    }
+    const dateRows = rows.filter(inPreset);
+    const latestRows = dateRows.filter(r => r.paid > 0).sort((a,b) => new Date(b.submitted||b.created_at||0) - new Date(a.submitted||a.created_at||0));
+    const upcomingRows = dateRows.filter(r => r.balance > 0).sort((a,b) => b.balance - a.balance);
+    const txRows = financeTab === 'latest' ? latestRows : upcomingRows;
+    const presets = [
+      ['all','All Time'],['this_month','This Month'],['last_month','Last Month'],
+      ['this_quarter','This Quarter'],['this_year','This Year']
+    ];
+
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
           <div><h1>Finance</h1><p>Commissions, payments, outstanding balances, and monthly cash flow.</p></div>
           <div class="dv5-head-actions">
-            <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:160px">
+            <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:140px">
               <option value="">All Companies</option>
               ${companies.map(c=>`<option value="${h(c)}" ${financeCompanyFilter===c?'selected':''}>${h(c)}</option>`).join('')}
             </select>
@@ -3981,14 +4043,15 @@ function setUserDisplay(display, role) {
             <button class="dv5-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button>
           </div>
         </div>
-        <div class="dv5-kpi-grid">
-          ${kpi('Total Invoiced',  money(total), 'All candidates',   'ti-receipt',     '','ink')}
-          ${kpi('Total Paid',      money(paid),  'Collected',        'ti-wallet',      '','green')}
-          ${kpi('Outstanding',     money(bal),   'Follow up needed', 'ti-alert-circle','','rose')}
-          ${kpi('Collection Rate', rate+'%',     'Paid / invoiced',  'ti-chart-line',  '','blue')}
-          ${kpi('Open Accounts',   rows.filter(r=>r.balance>0).length, 'Unpaid balances', 'ti-user-dollar','','amber')}
+
+        <div class="dv5-stat-grid">
+          ${statCard('ti-receipt',      money(total), 'Total Invoiced',  'All candidates',            '#E0E7FF','#4338CA','#fff')}
+          ${statCard('ti-wallet',       money(paid),  'Collected',       'Revenue received',          '#DCFCE7','#16A34A','#fff')}
+          ${statCard('ti-alert-circle', money(bal),   'Outstanding',     `${rows.filter(r=>r.balance>0).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
+          ${statCard('ti-chart-pie',    rate+'%',     'Collection Rate', 'Paid vs invoiced',          '#FEF9C3','#A16207','#fff')}
         </div>
-        <div class="dv5-two-col">
+
+        <div class="dv5-two-col" style="margin-bottom:16px">
           <div class="dv5-card">
             <div class="dv5-card-head"><span class="dv5-card-title">Monthly Breakdown</span><span class="dv5-card-sub">Last 6 months</span></div>
             <div class="dv5-table-wrap">
@@ -4023,31 +4086,44 @@ function setUserDisplay(display, role) {
             </div>
           </div>
         </div>
-        <div class="dv5-table-card" style="margin-top:16px">
-          <div class="dv5-card-head" style="padding:12px 16px">
-            <span class="dv5-card-title">Finance Records${financeCompanyFilter?' — '+h(financeCompanyFilter):''}</span>
-            <span class="dv5-card-sub">${rows.length} records</span>
+
+        <!-- Transactions section -->
+        <div class="dv5-table-card">
+          <div class="dv5-tx-header">
+            <div>
+              <div class="dv5-card-title">Transactions${financeCompanyFilter?' — '+h(financeCompanyFilter):''}</div>
+              <div class="dv5-card-sub" style="margin-top:2px">${txRows.length} records</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <div class="dv5-date-presets">
+                ${presets.map(([val,label])=>`<button class="dv5-preset-btn${financeDatePreset===val?' active':''}" onclick="window.setFinanceDatePreset('${val}')">${h(label)}</button>`).join('')}
+              </div>
+              <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i></button>
+            </div>
           </div>
-          <div class="dv5-table-wrap">
-            <table class="dv5-table">
-              <thead><tr><th>Candidate</th><th>Company</th><th>Type</th><th>Invoice</th><th>Paid</th><th>Balance</th><th>Status</th><th></th></tr></thead>
-              <tbody>
-                ${rows.length ? rows.map(r=>`
-                  <tr>
-                    <td><div class="dv5-name-cell">${avatar(r.name)}<div>
-                      <div class="dv5-name">${h(r.name)}</div>
-                      <div class="dv5-sub">${h(r.pp||'No passport')}</div>
-                    </div></div></td>
-                    <td>${h(r.company)}</td>
-                    <td>${r.type==='pro'?'Professional':'General'}</td>
-                    <td>${money(r.commission)}</td>
-                    <td>${money(r.paid)}</td>
-                    <td>${r.balance>0?`<strong style="color:#b91c1c">${money(r.balance)}</strong>`:money(0)}</td>
-                    <td>${r.balance>0?'<span class="dv5-badge red">Unpaid</span>':'<span class="dv5-badge green">Paid</span>'}</td>
-                    <td><button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">Open</button></td>
-                  </tr>`).join('') : '<tr><td colspan="8"><div class="dv5-empty">No records yet.</div></td></tr>'}
-              </tbody>
-            </table>
+          <div class="dv5-tx-tabs">
+            <button class="dv5-tx-tab${financeTab==='latest'?' active':''}" onclick="window.setFinanceTab('latest')">Latest</button>
+            <button class="dv5-tx-tab${financeTab==='upcoming'?' active':''}" onclick="window.setFinanceTab('upcoming')">Upcoming</button>
+          </div>
+          <div class="dv5-tx-list">
+            ${txRows.length ? txRows.map(r => {
+              const d = new Date(r.submitted||r.created_at||'');
+              const dateStr = isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+              const isIncoming = financeTab === 'latest';
+              const amt = isIncoming ? r.paid : r.balance;
+              const amtStr = (isIncoming ? '+' : '-') + money(amt);
+              const amtColor = isIncoming ? '#16a34a' : '#dc2626';
+              const status = r.balance > 0 ? 'Unpaid' : 'Completed';
+              return `<div class="dv5-tx-row" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
+                <div class="dv5-tx-date">${dateStr}</div>
+                <div class="dv5-tx-info">
+                  <div class="dv5-tx-name">${h(isIncoming ? 'Payment from '+r.company : 'Balance — '+r.name)}</div>
+                  <div class="dv5-tx-status">${status}</div>
+                </div>
+                <div class="dv5-tx-amt" style="color:${amtColor}">${amtStr}</div>
+                <button class="dv5-tx-arrow" onclick="event.stopPropagation();${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-chevron-right"></i></button>
+              </div>`;
+            }).join('') : `<div class="dv5-empty" style="padding:32px">${financeTab==='latest'?'No payments recorded.':'No outstanding balances.'}</div>`}
           </div>
         </div>
       </div>`;
@@ -4091,12 +4167,11 @@ function setUserDisplay(display, role) {
             <button class="dv5-btn primary" onclick="switchTab('candidates')"><i class="ti ti-paperclip"></i>Attach to Candidate</button>
           </div>
         </div>
-        <div class="dv5-kpi-grid">
-          ${kpi('Complete',  complete,        'All documents present',  'ti-folder-check', '','green')}
-          ${kpi('Partial',   partial,         'Some files uploaded',    'ti-folder-minus', '','amber')}
-          ${kpi('Missing',   missing,         'No documents yet',       'ti-folder-x',     '','rose')}
-          ${kpi('Passports', rows.filter(r=>r.pp).length, 'Recorded',  'ti-id',            '','teal')}
-          ${kpi('Total',     rows.length,     'All candidates',         'ti-users',         '','purple')}
+        <div class="dv5-file-grid">
+          ${fileCard('ti-file-description', '#2563EB', '#2563EB', 'Drive Links', Object.values(allDocs||{}).filter(Boolean).length, rows.length, `${Object.values(allDocs||{}).filter(Boolean).length} of ${rows.length} uploaded`, "switchTab('documents')")}
+          ${fileCard('ti-folder-check',     '#059669', '#059669', 'Complete Docs', complete, rows.length, `All documents present`, "switchTab('documents')")}
+          ${fileCard('ti-id',               '#D97706', '#F59E0B', 'Passports', rows.filter(r=>r.pp).length, rows.length, `Passport numbers recorded`, "switchTab('documents')")}
+          ${fileCard('ti-folder-x',         '#DC2626', '#EF4444', 'Missing',  missing, rows.length, `No documents yet`, "switchTab('documents')")}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
@@ -4524,6 +4599,51 @@ function setUserDisplay(display, role) {
 .dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:700; color:var(--text,#18191B); cursor:pointer; }
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
 
+/* Stat card grid (shadcn hotel-style colored cards) */
+.dv5-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
+.dv5-stat-card { border-radius:14px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.07); transition:transform .15s,box-shadow .15s; }
+.dv5-stat-card:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,.10); }
+.dv5-stat-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.dv5-stat-val { font-size:28px; font-weight:900; color:#18191B; line-height:1; margin:14px 0 4px; }
+.dv5-stat-label { font-size:13px; font-weight:700; color:#18191B; }
+.dv5-stat-sub { font-size:11px; color:rgba(0,0,0,.5); margin-top:3px; }
+
+/* File manager cards */
+.dv5-file-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
+.dv5-file-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:14px; padding:20px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.06); transition:border-color .15s,box-shadow .15s; }
+.dv5-file-card:hover { border-color:#5347CE30; box-shadow:0 4px 12px rgba(83,71,206,.08); }
+.dv5-file-card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.dv5-file-card-label { font-size:13px; font-weight:700; color:var(--text,#18191B); }
+.dv5-file-count { font-size:34px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:14px; }
+.dv5-file-bar-wrap { height:6px; background:#F1F1F1; border-radius:999px; overflow:hidden; margin-bottom:8px; }
+.dv5-file-bar { height:100%; border-radius:999px; transition:width .5s cubic-bezier(.4,0,.2,1); }
+.dv5-file-foot { display:flex; justify-content:space-between; font-size:11px; color:var(--text-3,#999); font-weight:700; margin-bottom:14px; }
+.dv5-file-link { font-size:12px; font-weight:700; color:var(--text-3,#999); display:flex; align-items:center; gap:4px; padding-top:10px; border-top:1px solid var(--border,#E8E8E8); }
+.dv5-file-card:hover .dv5-file-link { color:#5347CE; }
+
+/* Transactions */
+.dv5-tx-header { display:flex; justify-content:space-between; align-items:flex-start; padding:16px 20px 0; flex-wrap:wrap; gap:12px; }
+.dv5-tx-tabs { display:flex; gap:2px; padding:12px 20px 0; border-bottom:1px solid var(--border,#E8E8E8); }
+.dv5-tx-tab { background:none; border:none; padding:8px 14px; font-size:13px; font-weight:700; color:var(--text-3,#999); border-radius:8px 8px 0 0; cursor:pointer; transition:color .15s; }
+.dv5-tx-tab.active { color:var(--text,#18191B); border-bottom:2px solid #18191B; }
+.dv5-tx-tab:hover { color:var(--text,#18191B); }
+.dv5-tx-list { }
+.dv5-tx-row { display:grid; grid-template-columns:130px 1fr auto 36px; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border,#F1F1F1); cursor:pointer; transition:background .1s; }
+.dv5-tx-row:hover { background:#F9F9F9; }
+.dv5-tx-row:last-child { border-bottom:0; }
+.dv5-tx-date { font-size:12px; font-weight:700; color:var(--text-3,#999); white-space:nowrap; }
+.dv5-tx-name { font-size:13px; font-weight:700; color:var(--text,#18191B); }
+.dv5-tx-status { font-size:11px; color:var(--text-3,#999); margin-top:2px; }
+.dv5-tx-amt { font-size:13px; font-weight:800; white-space:nowrap; text-align:right; }
+.dv5-tx-arrow { width:32px; height:32px; border:1px solid var(--border,#E8E8E8); border-radius:8px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--text-3,#999); transition:background .1s; }
+.dv5-tx-arrow:hover { background:var(--bg,#F5F5F5); }
+
+/* Date presets */
+.dv5-date-presets { display:flex; gap:4px; flex-wrap:wrap; }
+.dv5-preset-btn { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:8px; padding:5px 12px; font-size:12px; font-weight:700; color:var(--text-3,#999); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.dv5-preset-btn:hover { background:var(--bg,#F5F5F5); color:var(--text,#18191B); }
+.dv5-preset-btn.active { background:#18191B; color:#fff; border-color:#18191B; }
+
 /* KPI grid */
 .dv5-kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
 .dv5-kpi { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; cursor:default; transition:border-color .15s; box-shadow:0 1px 3px rgba(0,0,0,.06); }
@@ -4699,7 +4819,9 @@ function setUserDisplay(display, role) {
   .dv5-page-head { margin-bottom:14px; gap:10px; }
   .dv5-page-head h1 { font-size:20px; }
   .dv5-kanban { grid-template-columns:1fr 1fr; }
-  .dv5-priority-grid,.dv5-kpi-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .dv5-priority-grid,.dv5-kpi-grid,.dv5-stat-grid,.dv5-file-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .dv5-tx-row { grid-template-columns:90px 1fr auto 32px; gap:8px; padding:12px 14px; }
+  .dv5-date-presets { gap:3px; }
   /* Last odd card spans full width */
   .dv5-priority-grid > *:last-child:nth-child(odd),
   .dv5-kpi-grid > *:last-child:nth-child(odd) { grid-column: 1 / -1; flex-direction:row; align-items:center; gap:14px; }
