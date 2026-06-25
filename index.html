@@ -11,16 +11,19 @@
   <meta name="apple-mobile-web-app-title" content="Dreco">
     <link rel="preconnect" href="https://rsms.me/">
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* Font fallback */
     /* Uses a Proton-inspired system font stack for fast, consistent rendering. */
-    html{font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif}
+    html{font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif;font-synthesis:none}
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       /* Product font stack */
-      --font-heading: 'Inter', 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --font-heading: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
       --font-body: 'Inter', 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
       --font-mono:  ui-monospace, 'Cascadia Code', 'Fira Code', monospace;      
       /* Palette */
@@ -2822,13 +2825,13 @@ tbody tr:hover td{
 
 /* Reference match correction: keep Dreco logo, cleaner typography, tighter proportions */
 body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
-  font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+  font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif!important;
   font-feature-settings:'cv02' 1,'cv03' 1,'cv04' 1,'cv11' 1!important;
   -webkit-font-smoothing:antialiased!important;
   text-rendering:geometricPrecision!important;
 }
 #app{padding:3px!important;background:#EEF3F9!important}.app-layout{border-radius:8px!important}
-.sidebar{width:230px!important;padding:22px 16px 16px!important;overflow:hidden!important}.sidebar-top{padding:0 0 30px!important}.sidebar-logo-mark{width:36px!important;height:36px!important;border-radius:10px!important;background:linear-gradient(135deg,#6B5BFF,#4D3FD9)!important;box-shadow:0 10px 22px rgba(90,73,248,.18)!important;clip-path:none!important}.sidebar-logo-mark::before{display:none!important}.sidebar-logo-mark svg{display:block!important;width:24px!important;height:24px!important}.sidebar-logo-mark svg path{fill:#fff!important;opacity:1!important}.sidebar-logo-text{font-size:20px!important;font-weight:760!important;letter-spacing:-.035em!important;color:#070B1D!important}.nav-section-label{margin:17px 0 10px!important;padding:0 10px!important;font-size:9.5px!important;font-weight:760!important;color:#A3ACC0!important;letter-spacing:.11em!important}.nav-item{height:40px!important;border-radius:9px!important;padding:0 12px!important;margin:2px 0 5px!important;color:#243756!important;font-size:13px!important;font-weight:560!important;letter-spacing:-.005em!important}.nav-item i{font-size:17px!important;color:#31486C!important;stroke-width:1.8!important}.nav-item.active{background:#F0ECFF!important;color:#4D3FD9!important;font-weight:660!important;box-shadow:inset 4px 0 0 #5A49F8!important}.nav-item.active i{color:#5A49F8!important}.sidebar::after{content:'JF\A John Fred\A Destiny Recruit Consults';white-space:pre;display:block;margin-top:auto;border-top:1px solid #E4E9F2;padding:18px 0 0 50px;color:#5B6880;font-size:11px;line-height:1.48;background:radial-gradient(circle at 20px 30px,#5A49F8 0 18px,transparent 19px);font-weight:560}.sidebar::before{content:'';position:absolute;left:31px;bottom:54px;width:2px;height:0}
+.sidebar{width:230px!important;padding:22px 16px 16px!important;overflow:hidden!important}.sidebar-top{padding:0 0 30px!important}.sidebar-logo-mark{width:36px!important;height:36px!important;border-radius:10px!important;background:linear-gradient(135deg,#6B5BFF,#4D3FD9)!important;box-shadow:0 10px 22px rgba(90,73,248,.18)!important;clip-path:none!important}.sidebar-logo-mark::before{display:none!important}.sidebar-logo-mark svg{display:block!important;width:24px!important;height:24px!important}.sidebar-logo-mark svg path{fill:#fff!important;opacity:1!important}.sidebar-logo-text{font-size:20px!important;font-weight:760!important;letter-spacing:-.035em!important;color:#070B1D!important;font-family:'Manrope',ui-sans-serif,system-ui,sans-serif!important;}.nav-section-label{margin:17px 0 10px!important;padding:0 10px!important;font-size:9.5px!important;font-weight:760!important;color:#A3ACC0!important;letter-spacing:.11em!important}.nav-item{height:40px!important;border-radius:9px!important;padding:0 12px!important;margin:2px 0 5px!important;color:#243756!important;font-size:13px!important;font-weight:560!important;letter-spacing:-.005em!important}.nav-item i{font-size:17px!important;color:#31486C!important;stroke-width:1.8!important}.nav-item.active{background:#F0ECFF!important;color:#4D3FD9!important;font-weight:660!important;box-shadow:inset 4px 0 0 #5A49F8!important}.nav-item.active i{color:#5A49F8!important}.sidebar::after{content:'JF\A John Fred\A Destiny Recruit Consults';white-space:pre;display:block;margin-top:auto;border-top:1px solid #E4E9F2;padding:18px 0 0 50px;color:#5B6880;font-size:11px;line-height:1.48;background:radial-gradient(circle at 20px 30px,#5A49F8 0 18px,transparent 19px);font-weight:560}.sidebar::before{content:'';position:absolute;left:31px;bottom:54px;width:2px;height:0}
 .topbar{height:68px!important;padding:0 24px 0 26px!important;gap:16px!important}.topbar-title{order:0!important;flex:0 0 520px!important;font-size:20px!important;font-weight:760!important;letter-spacing:-.035em!important;color:#070B1D!important}.topbar-search{order:1!important;margin-left:auto!important;flex:0 1 354px!important;max-width:354px!important}.topbar-search input{height:34px!important;border-radius:9px!important;font-size:12px!important;font-weight:430!important;color:#42516B!important;border-color:#D8E0EC!important;padding-left:36px!important}.topbar-search i{font-size:16px!important;color:#6B768B!important;stroke-width:1.8!important}.topbar-search::after{top:6px!important;right:8px!important;height:20px;display:flex;align-items:center;font-size:10.5px!important;color:#8A96AA!important}.save-dot{order:2!important;width:7px!important;height:7px!important;background:#FF5263!important;margin:0 4px 0 8px!important}.topbar::before{content:'\eb7d';font-family:'tabler-icons';order:2;width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#334663;font-size:18px;margin-left:0}.topbar::after{order:3;width:20px!important;height:20px!important;font-size:12px!important;border-color:#8A9AB3!important;color:#334663!important}.topbar-workspace{order:4!important;margin-left:8px!important;height:34px!important;padding:0 14px!important;border-radius:9px!important;background:#F0ECFF!important;color:#10182E!important;font-size:12px!important;font-weight:660!important;letter-spacing:-.01em!important}.topbar-workspace i{font-size:15px!important;stroke-width:1.8!important}.profile-wrap{order:5!important}.topbar-avatar{width:36px!important;height:36px!important;font-size:13px!important;font-weight:700!important}.topbar-profile-btn{width:36px!important;height:36px!important}.content-area>div{padding:28px 26px 24px!important}.ref-dashboard-head{margin-bottom:28px!important}.ref-dashboard-head h1{font-size:20px!important;font-weight:760!important;letter-spacing:-.03em!important;color:#0B1024!important}.ref-dashboard-head p{font-size:13px!important;font-weight:430!important;color:#657188!important}.ref-date-btn{height:38px!important;border-radius:9px!important;font-size:12px!important;font-weight:560!important;padding:0 16px!important;color:#40506A!important}.ref-board-grid{grid-template-columns:minmax(0,1fr) 266px!important;gap:20px!important}.ref-kpi-row{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px!important;margin-bottom:18px!important}.ref-kpi{height:106px!important;border-radius:10px!important;padding:18px!important;gap:18px!important}.ref-kpi-icon{width:40px!important;height:40px!important;border-radius:12px!important}.ref-kpi span{font-size:11px!important;font-weight:650!important;color:#536179!important}.ref-kpi strong{font-size:24px!important;font-weight:760!important;letter-spacing:-.035em!important}.ref-kpi em{font-size:11px!important;font-weight:650!important}.ref-card,.ref-fin-card{border-radius:10px!important}.ref-card-title{font-size:14px!important;font-weight:760!important;letter-spacing:-.02em!important;color:#0B1024!important}.ref-pipeline-overview{padding:20px!important;margin-bottom:18px!important}.ref-stage-row{gap:10px!important}.ref-stage-box{height:64px!important;border-radius:10px!important;padding:0 14px!important}.ref-stage-icon{width:34px!important;height:34px!important;border-radius:10px!important}.ref-stage-label{font-size:10px!important;font-weight:650!important;color:#647089!important}.ref-stage-value{font-size:22px!important;font-weight:760!important;letter-spacing:-.035em!important}.ref-stage-percent{font-size:12px!important;font-weight:650!important}.ref-trend-card,.ref-breakdown-card{height:278px!important;padding:18px!important}.ref-fin-card{height:380px!important;padding:20px!important}.ref-fin-head{font-size:11px!important;font-weight:760!important}.ref-fin-block h2{font-size:24px!important;font-weight:760!important;letter-spacing:-.035em!important}.ref-fin-block div,.ref-fin-block p,.ref-fin-report{font-size:12px!important}.ref-upcoming{height:224px!important}.ref-quick{height:200px!important}.ref-chat-btn{width:44px!important;height:44px!important;right:22px!important;bottom:20px!important}
 @media(max-width:1360px){.topbar-title{flex-basis:440px!important}.topbar-search{max-width:320px!important;flex-basis:320px!important}.ref-board-grid{grid-template-columns:minmax(0,1fr) 266px!important}.ref-kpi-row{gap:16px!important}.ref-kpi strong{font-size:23px!important}}
 @media(max-width:1180px){.topbar-title{flex:1 1 auto!important}.ref-board-grid{grid-template-columns:1fr!important}.ref-side-column{display:grid!important;grid-template-columns:repeat(3,minmax(250px,1fr));overflow-x:auto}.ref-fin-card,.ref-upcoming,.ref-quick{height:auto!important}.ref-kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
@@ -3030,6 +3033,75 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
     @media (forced-colors: active) {
       input:focus, button:focus, select:focus, textarea:focus { outline: 2px solid ButtonText; }
     }
+
+/* Manrope heading font — applied after override blocks to win cascade */
+h1,h2,h3,h4,h5,h6,
+.lp-brand-name,.lp-header h1,.wb-left h2,
+.topbar-title,.panel-title,.modal-header h3,
+.metric-val,.p-card-count,.spotlight-amount,
+.wb-stat-val,.rev-cell-val,.kanban-col-title,
+.kanban-card-name,.report-card-title,
+.sidebar-logo-text,.pd-name,.ref-kpi strong,
+.suc-name,.nav-section-label,
+.lp-media-copy h2,.lp-metric strong,.lp-progress-count {
+  font-family:'Manrope',ui-sans-serif,system-ui,sans-serif!important;
+}
+
+/* Proportion and whitespace fixes */
+
+/* Topbar: tighten the wasted space between title and search */
+.topbar { gap: 12px !important; }
+
+/* Login page heading: tighter, heavier for Manrope */
+.lp-header h1 { font-size: 26px !important; font-weight: 900 !important; letter-spacing: -.045em !important; }
+.lp-media-copy h2 { font-size: 32px !important; font-weight: 900 !important; letter-spacing: -.04em !important; }
+
+/* Dashboard welcome banner: use Manrope weight */
+.wb-left h2 { font-weight: 900 !important; letter-spacing: -.04em !important; }
+
+/* KPI numbers: bigger, tighter for Manrope */
+.metric-val { font-size: 28px !important; font-weight: 900 !important; letter-spacing: -.04em !important; }
+.wb-stat-val { font-size: 20px !important; font-weight: 900 !important; }
+
+/* Panel titles: slightly heavier */
+.panel-title { font-size: 13px !important; font-weight: 800 !important; letter-spacing: -.025em !important; }
+
+/* Nav items: use Inter for readability (override Manrope inheritance) */
+.nav-item, .nav-item-label { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important; }
+
+/* Table: more consistent row spacing */
+td { padding: 11px 14px !important; }
+th { padding: 9px 14px !important; }
+
+/* Section eyebrow labels: tighten tracking */
+.section-eyebrow { letter-spacing: .08em !important; font-weight: 800 !important; }
+
+/* Badges: use Inter for readability */
+.badge { font-family: 'Inter', ui-sans-serif, sans-serif !important; font-weight: 700 !important; }
+
+/* ref-kpi overrides: Manrope for numbers */
+.ref-kpi strong { font-size: 26px !important; font-weight: 900 !important; letter-spacing: -.04em !important; }
+.ref-kpi span { font-size: 10px !important; font-weight: 700 !important; letter-spacing: .06em !important; }
+
+/* Sidebar logo text: Manrope */
+.sidebar-logo-text { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 900 !important; }
+
+/* Topbar title: Manrope heading style */
+.topbar-title { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 800 !important; letter-spacing: -.035em !important; }
+
+/* Kanban col titles */
+.kanban-col-title { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 800 !important; }
+
+/* Improve pill tab readability */
+.pill-tab { font-size: 11px !important; font-weight: 600 !important; padding: 5px 13px !important; }
+
+/* Candidate profile name */
+.pd-name { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 900 !important; }
+
+/* Remove orphaned bottom padding on mobile content */
+@media(max-width:640px) {
+  .content-area { padding-bottom: 24px !important; }
+}
 </style>
 </head>
 <body>
