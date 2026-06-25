@@ -3359,11 +3359,11 @@ function setUserDisplay(display, role) {
   }
 
   // ── KPI card helper ───────────────────────────────────────
-  function kpi(label, value, note, icon, action='') {
+  function kpi(label, value, note, icon, action='', color='purple') {
     const click = action ? `onclick="${action}"` : '';
     const clickable = action ? 'style="cursor:pointer"' : '';
     return `<div class="dv5-kpi" ${click} ${clickable}>
-      <div class="dv5-kpi-icon"><i class="ti ${h(icon)}"></i></div>
+      <div class="dv5-kpi-icon ${color||'purple'}"><i class="ti ${h(icon)}"></i></div>
       <div class="dv5-kpi-val">${h(String(value))}</div>
       <div class="dv5-kpi-label">${h(label)}</div>
       <div class="dv5-kpi-note">${h(note)}</div>
@@ -3484,6 +3484,7 @@ function setUserDisplay(display, role) {
           <div class="suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
           <div class="suc-org">${h(co())}</div>
         </div>
+        <i class="ti ti-dots-vertical" style="font-size:14px;color:rgba(255,255,255,.4);margin-left:auto;flex-shrink:0"></i>
       </button>
       <div class="sidebar-divider"></div>
       <div class="nav-section-label">Workspace</div>
@@ -3492,7 +3493,12 @@ function setUserDisplay(display, role) {
       ${['finance','documents','reports','clients'].map(navItem).join('')}
       <div class="nav-section-label">System</div>
       ${navItem('settings')}
-      <div class="nav-spacer"></div>`;
+      <div class="nav-spacer"></div>
+      <div class="sidebar-divider"></div>
+      <button class="nav-item" style="color:rgba(255,80,80,.7);margin-bottom:8px" onclick="doLogout()" type="button">
+        <i class="ti ti-logout" style="color:rgba(255,80,80,.7)"></i>
+        <span class="nav-item-label">Log out</span>
+      </button>`;
     sidebarBuilt = true;
   }
 
@@ -3553,10 +3559,10 @@ function setUserDisplay(display, role) {
           ${priority('ti-alert-circle',     missDocs,  'Missing Documents',   'Compliance gap',        '#FEECEF', "switchTab('documents')")}
         </div>
 
-        <div class="dv5-card">
+        <div class="dv5-card dv5-card-pipeline">
           <div class="dv5-card-head">
-            <span class="dv5-card-title">Pipeline Overview</span>
-            <button class="dv5-link" onclick="switchTab('pipeline')">View pipeline →</button>
+            <span class="dv5-card-title" style="color:#fff">Pipeline Overview</span>
+            <button class="dv5-link" style="color:rgba(255,255,255,.7)" onclick="switchTab('pipeline')">View pipeline →</button>
           </div>
           <div class="dv5-pipeline-flow">
             ${flowSteps.map(([label,val]) => `
@@ -3587,11 +3593,11 @@ function setUserDisplay(display, role) {
         </div>
 
         <div class="dv5-kpi-grid" style="margin-top:16px">
-          ${kpi('Total Candidates', rows.length,    'All active records',     'ti-users',              "switchTab('candidates')")}
-          ${kpi('Travelled',        travelled,       'Completed placements',   'ti-plane',              "switchTab('pipeline')")}
-          ${kpi('Collected',        money(totalPaid),'Recorded payments',      'ti-wallet',             "switchTab('finance')")}
-          ${kpi('Clients',          buildClients().length, 'Companies served', 'ti-building',           "switchTab('clients')")}
-          ${kpi('Documents',        Object.values(allDocs||{}).filter(Boolean).length, 'Drive links saved','ti-folder', "switchTab('documents')")}
+          ${kpi('Total Candidates', rows.length,    'All active records',     'ti-users',              "switchTab('candidates')",'purple')}
+          ${kpi('Travelled',        travelled,       'Completed placements',   'ti-plane',              "switchTab('pipeline')",'green')}
+          ${kpi('Collected',        money(totalPaid),'Recorded payments',      'ti-wallet',             "switchTab('finance')",'amber')}
+          ${kpi('Clients',          buildClients().length, 'Companies served', 'ti-building',           "switchTab('clients')",'blue')}
+          ${kpi('Documents',        Object.values(allDocs||{}).filter(Boolean).length, 'Drive links saved','ti-folder', "switchTab('documents')",'teal')}
         </div>
       </div>`;
   }
@@ -3768,7 +3774,7 @@ function setUserDisplay(display, role) {
               <thead><tr>
                 <th style="width:36px"><input type="checkbox" id="cand-select-all" ${allSel?'checked':''} onchange="toggleSelectAll(this.checked)"></th>
                 <th>Name</th><th>Job Title</th><th>Company</th>
-                <th>Stage</th><th>Submitted</th><th>Next Action</th><th>Owner</th><th></th>
+                <th>Stage</th><th>Submitted</th><th></th>
               </tr></thead>
               <tbody>
                 ${list.length ? list.map(r => {
@@ -3790,8 +3796,6 @@ function setUserDisplay(display, role) {
                     <td>${h(r.company)}</td>
                     <td>${badge(r.stage)}</td>
                     <td>${h(fmt(r.submitted))}</td>
-                    <td><span class="dv5-next-action">${h(nextAction(r))}</span></td>
-                    <td>${h(r.owner)}</td>
                     <td onclick="event.stopPropagation()">
                       <button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
                         <i class="ti ti-edit"></i>
@@ -3825,11 +3829,11 @@ function setUserDisplay(display, role) {
           </div>
         </div>
         <div class="dv5-kpi-grid">
-          ${kpi('Open Tasks',   tasks.length, 'Need attention',   'ti-checkbox')}
-          ${kpi('High Priority',high.length,  'Urgent blockers',  'ti-alert-triangle')}
-          ${kpi('Medium',       med.length,   'Stage follow ups', 'ti-clock')}
-          ${kpi('Missing Docs', allRows().filter(r=>!hasDoc(r)).length, 'Compliance', 'ti-folder-x')}
-          ${kpi('Unpaid',       allRows().filter(r=>r.balance>0).length,'Finance follow up','ti-coin')}
+          ${kpi('Open Tasks',   tasks.length, 'Need attention',   'ti-checkbox',       '','purple')}
+          ${kpi('High Priority',high.length,  'Urgent blockers',  'ti-alert-triangle', '','rose')}
+          ${kpi('Medium',       med.length,   'Stage follow ups', 'ti-clock',          '','amber')}
+          ${kpi('Missing Docs', allRows().filter(r=>!hasDoc(r)).length, 'Compliance', 'ti-folder-x','','teal')}
+          ${kpi('Unpaid',       allRows().filter(r=>r.balance>0).length,'Finance follow up','ti-coin','','green')}
         </div>
         <div class="dv5-card">
           <div class="dv5-card-head">
@@ -3895,11 +3899,11 @@ function setUserDisplay(display, role) {
           </div>
         </div>
         <div class="dv5-kpi-grid">
-          ${kpi('Total Invoiced',  money(total), 'All candidates',   'ti-receipt')}
-          ${kpi('Total Paid',      money(paid),  'Collected',        'ti-wallet')}
-          ${kpi('Outstanding',     money(bal),   'Follow up needed', 'ti-alert-circle')}
-          ${kpi('Collection Rate', rate+'%',     'Paid / invoiced',  'ti-chart-line')}
-          ${kpi('Open Accounts',   rows.filter(r=>r.balance>0).length, 'Unpaid balances', 'ti-user-dollar')}
+          ${kpi('Total Invoiced',  money(total), 'All candidates',   'ti-receipt',     '','ink')}
+          ${kpi('Total Paid',      money(paid),  'Collected',        'ti-wallet',      '','green')}
+          ${kpi('Outstanding',     money(bal),   'Follow up needed', 'ti-alert-circle','','rose')}
+          ${kpi('Collection Rate', rate+'%',     'Paid / invoiced',  'ti-chart-line',  '','blue')}
+          ${kpi('Open Accounts',   rows.filter(r=>r.balance>0).length, 'Unpaid balances', 'ti-user-dollar','','amber')}
         </div>
         <div class="dv5-two-col">
           <div class="dv5-card">
@@ -4005,11 +4009,11 @@ function setUserDisplay(display, role) {
           </div>
         </div>
         <div class="dv5-kpi-grid">
-          ${kpi('Complete',  complete,        'All documents present',  'ti-folder-check')}
-          ${kpi('Partial',   partial,         'Some files uploaded',    'ti-folder-minus')}
-          ${kpi('Missing',   missing,         'No documents yet',       'ti-folder-x')}
-          ${kpi('Passports', rows.filter(r=>r.pp).length, 'Recorded',  'ti-id')}
-          ${kpi('Total',     rows.length,     'All candidates',         'ti-users')}
+          ${kpi('Complete',  complete,        'All documents present',  'ti-folder-check', '','green')}
+          ${kpi('Partial',   partial,         'Some files uploaded',    'ti-folder-minus', '','amber')}
+          ${kpi('Missing',   missing,         'No documents yet',       'ti-folder-x',     '','rose')}
+          ${kpi('Passports', rows.filter(r=>r.pp).length, 'Recorded',  'ti-id',            '','teal')}
+          ${kpi('Total',     rows.length,     'All candidates',         'ti-users',         '','purple')}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
@@ -4090,11 +4094,11 @@ function setUserDisplay(display, role) {
           </div>
         </div>
         <div class="dv5-kpi-grid">
-          ${kpi('Total Candidates', rows.length,        'All records',        'ti-users')}
-          ${kpi('Travelled',        travelled.length,   'Successful travel',  'ti-plane')}
-          ${kpi('Success Rate',     rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%', 'Travelled / total','ti-target')}
-          ${kpi('Collection Rate',  total?Math.round(paid/total*100)+'%':'0%', 'Finance health','ti-chart-line')}
-          ${kpi('Avg Processing',   avgProcessing,      withDates.length ? 'Intake → travel date' : 'No travel dates yet', 'ti-clock')}
+          ${kpi('Total Candidates', rows.length,        'All records',        'ti-users',    '','purple')}
+          ${kpi('Travelled',        travelled.length,   'Successful travel',  'ti-plane',    '','green')}
+          ${kpi('Success Rate',     rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%', 'Travelled / total','ti-target','','blue')}
+          ${kpi('Collection Rate',  total?Math.round(paid/total*100)+'%':'0%', 'Finance health','ti-chart-line','','amber')}
+          ${kpi('Avg Processing',   avgProcessing,      withDates.length ? 'Intake → travel date' : 'No travel dates yet', 'ti-clock','','teal')}
         </div>
         <div class="dv5-two-col">
           <div class="dv5-card">
@@ -4170,11 +4174,11 @@ function setUserDisplay(display, role) {
           </div>
         </div>
         <div class="dv5-kpi-grid">
-          ${kpi('Total Clients',  clients.length,                        'Employer companies',     'ti-building')}
-          ${kpi('Active Jobs',    clients.reduce((s,c)=>s+c.active,0),   'In-progress placements', 'ti-briefcase')}
-          ${kpi('Total Hired',    clients.reduce((s,c)=>s+c.total,0),    'All-time candidates',    'ti-users')}
-          ${kpi('Outstanding',    money(clients.reduce((s,c)=>s+c.due,0)),'Total due',              'ti-coin')}
-          ${kpi('Collected',      money(clients.reduce((s,c)=>s+c.paid,0)),'Total paid',            'ti-wallet')}
+          ${kpi('Total Clients',  clients.length,                        'Employer companies',     'ti-building',  '','blue')}
+          ${kpi('Active Jobs',    clients.reduce((s,c)=>s+c.active,0),   'In-progress placements', 'ti-briefcase', '','purple')}
+          ${kpi('Total Hired',    clients.reduce((s,c)=>s+c.total,0),    'All-time candidates',    'ti-users',     '','green')}
+          ${kpi('Outstanding',    money(clients.reduce((s,c)=>s+c.due,0)),'Total due',              'ti-coin',      '','rose')}
+          ${kpi('Collected',      money(clients.reduce((s,c)=>s+c.paid,0)),'Total paid',            'ti-wallet',    '','amber')}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
@@ -4308,7 +4312,6 @@ function setUserDisplay(display, role) {
             <div class="dv5-detail-grid">
               <span>Submitted</span><strong>${h(fmt(r.submitted))}</strong>
               <span>Stage</span><strong>${h(r.stage)}</strong>
-              <span>Owner</span><strong>${h(r.owner)}</strong>
               <span>Company</span><strong>${h(r.company)}</strong>
               ${type==='pro' && r.raw?.mol ? `<span>MOL Date</span><strong>${h(fmt(r.raw.mol))}</strong>` : ''}
               ${type==='pro' && r.raw?.visa ? `<span>Visa Date</span><strong>${h(fmt(r.raw.visa))}</strong>` : ''}
@@ -4444,6 +4447,13 @@ function setUserDisplay(display, role) {
 .dv5-kpi[onclick] { cursor:pointer; }
 .dv5-kpi:hover[onclick] { border-color:#5347CE30; }
 .dv5-kpi-icon { width:36px; height:36px; border-radius:10px; background:#F3F3F3; display:flex; align-items:center; justify-content:center; font-size:16px; color:#5347CE; margin-bottom:10px; }
+.dv5-kpi-icon.purple { background:#EEF2FF; color:#5347CE; }
+.dv5-kpi-icon.green  { background:#ECFDF5; color:#059669; }
+.dv5-kpi-icon.amber  { background:#FFFBEB; color:#D97706; }
+.dv5-kpi-icon.blue   { background:#EFF6FF; color:#2563EB; }
+.dv5-kpi-icon.rose   { background:#FFF1F2; color:#E11D48; }
+.dv5-kpi-icon.teal   { background:#F0FDFA; color:#0D9488; }
+.dv5-kpi-icon.ink    { background:#1E1B4B; color:#EEFA94; }
 .dv5-kpi-val { font-size:22px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
 .dv5-kpi-label { font-size:12px; font-weight:700; color:var(--text,#18191B); }
 .dv5-kpi-note { font-size:11px; color:var(--text-3,#999); margin-top:2px; }
@@ -4459,6 +4469,11 @@ function setUserDisplay(display, role) {
 
 /* Cards */
 .dv5-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:16px; margin-bottom:12px; }
+.dv5-card-pipeline { background:linear-gradient(135deg,#1E1B4B 0%,#312E81 60%,#3730A3 100%); border-color:#4338CA; padding:16px 20px; }
+.dv5-card-pipeline .dv5-flow-step strong { color:#fff; }
+.dv5-card-pipeline .dv5-flow-step span { color:rgba(255,255,255,.55); }
+.dv5-card-pipeline .dv5-flow-arrow { color:rgba(255,255,255,.3); }
+.dv5-card-pipeline .dv5-pipeline-flow { padding:4px 0; }
 .dv5-card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .dv5-card-title { font-size:13px; font-weight:800; color:var(--text,#18191B); }
 .dv5-card-sub { font-size:11px; color:var(--text-3,#999); }
@@ -4532,7 +4547,7 @@ function setUserDisplay(display, role) {
 
 /* Pipeline flow steps */
 .dv5-pipeline-flow { display:flex; align-items:center; gap:0; overflow-x:auto; padding:8px 0; }
-.dv5-flow-step { text-align:center; padding:12px 20px; min-width:80px; }
+.dv5-flow-step { text-align:center; padding:8px 16px; min-width:70px; }
 .dv5-flow-step strong { display:block; font-size:22px; font-weight:900; color:var(--text,#18191B); }
 .dv5-flow-step span { font-size:11px; color:var(--text-3,#999); font-weight:700; }
 .dv5-flow-arrow { color:var(--text-3,#999); font-size:14px; flex-shrink:0; }
