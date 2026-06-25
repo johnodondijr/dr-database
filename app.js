@@ -5362,6 +5362,8 @@ function setUserDisplay(display, role) {
     if (overlay) overlay.classList.remove('open');
   };
 
+  function cmdEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
   window.cmdSearch = function() {
     const q = (document.getElementById('cmd-input')?.value || '').toLowerCase().trim();
     const results = document.getElementById('cmd-results');
@@ -5393,8 +5395,8 @@ function setUserDisplay(display, role) {
         <div class="cmd-item" data-cmd-idx="${tabs.length+i}" onclick="closeCmd();editPro(${r.id})">
           <div class="cmd-item-icon"><i class="ti ti-user"></i></div>
           <div class="cmd-item-main">
-            <div class="cmd-item-name">${h(r.name)}</div>
-            <div class="cmd-item-sub">${h(r.stage||'')} · ${h(r.company||'')}</div>
+            <div class="cmd-item-name">${cmdEsc(r.name)}</div>
+            <div class="cmd-item-sub">${cmdEsc(r.stage||'')} · ${cmdEsc(r.company||'')}</div>
           </div>
         </div>`).join('');
     }
