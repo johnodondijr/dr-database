@@ -3571,14 +3571,6 @@ function setUserDisplay(display, role) {
           <i class="ti ti-chevrons-left"></i>
         </button>
       </div>
-      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" onclick="toggleProfileDropdown(event)" type="button">
-        <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
-        <div class="dv5-suc-body suc-info">
-          <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
-          <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
-        </div>
-        <i class="ti ti-chevrons-up-down" style="font-size:14px;opacity:.45;margin-left:auto;flex-shrink:0"></i>
-      </button>
       <div class="sidebar-divider"></div>
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Workspace</div>
       ${['dash','pipeline','candidates','tasks'].map(navItem).join('')}
@@ -3587,10 +3579,14 @@ function setUserDisplay(display, role) {
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">System</div>
       ${navItem('settings')}
       <div class="nav-spacer"></div>
-      <div class="sidebar-divider"></div>
-      <button class="nav-item" style="color:rgba(255,80,80,.7);margin-bottom:8px" onclick="doLogout()" type="button">
-        <i class="ti ti-logout" style="color:rgba(255,80,80,.7)"></i>
-        <span class="nav-item-label">Log out</span>
+      <div class="sidebar-divider" style="margin-bottom:10px"></div>
+      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" onclick="toggleProfileDropdown(event)" type="button">
+        <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
+        <div class="dv5-suc-body suc-info">
+          <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
+          <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
+        </div>
+        <i class="ti ti-chevrons-up-down" style="font-size:14px;color:#9AA0B0;margin-left:auto;flex-shrink:0"></i>
       </button>`;
     sidebarBuilt = true;
   }
@@ -4583,16 +4579,20 @@ function setUserDisplay(display, role) {
   const DV5_CSS = `
 /* === DV5 Component System === */
 .dv5-section { display: none; }
-/* Shadcn-style sidebar user card */
-.dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:8px 10px!important; border-radius:10px!important; background:rgba(255,255,255,.06)!important; border:1px solid rgba(255,255,255,.1)!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .15s!important; margin-bottom:6px!important; }
-.dv5-suc:hover { background:rgba(255,255,255,.1)!important; }
-.dv5-suc-av { width:34px!important; height:34px!important; border-radius:8px!important; background:#fff!important; color:#18191B!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:12px!important; font-weight:900!important; flex-shrink:0!important; }
-.dv5-suc-body { min-width:0!important; flex:1!important; }
-.dv5-suc-name { font-size:12.5px!important; font-weight:750!important; color:#fff!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.3!important; }
-.dv5-suc-email { font-size:10.5px!important; color:rgba(255,255,255,.5)!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; }
+/* Override all legacy sidebar-user-card styles for the new card */
+.dv5-suc.sidebar-user-card { background:#F7F8FA!important; border:1px solid #E8EAF0!important; border-radius:10px!important; padding:9px 10px!important; margin-top:0!important; margin-bottom:6px!important; min-height:unset!important; }
+.dv5-suc.sidebar-user-card::after { content:none!important; }
 
-/* Shadcn-style profile dropdown */
-.dv5-pd { position:fixed!important; left:228px!important; bottom:20px!important; top:auto!important; right:auto!important; width:280px!important; background:#fff!important; border:1px solid #E8E8E8!important; border-radius:14px!important; box-shadow:0 8px 32px rgba(0,0,0,.14)!important; z-index:9000!important; overflow:hidden!important; display:none; }
+/* Shadcn-style sidebar user card */
+.dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:9px 10px!important; border-radius:10px!important; background:#F7F8FA!important; border:1px solid #E8EAF0!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .15s,border-color .15s!important; margin-bottom:6px!important; }
+.dv5-suc:hover { background:#EEEEF3!important; border-color:#D8DAE5!important; }
+.dv5-suc-av { width:34px!important; height:34px!important; border-radius:50%!important; background:#18191B!important; color:#fff!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:11px!important; font-weight:900!important; flex-shrink:0!important; }
+.dv5-suc-body { min-width:0!important; flex:1!important; }
+.dv5-suc-name { font-size:12.5px!important; font-weight:750!important; color:#18191B!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.3!important; }
+.dv5-suc-email { font-size:10.5px!important; color:#8A8F9E!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; }
+
+/* Shadcn-style profile dropdown — anchored above bottom user card */
+.dv5-pd { position:fixed!important; left:16px!important; bottom:74px!important; top:auto!important; right:auto!important; width:268px!important; background:#fff!important; border:1px solid #E4E4E7!important; border-radius:12px!important; box-shadow:0 4px 24px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.06)!important; z-index:9000!important; overflow:hidden!important; display:none; }
 .dv5-pd.open { display:block!important; }
 .dv5-pd-head { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #F1F1F1; }
 .dv5-pd-av { width:38px; height:38px; border-radius:9px; background:#18191B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; flex-shrink:0; }
