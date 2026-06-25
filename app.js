@@ -3359,14 +3359,23 @@ function setUserDisplay(display, role) {
   }
 
   // ── KPI card helper ───────────────────────────────────────
-  function kpi(label, value, note, icon, action='', color='purple') {
+  function kpi(label, value, note, icon, action='', color='purple', trend='') {
     const click = action ? `onclick="${action}"` : '';
     const clickable = action ? 'style="cursor:pointer"' : '';
+    let trendHtml = '';
+    if (trend) {
+      const up = trend.startsWith('+');
+      const trendColor = up ? '#059669' : '#E11D48';
+      const trendBg = up ? '#ECFDF5' : '#FFF1F2';
+      const trendIcon = up ? 'ti-trending-up' : 'ti-trending-down';
+      trendHtml = `<span class="dv5-kpi-trend" style="display:inline-flex;align-items:center;gap:3px;margin-top:6px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;background:${trendBg};color:${trendColor}"><i class="ti ${trendIcon}" style="font-size:10px"></i>${h(trend)}</span>`;
+    }
     return `<div class="dv5-kpi" ${click} ${clickable}>
       <div class="dv5-kpi-icon ${color||'purple'}"><i class="ti ${h(icon)}"></i></div>
       <div class="dv5-kpi-val">${h(String(value))}</div>
       <div class="dv5-kpi-label">${h(label)}</div>
       <div class="dv5-kpi-note">${h(note)}</div>
+      ${trendHtml}
     </div>`;
   }
 
@@ -3593,11 +3602,11 @@ function setUserDisplay(display, role) {
         </div>
 
         <div class="dv5-kpi-grid" style="margin-top:16px">
-          ${kpi('Total Candidates', rows.length,    'All active records',     'ti-users',              "switchTab('candidates')",'purple')}
-          ${kpi('Travelled',        travelled,       'Completed placements',   'ti-plane',              "switchTab('pipeline')",'green')}
-          ${kpi('Collected',        money(totalPaid),'Recorded payments',      'ti-wallet',             "switchTab('finance')",'amber')}
-          ${kpi('Clients',          buildClients().length, 'Companies served', 'ti-building',           "switchTab('clients')",'blue')}
-          ${kpi('Documents',        Object.values(allDocs||{}).filter(Boolean).length, 'Drive links saved','ti-folder', "switchTab('documents')",'teal')}
+          ${kpi('Total Candidates', rows.length,    'All active records',     'ti-users',              "switchTab('candidates')",'purple', rows.length>0?'+'+rows.length+' total':'')}
+          ${kpi('Travelled',        travelled,       'Completed placements',   'ti-plane',              "switchTab('pipeline')",'green',  travelled>0?'+'+travelled+' placed':'')}
+          ${kpi('Collected',        money(totalPaid),'Recorded payments',      'ti-wallet',             "switchTab('finance')",'amber',   totalPaid>0?'All time':'No payments')}
+          ${kpi('Clients',          buildClients().length, 'Companies served', 'ti-building',           "switchTab('clients')",'blue',    buildClients().length>0?'+'+buildClients().length+' active':'')}
+          ${kpi('Documents',        Object.values(allDocs||{}).filter(Boolean).length, 'Drive links saved','ti-folder', "switchTab('documents')",'teal', '')}
         </div>
       </div>`;
   }
@@ -4426,8 +4435,8 @@ function setUserDisplay(display, role) {
 .dv5-section { display: none; }
 .dv5-page { padding: 0 0 40px; max-width: none; }
 .dv5-page-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; flex-wrap:wrap; }
-.dv5-page-head h1 { font-size:22px; font-weight:800; color:var(--text,#18191B); margin:0 0 4px; }
-.dv5-page-head p { font-size:13px; color:var(--text-3,#999); margin:0; }
+.dv5-page-head h1 { font-size:24px; font-weight:900; color:var(--text,#18191B); margin:0 0 4px; letter-spacing:-.5px; }
+.dv5-page-head p { font-size:13px; color:var(--text-3,#999); margin:0; line-height:1.4; }
 .dv5-head-actions { display:flex; gap:8px; flex-wrap:wrap; }
 
 /* Buttons */
@@ -4443,7 +4452,7 @@ function setUserDisplay(display, role) {
 
 /* KPI grid */
 .dv5-kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
-.dv5-kpi { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:16px; cursor:default; transition:border-color .15s; }
+.dv5-kpi { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; cursor:default; transition:border-color .15s; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 .dv5-kpi[onclick] { cursor:pointer; }
 .dv5-kpi:hover[onclick] { border-color:#5347CE30; }
 .dv5-kpi-icon { width:36px; height:36px; border-radius:10px; background:#F3F3F3; display:flex; align-items:center; justify-content:center; font-size:16px; color:#5347CE; margin-bottom:10px; }
@@ -4460,15 +4469,15 @@ function setUserDisplay(display, role) {
 
 /* Priority grid */
 .dv5-priority-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px; }
-.dv5-priority { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:16px; cursor:pointer; transition:border-color .15s,box-shadow .15s; text-align:left; }
-.dv5-priority:hover { border-color:#5347CE50; box-shadow:0 4px 16px rgba(83,71,206,.08); }
+.dv5-priority { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; cursor:pointer; transition:border-color .15s,box-shadow .15s; text-align:left; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.dv5-priority:hover { border-color:#5347CE50; box-shadow:0 2px 8px rgba(83,71,206,.1); }
 .dv5-priority-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#5347CE; margin-bottom:10px; }
 .dv5-priority strong { display:block; font-size:28px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
 .dv5-priority span { display:block; font-size:12px; font-weight:700; color:var(--text,#18191B); }
 .dv5-priority small { display:block; font-size:11px; color:var(--text-3,#999); margin-top:2px; }
 
 /* Cards */
-.dv5-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:16px; margin-bottom:12px; }
+.dv5-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 .dv5-card-pipeline { background:linear-gradient(135deg,#1E1B4B 0%,#312E81 60%,#3730A3 100%); border-color:#4338CA; padding:16px 20px; }
 .dv5-card-pipeline .dv5-flow-step strong { color:#fff; }
 .dv5-card-pipeline .dv5-flow-step span { color:rgba(255,255,255,.55); }
@@ -4487,7 +4496,7 @@ function setUserDisplay(display, role) {
 .dv5-table tbody tr { border-bottom:1px solid var(--border,#E8E8E8); transition:background .12s; cursor:pointer; }
 .dv5-table tbody tr:last-child { border-bottom:0; }
 .dv5-table tbody tr:hover { background:#FAFAFA; }
-.dv5-table tbody td { padding:10px 12px; color:var(--text,#18191B); vertical-align:middle; }
+.dv5-table tbody td { padding:0 12px; height:44px; color:var(--text,#18191B); vertical-align:middle; }
 
 /* Name cells */
 .dv5-name-cell { display:flex; align-items:center; gap:10px; }
@@ -5319,5 +5328,99 @@ function setUserDisplay(display, role) {
   window.addEventListener('unhandledrejection', event => {
     console.error('Dreco async error:', event.reason);
     showHealthMessage('Sync/action issue caught', 'An action failed safely. Check the console for details.');
+  });
+
+  // ══════════════════════════════════════════════════════════
+  // ⌘K COMMAND PALETTE
+  // ══════════════════════════════════════════════════════════
+  const CMD_TABS = [
+    { label:'Dashboard',   icon:'ti-home',           tab:'dash' },
+    { label:'Candidates',  icon:'ti-users',          tab:'candidates' },
+    { label:'Pipeline',    icon:'ti-git-branch',     tab:'pipeline' },
+    { label:'Finance',     icon:'ti-coin',           tab:'finance' },
+    { label:'Documents',   icon:'ti-folder',         tab:'documents' },
+    { label:'Clients',     icon:'ti-building',       tab:'clients' },
+    { label:'Tasks',       icon:'ti-checkbox',       tab:'tasks' },
+    { label:'Reports',     icon:'ti-chart-bar',      tab:'reports' },
+  ];
+  let cmdSelectedIdx = 0;
+
+  window.openCmd = function() {
+    const overlay = document.getElementById('cmd-overlay');
+    if (!overlay) return;
+    overlay.classList.add('open');
+    const inp = document.getElementById('cmd-input');
+    if (inp) { inp.value = ''; inp.focus(); }
+    cmdSearch();
+  };
+
+  window.closeCmd = function() {
+    const overlay = document.getElementById('cmd-overlay');
+    if (overlay) overlay.classList.remove('open');
+  };
+
+  window.cmdSearch = function() {
+    const q = (document.getElementById('cmd-input')?.value || '').toLowerCase().trim();
+    const results = document.getElementById('cmd-results');
+    if (!results) return;
+    cmdSelectedIdx = 0;
+
+    const tabs = CMD_TABS.filter(t => !q || t.label.toLowerCase().includes(q));
+    const candidates = q.length >= 2
+      ? (allRows ? allRows() : []).filter(r =>
+          (r.name||'').toLowerCase().includes(q) ||
+          (r.pp||'').toLowerCase().includes(q) ||
+          (r.company||'').toLowerCase().includes(q)
+        ).slice(0, 8)
+      : [];
+
+    let html = '';
+    if (tabs.length) {
+      html += `<div class="cmd-section-label">Navigation</div>`;
+      html += tabs.map((t,i) => `
+        <div class="cmd-item${i===0&&!candidates.length?'':''}" data-cmd-idx="${i}" onclick="closeCmd();switchTab('${t.tab}')">
+          <div class="cmd-item-icon"><i class="ti ${t.icon}"></i></div>
+          <div class="cmd-item-main"><div class="cmd-item-name">${t.label}</div></div>
+          <span class="cmd-item-badge">Tab</span>
+        </div>`).join('');
+    }
+    if (candidates.length) {
+      html += `<div class="cmd-section-label">Candidates</div>`;
+      html += candidates.map((r,i) => `
+        <div class="cmd-item" data-cmd-idx="${tabs.length+i}" onclick="closeCmd();editPro(${r.id})">
+          <div class="cmd-item-icon"><i class="ti ti-user"></i></div>
+          <div class="cmd-item-main">
+            <div class="cmd-item-name">${h(r.name)}</div>
+            <div class="cmd-item-sub">${h(r.stage||'')} · ${h(r.company||'')}</div>
+          </div>
+        </div>`).join('');
+    }
+    if (!html) html = `<div id="cmd-empty">No results for "<strong>${q}</strong>"</div>`;
+    results.innerHTML = html;
+    highlightCmd();
+  };
+
+  window.cmdKey = function(e) {
+    const items = document.querySelectorAll('.cmd-item');
+    if (e.key === 'ArrowDown') { e.preventDefault(); cmdSelectedIdx = Math.min(cmdSelectedIdx+1, items.length-1); highlightCmd(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); cmdSelectedIdx = Math.max(cmdSelectedIdx-1, 0); highlightCmd(); }
+    else if (e.key === 'Enter') { e.preventDefault(); items[cmdSelectedIdx]?.click(); }
+    else if (e.key === 'Escape') { closeCmd(); }
+  };
+
+  function highlightCmd() {
+    document.querySelectorAll('.cmd-item').forEach((el,i) => {
+      el.classList.toggle('selected', i === cmdSelectedIdx);
+    });
+  }
+
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      const overlay = document.getElementById('cmd-overlay');
+      if (overlay?.classList.contains('open')) closeCmd();
+      else openCmd();
+    }
+    if (e.key === 'Escape') closeCmd();
   });
 })();
