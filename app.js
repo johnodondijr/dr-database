@@ -2902,7 +2902,7 @@ function openDocs(type,id,name){
   input.value=existing; openBtn.disabled=!existing.trim(); renderDocChecklist(type,id);
   const dm=document.getElementById('docs-modal');
   // Elevate z-index above any open profile/lb modal (z-index:200) so docs always appears on top
-  dm.style.setProperty('z-index','500','important');
+  dm.style.setProperty('z-index','19999','important');
   dm.classList.add('open');
 }
 function onDocsLinkInput(){ document.getElementById('docs-open-btn').disabled=!document.getElementById('docs-link-input').value.trim(); }
@@ -3614,16 +3614,24 @@ function setUserDisplay(display, role) {
         </div>
 
         <div class="dv5-card dv5-card-pipeline">
-          <div class="dv5-card-head">
-            <span class="dv5-card-title" style="color:#fff">Pipeline Overview</span>
-            <button class="dv5-link" style="color:rgba(255,255,255,.7)" onclick="switchTab('pipeline')">View pipeline →</button>
+          <div class="dv5-card-head" style="margin-bottom:16px">
+            <span class="dv5-card-title" style="color:#fff;font-size:14px">Pipeline Overview</span>
+            <button class="dv5-link" style="color:rgba(255,255,255,.6);font-size:11px" onclick="switchTab('pipeline')">View all →</button>
           </div>
-          <div class="dv5-pipeline-flow">
-            ${flowSteps.map(([label,val]) => `
-              <div class="dv5-flow-step">
-                <strong>${h(String(val))}</strong>
-                <span>${h(label)}</span>
-              </div>`).join('<div class="dv5-flow-arrow"><i class="ti ti-chevron-right"></i></div>')}
+          <div class="dv5-pipeline-flow" style="justify-content:space-between">
+            ${flowSteps.map(([label,val], i) => {
+              const maxVal = Math.max(...flowSteps.map(([,v])=>v), 1);
+              const pct = Math.round((val/maxVal)*100);
+              const isLast = i === flowSteps.length - 1;
+              return `
+              <div class="dv5-flow-step" style="flex:1;position:relative;padding:0 8px">
+                <strong style="font-size:28px">${h(String(val))}</strong>
+                <span style="font-size:10px;letter-spacing:.04em;text-transform:uppercase">${h(label)}</span>
+                <div style="margin-top:8px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden">
+                  <div style="height:100%;width:${pct}%;background:${isLast?'#EEFA94':'rgba(255,255,255,.45)'};border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+                </div>
+              </div>${!isLast ? '<div class="dv5-flow-arrow" style="flex-shrink:0;padding:0 2px;padding-bottom:18px"><i class="ti ti-chevron-right"></i></div>' : ''}`;
+            }).join('')}
           </div>
         </div>
 
@@ -4621,10 +4629,10 @@ function setUserDisplay(display, role) {
 .dv5-pipe-foot { display:flex; justify-content:space-between; font-size:10px; color:var(--text-3,#999); font-weight:700; }
 
 /* Pipeline flow steps */
-.dv5-pipeline-flow { display:flex; align-items:center; gap:0; overflow-x:auto; padding:8px 0; }
-.dv5-flow-step { text-align:center; padding:8px 16px; min-width:70px; }
-.dv5-flow-step strong { display:block; font-size:22px; font-weight:900; color:var(--text,#18191B); }
-.dv5-flow-step span { font-size:11px; color:var(--text-3,#999); font-weight:700; }
+.dv5-pipeline-flow { display:flex; align-items:center; gap:0; padding:0; width:100%; }
+.dv5-flow-step { text-align:center; padding:0 8px; }
+.dv5-flow-step strong { display:block; font-size:28px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
+.dv5-flow-step span { font-size:10px; color:var(--text-3,#999); font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
 .dv5-flow-arrow { color:var(--text-3,#999); font-size:14px; flex-shrink:0; }
 
 /* Tasks */
@@ -4811,6 +4819,8 @@ function setUserDisplay(display, role) {
     try { docsTarget = window.docsTarget; } catch {}
     const modal = $('#docs-modal');
     if(!modal) return;
+    // Always appear above any open profile/DV5 overlay (z-index:9999)
+    modal.style.setProperty('z-index','19999','important');
     const title = $('#docs-modal-title');
     if(title) title.textContent = `Documents - ${name || 'Candidate'}`;
     const panel = modal.querySelector('.modal');
