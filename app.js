@@ -3319,6 +3319,47 @@ function setUserDisplay(display, role) {
     reports:'ti-chart-bar', clients:'ti-building-skyscraper', settings:'ti-settings'
   };
 
+  // ── Global job-type tab (Pro / General) ──────────────────
+  let jobTypeTab = 'pro';
+  let lbCountryFilter = '';
+  function rerenderPage() {
+    const renderers = {
+      dash: window.renderDash, pipeline: window.renderPipelinePage,
+      candidates: window.renderCandidatesPage, finance: window.renderFinancePage,
+      documents: window.renderDocumentsPage, reports: window.renderReportsPage,
+      clients: window.renderClientsPage,
+    };
+    for (const [id, fn] of Object.entries(renderers)) {
+      const el = document.getElementById(id+'-section');
+      if (el && el.style.display !== 'none' && typeof fn === 'function') { fn(); break; }
+    }
+  }
+  window.setJobTypeTab = v => { jobTypeTab = v; rerenderPage(); };
+  window.setLbCountry  = v => { lbCountryFilter = v; rerenderPage(); };
+
+  // Shared shadcn-style Pro/General tabs widget
+  function jobTypeTabs(suffix='') {
+    return `<div class="dv5-job-type-tabs" style="display:flex;align-items:center;gap:0;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;background:#f4f4f5">
+      <button class="dv5-jt-tab${jobTypeTab==='pro'?' active':''}" onclick="window.setJobTypeTab('pro')" style="padding:7px 18px;font-size:13px;font-weight:600;border:0;background:${jobTypeTab==='pro'?'#fff':'transparent'};color:${jobTypeTab==='pro'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='pro'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
+        <i class="ti ti-briefcase" style="margin-right:5px;font-size:12px"></i>Professional
+      </button>
+      <button class="dv5-jt-tab${jobTypeTab==='lb'?' active':''}" onclick="window.setJobTypeTab('lb')" style="padding:7px 18px;font-size:13px;font-weight:600;border:0;background:${jobTypeTab==='lb'?'#fff':'transparent'};color:${jobTypeTab==='lb'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='lb'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
+        <i class="ti ti-globe" style="margin-right:5px;font-size:12px"></i>General Jobs
+      </button>
+    </div>`;
+  }
+
+  // Country sub-filter for General Jobs
+  function lbCountryBar(rows) {
+    const countries = [...new Set(rows.map(r=>r.country).filter(Boolean))].sort();
+    if (countries.length < 2) return '';
+    return `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
+      <span style="font-size:11px;font-weight:600;color:#71717a;letter-spacing:.04em">DESTINATION:</span>
+      <button onclick="window.setLbCountry('')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${!lbCountryFilter?'#5347CE':'#e4e4e7'};background:${!lbCountryFilter?'#5347CE':'transparent'};color:${!lbCountryFilter?'#fff':'#71717a'};cursor:pointer;font-weight:600">All</button>
+      ${countries.map(c=>`<button onclick="window.setLbCountry('${js(c)}')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${lbCountryFilter===c?'#5347CE':'#e4e4e7'};background:${lbCountryFilter===c?'#5347CE':'transparent'};color:${lbCountryFilter===c?'#fff':'#71717a'};cursor:pointer;font-weight:600">${h(c)}</button>`).join('')}
+    </div>`;
+  }
+
   // ── Micro-helpers ─────────────────────────────────────────
   const $ = (s, root=document) => root.querySelector(s);
   const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
@@ -3717,26 +3758,49 @@ function setUserDisplay(display, role) {
   function renderDash() {
     ensureSections(); buildSidebar();
     const el = document.getElementById('dash-section'); if (!el) return;
-    const rows = allRows();
-    const awaitMol  = (proDB||[]).filter(r=>r.stage==='PENDING MOL').length;
-    const visaReady = (proDB||[]).filter(r=>r.stage==='PENDING VISA').length;
-    const unpaid    = rows.filter(r=>r.balance>0).length;
-    const tickets   = (proDB||[]).filter(r=>r.stage==='PENDING TRAVEL').length;
+    const isPro = jobTypeTab === 'pro';
+    const proRows = proDB || [];
+    const lbFiltered = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const rows = isPro ? proRows : lbFiltered;
+
+    // Pro-specific dash metrics
+    const awaitMol  = proRows.filter(r=>r.stage==='MOL').length;
+    const visaReady = proRows.filter(r=>r.stage==='VISA').length;
+    const tickets   = proRows.filter(r=>r.stage==='PENDING TRAVEL').length;
+    const unpaidPro = proRows.filter(r=>r.balance>0).length;
+    // LB-specific
+    const lbRefundPending = lbFiltered.filter(r=>r.stage==='REFUND PENDING').length;
+    const lbSelected      = lbFiltered.filter(r=>r.stage==='SELECTED').length;
+    const unpaidLB        = lbFiltered.filter(r=>r.balance>0&&!r.own_passport).length;
+
     const missDocs  = rows.filter(r=>!hasDoc(r)).length;
     const travelled = rows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
-    const totalPaid = rows.reduce((s,r)=>s+r.paid,0);
-    // Pipeline flow steps
-    const flowSteps = [
-      ['Submitted',  (proDB||[]).filter(r=>r.stage==='SUBMITTED').length],
-      ['Interview',  (proDB||[]).filter(r=>r.stage==='INTERVIEW').length],
-      ['Offer',      (proDB||[]).filter(r=>r.stage==='OFFER LETTER').length],
-      ['Medical',    (proDB||[]).filter(r=>r.stage==='MEDICAL & ATTESTATION').length],
-      ['MOL',        (proDB||[]).filter(r=>r.stage==='MOL').length],
-      ['Visa',       (proDB||[]).filter(r=>r.stage==='VISA').length],
-      ['Travel',     (proDB||[]).filter(r=>r.stage==='PENDING TRAVEL').length],
-      ['Travelled',  (proDB||[]).filter(r=>r.stage==='TRAVELLED').length],
+    const totalPaidPro = proRows.reduce((s,r)=>s+r.paid,0);
+    const totalPaidLB  = lbFiltered.reduce((s,r)=>s+r.paid,0);
+
+    const proFlowSteps = [
+      ['Submitted',  proRows.filter(r=>r.stage==='SUBMITTED').length],
+      ['Interview',  proRows.filter(r=>r.stage==='INTERVIEW').length],
+      ['Offer',      proRows.filter(r=>r.stage==='OFFER LETTER').length],
+      ['Medical',    proRows.filter(r=>r.stage==='MEDICAL & ATTESTATION').length],
+      ['MOL',        proRows.filter(r=>r.stage==='MOL').length],
+      ['Visa',       proRows.filter(r=>r.stage==='VISA').length],
+      ['Travel',     proRows.filter(r=>r.stage==='PENDING TRAVEL').length],
+      ['Travelled',  proRows.filter(r=>r.stage==='TRAVELLED').length],
     ];
+    const lbFlowSteps = [
+      ['Docs In',    lbFiltered.filter(r=>r.stage==='DOCS SUBMITTED').length],
+      ['Profile Sent',lbFiltered.filter(r=>r.stage==='PROFILE SENT').length],
+      ['Selected',   lbFiltered.filter(r=>r.stage==='SELECTED').length],
+      ['Passport',   lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length],
+      ['Visa',       lbFiltered.filter(r=>r.stage==='VISA PROCESSING').length],
+      ['Travelled',  lbFiltered.filter(r=>r.stage==='TRAVELLED').length],
+      ['Refund',     lbFiltered.filter(r=>r.stage==='REFUND PENDING').length],
+      ['Done',       lbFiltered.filter(r=>r.stage==='REFUND COMPLETE').length],
+    ];
+    const flowSteps = isPro ? proFlowSteps : lbFlowSteps;
     const tasks = buildTasks().slice(0,5);
+
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
@@ -3745,22 +3809,32 @@ function setUserDisplay(display, role) {
             <p>Here's what needs your attention today.</p>
           </div>
           <div class="dv5-head-actions">
-            <button class="dv5-btn" onclick="switchTab('tasks')"><i class="ti ti-checkbox"></i>View all tasks</button>
-            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>New Candidate</button>
+            ${jobTypeTabs()}
+            <button class="dv5-btn" onclick="switchTab('tasks')"><i class="ti ti-checkbox"></i>Tasks</button>
+            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add ${isPro?'Professional':'General'}</button>
           </div>
         </div>
+        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
 
         <div class="dv5-priority-grid">
-          ${priority('ti-file-description', awaitMol,  'Awaiting MOL',        'Submit to ministry',    '#FFF4DE', "switchTab('pipeline')")}
-          ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',         'Ready to travel',       '#E9F3FF', "switchTab('pipeline')")}
-          ${priority('ti-coin',             unpaid,    'Unpaid Commissions',  'Requires follow up',    '#E8F8EE', "switchTab('finance')")}
-          ${priority('ti-plane-departure',  tickets,   'Tickets Pending',     'Awaiting issue',        '#F1EFFF', "switchTab('pipeline')")}
-          ${priority('ti-alert-circle',     missDocs,  'Missing Documents',   'Compliance gap',        '#FEECEF', "switchTab('documents')")}
+          ${isPro ? `
+            ${priority('ti-file-description', awaitMol,  'Awaiting MOL',       'Submit to ministry',   '#FFF4DE', "switchTab('pipeline')")}
+            ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',        'Ready to travel',      '#E9F3FF', "switchTab('pipeline')")}
+            ${priority('ti-coin',             unpaidPro, 'Unpaid Commissions', 'Requires follow up',   '#E8F8EE', "switchTab('finance')")}
+            ${priority('ti-plane-departure',  tickets,   'Tickets Pending',    'Awaiting issue',       '#F1EFFF', "switchTab('pipeline')")}
+            ${priority('ti-alert-circle',     missDocs,  'Missing Documents',  'Compliance gap',       '#FEECEF', "switchTab('documents')")}
+          ` : `
+            ${priority('ti-users',            lbSelected,      'Selected',           'Awaiting passport',    '#E9F3FF', "switchTab('pipeline')")}
+            ${priority('ti-credit-card',      lbRefundPending, 'Refund Pending',     'Refunds to process',   '#FFF4DE', "switchTab('finance')")}
+            ${priority('ti-coin',             unpaidLB,        'Outstanding USD',    'Refunds not started',  '#E8F8EE', "switchTab('finance')")}
+            ${priority('ti-passport',         lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length, 'Passport Applied', 'Awaiting passport', '#F1EFFF', "switchTab('pipeline')")}
+            ${priority('ti-alert-circle',     missDocs,        'Missing Documents',  'Compliance gap',       '#FEECEF', "switchTab('documents')")}
+          `}
         </div>
 
         <div class="dv5-card dv5-card-pipeline">
           <div class="dv5-card-head" style="margin-bottom:16px">
-            <span class="dv5-card-title" style="color:#fff;font-size:14px">Pipeline Overview</span>
+            <span class="dv5-card-title" style="color:#fff;font-size:14px">${isPro?'Professional':'General Jobs'} Pipeline</span>
             <button class="dv5-link" style="color:rgba(255,255,255,.6);font-size:11px" onclick="switchTab('pipeline')">View all →</button>
           </div>
           <div class="dv5-pipeline-flow" style="justify-content:space-between">
@@ -3804,7 +3878,7 @@ function setUserDisplay(display, role) {
             <div class="dv5-card-head">
               <div>
                 <span class="dv5-card-title">Placements by Month</span>
-                <div class="dv5-card-sub">Candidates who travelled — last 6 months</div>
+                <div class="dv5-card-sub">${isPro?'Professional':'General'} — last 6 months</div>
               </div>
             </div>
             ${buildBarChart(rows)}
@@ -3821,10 +3895,17 @@ function setUserDisplay(display, role) {
         </div>
 
         <div class="dv5-stat-grid" style="margin-top:0">
-          ${statCard('ti-users',    rows.length,    'Total Candidates', `Active records: ${rows.length}`,  '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
-          ${statCard('ti-plane',    travelled,      'Placements',       `Completed: ${travelled}`,          '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
-          ${statCard('ti-users-group', (proDB||[]).filter(r=>!['TRAVELLED'].includes(r.stage)).length + (lbDB||[]).filter(r=>!['TRAVELLED'].includes(r.stage)).length, 'Active Pipeline', `In progress: ${rows.filter(r=>String(r.stage).toUpperCase()!=='TRAVELLED').length}`, '#FCE7F3','#9D174D','#fff', "switchTab('pipeline')")}
-          ${statCard('ti-wallet',   money(totalPaid),'Revenue Collected', `Commission tracked`, '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
+          ${isPro ? `
+            ${statCard('ti-users',     proRows.length,         'Professional',  `Total candidates`,              '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
+            ${statCard('ti-plane',     travelled,              'Placements',    `Completed`,                     '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
+            ${statCard('ti-users-group',proRows.filter(r=>r.stage!=='TRAVELLED').length,'Active Pipeline',`In progress`,'#FCE7F3','#9D174D','#fff', "switchTab('pipeline')")}
+            ${statCard('ti-wallet',    money(totalPaidPro),   'Revenue (KES)', `Commission collected`,           '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
+          ` : `
+            ${statCard('ti-users',     lbFiltered.length,     'General Jobs',  `Total candidates`,              '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
+            ${statCard('ti-plane',     travelled,             'Travelled',     `Successfully placed`,           '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
+            ${statCard('ti-passport',  lbFiltered.filter(r=>r.own_passport).length,'Own Passport','No refund required','#F0FDF4','#059669','#fff', "switchTab('candidates')")}
+            ${statCard('ti-wallet',    moneyUSD(totalPaidLB), 'Refunds (USD)', `Refunds collected`,             '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
+          `}
         </div>
       </div>`;
   }
@@ -3833,20 +3914,28 @@ function setUserDisplay(display, role) {
   // ── 2. PIPELINE ───────────────────────────────────────────
   function renderPipeline() {
     const el = document.getElementById('pipeline-section'); if (!el) return;
-    const stages = ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
+    const isPro = jobTypeTab === 'pro';
+    const proStageList = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+    const lbStageList  = window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+    const lbFiltered = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const stages = isPro ? proStageList : lbStageList;
+
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Pipeline</h1><p>Candidate progress through offer, MOL, visa, ticketing, and travel.</p></div>
+          <div><h1>Pipeline</h1><p>${isPro?'Professional candidates — KES commission pipeline.':'General Jobs — USD refund pipeline.'}</p></div>
           <div class="dv5-head-actions">
-            <button class="dv5-btn" onclick="renderPipeline()"><i class="ti ti-refresh"></i>Refresh</button>
-            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate</button>
+            ${jobTypeTabs()}
+            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add ${isPro?'Professional':'General'}</button>
           </div>
         </div>
-        <div class="dv5-kanban">
+        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
+        <div class="dv5-kanban" style="margin-top:12px">
           ${stages.map(stage => {
-            const items = (proDB||[]).filter(r=>r.stage===stage);
-            const label = stage.replace('PENDING ','');
+            const items = isPro
+              ? (proDB||[]).filter(r=>r.stage===stage)
+              : lbFiltered.filter(r=>r.stage===stage);
+            const label = stage.replace(/^(PENDING |DOCS )/,'');
             return `<div class="dv5-col">
               <div class="dv5-col-head">
                 <span>${h(label)}</span>
@@ -3854,12 +3943,14 @@ function setUserDisplay(display, role) {
               </div>
               <div class="dv5-col-body">
                 ${items.length ? items.slice(0,30).map(r => `
-                  <div class="dv5-pipe-card" onclick="editPro(${r.id})">
+                  <div class="dv5-pipe-card" onclick="${isPro?`editPro(${r.id})`:`editLB(${r.id})`}">
                     <div class="dv5-pipe-name">${h(r.name)}</div>
-                    <div class="dv5-pipe-meta">${h(r.position||'—')} · ${h(r.company||'—')}</div>
+                    <div class="dv5-pipe-meta">${h(r.position||r.country||'—')} · ${h(r.company||'—')}</div>
                     <div class="dv5-pipe-foot">
                       <span><i class="ti ti-id"></i>${h(r.pp||'No PP')}</span>
-                      ${r.commission ? `<span>${money(r.commission)}</span>` : ''}
+                      ${isPro && r.commission ? `<span>${money(r.commission)}</span>` : ''}
+                      ${!isPro && r.toRefund ? `<span>${moneyUSD(r.toRefund)}</span>` : ''}
+                      ${!isPro && r.own_passport ? `<span style="color:#059669;font-size:9px">Own PP</span>` : ''}
                     </div>
                   </div>`).join('') : '<div class="dv5-empty">No candidates</div>'}
               </div>
@@ -3944,23 +4035,37 @@ function setUserDisplay(display, role) {
 
   function renderCandidates() {
     const el = document.getElementById('candidates-section'); if (!el) return;
-    const all = allRows();
+    const isPro = jobTypeTab === 'pro';
+    const lbBaseRows = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const all = isPro ? (proDB||[]).map(r=>({...r,type:'pro',position:r.position||'',company:r.company||'',country:r.country||'',stage:r.stage||'SUBMITTED',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Number(r.balance||0)}))
+      : lbBaseRows.map(r=>({...r,type:'lb',position:r.country||'',company:r.company||'',country:r.country||'',stage:r.stage||'DOCS SUBMITTED',commission:Number(r.toRefund||0),paid:Number((r.r1Amt||0)+(r.r2Amt||0)),balance:Number(r.balance||0)}));
     const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
-    const list = filterCandidates();
+    // apply filters on top of type-filtered set
+    const _origAllRows = window._drecoAllRows;
+    // use local filter: search + stage filter only (type already filtered above)
+    const q = candidateSearch.toLowerCase();
+    let list = all.filter(r => {
+      if (candidateStageFilter && r.stage !== candidateStageFilter) return false;
+      if (candidateViewFilter==='my' && r.owner !== currentUser?.display) return false;
+      if (candidateViewFilter==='follow' && r.balance<=0 && hasDoc(r)) return false;
+      if (q && ![r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q)) return false;
+      return true;
+    });
     const allSel = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
     const someSel = selectedCandidates.size > 0;
     const proStages = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
     const lbStages  = window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
-    const allStages = [...new Set([...proStages,...lbStages,...stageOptions])];
+    const allStages = isPro ? proStages : lbStages;
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Candidates</h1><p>Unified list across professional and general job placements.</p></div>
+          <div><h1>Candidates</h1><p>${isPro?'Professional placements — commissions in KES.':'General Jobs — refunds in USD.'}</p></div>
           <div class="dv5-head-actions">
-            <button class="dv5-btn" onclick="openLBForm()"><i class="ti ti-briefcase"></i>Add General</button>
-            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Professional</button>
+            ${jobTypeTabs()}
+            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add ${isPro?'Professional':'General'}</button>
           </div>
         </div>
+        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
         <div class="dv5-bulk-bar" id="cand-bulk-bar" style="display:${someSel?'flex':'none'}">
           <span id="cand-bulk-count">${selectedCandidates.size} selected</span>
           <select class="dv5-select" onchange="bulkChangeStage(this.value);this.value=''">
@@ -3974,11 +4079,6 @@ function setUserDisplay(display, role) {
           <div class="dv5-toolbar-left">
             <input class="dv5-input" id="cand-search" placeholder="Search name, passport, company…"
               value="${h(candidateSearch)}" oninput="setCandidateSearch(this.value)">
-            <select class="dv5-select" onchange="candidateTypeFilter=this.value;renderCandidates()">
-              <option value="">All Jobs</option>
-              <option value="pro" ${candidateTypeFilter==='pro'?'selected':''}>Professional</option>
-              <option value="lb" ${candidateTypeFilter==='lb'?'selected':''}>General</option>
-            </select>
             <select class="dv5-select" onchange="candidateStageFilter=this.value;renderCandidates()">
               <option value="">All Stages</option>
               ${stageOptions.map(s=>`<option value="${h(s)}" ${candidateStageFilter===s?'selected':''}>${h(s)}</option>`).join('')}
@@ -4110,11 +4210,14 @@ function setUserDisplay(display, role) {
 
   function renderFinance() {
     const el = document.getElementById('finance-section'); if (!el) return;
+    const isPro = jobTypeTab === 'pro';
     const allFinRows = allRows();
     const proRows = allFinRows.filter(r=>r.type==='pro');
-    const lbRows  = allFinRows.filter(r=>r.type==='lb');
-    const companies = [...new Set(allFinRows.map(r=>r.company).filter(Boolean))].sort();
-    const rows = financeCompanyFilter ? allFinRows.filter(r=>r.company===financeCompanyFilter) : allFinRows;
+    const lbAllRows = allFinRows.filter(r=>r.type==='lb');
+    const lbRows  = lbCountryFilter ? lbAllRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbAllRows;
+    const activeRows = isPro ? proRows : lbRows;
+    const companies = [...new Set(activeRows.map(r=>r.company).filter(Boolean))].sort();
+    const rows = financeCompanyFilter ? activeRows.filter(r=>r.company===financeCompanyFilter) : activeRows;
     // Pro stats (KES)
     const proFin = financeCompanyFilter ? proRows.filter(r=>r.company===financeCompanyFilter) : proRows;
     const proTotal = proFin.reduce((s,r)=>s+r.commission,0);
@@ -4196,31 +4299,31 @@ function setUserDisplay(display, role) {
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Finance</h1><p>Commissions, payments, outstanding balances, and monthly cash flow.</p></div>
+          <div><h1>Finance</h1><p>${isPro?'Professional commissions — KES.':'General Jobs refunds — USD.'}</p></div>
           <div class="dv5-head-actions">
-            <input class="dv5-input" placeholder="Search client…" value="${h(financeClientSearch)}" oninput="window.setFinanceClientSearch(this.value)" style="min-width:160px">
-            <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:140px">
+            ${jobTypeTabs()}
+            <input class="dv5-input" placeholder="Search client…" value="${h(financeClientSearch)}" oninput="window.setFinanceClientSearch(this.value)" style="min-width:150px">
+            <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:130px">
               <option value="">All Companies</option>
               ${companies.map(c=>`<option value="${h(c)}" ${financeCompanyFilter===c?'selected':''}>${h(c)}</option>`).join('')}
             </select>
-            <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export Pro</button>
-            <button class="dv5-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button>
+            <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
           </div>
         </div>
+        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
 
-        <div style="margin-bottom:8px"><span class="dv5-section-label" style="font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:.05em">PROFESSIONAL (KES)</span></div>
-        <div class="dv5-stat-grid" style="margin-bottom:20px">
-          ${statCard('ti-receipt',      money(proTotal), 'Total Commission',  'Pro candidates',            '#E0E7FF','#4338CA','#fff')}
-          ${statCard('ti-wallet',       money(proPaid),  'Collected KES',     'Revenue received',          '#DCFCE7','#16A34A','#fff')}
-          ${statCard('ti-alert-circle', money(proBal),   'Outstanding KES',   `${proFin.filter(r=>r.balance>0).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
-          ${statCard('ti-chart-pie',    proRate+'%',     'Collection Rate',   'Paid vs invoiced',          '#FEF9C3','#A16207','#fff')}
-        </div>
-        <div style="margin-bottom:8px"><span class="dv5-section-label" style="font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:.05em">GENERAL JOBS (USD)</span></div>
-        <div class="dv5-stat-grid" style="margin-bottom:20px">
-          ${statCard('ti-receipt',      moneyUSD(lbTotal),   'Total to Refund',   'General candidates',        '#E0E7FF','#4338CA','#fff')}
-          ${statCard('ti-wallet',       moneyUSD(lbPaidAmt), 'Collected USD',     'Refunds received',          '#DCFCE7','#16A34A','#fff')}
-          ${statCard('ti-alert-circle', moneyUSD(lbBal),     'Outstanding USD',   `${lbFin.filter(r=>r.balance>0&&!r.own_passport).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
-          ${statCard('ti-passport',     lbOwnPP+'',          'Own Passport',      'No refund required',        '#F0FDF4','#059669','#fff')}
+        <div class="dv5-stat-grid" style="margin-bottom:20px;margin-top:12px">
+          ${isPro ? `
+            ${statCard('ti-receipt',      money(proTotal), 'Total Commission',  `${proFin.length} candidates`,     '#E0E7FF','#4338CA','#fff')}
+            ${statCard('ti-wallet',       money(proPaid),  'Collected KES',     'Revenue received',                '#DCFCE7','#16A34A','#fff')}
+            ${statCard('ti-alert-circle', money(proBal),   'Outstanding KES',   `${proFin.filter(r=>r.balance>0).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
+            ${statCard('ti-chart-pie',    proRate+'%',     'Collection Rate',   'Paid vs invoiced',                '#FEF9C3','#A16207','#fff')}
+          ` : `
+            ${statCard('ti-receipt',      moneyUSD(lbTotal),   'Total to Refund', `${lbFin.length} candidates`,     '#E0E7FF','#4338CA','#fff')}
+            ${statCard('ti-wallet',       moneyUSD(lbPaidAmt), 'Collected USD',   'Refunds received',               '#DCFCE7','#16A34A','#fff')}
+            ${statCard('ti-alert-circle', moneyUSD(lbBal),     'Outstanding USD', `${lbFin.filter(r=>r.balance>0&&!r.own_passport).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
+            ${statCard('ti-passport',     lbOwnPP+'',          'Own Passport',    'No refund required',             '#F0FDF4','#059669','#fff')}
+          `}
         </div>
 
         <div class="dv5-two-col" style="margin-bottom:16px">
@@ -4232,9 +4335,9 @@ function setUserDisplay(display, role) {
                 <tbody>
                   ${monthly.map(m=>`<tr>
                     <td style="font-weight:700">${m.label}</td>
-                    <td>${money(m.invoiced)}</td>
-                    <td style="color:#16a34a;font-weight:700">${money(m.paid)}</td>
-                    <td style="color:${m.invoiced-m.paid>0?'#b91c1c':'#6b7280'}">${money(m.invoiced-m.paid)}</td>
+                    <td>${isPro?money(m.invoiced):moneyUSD(m.invoiced)}</td>
+                    <td style="color:#16a34a;font-weight:700">${isPro?money(m.paid):moneyUSD(m.paid)}</td>
+                    <td style="color:${m.invoiced-m.paid>0?'#b91c1c':'#6b7280'}">${isPro?money(m.invoiced-m.paid):moneyUSD(m.invoiced-m.paid)}</td>
                   </tr>`).join('')}
                 </tbody>
               </table>
@@ -4243,7 +4346,7 @@ function setUserDisplay(display, role) {
           <div class="dv5-card">
             <div class="dv5-card-head">
               <span class="dv5-card-title">Outstanding by Company</span>
-              <span class="dv5-card-sub">${money(bal)}</span>
+              <span class="dv5-card-sub">${isPro?money(bal):moneyUSD(bal)}</span>
             </div>
             <div class="dv5-task-list">
               ${companyDebt.slice(0,8).map(c=>`
@@ -4253,7 +4356,7 @@ function setUserDisplay(display, role) {
                     <div class="dv5-task-title">${h(c.name)}</div>
                     <div class="dv5-task-meta">${c.count} candidate${c.count!==1?'s':''}</div>
                   </div>
-                  <span class="dv5-pill red">${money(c.balance)}</span>
+                  <span class="dv5-pill red">${isPro?money(c.balance):moneyUSD(c.balance)}</span>
                 </div>`).join('') || '<div class="dv5-empty">No outstanding balances.</div>'}
             </div>
           </div>
@@ -4354,18 +4457,23 @@ function setUserDisplay(display, role) {
 
   function renderDocuments() {
     const el = document.getElementById('documents-section'); if (!el) return;
-    const rows = allRows();
+    const isPro = jobTypeTab === 'pro';
+    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const rawRows = isPro ? (proDB||[]).map(r=>({...r,type:'pro'})) : lbBase.map(r=>({...r,type:'lb'}));
+    const rows = rawRows;
     const complete = rows.filter(r=>{ const c=docChecklist(r); return c.done===c.total; }).length;
     const partial  = rows.filter(r=>{ const c=docChecklist(r); return c.done>0&&c.done<c.total; }).length;
     const missing  = rows.filter(r=>docChecklist(r).done===0).length;
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Documents</h1><p>Per-candidate document checklist — passport, offer letter, MOL, visa, and travel dates.</p></div>
+          <div><h1>Documents</h1><p>${isPro?'Professional — passport, offer letter, MOL, visa, travel.':'General Jobs — ID, birth cert, photo, passport copy.'}</p></div>
           <div class="dv5-head-actions">
+            ${jobTypeTabs()}
             <button class="dv5-btn primary" onclick="switchTab('candidates')"><i class="ti ti-paperclip"></i>Attach to Candidate</button>
           </div>
         </div>
+        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
         <div class="dv5-file-grid">
           ${fileCard('ti-file-description', '#2563EB', '#2563EB', 'Drive Links', Object.values(allDocs||{}).filter(Boolean).length, rows.length, `${Object.values(allDocs||{}).filter(Boolean).length} of ${rows.length} uploaded`, "switchTab('documents')")}
           ${fileCard('ti-folder-check',     '#059669', '#059669', 'Complete Docs', complete, rows.length, `All documents present`, "switchTab('documents')")}
@@ -4418,46 +4526,68 @@ function setUserDisplay(display, role) {
   // ── 7. REPORTS ────────────────────────────────────────────
   function renderReports() {
     const el = document.getElementById('reports-section'); if (!el) return;
-    const rows = allRows();
+    const isPro = jobTypeTab === 'pro';
+    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const rows = isPro ? (proDB||[]).map(r=>({...r,type:'pro',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Number(r.balance||0)}))
+      : lbBase.map(r=>({...r,type:'lb',commission:Number(r.toRefund||0),paid:Number((r.r1Amt||0)+(r.r2Amt||0)),balance:Number(r.balance||0)}));
+    const fmt2 = v => isPro ? money(v) : moneyUSD(v);
     const total = rows.reduce((s,r)=>s+r.commission,0);
     const paid  = rows.reduce((s,r)=>s+r.paid,0);
     const stageCounts = {};
     rows.forEach(r => stageCounts[r.stage] = (stageCounts[r.stage]||0)+1);
-    const topClients = buildClients().slice(0,8);
     const travelled = rows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED');
-    // top performing jobs
+
+    // Pro: top jobs by position
     const jobCounts = {};
-    (proDB||[]).forEach(r => {
-      if (r.position) jobCounts[r.position] = (jobCounts[r.position]||{count:0,travelled:0,commission:0});
-      if (r.position) { jobCounts[r.position].count++; if(r.stage==='TRAVELLED') jobCounts[r.position].travelled++; jobCounts[r.position].commission+=Number(r.commission)||0; }
-    });
-    const topJobs = Object.entries(jobCounts).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
-    // Calculate real avg processing time: intake date → travel date for travelled candidates
-    let avgProcessing = '—';
-    const withDates = (proDB||[]).filter(r => r.stage==='TRAVELLED' && r.travel && (r.intake||r.created||r.createdAt));
-    if (withDates.length) {
-      const avgDays = Math.round(withDates.reduce((s,r) => {
-        const start = new Date(r.intake||r.created||r.createdAt);
-        const end   = new Date(r.travel);
-        return s + Math.max(0, (end-start)/(86400000));
-      }, 0) / withDates.length);
-      avgProcessing = avgDays > 0 ? avgDays + ' days' : '—';
+    if (isPro) {
+      (proDB||[]).forEach(r => {
+        if (r.position) { jobCounts[r.position] = jobCounts[r.position]||{count:0,travelled:0,commission:0}; jobCounts[r.position].count++; if(r.stage==='TRAVELLED') jobCounts[r.position].travelled++; jobCounts[r.position].commission+=Number(r.commission)||0; }
+      });
     }
+    const topJobs = Object.entries(jobCounts).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
+
+    // General: top countries
+    const countryCounts = {};
+    if (!isPro) {
+      lbBase.forEach(r => {
+        const c = r.country||'Unknown';
+        countryCounts[c] = countryCounts[c]||{count:0,travelled:0,toRefund:0};
+        countryCounts[c].count++; if(r.stage==='TRAVELLED') countryCounts[c].travelled++; countryCounts[c].toRefund+=Number(r.toRefund)||0;
+      });
+    }
+    const topCountries = Object.entries(countryCounts).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
+
+    // Avg processing (Pro: intake→travel; LB: submit→travel)
+    let avgProcessing = '—';
+    if (isPro) {
+      const withDates = (proDB||[]).filter(r => r.stage==='TRAVELLED' && r.travel && (r.intake||r.created||r.createdAt));
+      if (withDates.length) { const avg = Math.round(withDates.reduce((s,r)=>s+Math.max(0,(new Date(r.travel)-new Date(r.intake||r.created||r.createdAt))/86400000),0)/withDates.length); avgProcessing = avg>0?avg+' days':'—'; }
+    } else {
+      const withDates = lbBase.filter(r=>r.stage==='TRAVELLED'&&r.travelDate&&r.created_at);
+      if (withDates.length) { const avg = Math.round(withDates.reduce((s,r)=>s+Math.max(0,(new Date(r.travelDate)-new Date(r.created_at))/86400000),0)/withDates.length); avgProcessing = avg>0?avg+' days':'—'; }
+    }
+
+    // Clients for this type
+    const cMap2 = new Map();
+    rows.forEach(r => { const n=r.company||'Unassigned'; const c=cMap2.get(n)||{name:n,country:r.country||'—',total:0,due:0}; c.total++;c.due+=r.balance;cMap2.set(n,c); });
+    const topClients2 = [...cMap2.values()].sort((a,b)=>b.total-a.total).slice(0,8);
+
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Reports</h1><p>Performance overview for candidates, clients, stages, and collections.</p></div>
+          <div><h1>Reports</h1><p>${isPro?'Professional performance — KES commissions.':'General Jobs performance — USD refunds.'}</p></div>
           <div class="dv5-head-actions">
-            <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export Pro</button>
-            <button class="dv5-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button>
+            ${jobTypeTabs()}
+            <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
           </div>
         </div>
-        <div class="dv5-stat-grid">
-          ${statCard('ti-users',     rows.length,       'Total Candidates', `All records`,                                                 '#EFF6FF','#2563EB','#fff')}
+        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
+        <div class="dv5-stat-grid" style="margin-top:12px">
+          ${statCard('ti-users',     rows.length,       isPro?'Professional':'General Jobs',`Total candidates`,                             '#EFF6FF','#2563EB','#fff')}
           ${statCard('ti-plane',     travelled.length,  'Travelled',        `Successful placements`,                                       '#F0FDF4','#16A34A','#fff')}
           ${statCard('ti-target',    rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%','Success Rate','Travelled / total', '#F5F3FF','#7C3AED','#fff')}
-          ${statCard('ti-chart-line',total?Math.round(paid/total*100)+'%':'0%','Collection Rate','Finance health',                         '#FFFBEB','#D97706','#fff')}
-          ${statCard('ti-clock',     avgProcessing,     'Avg Processing',   withDates.length ? 'Intake → travel' : 'No dates yet',        '#F0FDFA','#0D9488','#fff')}
+          ${statCard('ti-chart-line',total?Math.round(paid/total*100)+'%':'0%',isPro?'Collection Rate':'Refund Rate',isPro?'Finance health':'Refunds collected','#FFFBEB','#D97706','#fff')}
+          ${statCard('ti-clock',     avgProcessing,     'Avg Processing',   'Submission → travel',                                        '#F0FDFA','#0D9488','#fff')}
         </div>
         <div class="dv5-two-col">
           <div class="dv5-card">
@@ -4475,39 +4605,43 @@ function setUserDisplay(display, role) {
             </div>
           </div>
           <div class="dv5-card">
-            <div class="dv5-card-head"><span class="dv5-card-title">Top Companies</span></div>
+            <div class="dv5-card-head"><span class="dv5-card-title">Top ${isPro?'Companies':'Countries'}</span></div>
             <div class="dv5-task-list">
-              ${topClients.length ? topClients.map(c => `
+              ${isPro ? (topClients2.length ? topClients2.map(c=>`
                 <div class="dv5-task-item" onclick="setCandidateSearch('${js(c.name)}');switchTab('candidates')" style="cursor:pointer">
                   <div class="dv5-task-icon med"><i class="ti ti-building"></i></div>
                   <div class="dv5-task-body">
                     <div class="dv5-task-title">${h(c.name)}</div>
-                    <div class="dv5-task-meta">${c.total} candidates · ${money(c.due)} due</div>
+                    <div class="dv5-task-meta">${c.total} candidates · ${fmt2(c.due)} due</div>
                   </div>
                   <span class="dv5-pill">${h(c.country)}</span>
-                </div>`).join('') : '<div class="dv5-empty">No company data yet.</div>'}
+                </div>`).join('') : '<div class="dv5-empty">No company data yet.</div>')
+              : (topCountries.length ? topCountries.map(([country,d])=>`
+                <div class="dv5-task-item" onclick="window.setLbCountry('${js(country)}')" style="cursor:pointer">
+                  <div class="dv5-task-icon med"><i class="ti ti-globe"></i></div>
+                  <div class="dv5-task-body">
+                    <div class="dv5-task-title">${h(country)}</div>
+                    <div class="dv5-task-meta">${d.count} candidates · ${d.travelled} travelled · ${moneyUSD(d.toRefund)} refund</div>
+                  </div>
+                  <span class="dv5-pill">${Math.round(d.travelled/Math.max(d.count,1)*100)}%</span>
+                </div>`).join('') : '<div class="dv5-empty">No country data yet.</div>')}
             </div>
           </div>
         </div>
-        <div class="dv5-card" style="margin-top:16px">
+        ${isPro ? `<div class="dv5-card" style="margin-top:16px">
           <div class="dv5-card-head"><span class="dv5-card-title">Top Performing Jobs</span></div>
           <div class="dv5-table-wrap">
             <table class="dv5-table">
-              <thead><tr><th>#</th><th>Position</th><th>Candidates</th><th>Travelled</th><th>Success Rate</th><th>Total Commission</th></tr></thead>
+              <thead><tr><th>#</th><th>Position</th><th>Candidates</th><th>Travelled</th><th>Success Rate</th><th>Commission</th></tr></thead>
               <tbody>
-                ${topJobs.length ? topJobs.map(([pos,d],i) => `
-                  <tr>
-                    <td>${i+1}</td>
-                    <td>${h(pos)}</td>
-                    <td>${d.count}</td>
-                    <td>${d.travelled}</td>
-                    <td>${d.count?Math.round(d.travelled/d.count*100)+'%':'—'}</td>
-                    <td>${money(d.commission)}</td>
-                  </tr>`).join('') : '<tr><td colspan="6"><div class="dv5-empty">No job data yet.</div></td></tr>'}
+                ${topJobs.length ? topJobs.map(([pos,d],i)=>`<tr>
+                  <td>${i+1}</td><td>${h(pos)}</td><td>${d.count}</td><td>${d.travelled}</td>
+                  <td>${d.count?Math.round(d.travelled/d.count*100)+'%':'—'}</td><td>${money(d.commission)}</td>
+                </tr>`).join('') : '<tr><td colspan="6"><div class="dv5-empty">No job data yet.</div></td></tr>'}
               </tbody>
             </table>
           </div>
-        </div>
+        </div>` : ''}
       </div>`;
   }
   window.renderReportsPage = renderReports;
@@ -4517,27 +4651,42 @@ function setUserDisplay(display, role) {
 
   function renderClients() {
     const el = document.getElementById('clients-section'); if (!el) return;
-    const clients = buildClients();
-    const rows = allRows();
+    const isPro = jobTypeTab === 'pro';
+    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const sourceRows = isPro ? (proDB||[]).map(r=>({...r,type:'pro'})) : lbBase.map(r=>({...r,type:'lb'}));
+    const fmt2 = v => isPro ? money(v) : moneyUSD(v);
 
-    function clientCandidates(name) {
-      return rows.filter(r=>r.company===name);
-    }
+    // Build clients from sourceRows only
+    const cMap = new Map();
+    sourceRows.forEach(r => {
+      const name = r.company || 'Unassigned';
+      const c = cMap.get(name) || { name, country: r.country||'—', active:0, total:0, due:0, paid:0, manager: currentUser?.display||'Team' };
+      c.total++;
+      if (r.stage !== 'TRAVELLED') c.active++;
+      c.due  += Number(r.balance)||0;
+      c.paid += Number(r.paid)||0;
+      cMap.set(name, c);
+    });
+    const clients = [...cMap.values()].sort((a,b)=>b.total-a.total);
+
+    function clientCandidates(name) { return sourceRows.filter(r=>r.company===name); }
 
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Clients</h1><p>Employer companies — click any row to see their candidates inline.</p></div>
+          <div><h1>Clients</h1><p>${isPro?'Professional clients — commissions in KES.':'General Jobs clients — refunds in USD.'}</p></div>
           <div class="dv5-head-actions">
-            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate for Client</button>
+            ${jobTypeTabs()}
+            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add Candidate</button>
           </div>
         </div>
-        <div class="dv5-stat-grid">
-          ${statCard('ti-building',  clients.length,                          'Total Clients',  `Employer companies`,      '#EFF6FF','#2563EB','#fff')}
-          ${statCard('ti-briefcase', clients.reduce((s,c)=>s+c.active,0),    'Active Jobs',    `In-progress placements`,  '#F5F3FF','#7C3AED','#fff')}
-          ${statCard('ti-users',     clients.reduce((s,c)=>s+c.total,0),     'Total Hired',    `All-time candidates`,     '#F0FDF4','#16A34A','#fff')}
-          ${statCard('ti-coin',      money(clients.reduce((s,c)=>s+c.due,0)),'Outstanding',    `Total due`,               '#FEF2F2','#DC2626','#fff')}
-          ${statCard('ti-wallet',    money(clients.reduce((s,c)=>s+c.paid,0)),'Collected',     `Total paid`,              '#FEF9C3','#A16207','#fff')}
+        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
+        <div class="dv5-stat-grid" style="margin-top:12px">
+          ${statCard('ti-building',  clients.length,                              'Total Clients', `Employer companies`,    '#EFF6FF','#2563EB','#fff')}
+          ${statCard('ti-briefcase', clients.reduce((s,c)=>s+c.active,0),        'Active Jobs',   `In-progress`,           '#F5F3FF','#7C3AED','#fff')}
+          ${statCard('ti-users',     clients.reduce((s,c)=>s+c.total,0),         'Total Hired',   `All-time candidates`,   '#F0FDF4','#16A34A','#fff')}
+          ${statCard('ti-coin',      fmt2(clients.reduce((s,c)=>s+c.due,0)),     'Outstanding',   `Total due`,             '#FEF2F2','#DC2626','#fff')}
+          ${statCard('ti-wallet',    fmt2(clients.reduce((s,c)=>s+c.paid,0)),    'Collected',     `Total paid`,            '#FEF9C3','#A16207','#fff')}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
@@ -4560,21 +4709,21 @@ function setUserDisplay(display, role) {
                     <td>${h(c.country||'—')}</td>
                     <td>${c.active}</td>
                     <td>${c.total}</td>
-                    <td>${c.due>0?`<strong style="color:#b91c1c">${money(c.due)}</strong>`:money(0)}</td>
-                    <td>${money(c.paid)}</td>
+                    <td>${c.due>0?`<strong style="color:#b91c1c">${fmt2(c.due)}</strong>`:fmt2(0)}</td>
+                    <td>${fmt2(c.paid)}</td>
                     <td>${h(c.manager||'—')}</td>
                   </tr>
                   ${isOpen ? `<tr class="dv5-expand-row"><td colspan="8" style="padding:0 0 8px 40px;background:#f8fafc">
                     <table class="dv5-table" style="min-width:0;border:0;box-shadow:none">
-                      <thead><tr><th>Name</th><th>Job Title</th><th>Stage</th><th>Submitted</th><th>Invoice</th><th>Balance</th><th></th></tr></thead>
+                      <thead><tr><th>Name</th><th>${isPro?'Job Title':'Country'}</th><th>Stage</th><th>Submitted</th><th>Invoice</th><th>Balance</th><th></th></tr></thead>
                       <tbody>
                         ${cands.map(r=>`<tr>
                           <td>${h(r.name)}</td>
-                          <td>${h(r.position)}</td>
+                          <td>${h(isPro?r.position:r.country)}</td>
                           <td>${badge(r.stage)}</td>
-                          <td>${h(fmt(r.submitted))}</td>
-                          <td>${money(r.commission)}</td>
-                          <td>${r.balance>0?`<strong style="color:#b91c1c">${money(r.balance)}</strong>`:money(0)}</td>
+                          <td>${h(fmt(r.submitted||r.travelDate))}</td>
+                          <td>${fmt2(r.commission||r.toRefund||0)}</td>
+                          <td>${r.balance>0?`<strong style="color:#b91c1c">${fmt2(r.balance)}</strong>`:fmt2(0)}</td>
                           <td><button class="dv5-action-btn" onclick="event.stopPropagation();openCandidateProfile('${r.type}',${r.id})">View</button></td>
                         </tr>`).join('')}
                       </tbody>
