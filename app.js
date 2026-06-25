@@ -3151,18 +3151,19 @@ function setUserDisplay(display, role) {
   // sidebar role
   const rEl = document.getElementById('sidebar-user-role');
   if (rEl) rEl.textContent = role === 'admin' ? 'Administrator' : 'Staff';
-  // pd name + role badge
+  // pd name + email (shadcn style)
   const pdName = document.getElementById('pd-name');
   if (pdName) pdName.textContent = display;
-  const pdBadge = document.getElementById('pd-role-badge');
   const pdRoleText = document.getElementById('pd-role-text');
-  if (pdBadge && pdRoleText) {
-    const isAdmin = role === 'admin';
-    pdBadge.className = 'pd-role-badge' + (isAdmin ? ' admin' : '');
-    pdRoleText.textContent = isAdmin ? 'Administrator' : 'Staff';
-  }
+  if (pdRoleText) pdRoleText.textContent = (currentUser?.username||'user') + '@dreco.app';
+  // suc email
+  const sucEmail = document.getElementById('suc-email');
+  if (sucEmail) sucEmail.textContent = (currentUser?.username||'user') + '@dreco.app';
+  // pd avatar (shadcn dropdown)
+  const pdAv = document.getElementById('pd-avatar');
+  if (pdAv) { pdAv.textContent = initials; pdAv.className = 'dv5-pd-av'; }
   const sucOrg = document.querySelector('.suc-org');
-  if (sucOrg) sucOrg.textContent = getCompanyName();
+  if (sucOrg) sucOrg.textContent = (currentUser?.username||'user') + '@dreco.app';
   updateWorkspaceLabels();
 }
 
@@ -3570,13 +3571,13 @@ function setUserDisplay(display, role) {
           <i class="ti ti-chevrons-left"></i>
         </button>
       </div>
-      <button class="sidebar-user-card sidebar-account-trigger" onclick="toggleProfileDropdown(event)" type="button">
-        <div class="suc-avatar" id="suc-avatar">${h(ini(currentUser?.display))}</div>
-        <div class="suc-info">
-          <div class="suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
-          <div class="suc-org">${h(co())}</div>
+      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" onclick="toggleProfileDropdown(event)" type="button">
+        <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
+        <div class="dv5-suc-body suc-info">
+          <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
+          <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
         </div>
-        <i class="ti ti-dots-vertical" style="font-size:14px;color:rgba(255,255,255,.4);margin-left:auto;flex-shrink:0"></i>
+        <i class="ti ti-chevrons-up-down" style="font-size:14px;opacity:.45;margin-left:auto;flex-shrink:0"></i>
       </button>
       <div class="sidebar-divider"></div>
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Workspace</div>
@@ -3948,12 +3949,12 @@ function setUserDisplay(display, role) {
             <button class="dv5-btn primary" onclick="switchTab('candidates')"><i class="ti ti-users"></i>Open Candidates</button>
           </div>
         </div>
-        <div class="dv5-kpi-grid">
-          ${kpi('Open Tasks',   tasks.length, 'Need attention',   'ti-checkbox',       '','purple')}
-          ${kpi('High Priority',high.length,  'Urgent blockers',  'ti-alert-triangle', '','rose')}
-          ${kpi('Medium',       med.length,   'Stage follow ups', 'ti-clock',          '','amber')}
-          ${kpi('Missing Docs', allRows().filter(r=>!hasDoc(r)).length, 'Compliance', 'ti-folder-x','','teal')}
-          ${kpi('Unpaid',       allRows().filter(r=>r.balance>0).length,'Finance follow up','ti-coin','','green')}
+        <div class="dv5-stat-grid">
+          ${statCard('ti-checkbox',      tasks.length,  'Open Tasks',      `Need attention`,                              '#F5F3FF','#7C3AED','#fff')}
+          ${statCard('ti-alert-triangle',high.length,   'High Priority',   `Urgent blockers`,                             '#FEF2F2','#DC2626','#fff')}
+          ${statCard('ti-clock',         med.length,    'Medium',          `Stage follow ups`,                            '#FFFBEB','#D97706','#fff')}
+          ${statCard('ti-folder-x',      allRows().filter(r=>!hasDoc(r)).length,'Missing Docs','Compliance gap',          '#F0FDFA','#0D9488','#fff')}
+          ${statCard('ti-coin',          allRows().filter(r=>r.balance>0).length,'Unpaid',    `Finance follow up`,        '#F0FDF4','#16A34A','#fff')}
         </div>
         <div class="dv5-card">
           <div class="dv5-card-head">
@@ -4251,12 +4252,12 @@ function setUserDisplay(display, role) {
             <button class="dv5-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button>
           </div>
         </div>
-        <div class="dv5-kpi-grid">
-          ${kpi('Total Candidates', rows.length,        'All records',        'ti-users',    '','purple')}
-          ${kpi('Travelled',        travelled.length,   'Successful travel',  'ti-plane',    '','green')}
-          ${kpi('Success Rate',     rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%', 'Travelled / total','ti-target','','blue')}
-          ${kpi('Collection Rate',  total?Math.round(paid/total*100)+'%':'0%', 'Finance health','ti-chart-line','','amber')}
-          ${kpi('Avg Processing',   avgProcessing,      withDates.length ? 'Intake → travel date' : 'No travel dates yet', 'ti-clock','','teal')}
+        <div class="dv5-stat-grid">
+          ${statCard('ti-users',     rows.length,       'Total Candidates', `All records`,                                                 '#EFF6FF','#2563EB','#fff')}
+          ${statCard('ti-plane',     travelled.length,  'Travelled',        `Successful placements`,                                       '#F0FDF4','#16A34A','#fff')}
+          ${statCard('ti-target',    rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%','Success Rate','Travelled / total', '#F5F3FF','#7C3AED','#fff')}
+          ${statCard('ti-chart-line',total?Math.round(paid/total*100)+'%':'0%','Collection Rate','Finance health',                         '#FFFBEB','#D97706','#fff')}
+          ${statCard('ti-clock',     avgProcessing,     'Avg Processing',   withDates.length ? 'Intake → travel' : 'No dates yet',        '#F0FDFA','#0D9488','#fff')}
         </div>
         <div class="dv5-two-col">
           <div class="dv5-card">
@@ -4331,12 +4332,12 @@ function setUserDisplay(display, role) {
             <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate for Client</button>
           </div>
         </div>
-        <div class="dv5-kpi-grid">
-          ${kpi('Total Clients',  clients.length,                        'Employer companies',     'ti-building',  '','blue')}
-          ${kpi('Active Jobs',    clients.reduce((s,c)=>s+c.active,0),   'In-progress placements', 'ti-briefcase', '','purple')}
-          ${kpi('Total Hired',    clients.reduce((s,c)=>s+c.total,0),    'All-time candidates',    'ti-users',     '','green')}
-          ${kpi('Outstanding',    money(clients.reduce((s,c)=>s+c.due,0)),'Total due',              'ti-coin',      '','rose')}
-          ${kpi('Collected',      money(clients.reduce((s,c)=>s+c.paid,0)),'Total paid',            'ti-wallet',    '','amber')}
+        <div class="dv5-stat-grid">
+          ${statCard('ti-building',  clients.length,                          'Total Clients',  `Employer companies`,      '#EFF6FF','#2563EB','#fff')}
+          ${statCard('ti-briefcase', clients.reduce((s,c)=>s+c.active,0),    'Active Jobs',    `In-progress placements`,  '#F5F3FF','#7C3AED','#fff')}
+          ${statCard('ti-users',     clients.reduce((s,c)=>s+c.total,0),     'Total Hired',    `All-time candidates`,     '#F0FDF4','#16A34A','#fff')}
+          ${statCard('ti-coin',      money(clients.reduce((s,c)=>s+c.due,0)),'Outstanding',    `Total due`,               '#FEF2F2','#DC2626','#fff')}
+          ${statCard('ti-wallet',    money(clients.reduce((s,c)=>s+c.paid,0)),'Collected',     `Total paid`,              '#FEF9C3','#A16207','#fff')}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
@@ -4582,6 +4583,30 @@ function setUserDisplay(display, role) {
   const DV5_CSS = `
 /* === DV5 Component System === */
 .dv5-section { display: none; }
+/* Shadcn-style sidebar user card */
+.dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:8px 10px!important; border-radius:10px!important; background:rgba(255,255,255,.06)!important; border:1px solid rgba(255,255,255,.1)!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .15s!important; margin-bottom:6px!important; }
+.dv5-suc:hover { background:rgba(255,255,255,.1)!important; }
+.dv5-suc-av { width:34px!important; height:34px!important; border-radius:8px!important; background:#fff!important; color:#18191B!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:12px!important; font-weight:900!important; flex-shrink:0!important; }
+.dv5-suc-body { min-width:0!important; flex:1!important; }
+.dv5-suc-name { font-size:12.5px!important; font-weight:750!important; color:#fff!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.3!important; }
+.dv5-suc-email { font-size:10.5px!important; color:rgba(255,255,255,.5)!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; }
+
+/* Shadcn-style profile dropdown */
+.dv5-pd { position:fixed!important; left:228px!important; bottom:20px!important; top:auto!important; right:auto!important; width:280px!important; background:#fff!important; border:1px solid #E8E8E8!important; border-radius:14px!important; box-shadow:0 8px 32px rgba(0,0,0,.14)!important; z-index:9000!important; overflow:hidden!important; display:none; }
+.dv5-pd.open { display:block!important; }
+.dv5-pd-head { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #F1F1F1; }
+.dv5-pd-av { width:38px; height:38px; border-radius:9px; background:#18191B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; flex-shrink:0; }
+.dv5-pd-name { font-size:13px; font-weight:750; color:#18191B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-pd-email { font-size:11px; color:#999; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-pd-items { padding:6px; }
+.dv5-pd-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; font-size:13px; font-weight:500; color:#18191B; background:none; border:none; width:100%; text-align:left; cursor:pointer; font-family:inherit; transition:background .1s; }
+.dv5-pd-item:hover { background:#F5F5F5; }
+.dv5-pd-item i { font-size:16px; color:#666; flex-shrink:0; width:20px; }
+.dv5-pd-sep { height:1px; background:#F1F1F1; margin:4px 6px; }
+.dv5-pd-item.danger { color:#DC2626; }
+.dv5-pd-item.danger i { color:#DC2626; }
+.dv5-pd-item.danger:hover { background:#FEF2F2; }
+
 .dv5-page { padding: 0 0 40px; max-width: none; }
 .dv5-page-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; flex-wrap:wrap; }
 .dv5-page-head h1 { font-size:24px; font-weight:900; color:var(--text,#18191B); margin:0 0 4px; letter-spacing:-.5px; }

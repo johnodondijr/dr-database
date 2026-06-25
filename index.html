@@ -3138,13 +3138,17 @@ th { padding: 9px 14px !important; }
   .content-area > div {
     padding: 14px 12px 72px !important;
   }
+  /* Profile dropdown on mobile */
+  .dv5-pd { left:10px!important; right:10px!important; bottom:74px!important; top:auto!important; width:auto!important; }
 }
 
 /* Dashboard page header: tighter on mobile */
 @media(max-width:640px) {
-  /* KPI / priority grids: last odd card spans full width */
+  /* KPI / priority / stat grids: last odd card spans full width */
   .dv5-priority-grid > *:last-child:nth-child(odd),
-  .dv5-kpi-grid > *:last-child:nth-child(odd) {
+  .dv5-kpi-grid > *:last-child:nth-child(odd),
+  .dv5-stat-grid > *:last-child:nth-child(odd),
+  .dv5-file-grid > *:last-child:nth-child(odd) {
     grid-column: 1 / -1 !important;
   }
   /* Candidates / reports / tasks table: enforce horizontal scroll */
@@ -3628,27 +3632,33 @@ input, textarea, select, [contenteditable] {
             <div class="topbar-avatar" id="topbar-avatar">-</div>
           </button>
 
-          <!-- Rich profile dropdown -->
-          <div class="profile-dropdown" id="profile-dropdown">
-            <!-- Header: avatar + name + role -->
-            <div class="pd-header">
-              <div class="pd-avatar" id="pd-avatar">-</div>
-              <div style="flex:1;min-width:0">
-                <div class="pd-name" id="pd-name">-</div>
-                <div class="pd-role-badge" id="pd-role-badge"><i class="ti ti-shield-check"></i><span id="pd-role-text">Staff</span></div>
+          <!-- Shadcn-style profile dropdown -->
+          <div class="dv5-pd" id="profile-dropdown">
+            <!-- User identity header -->
+            <div class="dv5-pd-head">
+              <div class="dv5-pd-av" id="pd-avatar">-</div>
+              <div style="min-width:0;flex:1">
+                <div class="dv5-pd-name" id="pd-name">-</div>
+                <div class="dv5-pd-email" id="pd-role-badge"><span id="pd-role-text">-</span></div>
               </div>
             </div>
-
-            <!-- Account actions -->
-            <div class="pd-menu-section">Account</div>
-            <button class="pd-menu-item" onclick="openProfileEdit()">
-              <i class="ti ti-user-edit"></i><span>Edit Profile</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
-            </button>
-            <button class="pd-menu-item" onclick="openChangePassword()">
-              <i class="ti ti-lock"></i><span>Change Password</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
-            </button>
-
-            <!-- Edit profile panel (hidden by default) -->
+            <!-- Menu items -->
+            <div class="dv5-pd-items">
+              <button class="dv5-pd-item" onclick="openProfileEdit()">
+                <i class="ti ti-user-circle"></i>Account
+              </button>
+              <button class="dv5-pd-item" onclick="openChangePassword()">
+                <i class="ti ti-lock"></i>Change Password
+              </button>
+              <button class="dv5-pd-item" onclick="switchTab('settings');document.getElementById('profile-dropdown').classList.remove('open')">
+                <i class="ti ti-settings"></i>Settings
+              </button>
+              <div class="dv5-pd-sep"></div>
+              <button class="dv5-pd-item danger" onclick="doLogout()">
+                <i class="ti ti-logout"></i>Log out
+              </button>
+            </div>
+            <!-- Hidden edit sub-panel (keep for functionality) -->
             <div class="pd-edit-panel" id="pd-edit-panel" style="display:none">
               <div class="pd-edit-header">
                 <button class="pd-back-btn" onclick="closeProfileEdit()"><i class="ti ti-arrow-left"></i> Back</button>
@@ -3682,12 +3692,6 @@ input, textarea, select, [contenteditable] {
                 <button class="pd-save" onclick="saveProfileChanges()">Save changes</button>
               </div>
             </div>
-
-            <!-- Divider + sign out -->
-            <div style="height:1px;background:var(--border);margin:4px 0"></div>
-            <button class="pd-menu-item pd-menu-signout" onclick="doLogout()">
-              <i class="ti ti-logout"></i><span>Sign out</span>
-            </button>
           </div>
         </div>
       </div>
