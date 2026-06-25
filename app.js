@@ -3334,7 +3334,7 @@ function setUserDisplay(display, role) {
       if (el && el.style.display !== 'none' && typeof fn === 'function') { fn(); break; }
     }
   }
-  window.setJobTypeTab = v => { jobTypeTab = v; rerenderPage(); };
+  window.setJobTypeTab = v => { jobTypeTab = v; candidateStageFilter = ''; lbCountryFilter = ''; rerenderPage(); };
   window.setLbCountry  = v => { lbCountryFilter = v; rerenderPage(); };
 
   // Shared shadcn-style Pro/General tabs widget
@@ -3376,7 +3376,14 @@ function setUserDisplay(display, role) {
   const avatar = name => `<div class="dv5-avatar">${h(ini(name))}</div>`;
   const docKey  = r => `${r.type}_${r.id}`;
   const docLink = r => allDocs?.[docKey(r)] || '';
-  const hasDoc  = r => !!String(docLink(r)||'').trim();
+  const hasDoc  = r => {
+    if (!!String(docLink(r)||'').trim()) return true;
+    if (r.type === 'lb') {
+      const id = r.id;
+      return !!(allDocs?.[`lb_${id}_id`]||allDocs?.[`lb_${id}_birth`]||allDocs?.[`lb_${id}_photo`]||allDocs?.[`lb_${id}_passport`]||docTicks?.[`lb_${id}_National ID`]||docTicks?.[`lb_${id}_Photo`]);
+    }
+    return false;
+  };
   const safeUrl = u => /^https?:\/\//i.test(String(u||'')) ? u : '';
   const balPro  = r => (typeof proBalance === 'function') ? proBalance(r) : Math.max((Number(r.commission)||0)-(Number(r.paid)||0),0);
   const balLB   = r => Math.max((Number(r.toRefund||r.to_refund)||0) - ((Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0)), 0);
@@ -3384,9 +3391,14 @@ function setUserDisplay(display, role) {
   function stageColor(stage) {
     const s = String(stage||'').toUpperCase();
     if (s==='TRAVELLED') return 'green';
+    if (s==='REFUND COMPLETE') return 'green';
     if (s.includes('VISA')) return 'blue';
     if (s.includes('MOL')||s.includes('OFFER')) return 'amber';
-    if (s.includes('TRAVEL')) return 'purple';
+    if (s.includes('TRAVEL')||s==='PASSPORT APPLIED') return 'purple';
+    if (s==='SELECTED') return 'blue';
+    if (s==='PROFILE SENT') return 'amber';
+    if (s==='REFUND PENDING') return 'red';
+    if (s==='DOCS SUBMITTED'||s==='SUBMITTED') return 'gray';
     if (s==='NOT YET') return 'red';
     return 'gray';
   }
@@ -3418,19 +3430,29 @@ function setUserDisplay(display, role) {
         currency:'KES', raw:r
       };
     });
-    const lb = (Array.isArray(lbDB) ? lbDB : []).map(r => ({
-      type:'lb', id:r.id, name:r.name||'—', pp:r.pp||r.passport||'', phone:r.phone||'',
-      position:'General Job', company:r.company||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'General')||'—',
-      country:r.country||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'—')||'—',
-      stage:r.stage||r.travelStatus||r.travel_status||'DOCS SUBMITTED',
-      submitted:r.submitted_date||r.travelDate||r.travel_date, interview:null, mol:null, visa:null,
-      travel:r.travelDate||r.travel_date,
-      own_passport:!!r.own_passport,
-      owner:currentUser?.display||'Team',
-      commission:Number(r.toRefund||r.to_refund)||0,
-      paid:(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0),
-      balance:balLB(r), currency:'USD', raw:r
-    }));
+    const lb = (Array.isArray(lbDB) ? lbDB : []).map(r => {
+      const r1Amt = Number(r.r1Amt||r.r1_amt)||0;
+      const r2Amt = Number(r.r2Amt||r.r2_amt)||0;
+      return {
+        type:'lb', id:r.id, name:r.name||'—', pp:r.pp||r.passport||'', phone:r.phone||'',
+        position: r.country || 'General Job',
+        company:r.company||r.country||'—',
+        country:r.country||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'—')||'—',
+        stage:r.stage||r.travelStatus||r.travel_status||'DOCS SUBMITTED',
+        submitted:r.submitted_date||r.submitted||null,
+        travelDate:r.travelDate||r.travel_date||null,
+        interview:null, mol:null, visa:null,
+        travel:r.travelDate||r.travel_date||null,
+        own_passport:!!r.own_passport,
+        owner:currentUser?.display||'Team',
+        commission:Number(r.toRefund||r.to_refund)||0,
+        r1Amt, r2Amt,
+        r1Date:r.r1Date||r.r1_date||null,
+        r2Date:r.r2Date||r.r2_date||null,
+        paid: r1Amt + r2Amt,
+        balance:balLB(r), currency:'USD', raw:r
+      };
+    });
     return [...pro, ...lb];
   }
 
@@ -3458,21 +3480,28 @@ function setUserDisplay(display, role) {
     allRows().forEach(r => {
       const edit = r.type==='pro' ? `editPro(${r.id})` : `editLB(${r.id})`;
       const docs = `openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')`;
+      const balStr = r.currency==='USD' ? moneyUSD(r.balance) : money(r.balance);
+      const meta = `${r.company||r.country||'—'}`;
       if (!hasDoc(r))
         tasks.push({priority:'High', label:'High', title:`Upload documents — ${r.name}`,
-          meta:`${r.position} · ${r.company}`, action:docs, icon:'ti-folder-x'});
+          meta, action:docs, icon:'ti-folder-x'});
       if (r.balance > 0)
-        tasks.push({priority:'High', label:'High', title:`Collect commission — ${r.name}`,
-          meta:`Balance ${money(r.balance)}`, action:edit, icon:'ti-coin'});
-      if (String(r.stage).includes('MOL'))
-        tasks.push({priority:'Medium', label:'Med', title:`MOL submission — ${r.name}`,
-          meta:`${r.company} · ${r.position}`, action:edit, icon:'ti-file-check'});
-      if (String(r.stage).includes('VISA'))
-        tasks.push({priority:'Medium', label:'Med', title:`Visa follow-up — ${r.name}`,
-          meta:`${r.company} · ${r.position}`, action:edit, icon:'ti-id-badge-2'});
-      if (String(r.stage).includes('TRAVEL'))
-        tasks.push({priority:'High', label:'High', title:`Book ticket — ${r.name}`,
-          meta:`${r.company} · ${r.position}`, action:edit, icon:'ti-plane-departure'});
+        tasks.push({priority:'High', label:'High',
+          title: r.type==='pro' ? `Collect commission — ${r.name}` : `Process refund — ${r.name}`,
+          meta:`Balance ${balStr}`, action:edit, icon:'ti-coin'});
+      if (r.type==='pro') {
+        if (String(r.stage).toUpperCase()==='MOL')
+          tasks.push({priority:'Medium', label:'Med', title:`MOL submission — ${r.name}`, meta, action:edit, icon:'ti-file-check'});
+        if (String(r.stage).toUpperCase()==='VISA')
+          tasks.push({priority:'Medium', label:'Med', title:`Visa follow-up — ${r.name}`, meta, action:edit, icon:'ti-id-badge-2'});
+        if (String(r.stage).toUpperCase()==='PENDING TRAVEL')
+          tasks.push({priority:'High', label:'High', title:`Book ticket — ${r.name}`, meta, action:edit, icon:'ti-plane-departure'});
+      } else {
+        if (r.stage==='SELECTED')
+          tasks.push({priority:'High', label:'High', title:`Apply passport — ${r.name}`, meta, action:edit, icon:'ti-passport'});
+        if (r.stage==='REFUND PENDING')
+          tasks.push({priority:'Medium', label:'Med', title:`Refund pending — ${r.name}`, meta:`${balStr} to refund`, action:edit, icon:'ti-credit-card'});
+      }
     });
     return tasks;
   }
@@ -3493,15 +3522,30 @@ function setUserDisplay(display, role) {
   // ── Checklist per candidate profile ───────────────────────
   function buildChecklist(r) {
     const s = String(r.stage||'').toUpperCase();
-    const list = [
+    if (r.type === 'lb') {
+      const id = r.id;
+      return [
+        {label:'National ID',       done: !!(allDocs?.[`lb_${id}_id`]       || docTicks?.[`lb_${id}_National ID`])},
+        {label:'Birth Certificate', done: !!(allDocs?.[`lb_${id}_birth`]     || docTicks?.[`lb_${id}_Birth Certificate`])},
+        {label:'Parent ID',         done: !!(allDocs?.[`lb_${id}_parent_id`] || docTicks?.[`lb_${id}_Parent ID`])},
+        {label:'Photo',             done: !!(allDocs?.[`lb_${id}_photo`]     || docTicks?.[`lb_${id}_Photo`])},
+        {label:'Passport Copy',     done: !!(allDocs?.[`lb_${id}_passport`]  || docTicks?.[`lb_${id}_Passport Copy`])},
+        {label:'Selected',          done: ['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s)},
+        {label:'Travelled',         done: ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s)},
+        {label:'Refund processed',  done: s==='REFUND COMPLETE' || r.own_passport},
+      ];
+    }
+    const proStageOrder = ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+    const idx = proStageOrder.indexOf(s);
+    return [
       {label:'Documents uploaded',   done: hasDoc(r)},
-      {label:'Offer letter received',done: !!r.raw?.ol || s !== '—'},
-      {label:'MOL submitted',        done: !!r.raw?.mol || ['PENDING VISA','PENDING TRAVEL','TRAVELLED'].some(x=>s.includes(x.replace('PENDING ','').replace('PENDING','').trim()))},
-      {label:'Visa stamped',         done: !!r.raw?.visa || ['PENDING TRAVEL','TRAVELLED'].some(x=>s.includes(x.replace('PENDING ','').trim()))},
+      {label:'Offer letter received',done: !!r.raw?.ol || idx >= proStageOrder.indexOf('OFFER LETTER')},
+      {label:'Medical cleared',      done: !!r.raw?.medical || idx >= proStageOrder.indexOf('MEDICAL & ATTESTATION')},
+      {label:'MOL submitted',        done: !!r.raw?.mol || idx >= proStageOrder.indexOf('MOL')},
+      {label:'Visa stamped',         done: !!r.raw?.visa || idx >= proStageOrder.indexOf('VISA')},
       {label:'Ticket booked',        done: !!r.travel || s==='TRAVELLED'},
       {label:'Commission collected', done: r.balance === 0 && r.commission > 0},
     ];
-    return list;
   }
   function checklistPct(r) {
     const cl = buildChecklist(r);
@@ -3763,40 +3807,46 @@ function setUserDisplay(display, role) {
     const lbFiltered = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
     const rows = isPro ? proRows : lbFiltered;
 
-    // Pro-specific dash metrics
-    const awaitMol  = proRows.filter(r=>r.stage==='MOL').length;
-    const visaReady = proRows.filter(r=>r.stage==='VISA').length;
-    const tickets   = proRows.filter(r=>r.stage==='PENDING TRAVEL').length;
-    const unpaidPro = proRows.filter(r=>r.balance>0).length;
-    // LB-specific
-    const lbRefundPending = lbFiltered.filter(r=>r.stage==='REFUND PENDING').length;
-    const lbSelected      = lbFiltered.filter(r=>r.stage==='SELECTED').length;
-    const unpaidLB        = lbFiltered.filter(r=>r.balance>0&&!r.own_passport).length;
+    // Use normalised allRows for accurate computed fields (balance, hasDoc)
+    const allNorm = allRows();
+    const proNorm = allNorm.filter(r=>r.type==='pro');
+    const lbNorm  = lbCountryFilter ? allNorm.filter(r=>r.type==='lb'&&r.country===lbCountryFilter) : allNorm.filter(r=>r.type==='lb');
+    const normRows = isPro ? proNorm : lbNorm;
 
-    const missDocs  = rows.filter(r=>!hasDoc(r)).length;
-    const travelled = rows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
-    const totalPaidPro = proRows.reduce((s,r)=>s+r.paid,0);
-    const totalPaidLB  = lbFiltered.reduce((s,r)=>s+r.paid,0);
+    // Pro-specific dash metrics
+    const awaitMol  = proNorm.filter(r=>r.stage==='MOL').length;
+    const visaReady = proNorm.filter(r=>r.stage==='VISA').length;
+    const tickets   = proNorm.filter(r=>r.stage==='PENDING TRAVEL').length;
+    const unpaidPro = proNorm.filter(r=>r.balance>0).length;
+    // LB-specific
+    const lbRefundPending = lbNorm.filter(r=>r.stage==='REFUND PENDING').length;
+    const lbSelected      = lbNorm.filter(r=>r.stage==='SELECTED').length;
+    const unpaidLB        = lbNorm.filter(r=>r.balance>0&&!r.own_passport).length;
+
+    const missDocs  = normRows.filter(r=>!hasDoc(r)).length;
+    const travelled = normRows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
+    const totalPaidPro = proNorm.reduce((s,r)=>s+r.paid,0);
+    const totalPaidLB  = lbNorm.reduce((s,r)=>s+r.paid,0);
 
     const proFlowSteps = [
-      ['Submitted',  proRows.filter(r=>r.stage==='SUBMITTED').length],
-      ['Interview',  proRows.filter(r=>r.stage==='INTERVIEW').length],
-      ['Offer',      proRows.filter(r=>r.stage==='OFFER LETTER').length],
-      ['Medical',    proRows.filter(r=>r.stage==='MEDICAL & ATTESTATION').length],
-      ['MOL',        proRows.filter(r=>r.stage==='MOL').length],
-      ['Visa',       proRows.filter(r=>r.stage==='VISA').length],
-      ['Travel',     proRows.filter(r=>r.stage==='PENDING TRAVEL').length],
-      ['Travelled',  proRows.filter(r=>r.stage==='TRAVELLED').length],
+      ['Submitted',  proNorm.filter(r=>r.stage==='SUBMITTED').length],
+      ['Interview',  proNorm.filter(r=>r.stage==='INTERVIEW').length],
+      ['Offer',      proNorm.filter(r=>r.stage==='OFFER LETTER').length],
+      ['Medical',    proNorm.filter(r=>r.stage==='MEDICAL & ATTESTATION').length],
+      ['MOL',        proNorm.filter(r=>r.stage==='MOL').length],
+      ['Visa',       proNorm.filter(r=>r.stage==='VISA').length],
+      ['Travel',     proNorm.filter(r=>r.stage==='PENDING TRAVEL').length],
+      ['Travelled',  proNorm.filter(r=>r.stage==='TRAVELLED').length],
     ];
     const lbFlowSteps = [
-      ['Docs In',    lbFiltered.filter(r=>r.stage==='DOCS SUBMITTED').length],
-      ['Profile Sent',lbFiltered.filter(r=>r.stage==='PROFILE SENT').length],
-      ['Selected',   lbFiltered.filter(r=>r.stage==='SELECTED').length],
-      ['Passport',   lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length],
-      ['Visa',       lbFiltered.filter(r=>r.stage==='VISA PROCESSING').length],
-      ['Travelled',  lbFiltered.filter(r=>r.stage==='TRAVELLED').length],
-      ['Refund',     lbFiltered.filter(r=>r.stage==='REFUND PENDING').length],
-      ['Done',       lbFiltered.filter(r=>r.stage==='REFUND COMPLETE').length],
+      ['Docs In',    lbNorm.filter(r=>r.stage==='DOCS SUBMITTED').length],
+      ['Profile Sent',lbNorm.filter(r=>r.stage==='PROFILE SENT').length],
+      ['Selected',   lbNorm.filter(r=>r.stage==='SELECTED').length],
+      ['Passport',   lbNorm.filter(r=>r.stage==='PASSPORT APPLIED').length],
+      ['Visa',       lbNorm.filter(r=>r.stage==='VISA PROCESSING').length],
+      ['Travelled',  lbNorm.filter(r=>r.stage==='TRAVELLED').length],
+      ['Refund',     lbNorm.filter(r=>r.stage==='REFUND PENDING').length],
+      ['Done',       lbNorm.filter(r=>r.stage==='REFUND COMPLETE').length],
     ];
     const flowSteps = isPro ? proFlowSteps : lbFlowSteps;
     const tasks = buildTasks().slice(0,5);
@@ -3896,15 +3946,15 @@ function setUserDisplay(display, role) {
 
         <div class="dv5-stat-grid" style="margin-top:0">
           ${isPro ? `
-            ${statCard('ti-users',     proRows.length,         'Professional',  `Total candidates`,              '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
-            ${statCard('ti-plane',     travelled,              'Placements',    `Completed`,                     '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-users-group',proRows.filter(r=>r.stage!=='TRAVELLED').length,'Active Pipeline',`In progress`,'#FCE7F3','#9D174D','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-wallet',    money(totalPaidPro),   'Revenue (KES)', `Commission collected`,           '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
+            ${statCard('ti-users',      proNorm.length,                                         'Professional',    `Total candidates`,      '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
+            ${statCard('ti-plane',      travelled,                                              'Placements',      `Completed`,             '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
+            ${statCard('ti-users-group',proNorm.filter(r=>r.stage!=='TRAVELLED').length,        'Active Pipeline', `In progress`,           '#FCE7F3','#9D174D','#fff', "switchTab('pipeline')")}
+            ${statCard('ti-wallet',     money(totalPaidPro),                                   'Revenue (KES)',   `Commission collected`,   '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
           ` : `
-            ${statCard('ti-users',     lbFiltered.length,     'General Jobs',  `Total candidates`,              '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
-            ${statCard('ti-plane',     travelled,             'Travelled',     `Successfully placed`,           '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-passport',  lbFiltered.filter(r=>r.own_passport).length,'Own Passport','No refund required','#F0FDF4','#059669','#fff', "switchTab('candidates')")}
-            ${statCard('ti-wallet',    moneyUSD(totalPaidLB), 'Refunds (USD)', `Refunds collected`,             '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
+            ${statCard('ti-users',      lbNorm.length,                                          'General Jobs',    `Total candidates`,      '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
+            ${statCard('ti-plane',      travelled,                                              'Travelled',       `Successfully placed`,   '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
+            ${statCard('ti-passport',   lbNorm.filter(r=>r.own_passport).length,               'Own Passport',    `No refund required`,    '#F0FDF4','#059669','#fff', "switchTab('candidates')")}
+            ${statCard('ti-wallet',     moneyUSD(totalPaidLB),                                 'Refunds (USD)',   `Refunds collected`,      '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
           `}
         </div>
       </div>`;
@@ -3972,12 +4022,12 @@ function setUserDisplay(display, role) {
   window.setCandidateSearch = setCandidateSearch;
 
   function filterCandidates() {
-    let rows = allRows();
+    // Always scoped to the active job type tab
+    let rows = allRows().filter(r => r.type === jobTypeTab);
     const q = candidateSearch.toLowerCase();
-    if (candidateTypeFilter)  rows = rows.filter(r=>r.type===candidateTypeFilter);
     if (candidateStageFilter) rows = rows.filter(r=>r.stage===candidateStageFilter);
-    if (candidateViewFilter==='my')    rows = rows.filter(r=>r.owner===currentUser?.display);
     if (candidateViewFilter==='follow') rows = rows.filter(r=>r.balance>0||!hasDoc(r));
+    if (candidateViewFilter==='balance') rows = rows.filter(r=>r.balance>0);
     if (q) rows = rows.filter(r=>[r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q));
     return rows;
   }
@@ -4037,17 +4087,15 @@ function setUserDisplay(display, role) {
     const el = document.getElementById('candidates-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
     const lbBaseRows = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    const all = isPro ? (proDB||[]).map(r=>({...r,type:'pro',position:r.position||'',company:r.company||'',country:r.country||'',stage:r.stage||'SUBMITTED',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Number(r.balance||0)}))
-      : lbBaseRows.map(r=>({...r,type:'lb',position:r.country||'',company:r.company||'',country:r.country||'',stage:r.stage||'DOCS SUBMITTED',commission:Number(r.toRefund||0),paid:Number((r.r1Amt||0)+(r.r2Amt||0)),balance:Number(r.balance||0)}));
+    const all = isPro
+      ? (proDB||[]).map(r=>({...r,type:'pro',position:r.position||'',company:r.company||'',country:r.country||'',stage:r.stage||'SUBMITTED',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Math.max((Number(r.commission)||0)-(Number(r.paid||0)),0)}))
+      : lbBaseRows.map(r=>{const r1=Number(r.r1Amt||r.r1_amt)||0,r2=Number(r.r2Amt||r.r2_amt)||0,toRef=Number(r.toRefund||r.to_refund)||0;return{...r,type:'lb',position:r.country||'General Job',company:r.company||r.country||'—',country:r.country||'—',stage:r.stage||'DOCS SUBMITTED',commission:toRef,paid:r1+r2,balance:Math.max(toRef-(r1+r2),0)};});
     const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
-    // apply filters on top of type-filtered set
-    const _origAllRows = window._drecoAllRows;
-    // use local filter: search + stage filter only (type already filtered above)
     const q = candidateSearch.toLowerCase();
     let list = all.filter(r => {
       if (candidateStageFilter && r.stage !== candidateStageFilter) return false;
-      if (candidateViewFilter==='my' && r.owner !== currentUser?.display) return false;
       if (candidateViewFilter==='follow' && r.balance<=0 && hasDoc(r)) return false;
+      if (candidateViewFilter==='balance' && r.balance<=0) return false;
       if (q && ![r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q)) return false;
       return true;
     });
@@ -4086,13 +4134,13 @@ function setUserDisplay(display, role) {
           </div>
           <div class="dv5-toolbar-right">
             <div class="dv5-view-tabs">
-              ${[['all','All'],['my','Mine'],['follow','Follow Ups']].map(([v,l])=>
+              ${[['all','All'],['follow','Needs Action'],['balance','Has Balance']].map(([v,l])=>
                 `<button class="dv5-view-tab ${candidateViewFilter===v?'active':''}"
                   onclick="candidateViewFilter='${v}';renderCandidates()">${l}</button>`
               ).join('')}
             </div>
             <span class="dv5-count">Showing ${list.length} of ${all.length}</span>
-            <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export</button>
+            <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
           </div>
         </div>
         <div class="dv5-table-card">
@@ -4100,8 +4148,8 @@ function setUserDisplay(display, role) {
             <table class="dv5-table">
               <thead><tr>
                 <th style="width:36px"><input type="checkbox" id="cand-select-all" ${allSel?'checked':''} onchange="toggleSelectAll(this.checked)"></th>
-                <th>Name</th><th>Job Title</th><th>Company</th>
-                <th>Stage</th><th>Submitted</th><th></th>
+                <th>Name</th><th>${isPro?'Job Title':'Destination'}</th><th>${isPro?'Company':'Agency'}</th>
+                <th>Stage</th><th>${isPro?'Submitted':'Doc Date'}</th><th></th>
               </tr></thead>
               <tbody>
                 ${list.length ? list.map(r => {
@@ -4279,10 +4327,10 @@ function setUserDisplay(display, role) {
         if (r.paid2 > 0) paymentEntries.push({ r, label: `${r.name} — 2nd Commission`, amt: r.paid2, date: r.ol || r.submitted || r.created_at, isUSD: false });
         if (!r.paid1 && !r.paid2 && r.paid > 0) paymentEntries.push({ r, label: `${r.name} — Commission`, amt: r.paid, date: r.submitted || r.created_at, isUSD: false });
       } else {
-        if (r.r1Amt > 0) paymentEntries.push({ r, label: `${r.name} — 1st Refund`, amt: r.r1Amt, date: r.r1Date || r.travelDate || r.created_at, isUSD: true });
-        if (r.r2Amt > 0) paymentEntries.push({ r, label: `${r.name} — 2nd Refund`, amt: r.r2Amt, date: r.r2Date || r.travelDate || r.created_at, isUSD: true });
-        const lbPaid = (r.r1Amt||0) + (r.r2Amt||0);
-        if (!r.r1Amt && !r.r2Amt && lbPaid > 0) paymentEntries.push({ r, label: `${r.name} — Refund`, amt: lbPaid, date: r.created_at, isUSD: true });
+        const r1 = Number(r.r1Amt)||0, r2 = Number(r.r2Amt)||0;
+        if (r1 > 0) paymentEntries.push({ r, label: `${r.name} — 1st Refund`, amt: r1, date: r.r1Date || r.travelDate || r.submitted || r.created_at, isUSD: true });
+        if (r2 > 0) paymentEntries.push({ r, label: `${r.name} — 2nd Refund`, amt: r2, date: r.r2Date || r.travelDate || r.submitted || r.created_at, isUSD: true });
+        if (!r1 && !r2 && r.paid > 0) paymentEntries.push({ r, label: `${r.name} — Refund`, amt: r.paid, date: r.travelDate || r.submitted || r.created_at, isUSD: true });
       }
     });
     paymentEntries.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
