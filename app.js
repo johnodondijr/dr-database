@@ -344,7 +344,6 @@ window.proStagePillFilter = '';
 window.lbTravelPillFilter = '';
 window.lbPPFilter         = '';
 window.generalCountryFilter = '';
-let kanbanSource = 'pro';
 let calSource = 'pro';
 let calDate = new Date();
 let appStorageMode = db ? 'cloud' : 'local';
@@ -1442,11 +1441,11 @@ function ppBadge(s){
 function switchTab(tab){
   if (window.innerWidth <= 640) closeMobileSidebar();
   // DV5 unified tab router — handles both legacy and new tabs
-  const DV5_TABS = ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'];
+  const DV5_TABS = ['dash','pipeline','candidates','finance','documents','reports','clients','settings'];
   const DV5_ALIASES = {
     pro:'candidates', lb:'candidates',
-    kanban:'pipeline', travel:'pipeline',
-    calendar:'tasks',
+    kanban:'pipeline', travel:'pipeline', tasks:'pipeline',
+    calendar:'pipeline',
     commissions:'finance', repayments:'finance', expenses:'finance',
     team:'settings', help:'settings'
   };
@@ -1490,7 +1489,6 @@ function switchTab(tab){
     dash: ()=> (window.renderDash || renderDash)(),
     pipeline: ()=> window.renderPipelinePage?.(),
     candidates: ()=> window.renderCandidatesPage?.(),
-    tasks: ()=> window.renderTasksPage?.(),
     finance: ()=> window.renderFinancePage?.(),
     documents: ()=> window.renderDocumentsPage?.(),
     reports: ()=> window.renderReportsPage?.(),
@@ -1499,12 +1497,8 @@ function switchTab(tab){
     // Legacy fallbacks
     pro: ()=> { if(typeof rebuildProPills==='function') rebuildProPills(); if(typeof renderPro==='function') renderPro(); },
     lb: ()=> (typeof renderLB === 'function') && renderLB(),
-    kanban: ()=> (typeof renderKanban === 'function') && renderKanban(),
     travel: ()=> (typeof renderTravel === 'function') && renderTravel(),
     calendar: ()=> (typeof renderCalendar === 'function') && renderCalendar(),
-    commissions: ()=> (typeof renderCommissions === 'function') && renderCommissions(),
-    repayments: ()=> (typeof renderRepayments === 'function') && renderRepayments(),
-    expenses: ()=> (typeof renderExpenses === 'function') && renderExpenses(),
     team: ()=> (typeof renderTeam === 'function') && renderTeam(),
     help: ()=> (typeof renderHelpPage === 'function') && renderHelpPage(),
   };
@@ -1520,43 +1514,6 @@ function setBottomNav(t){
       active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
     }
   }
-}
-function setKanbanSource(src,btn){
-  kanbanSource=src;
-  document.querySelectorAll('#kanban-source-tabs .pill-tab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  const title=document.getElementById('kanban-title');
-  const addBtn=document.getElementById('kanban-add-btn');
-  if(title) title.textContent=src==='pro'?'Professional Pipeline Board':'General Jobs Board';
-  if(addBtn) addBtn.setAttribute('onclick',src==='pro'?'openProForm()':'openLBForm()');
-  renderKanban();
-}
-function renderKanban(){
-  const board=document.getElementById('kanban-board'); if(!board) return;
-  const kanbanRows=allRows().filter(r=>r.type===kanbanSource);
-  const stages=kanbanSource==='pro'
-    ? stageListWithData(proStages, kanbanRows, r=>r.stage, canonicalProStage)
-    : stageListWithData(lbStages, kanbanRows, r=>r.stage);
-  board.innerHTML=stages.map(stage=>{
-    const items=kanbanRows.filter(r=>r.stage===stage);
-    const cards=items.length?items.map(r=>{
-      const meta=kanbanSource==='pro'
-        ? `${r.position||'No position'}  |  ${r.company||'No company'}`
-        : `${r.own_passport?'Own passport':'Passport'}  |  ${getRefundStatus(r.raw||r)}`;
-      const footer=kanbanSource==='pro'
-        ? `<span class="kanban-card-country">${r.country||'-'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
-        : `<span class="kanban-card-country">${r.phone||'-'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.commission)||0)}</span>`;
-      return `<div class="kanban-card" onclick="${kanbanSource==='pro'?'editPro':'editLB'}(${r.id})">
-        <div class="kanban-card-name">${r.name}</div>
-        <div class="kanban-card-meta"><i class="ti ti-id"></i>${meta}</div>
-        <div class="kanban-card-footer">${footer}</div>
-      </div>`;
-    }).join(''):'<div class="kanban-empty">No candidates</div>';
-    return `<div class="kanban-col">
-      <div class="kanban-col-header"><div class="kanban-col-title">${stage}</div><div class="kanban-col-count">${items.length}</div></div>
-      ${cards}
-    </div>`;
-  }).join('');
 }
 function setCalSource(src,btn){
   calSource=src;
@@ -2274,7 +2231,6 @@ function renderDash(){
     <div class="ref-dashboard">
       <div class="ref-dashboard-head">
         <div><h1>Good afternoon, ${escHTML(firstName)}</h1><p>Here's what's happening in your workspace today.</p></div>
-        <button class="ref-date-btn" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i><span>Open calendar</span><i class="ti ti-chevron-right"></i></button>
       </div>
 
       <div class="ref-board-grid">
@@ -2665,7 +2621,7 @@ function deleteCalendarEvent(){
 function openTravelEventPrompt(){ switchTab('travel'); showToast('Open a candidate row to add airline, travel time, and notes.','success'); }
 function renderHelpPage(){
   const el=document.getElementById('help-section-content'); if(!el) return;
-  el.innerHTML=`<div class="settings-page-card"><h3>Daily workflow</h3><p>Use Dashboard for status, Pipeline Board for movement, Calendar for deadlines, and Reports for management review.</p><div class="setting-row"><span>Pipeline board</span><button onclick="switchTab('kanban')">Open</button></div><div class="setting-row"><span>Calendar</span><button onclick="switchTab('calendar')">Open</button></div></div><div class="settings-page-card"><h3>Records</h3><p>Professional Jobs and General Jobs are separate workflows. Travel combines both lists and sorts latest travel first.</p><div class="setting-row"><span>Professional Jobs</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General Jobs</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Finance</h3><p>Commissions focus on professional job income. Repayments only track travelled general-job clients. Expenses capture money spent on clients.</p><div class="setting-row"><span>Commissions</span><button onclick="switchTab('commissions')">Open</button></div><div class="setting-row"><span>Expenses</span><button onclick="switchTab('expenses')">Open</button></div></div><div class="settings-page-card"><h3>Support note</h3><p>For shared multi-user work, keep Supabase configured. Local mode is useful for solo testing, but cloud mode is better for office use.</p><div class="setting-row"><span>Settings</span><button onclick="switchTab('settings')">Open</button></div></div>`;
+  el.innerHTML=`<div class="settings-page-card"><h3>Daily workflow</h3><p>Use Dashboard for an overview, Pipeline to move candidates through stages, and Reports for management review.</p><div class="setting-row"><span>Pipeline</span><button onclick="switchTab('pipeline')">Open</button></div></div><div class="settings-page-card"><h3>Records</h3><p>Professional Jobs and General Jobs are separate workflows. Travel combines both lists and sorts latest travel first.</p><div class="setting-row"><span>Professional Jobs</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General Jobs</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Finance</h3><p>Commissions focus on professional job income. Repayments only track travelled general-job clients. Expenses capture money spent on clients.</p><div class="setting-row"><span>Commissions</span><button onclick="switchTab('commissions')">Open</button></div><div class="setting-row"><span>Expenses</span><button onclick="switchTab('expenses')">Open</button></div></div><div class="settings-page-card"><h3>Support note</h3><p>For shared multi-user work, keep Supabase configured. Local mode is useful for solo testing, but cloud mode is better for office use.</p><div class="setting-row"><span>Settings</span><button onclick="switchTab('settings')">Open</button></div></div>`;
 }
 function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
 function renderRefKpi(label,value,sub,icon,bg,extra='',action=''){
@@ -3405,11 +3361,11 @@ function setUserDisplay(display, role) {
   'use strict';
 
   // ── Constants ────────────────────────────────────────────
-  const TABS    = ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'];
+  const TABS    = ['dash','pipeline','candidates','finance','documents','reports','clients','settings'];
   const ALIASES = {
     pro:'candidates', lb:'candidates',
-    kanban:'pipeline', travel:'pipeline',
-    calendar:'tasks',
+    kanban:'pipeline', travel:'pipeline', tasks:'pipeline',
+    calendar:'pipeline',
     commissions:'finance', repayments:'finance', expenses:'finance',
     team:'settings', help:'settings'
   };
@@ -3881,7 +3837,7 @@ function setUserDisplay(display, role) {
       </div>
       <div class="sidebar-divider"></div>
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Workspace</div>
-      ${['dash','pipeline','candidates','tasks'].map(navItem).join('')}
+      ${['dash','pipeline','candidates'].map(navItem).join('')}
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Operations</div>
       ${['finance','documents','reports','clients'].map(navItem).join('')}
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">System</div>
@@ -3975,7 +3931,6 @@ function setUserDisplay(display, role) {
           </div>
           <div class="dv5-head-actions">
             ${jobTypeTabs()}
-            <button class="dv5-btn" onclick="switchTab('tasks')"><i class="ti ti-checkbox"></i>Tasks</button>
             <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add ${isPro?'Professional':'General'}</button>
           </div>
         </div>
@@ -4030,7 +3985,7 @@ function setUserDisplay(display, role) {
           <div class="dv5-card">
             <div class="dv5-card-head">
               <span class="dv5-card-title">Upcoming Reminders</span>
-              <button class="dv5-link" onclick="switchTab('tasks')">View all →</button>
+              <button class="dv5-link" onclick="switchTab('pipeline')">View all →</button>
             </div>
             <div class="dv5-task-list">
               ${tasks.length ? tasks.map(taskRow).join('') : '<div class="dv5-empty">No urgent tasks. Workspace is clear.</div>'}
@@ -4083,7 +4038,6 @@ function setUserDisplay(display, role) {
     const pipelineRows = allRows();
     const proRows = pipelineRows.filter(r=>r.type==='pro').map(r=>({...r, pipelineStage:proPipelineStageValue(r)}));
     const lbRows = pipelineRows.filter(r=>r.type==='lb').map(r=>({...r, pipelineStage:lbPipelineStageValue(r)}));
-    console.log('[dreco debug] lbDB length:', (typeof lbDB!=='undefined'?lbDB:[]).length, 'lbRows:', lbRows.length, 'stages sample:', lbRows.slice(0,3).map(r=>r.pipelineStage));
     const proStageList = PRO_PIPELINE_STAGES;
     const lbStageList  = LB_PIPELINE_STAGES;
     const lbFiltered = lbCountryFilter ? lbRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbRows;
@@ -5686,9 +5640,6 @@ function setUserDisplay(display, role) {
     try { renderDocChecklist(type,id); } catch {}
     const active = sessionStorage.getItem('dreco_active_tab') || '';
     try { if(typeof renderDocumentsV4 === 'function') renderDocumentsV4(); } catch {}
-    try { if(typeof renderCandidatesV4 === 'function' && active === 'candidates') renderCandidatesV4(); } catch {}
-    try { if(typeof renderPipelineV4 === 'function' && active === 'pipeline') renderPipelineV4(); } catch {}
-    try { if(typeof renderTasks === 'function' && active === 'tasks') renderTasks(); } catch {}
   }
   function closeOverlays(exceptId){
     $$('.modal-bg.open,.modal.open,.v4-modal.open').forEach(el => { if(el.id !== exceptId) el.classList.remove('open'); });
@@ -5928,7 +5879,7 @@ function setUserDisplay(display, role) {
     window.switchTab.__mobileWrapped = true;
   }
 
-  ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderTasks','renderClients'].forEach(name=>{
+  ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderClients'].forEach(name=>{
     const fn=window[name];
     if(typeof fn === 'function' && !fn.__mobileWrapped){
       window[name]=function(){ const out=fn.apply(this,arguments); setTimeout(tuneMobile,40); return out; };
@@ -6171,7 +6122,7 @@ function setUserDisplay(display, role) {
   }
 
   function installRenderGuards(){
-    const names = ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderTasks','renderClients','renderPro','renderLB','renderKanban','renderCommissions','renderRepayments','renderExpenses','renderTravel'];
+    const names = ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderClients','renderPro','renderLB','renderCommissions','renderRepayments','renderExpenses','renderTravel'];
     names.forEach(name => {
       const fn = window[name];
       if (typeof fn !== 'function' || fn.__drecoGuarded) return;
@@ -6300,7 +6251,6 @@ function setUserDisplay(display, role) {
     { label:'Finance',     icon:'ti-coin',           tab:'finance' },
     { label:'Documents',   icon:'ti-folder',         tab:'documents' },
     { label:'Clients',     icon:'ti-building',       tab:'clients' },
-    { label:'Tasks',       icon:'ti-checkbox',       tab:'tasks' },
     { label:'Reports',     icon:'ti-chart-bar',      tab:'reports' },
   ];
   let cmdSelectedIdx = 0;

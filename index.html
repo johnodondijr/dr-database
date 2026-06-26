@@ -1485,8 +1485,6 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   tbody tr td:first-child{display:table-cell!important}
   .name-cell{min-width:180px!important}
   .click-hint{font-size:10px!important;padding:8px 10px!important}
-  #kanban-board{min-height:260px!important;gap:10px!important;padding-bottom:12px!important}
-  .kanban-col{flex:0 0 230px!important}
   .cal-day{min-height:54px!important;padding:4px!important}
   .cal-event{font-size:8px!important;max-width:100%!important}
   .modal-bg{padding:8px!important;align-items:flex-start!important}
@@ -3843,23 +3841,6 @@ input, textarea, select, [contenteditable] {
           </div>
         </div>
 
-        <!-- "-"- KANBAN BOARD "-"- -->
-        <div id="kanban-section" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-            <div>
-              <div id="kanban-title" style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em">Professional Pipeline Board</div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div class="pill-tabs" id="kanban-source-tabs">
-                <button class="pill-tab active" onclick="setKanbanSource('pro',this)">Professional</button>
-                <button class="pill-tab" onclick="setKanbanSource('lb',this)">General Jobs</button>
-              </div>
-              <button class="btn" onclick="switchTab('pro')"><i class="ti ti-table"></i> Table View</button>
-              <button class="btn primary" id="kanban-add-btn" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
-            </div>
-          </div>
-          <div id="kanban-board" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;min-height:300px"></div>
-        </div>
 
         <!-- "-"- CALENDAR "-"- -->
         <div id="calendar-section" style="display:none">
@@ -3894,23 +3875,6 @@ input, textarea, select, [contenteditable] {
           <div class="panel"><div class="panel-header"><span class="panel-title">Travel register</span><div class="panel-actions"><select class="toolbar-select" id="travel-filter" onchange="renderTravel()"><option value="all">All travel</option><option value="travelled">Travelled</option><option value="pending">Pending travel</option></select></div></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Name</th><th>Workflow</th><th>Company / Country</th><th>Position / Status</th><th>Travel Date</th><th>Airline</th><th>Time</th><th>Notes</th></tr></thead><tbody id="travel-tbody"></tbody></table></div></div>
         </div>
 
-        <div id="commissions-section" style="display:none">
-          <div class="section-page-head"><div><h2>Commissions</h2><p>Commission billed, received, balances, and latest payment updates.</p></div><button class="btn primary" onclick="openRecordPaymentPrompt('commission')"><i class="ti ti-plus"></i> Record commission</button></div>
-          <div class="metrics-strip" id="commission-metrics"></div>
-          <div class="finance-page-grid"><div class="panel"><div class="panel-header"><span class="panel-title">Commission ledger</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Candidate</th><th>Company</th><th>Position</th><th>Billed</th><th>Received</th><th>Balance</th><th>Latest Update</th><th>Action</th></tr></thead><tbody id="commissions-tbody"></tbody></table></div></div><div class="panel transaction-panel"><div class="panel-header"><span class="panel-title">Recent commission transactions</span></div><div id="commission-history"></div></div></div>
-        </div>
-
-        <div id="repayments-section" style="display:none">
-          <div class="section-page-head"><div><h2>Repayments</h2><p>Client repayments/refunds with installment status and outstanding balances.</p></div><button class="btn primary" onclick="openRecordPaymentPrompt('repayment')"><i class="ti ti-plus"></i> Record repayment</button></div>
-          <div class="metrics-strip" id="repayment-metrics"></div>
-          <div class="finance-page-grid"><div class="panel"><div class="panel-header"><span class="panel-title">Repayment tracker</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Candidate</th><th>Passport</th><th>Travel</th><th>To Repay</th><th>Paid</th><th>Balance</th><th>Installments</th><th>Action</th></tr></thead><tbody id="repayments-tbody"></tbody></table></div></div><div class="panel transaction-panel"><div class="panel-header"><span class="panel-title">Recent repayment transactions</span></div><div id="repayment-history"></div></div></div>
-        </div>
-
-        <div id="expenses-section" style="display:none">
-          <div class="section-page-head"><div><h2>Expenses</h2><p>Money spent on clients, documents, transport, processing, and follow-ups.</p></div><button class="btn primary" onclick="openExpensePrompt()"><i class="ti ti-plus"></i> Add expense</button></div>
-          <div class="metrics-strip" id="expense-metrics"></div>
-          <div class="panel"><div class="panel-header"><span class="panel-title">Expense register</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Date</th><th>Client</th><th>Category</th><th>Amount</th><th>Notes</th><th>Action</th></tr></thead><tbody id="expenses-tbody"></tbody></table></div></div>
-        </div>
 
         <div id="team-section" style="display:none">
           <div class="section-page-head"><div><h2>Team</h2><p>Company users, roles, permissions, and account access.</p></div><button class="btn primary" onclick="createStaffAccount()"><i class="ti ti-user-plus"></i> Add user</button></div>
@@ -3934,7 +3898,6 @@ input, textarea, select, [contenteditable] {
         <!-- DV5 New Sections - managed by dreco_v5 IIFE -->
         <div id="pipeline-section" class="dv5-section" style="display:none"></div>
         <div id="candidates-section" class="dv5-section" style="display:none"></div>
-        <div id="tasks-section" class="dv5-section" style="display:none"></div>
         <div id="finance-section" class="dv5-section" style="display:none"></div>
         <div id="documents-section" class="dv5-section" style="display:none"></div>
         <div id="clients-section" class="dv5-section" style="display:none"></div>
@@ -4280,9 +4243,6 @@ input, textarea, select, [contenteditable] {
   </button>
   <button class="bottom-nav-item" id="bnav-candidates" onclick="switchTab('candidates')" aria-label="Candidates">
     <i class="ti ti-users"></i><span>Candidates</span>
-  </button>
-  <button class="bottom-nav-item" id="bnav-tasks" onclick="switchTab('tasks')" aria-label="Tasks">
-    <i class="ti ti-checkbox"></i><span>Tasks</span>
   </button>
   <button class="bottom-nav-item" id="bnav-finance" onclick="switchTab('finance')" aria-label="Finance">
     <i class="ti ti-coin"></i><span>Finance</span>
