@@ -4093,6 +4093,9 @@ function setUserDisplay(display, role) {
 
   function setCandidateSearch(v) { candidateSearch = v; renderCandidates(); }
   window.setCandidateSearch = setCandidateSearch;
+  window.setCandidateStageFilter = v => { candidateStageFilter = v; renderCandidates(); };
+  window.setCandidateViewFilter  = v => { candidateViewFilter  = v; renderCandidates(); };
+  window.clearSelectedCandidates = () => { selectedCandidates.clear(); renderCandidates(); };
 
   function filterCandidates() {
     // Always scoped to the active job type tab
@@ -4198,13 +4201,13 @@ function setUserDisplay(display, role) {
             ${allStages.map(s=>`<option value="${h(s)}">${h(s)}</option>`).join('')}
           </select>
           <button class="dv5-btn" onclick="bulkExportSelected()"><i class="ti ti-download"></i>Export selected</button>
-          <button class="dv5-btn" onclick="selectedCandidates.clear();renderCandidates()"><i class="ti ti-x"></i>Clear</button>
+          <button class="dv5-btn" onclick="window.clearSelectedCandidates()"><i class="ti ti-x"></i>Clear</button>
         </div>
         <div class="dv5-toolbar">
           <div class="dv5-toolbar-left">
             <input class="dv5-input" id="cand-search" placeholder="Search name, passport, company…"
               value="${h(candidateSearch)}" oninput="setCandidateSearch(this.value)">
-            <select class="dv5-select" onchange="candidateStageFilter=this.value;renderCandidates()">
+            <select class="dv5-select" onchange="window.setCandidateStageFilter(this.value)">
               <option value="">All Stages</option>
               ${stageOptions.map(s=>`<option value="${h(s)}" ${candidateStageFilter===s?'selected':''}>${h(s)}</option>`).join('')}
             </select>
@@ -4213,7 +4216,7 @@ function setUserDisplay(display, role) {
             <div class="dv5-view-tabs">
               ${[['all','All'],['follow','Needs Action'],['balance','Has Balance']].map(([v,l])=>
                 `<button class="dv5-view-tab ${candidateViewFilter===v?'active':''}"
-                  onclick="candidateViewFilter='${v}';renderCandidates()">${l}</button>`
+                  onclick="window.setCandidateViewFilter('${v}')">${l}</button>`
               ).join('')}
             </div>
             <span class="dv5-count">Showing ${list.length} of ${all.length}</span>
@@ -4268,6 +4271,7 @@ function setUserDisplay(display, role) {
       </div>`;
   }
   window.renderCandidatesPage = renderCandidates;
+  window.renderCandidates = renderCandidates;
 
   window.advanceStage = async function(type, id) {
     const stages = type === 'pro'
