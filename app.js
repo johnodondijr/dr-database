@@ -133,7 +133,10 @@ async function postAuthAction(payload, accessToken = '') {
     },
     body: JSON.stringify(payload),
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await response.json().catch(() => null);
+  if (response.status === 404 || !data) {
+    throw new Error('Auth API is unavailable. Using local workspace mode.');
+  }
   if (!response.ok) throw new Error(data.error || 'Auth service request failed.');
   return data;
 }
@@ -319,6 +322,8 @@ let allDocs       = {};
 let allTimelines  = {};
 let proStages     = ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
 let lbStages      = ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+const PRO_PIPELINE_STAGES = ['PENDING OFFER LETTER','OFFER LETTER','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+const LB_PIPELINE_STAGES = ['SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
 let drecoExpenses = JSON.parse(safeLocalGet('dreco_expenses') || '[]');
 let drecoEvents   = JSON.parse(safeLocalGet('dreco_events') || '[]');
 let drecoAudit    = JSON.parse(safeLocalGet('dreco_audit') || '[]');
@@ -381,6 +386,7 @@ function setCurrentWorkspace(account) {
 }
 function updateWorkspaceLabels() {
   const mappings = [
+    ['#topbar-workspace-name', getCompanyName()],
     ['#nav-lb .nav-item-label', 'General Jobs'],
     ['#nav-lb', 'General Jobs', 'data-title'],
     ['#bnav-lb span', 'General'],
@@ -456,7 +462,92 @@ function getDefaultLocalStore() {
 function toNumOrNull(v) {
   return v===''||v===null||v===undefined ? null : Number(v);
 }
+function cleanStage(value, fallback = '') {
+  return String(value || fallback || '').trim().toUpperCase();
+}
+function canonicalProStage(stage) {
+  const value = cleanStage(stage);
+  const legacyMap = {
+    'PENDING OFFER': 'PENDING OFFER LETTER',
+    'PENDING OL': 'PENDING OFFER LETTER',
+    'OFFER': 'OFFER LETTER',
+    'OL': 'OFFER LETTER',
+    'MEDICAL': 'MOL',
+    'MEDICAL & ATTESTATION': 'MOL',
+    'PENDING MOL': 'MOL',
+    'WORK PERMIT': 'MOL',
+    'PENDING VISA': 'VISA',
+    'TICKET BOOKED': 'PENDING TRAVEL',
+    'READY TO TRAVEL': 'PENDING TRAVEL',
+    'TRAVEL': 'PENDING TRAVEL',
+    'TRAVELING': 'TRAVELLED',
+    'TRAVELLING': 'TRAVELLED',
+    'TRAVELED': 'TRAVELLED',
+  };
+  return legacyMap[value] || value;
+}
+function proStageValue(row = {}) {
+  return canonicalProStage(row.stage || proStages[0] || 'SUBMITTED');
+}
+function lbStageValue(row = {}) {
+  return cleanStage(row.stage || row.travelStatus || row.travel_status, lbStages[0] || 'DOCS SUBMITTED');
+}
+function proPipelineStageValue(row = {}) {
+  const raw = row.raw || row;
+  const stage = canonicalProStage(raw.stage || row.stage);
+  if (stage === 'TRAVELLED') return 'TRAVELLED';
+  if (toInput(raw.travel || row.travel)) return 'PENDING TRAVEL';
+  if (toInput(raw.visa || row.visa)) return 'VISA';
+  if (toInput(raw.mol || row.mol)) return 'MOL';
+  if (toInput(raw.ol || row.ol)) return 'OFFER LETTER';
+  if (PRO_PIPELINE_STAGES.includes(stage)) return stage;
+  if (['SUBMITTED','INTERVIEW','PENDING INTERVIEW','NOT YET',''].includes(stage)) return 'PENDING OFFER LETTER';
+  return 'PENDING OFFER LETTER';
+}
+function lbPipelineStageValue(row = {}) {
+  const raw = row.raw || row;
+  const stage = cleanStage(raw.stage || raw.travelStatus || raw.travel_status || row.stage);
+  const map = {
+    'DOCS SUBMITTED': 'SUBMITTED',
+    'DOCUMENTS SUBMITTED': 'SUBMITTED',
+    'NOT YET': 'SUBMITTED',
+  };
+  return LB_PIPELINE_STAGES.includes(map[stage] || stage) ? (map[stage] || stage) : 'SUBMITTED';
+}
+function stageListWithData(configured = [], rows = [], getter = row => row.stage, normalizer = cleanStage) {
+  const seen = new Set();
+  return [...configured, ...rows.map(getter)]
+    .map(stage => normalizer(stage))
+    .filter(stage => stage && !seen.has(stage) && seen.add(stage));
+}
+function proStageMatches(row, stages) {
+  const stage = proStageValue(row);
+  return [].concat(stages).map(canonicalProStage).includes(stage);
+}
+function proPaidAmount(row = {}) {
+  const splitPaid = (Number(row.paid1) || 0) + (Number(row.paid2) || 0);
+  return splitPaid || (Number(row.paid) || 0);
+}
+function lbRefundPaidAmount(row = {}) {
+  return (Number(row.r1Amt || row.r1_amt) || 0) + (Number(row.r2Amt || row.r2_amt) || 0);
+}
+function lbOwnPassport(row = {}) {
+  return !!row.own_passport || cleanStage(row.ppStatus || row.pp_status) === 'HAD PP';
+}
+function lbRefundReturned(row = {}) {
+  return cleanStage(row.notes) === 'RETURNED';
+}
+function lbRefundPrincipal(row = {}) {
+  if (lbOwnPassport(row) || lbRefundReturned(row)) return 0;
+  return Number(row.toRefund || row.to_refund) || 0;
+}
+function lbRefundOutstanding(row = {}) {
+  if (!['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(lbStageValue(row))) return 0;
+  return Math.max(lbRefundPrincipal(row) - lbRefundPaidAmount(row), 0);
+}
 function normalizeProRecord(r={}) {
+  const paid1 = toNumOrNull(r.paid1);
+  const paid2 = toNumOrNull(r.paid2);
   return {
     id:r.id,
     company_id:r.company_id||r.companyId||getCompanyId(),
@@ -466,7 +557,7 @@ function normalizeProRecord(r={}) {
     position:(r.position||'').toString().toUpperCase(),
     company:(r.company||'').toString().toUpperCase(),
     country:r.country||'',
-    stage:r.stage||proStages[0],
+    stage:proStageValue(r),
     submitted:normalizeDateField(r.submitted),
     interview:normalizeDateField(r.interview),
     ol:normalizeDateField(r.ol),
@@ -474,10 +565,13 @@ function normalizeProRecord(r={}) {
     visa:normalizeDateField(r.visa),
     travel:normalizeDateField(r.travel),
     commission:toNumOrNull(r.commission),
+    paid1,
+    paid2,
     paid:toNumOrNull(r.paid),
   };
 }
 function normalizeLBRecord(r={}) {
+  const travelStatus = lbStageValue(r);
   return {
     id:r.id,
     company_id:r.company_id||r.companyId||getCompanyId(),
@@ -485,13 +579,15 @@ function normalizeLBRecord(r={}) {
     name:(r.name||'').toString().toUpperCase(),
     phone:r.phone||'',
     ppStatus:r.ppStatus||r.pp_status||'APPLIED',
-    travelStatus:r.travelStatus||r.travel_status||lbStages[0],
+    stage:travelStatus,
+    travelStatus,
     travelDate:normalizeDateField(r.travelDate||r.travel_date),
     toRefund:Number(r.toRefund||r.to_refund)||0,
     r1Date:normalizeDateField(r.r1Date||r.r1_date),
     r1Amt:Number(r.r1Amt||r.r1_amt)||0,
     r2Date:normalizeDateField(r.r2Date||r.r2_date),
     r2Amt:Number(r.r2Amt||r.r2_amt)||0,
+    own_passport:lbOwnPassport(r),
     notes:r.notes||'',
   };
 }
@@ -842,17 +938,25 @@ async function doSignup() {
       return fail(err.message || 'Password could not be secured. Use HTTPS and try again.');
     }
   }
+  const signupAccount = normalizeAccount(username, {
+    ...STAFF_ACCOUNTS[username],
+    role: 'admin',
+    display,
+    companyId,
+    companyName,
+    generalJobsCountries,
+  });
+  STAFF_ACCOUNTS[username] = signupAccount;
   await saveStaffAccounts();
   errEl.style.display = 'none';
-  const account = STAFF_ACCOUNTS[username];
   enterApp({
     username,
-    role: account.role,
-    display: account.display,
-    companyId: account.companyId,
-    companyName: account.companyName,
-    generalJobsCountries: account.generalJobsCountries,
-    authUserId: account.authUserId,
+    role: signupAccount.role,
+    display: signupAccount.display,
+    companyId: signupAccount.companyId,
+    companyName: signupAccount.companyName,
+    generalJobsCountries: signupAccount.generalJobsCountries,
+    authUserId: signupAccount.authUserId,
   });
 }
 
@@ -1312,8 +1416,8 @@ function isInProcessPro(r){ return ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDI
   // legacy stage names for backward compat
   'PENDING OFFER LETTER','PENDING MOL','PENDING VISA'].includes(r.stage); }
 function isInProcessLB(r){
-  const ts=r.stage||r.travelStatus||r.travel_status||'';
-  return !['TRAVELLED','REFUND PENDING','REFUND COMPLETE','NOT TRAVELLED'].includes(ts)&&!r.own_passport;
+  const ts=lbStageValue(r);
+  return !['TRAVELLED','REFUND PENDING','REFUND COMPLETE','NOT TRAVELLED'].includes(ts)&&!lbOwnPassport(r);
 }
 function stageBadge(s){
   const map={'PENDING OFFER LETTER':'b-pol','PENDING MOL':'b-mol','PENDING VISA':'b-visa','PENDING TRAVEL':'b-travel','TRAVELLED':'b-travelled'};
@@ -1429,17 +1533,19 @@ function setKanbanSource(src,btn){
 }
 function renderKanban(){
   const board=document.getElementById('kanban-board'); if(!board) return;
-  const stages=kanbanSource==='pro'?proStages:lbStages;
-  const rows=kanbanSource==='pro'?proDB:lbDB;
+  const kanbanRows=allRows().filter(r=>r.type===kanbanSource);
+  const stages=kanbanSource==='pro'
+    ? stageListWithData(proStages, kanbanRows, r=>r.stage, canonicalProStage)
+    : stageListWithData(lbStages, kanbanRows, r=>r.stage);
   board.innerHTML=stages.map(stage=>{
-    const items=rows.filter(r=>(kanbanSource==='pro'?r.stage:(r.travelStatus||r.travel_status))===stage);
+    const items=kanbanRows.filter(r=>r.stage===stage);
     const cards=items.length?items.map(r=>{
       const meta=kanbanSource==='pro'
         ? `${r.position||'No position'}  |  ${r.company||'No company'}`
-        : `${r.ppStatus||r.pp_status||'Passport'}  |  ${getRefundStatus(r)}`;
+        : `${r.own_passport?'Own passport':'Passport'}  |  ${getRefundStatus(r.raw||r)}`;
       const footer=kanbanSource==='pro'
         ? `<span class="kanban-card-country">${r.country||'-'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
-        : `<span class="kanban-card-country">${r.phone||'-'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.toRefund||r.to_refund)||0)}</span>`;
+        : `<span class="kanban-card-country">${r.phone||'-'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.commission)||0)}</span>`;
       return `<div class="kanban-card" onclick="${kanbanSource==='pro'?'editPro':'editLB'}(${r.id})">
         <div class="kanban-card-name">${r.name}</div>
         <div class="kanban-card-meta"><i class="ti ti-id"></i>${meta}</div>
@@ -1883,8 +1989,7 @@ function closeModal(id){ const el=document.getElementById(id); if(el) el.classLi
 function moneyKES(v){ return 'KES '+Number(v||0).toLocaleString(); }
 function moneyUSD(v){ return '$'+Number(v||0).toLocaleString(); }
 function proBalance(r){
-  const paid=(Number(r.paid1)||0)+(Number(r.paid2)||0)||(Number(r.paid)||0);
-  return Math.max((Number(r.commission)||0)-paid,0);
+  return Math.max((Number(r.commission)||0)-proPaidAmount(r),0);
 }
 function proNeedsAction(r){
   const stage=r.stage||'';
@@ -2412,21 +2517,21 @@ function renderTravel(){
   tb.innerHTML=shown.length?shown.map(r=>`<tr onclick="${r.type==='pro'?'editPro':'editLB'}(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${r.workflow}</td><td>${escHTML(r.company)}</td><td>${escHTML(r.status)}</td><td>${fmtDate(r.date)}</td><td>${escHTML(r.airline)}</td><td>${escHTML(r.time)}</td><td>${escHTML(r.notes)}</td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No travel records found</div></td></tr>';
 }
 function renderCommissions(){
-  const billed=proDB.reduce((sum,row)=>sum+(Number(row.commission)||0),0), paid=proDB.reduce((sum,row)=>sum+(Number(row.paid)||0),0);
-  const rows=[...proDB].sort((a,b)=>latestCommissionTs(b)-latestCommissionTs(a) || Number(b.paid||0)-Number(a.paid||0));
+  const billed=proDB.reduce((sum,row)=>sum+(Number(row.commission)||0),0), paid=proDB.reduce((sum,row)=>sum+proPaidAmount(row),0);
+  const rows=[...proDB].sort((a,b)=>latestCommissionTs(b)-latestCommissionTs(a) || proPaidAmount(b)-proPaidAmount(a));
   renderMetricCards('commission-metrics',[{label:'Billed',value:moneyKES(billed),cls:'mc-ink',small:true},{label:'Received',value:moneyKES(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyKES(billed-paid),cls:'mc-amber',small:true}]);
   renderTransactionHistory('commission-history', getCommissionTransactions(), moneyKES);
   const tb=document.getElementById('commissions-tbody'); if(!tb) return;
-  tb.innerHTML=rows.length?rows.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(r.paid)}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
+  tb.innerHTML=rows.length?rows.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(proPaidAmount(r))}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
 }
 function renderRepayments(){
   const travelled=lbDB.filter(isTravelledLB).sort((a,b)=>latestRepaymentTs(b)-latestRepaymentTs(a));
-  const owed=travelled.reduce((sum,row)=>sum+(Number(row.toRefund||row.to_refund)||0),0);
-  const paid=travelled.reduce((sum,row)=>sum+(Number(row.r1Amt||row.r1_amt)||0)+(Number(row.r2Amt||row.r2_amt)||0),0);
+  const owed=travelled.reduce((sum,row)=>sum+lbRefundPrincipal(row),0);
+  const paid=travelled.reduce((sum,row)=>sum+lbRefundPaidAmount(row),0);
   renderMetricCards('repayment-metrics',[{label:'Travelled clients',value:travelled.length,cls:'mc-default'},{label:'Paid',value:moneyUSD(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyUSD(owed-paid),cls:'mc-amber',small:true}]);
   renderTransactionHistory('repayment-history', getRepaymentTransactions(), moneyUSD);
   const tb=document.getElementById('repayments-tbody'); if(!tb) return;
-  tb.innerHTML=travelled.length?travelled.map(r=>{const toR=Number(r.toRefund||r.to_refund)||0,p=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${fmtDate(r.travelDate||r.travel_date)}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(toR-p)}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No travelled clients with repayment records yet</div></td></tr>';
+  tb.innerHTML=travelled.length?travelled.map(r=>{const toR=lbRefundPrincipal(r),p=lbRefundPaidAmount(r);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${fmtDate(r.travelDate||r.travel_date)}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(lbRefundOutstanding(r))}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No travelled clients with repayment records yet</div></td></tr>';
 }
 function renderExpenses(){
   const total=drecoExpenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
@@ -3389,9 +3494,9 @@ function setUserDisplay(display, role) {
   const LB_TRAVELLED_STAGES = new Set(['TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
   const lbHasTravelled = r => LB_TRAVELLED_STAGES.has(String(r.stage||r.travelStatus||r.travel_status||'').toUpperCase());
   const balLB = r => {
-    if (r.own_passport) return 0; // no refund owed
+    if (lbOwnPassport(r) || lbRefundReturned(r)) return 0; // no refund owed
     if (!lbHasTravelled(r)) return 0; // hasn't travelled yet — not a debt
-    return Math.max((Number(r.toRefund||r.to_refund)||0) - ((Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0)), 0);
+    return lbRefundOutstanding(r);
   };
 
   function stageColor(stage) {
@@ -3423,16 +3528,16 @@ function setUserDisplay(display, role) {
     const pro = (Array.isArray(proDB) ? proDB : []).map(r => {
       const paid1=Number(r.paid1)||0;
       const paid2=Number(r.paid2)||0;
-      const paid=(paid1+paid2)||(Number(r.paid)||0);
+      const paid=proPaidAmount(r);
       return {
         type:'pro', id:r.id, name:r.name||'—', pp:r.pp||'', phone:r.phone||'',
         position:r.position||'—', company:r.company||'—', country:r.country||'—',
-        stage:r.stage||'SUBMITTED', submitted:r.submitted, interview:r.interview,
+        stage:proStageValue(r), submitted:r.submitted, interview:r.interview,
         ol:r.ol, medical:r.medical||null, mol:r.mol, visa:r.visa, travel:r.travel,
         owner:r.owner||currentUser?.display||'Team',
         commission:Number(r.commission)||0,
         paid1, paid2, paid,
-        balance:Math.max((Number(r.commission)||0)-paid,0),
+        balance:proBalance(r),
         currency:'KES', raw:r
       };
     });
@@ -3444,14 +3549,14 @@ function setUserDisplay(display, role) {
         position: r.country || 'General Job',
         company:r.company||r.country||'—',
         country:r.country||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'—')||'—',
-        stage:r.stage||r.travelStatus||r.travel_status||'DOCS SUBMITTED',
+        stage:lbStageValue(r),
         submitted:r.submitted_date||r.submitted||null,
         travelDate:r.travelDate||r.travel_date||null,
         interview:null, mol:null, visa:null,
         travel:r.travelDate||r.travel_date||null,
-        own_passport:!!r.own_passport,
+        own_passport:lbOwnPassport(r),
         owner:currentUser?.display||'Team',
-        commission:Number(r.toRefund||r.to_refund)||0,
+        commission:lbRefundPrincipal(r),
         r1Amt, r2Amt,
         r1Date:r.r1Date||r.r1_date||null,
         r2Date:r.r2Date||r.r2_date||null,
@@ -3824,8 +3929,8 @@ function setUserDisplay(display, role) {
     const normRows = isPro ? proNorm : lbNorm;
 
     // Pro-specific dash metrics
-    const awaitMol  = proNorm.filter(r=>r.stage==='MOL').length;
-    const visaReady = proNorm.filter(r=>r.stage==='VISA').length;
+    const awaitMol  = proNorm.filter(r=>proStageMatches(r, ['MOL','PENDING MOL'])).length;
+    const visaReady = proNorm.filter(r=>proStageMatches(r, ['VISA','PENDING VISA'])).length;
     const tickets   = proNorm.filter(r=>r.stage==='PENDING TRAVEL').length;
     const unpaidPro = proNorm.filter(r=>r.balance>0).length;
     // LB-specific
@@ -3841,10 +3946,10 @@ function setUserDisplay(display, role) {
     const proFlowSteps = [
       ['Submitted',  proNorm.filter(r=>r.stage==='SUBMITTED').length],
       ['Interview',  proNorm.filter(r=>r.stage==='INTERVIEW').length],
-      ['Offer',      proNorm.filter(r=>r.stage==='OFFER LETTER').length],
+      ['Offer',      proNorm.filter(r=>proStageMatches(r, ['OFFER LETTER','PENDING OFFER LETTER'])).length],
       ['Medical',    proNorm.filter(r=>r.stage==='MEDICAL & ATTESTATION').length],
-      ['MOL',        proNorm.filter(r=>r.stage==='MOL').length],
-      ['Visa',       proNorm.filter(r=>r.stage==='VISA').length],
+      ['MOL',        proNorm.filter(r=>proStageMatches(r, ['MOL','PENDING MOL'])).length],
+      ['Visa',       proNorm.filter(r=>proStageMatches(r, ['VISA','PENDING VISA'])).length],
       ['Travel',     proNorm.filter(r=>r.stage==='PENDING TRAVEL').length],
       ['Travelled',  proNorm.filter(r=>r.stage==='TRAVELLED').length],
     ];
@@ -3975,9 +4080,12 @@ function setUserDisplay(display, role) {
   function renderPipeline() {
     const el = document.getElementById('pipeline-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
-    const proStageList = proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStageList  = lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
-    const lbFiltered = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const pipelineRows = allRows();
+    const proRows = pipelineRows.filter(r=>r.type==='pro').map(r=>({...r, pipelineStage:proPipelineStageValue(r)}));
+    const lbRows = pipelineRows.filter(r=>r.type==='lb').map(r=>({...r, pipelineStage:lbPipelineStageValue(r)}));
+    const proStageList = PRO_PIPELINE_STAGES;
+    const lbStageList  = LB_PIPELINE_STAGES;
+    const lbFiltered = lbCountryFilter ? lbRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbRows;
     const stages = isPro ? proStageList : lbStageList;
 
     el.innerHTML = `
@@ -3993,23 +4101,23 @@ function setUserDisplay(display, role) {
         <div class="dv5-kanban" style="margin-top:12px">
           ${stages.map(stage => {
             const items = isPro
-              ? (proDB||[]).filter(r=>r.stage===stage)
-              : lbFiltered.filter(r=>(r.travelStatus||r.travel_status||r.stage)===stage);
-            const label = stage.replace(/^(PENDING |DOCS )/,'');
+              ? proRows.filter(r=>r.pipelineStage===stage)
+              : lbFiltered.filter(r=>r.pipelineStage===stage);
+            const label = stage.replace(/^DOCS /,'');
             return `<div class="dv5-col">
               <div class="dv5-col-head">
                 <span>${h(label)}</span>
                 <span class="dv5-col-count">${items.length}</span>
               </div>
               <div class="dv5-col-body">
-                ${items.length ? items.slice(0,30).map(r => `
+                ${items.length ? items.map(r => `
                   <div class="dv5-pipe-card" onclick="${isPro?`editPro(${r.id})`:`editLB(${r.id})`}">
                     <div class="dv5-pipe-name">${h(r.name)}</div>
                     <div class="dv5-pipe-meta">${h(r.position||r.country||'—')} · ${h(r.company||'—')}</div>
                     <div class="dv5-pipe-foot">
                       <span><i class="ti ti-id"></i>${h(r.pp||'No PP')}</span>
                       ${isPro && r.commission ? `<span>${money(r.commission)}</span>` : ''}
-                      ${!isPro && r.toRefund ? `<span>${moneyUSD(r.toRefund)}</span>` : ''}
+                      ${!isPro && r.commission ? `<span>${moneyUSD(r.commission)}</span>` : ''}
                       ${!isPro && r.own_passport ? `<span style="color:#059669;font-size:9px">Own PP</span>` : ''}
                     </div>
                   </div>`).join('') : '<div class="dv5-empty">No candidates</div>'}
@@ -4097,9 +4205,13 @@ function setUserDisplay(display, role) {
     const el = document.getElementById('candidates-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
     const lbBaseRows = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    const all = isPro
+    let all = isPro
       ? (proDB||[]).map(r=>({...r,type:'pro',position:r.position||'',company:r.company||'',country:r.country||'',stage:r.stage||'SUBMITTED',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Math.max((Number(r.commission)||0)-(Number(r.paid||0)),0)}))
       : lbBaseRows.map(r=>{const r1=Number(r.r1Amt||r.r1_amt)||0,r2=Number(r.r2Amt||r.r2_amt)||0,toRef=Number(r.toRefund||r.to_refund)||0;return{...r,type:'lb',position:r.country||'General Job',company:r.company||r.country||'—',country:r.country||'—',stage:r.travelStatus||r.travel_status||r.stage||'DOCS SUBMITTED',commission:toRef,paid:r1+r2,balance:balLB(r)};});
+    const allCandidateRows = allRows();
+    all = isPro
+      ? allCandidateRows.filter(r=>r.type==='pro')
+      : allCandidateRows.filter(r=>r.type==='lb' && (!lbCountryFilter || (r.country||'')===lbCountryFilter));
     const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
     const q = candidateSearch.toLowerCase();
     let list = all.filter(r => {
@@ -4594,9 +4706,9 @@ function setUserDisplay(display, role) {
   function renderReports() {
     const el = document.getElementById('reports-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
-    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    const rows = isPro ? (proDB||[]).map(r=>({...r,type:'pro',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Number(r.balance||0)}))
-      : lbBase.map(r=>({...r,type:'lb',commission:Number(r.toRefund||0),paid:Number((r.r1Amt||0)+(r.r2Amt||0)),balance:Number(r.balance||0)}));
+    const allReportRows = allRows();
+    const lbBase = lbCountryFilter ? allReportRows.filter(r=>r.type==='lb'&&(r.country||'')===lbCountryFilter) : allReportRows.filter(r=>r.type==='lb');
+    const rows = isPro ? allReportRows.filter(r=>r.type==='pro') : lbBase;
     const fmt2 = v => isPro ? money(v) : moneyUSD(v);
     const total = rows.reduce((s,r)=>s+r.commission,0);
     const paid  = rows.reduce((s,r)=>s+r.paid,0);
@@ -4607,7 +4719,7 @@ function setUserDisplay(display, role) {
     // Pro: top jobs by position
     const jobCounts = {};
     if (isPro) {
-      (proDB||[]).forEach(r => {
+      rows.forEach(r => {
         if (r.position) { jobCounts[r.position] = jobCounts[r.position]||{count:0,travelled:0,commission:0}; jobCounts[r.position].count++; if(r.stage==='TRAVELLED') jobCounts[r.position].travelled++; jobCounts[r.position].commission+=Number(r.commission)||0; }
       });
     }
@@ -4619,7 +4731,7 @@ function setUserDisplay(display, role) {
       lbBase.forEach(r => {
         const c = r.country||'Unknown';
         countryCounts[c] = countryCounts[c]||{count:0,travelled:0,toRefund:0};
-        countryCounts[c].count++; if(r.stage==='TRAVELLED') countryCounts[c].travelled++; countryCounts[c].toRefund+=Number(r.toRefund)||0;
+        countryCounts[c].count++; if(r.stage==='TRAVELLED') countryCounts[c].travelled++; countryCounts[c].toRefund+=Number(r.commission)||0;
       });
     }
     const topCountries = Object.entries(countryCounts).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
