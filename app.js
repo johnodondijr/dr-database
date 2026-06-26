@@ -4274,8 +4274,12 @@ function setUserDisplay(display, role) {
     const lbAllRows = allFinRows.filter(r=>r.type==='lb');
     const lbRows  = lbCountryFilter ? lbAllRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbAllRows;
     const activeRows = isPro ? proRows : lbRows;
-    const companies = [...new Set(activeRows.map(r=>r.company).filter(Boolean))].sort();
-    const rows = financeCompanyFilter ? activeRows.filter(r=>r.company===financeCompanyFilter) : activeRows;
+    const companies = isPro
+      ? [...new Set(activeRows.map(r=>r.company).filter(Boolean))].sort()
+      : [...new Set(activeRows.map(r=>r.country||r.company).filter(Boolean))].sort();
+    const rows = financeCompanyFilter
+      ? activeRows.filter(r=>isPro ? r.company===financeCompanyFilter : (r.country===financeCompanyFilter||r.company===financeCompanyFilter))
+      : activeRows;
     // Pro stats (KES)
     const proFin = financeCompanyFilter ? proRows.filter(r=>r.company===financeCompanyFilter) : proRows;
     const proTotal = proFin.reduce((s,r)=>s+r.commission,0);
@@ -4283,13 +4287,15 @@ function setUserDisplay(display, role) {
     const proBal   = proFin.reduce((s,r)=>s+r.balance,0);
     const proRate  = proTotal ? Math.round(proPaid/proTotal*100) : 0;
     // LB stats (USD) — only post-travel candidates have real outstanding balances
-    const lbFin = financeCompanyFilter ? lbRows.filter(r=>r.company===financeCompanyFilter) : lbRows;
+    const lbFin = financeCompanyFilter ? lbRows.filter(r=>r.country===financeCompanyFilter||r.company===financeCompanyFilter) : lbRows;
     const lbTravelled = lbFin.filter(r => LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase()));
+    const lbPreTravel = lbFin.filter(r => !LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase())&&!r.own_passport);
     const lbTotal   = lbTravelled.reduce((s,r)=>s+r.commission,0); // total refund commitment (post-travel only)
     const lbPaidAmt = lbFin.reduce((s,r)=>s+r.paid,0);            // all refunds received
     const lbBal     = lbTravelled.reduce((s,r)=>s+r.balance,0);   // outstanding only for travelled
+    const lbExpected = lbPreTravel.reduce((s,r)=>s+r.commission,0); // pre-travel expected
     const lbOwnPP   = lbFin.filter(r=>r.own_passport).length;
-    const lbPipeline = lbFin.filter(r=>!LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase())&&!r.own_passport).length; // pre-travel, expected future refunds
+    const lbPipeline = lbPreTravel.length; // pre-travel, expected future refunds
     const total = rows.reduce((s,r)=>s+r.commission,0);
     const paid  = rows.reduce((s,r)=>s+r.paid,0);
     const bal   = rows.reduce((s,r)=>s+r.balance,0);
@@ -4364,7 +4370,7 @@ function setUserDisplay(display, role) {
             ${jobTypeTabs()}
             <input class="dv5-input" placeholder="Search client…" value="${h(financeClientSearch)}" oninput="window.setFinanceClientSearch(this.value)" style="min-width:150px">
             <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:130px">
-              <option value="">All Companies</option>
+              <option value="">${isPro?'All Companies':'All Countries'}</option>
               ${companies.map(c=>`<option value="${h(c)}" ${financeCompanyFilter===c?'selected':''}>${h(c)}</option>`).join('')}
             </select>
             <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
@@ -4379,10 +4385,10 @@ function setUserDisplay(display, role) {
             ${statCard('ti-alert-circle', money(proBal),   'Outstanding KES',   `${proFin.filter(r=>r.balance>0).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
             ${statCard('ti-chart-pie',    proRate+'%',     'Collection Rate',   'Paid vs invoiced',                '#FEF9C3','#A16207','#fff')}
           ` : `
-            ${statCard('ti-wallet',       moneyUSD(lbPaidAmt),  'Refunds Collected', 'Received so far',                                         '#DCFCE7','#16A34A','#fff')}
-            ${statCard('ti-alert-circle', moneyUSD(lbBal),      'Outstanding USD',   `${lbTravelled.filter(r=>r.balance>0).length} travelled, unpaid`,  '#FEE2E2','#DC2626','#fff')}
-            ${statCard('ti-receipt',      moneyUSD(lbTotal),    'Committed (Post-Travel)', `${lbTravelled.length} have travelled`,                      '#E0E7FF','#4338CA','#fff')}
-            ${statCard('ti-clock',        lbPipeline+'',        'In Pipeline',       'Pre-travel — refund not yet due',                                 '#FEF9C3','#A16207','#fff')}
+            ${statCard('ti-wallet',       moneyUSD(lbPaidAmt),   'Refunds Collected',  'Received so far',                                          '#DCFCE7','#16A34A','#fff')}
+            ${statCard('ti-alert-circle', moneyUSD(lbBal),      'Outstanding USD',    `${lbTravelled.filter(r=>r.balance>0).length} post-travel unpaid`, '#FEE2E2','#DC2626','#fff')}
+            ${statCard('ti-receipt',      moneyUSD(lbTotal),    'Collected + Owed',   `${lbTravelled.length} have travelled`,                            '#E0E7FF','#4338CA','#fff')}
+            ${statCard('ti-clock',        moneyUSD(lbExpected), 'Expected (Pipeline)',`${lbPipeline} pre-travel candidates`,                             '#FEF9C3','#A16207','#fff')}
           `}
         </div>
 
@@ -4719,17 +4725,30 @@ function setUserDisplay(display, role) {
     // Build clients from sourceRows only
     const cMap = new Map();
     sourceRows.forEach(r => {
-      const name = r.company || 'Unassigned';
+      const name = isPro ? (r.company || 'Unassigned') : (r.country || r.company || 'Unassigned');
+      const stage = String(r.stage||r.travelStatus||r.travel_status||'').toUpperCase();
+      const paid = isPro ? (Number(r.paid)||0) : (Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
+      const bal  = isPro ? (Number(r.balance)||0) : balLB(r);
+      const isFinished = isPro ? stage==='TRAVELLED' : LB_TRAVELLED_STAGES.has(stage);
       const c = cMap.get(name) || { name, country: r.country||'—', active:0, total:0, due:0, paid:0, manager: currentUser?.display||'Team' };
       c.total++;
-      if (r.stage !== 'TRAVELLED') c.active++;
-      c.due  += Number(r.balance)||0;
-      c.paid += Number(r.paid)||0;
+      if (!isFinished) c.active++;
+      c.due  += bal;
+      c.paid += paid;
       cMap.set(name, c);
     });
     const clients = [...cMap.values()].sort((a,b)=>b.total-a.total);
 
-    function clientCandidates(name) { return sourceRows.filter(r=>r.company===name); }
+    function clientCandidates(name) {
+      const cands = sourceRows.filter(r=>(isPro?(r.company||'Unassigned'):(r.country||r.company||'Unassigned'))===name);
+      if (isPro) return cands;
+      return cands.map(r=>({
+        ...r,
+        commission: Number(r.toRefund||r.to_refund)||0,
+        paid: (Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0),
+        balance: balLB(r),
+      }));
+    }
 
     el.innerHTML = `
       <div class="dv5-page">
@@ -4780,9 +4799,9 @@ function setUserDisplay(display, role) {
                         ${cands.map(r=>`<tr>
                           <td>${h(r.name)}</td>
                           <td>${h(isPro?r.position:r.country)}</td>
-                          <td>${badge(r.stage)}</td>
-                          <td>${h(fmt(r.submitted||r.travelDate))}</td>
-                          <td>${fmt2(r.commission||r.toRefund||0)}</td>
+                          <td>${badge(r.stage||r.travelStatus||r.travel_status)}</td>
+                          <td>${h(fmt(r.submitted_date||r.submitted||r.travelDate||r.travel_date))}</td>
+                          <td>${fmt2(r.commission||0)}</td>
                           <td>${r.balance>0?`<strong style="color:#b91c1c">${fmt2(r.balance)}</strong>`:fmt2(0)}</td>
                           <td><button class="dv5-action-btn" onclick="event.stopPropagation();openCandidateProfile('${r.type}',${r.id})">View</button></td>
                         </tr>`).join('')}
@@ -4878,9 +4897,10 @@ function setUserDisplay(display, role) {
             </div>
             ${cl.map(x => {
               if (x.done) return `
-                <div class="dv5-check-row done" style="opacity:.55;pointer-events:none">
+                <div class="dv5-check-row done" style="opacity:.7">
                   <i class="ti ti-circle-check-filled" style="color:#22A06B;font-size:18px;flex-shrink:0"></i>
-                  <span style="text-decoration:line-through">${h(x.label)}</span>
+                  <span style="text-decoration:line-through;flex:1">${h(x.label)}</span>
+                  ${x.action && x.action!=='edit' ? `<button onclick="window.checklistUntick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid #e4e4e7;background:transparent;color:#9ca3af;cursor:pointer;flex-shrink:0">Undo</button>` : ''}
                 </div>`;
               if (x.action === 'docs') return `
                 <button class="dv5-check-row clickable" onclick="openDocs('${type}',${JSON.stringify(id)},'${js(r.name)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
@@ -5013,6 +5033,68 @@ function setUserDisplay(display, role) {
     }
 
     // Refresh any open page
+    rerenderPage();
+  };
+
+  window.checklistUntick = async function(type, id, label) {
+    const db = type === 'pro' ? proDB : lbDB;
+    const rec = db.find(r => String(r.id) === String(id));
+    if (!rec) return;
+
+    // LB doc ticks (localStorage only)
+    const tickKey = `lb_${id}_${label}`;
+    if (type === 'lb' && docTicks[tickKey]) {
+      delete docTicks[tickKey];
+      saveDocTicks();
+      showToast(`Reverted: ${label}`, 'info');
+      openCandidateProfile(type, id);
+      return;
+    }
+
+    const PRO_MAP = {
+      'Interview done':       { field:'interview', stage:'INTERVIEW' },
+      'Offer letter received':{ field:'ol',        stage:'OFFER LETTER' },
+      'Medical cleared':      { field:'medical',   stage:'MEDICAL & ATTESTATION' },
+      'MOL submitted':        { field:'mol',       stage:'MOL' },
+      'Visa stamped':         { field:'visa',      stage:'VISA' },
+      'Ticket booked':        { field:'travel',    stage:'PENDING TRAVEL' },
+    };
+    const LB_MAP = {
+      'Profile Sent':    'PROFILE SENT',
+      'Selected':        'SELECTED',
+      'Passport Applied':'PASSPORT APPLIED',
+      'Visa Processing': 'VISA PROCESSING',
+      'Travelled':       'TRAVELLED',
+    };
+
+    if (type === 'pro') {
+      const map = PRO_MAP[label];
+      if (!map) return;
+      const proStageList = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+      const idx = proStageList.indexOf(map.stage);
+      const prevStage = idx > 0 ? proStageList[idx - 1] : proStageList[0];
+      rec[map.field] = null;
+      rec.stage = prevStage;
+      showToast(`Reverted: ${label}`, 'info');
+      openCandidateProfile(type, id);
+      try {
+        await dbUpdate('pro_candidates', id, { [map.field]: null, stage: prevStage });
+        addTimeline(type, id, `Reverted: ${label}`);
+      } catch(e) { console.warn('checklistUntick error', e); }
+    } else {
+      const targetStage = LB_MAP[label];
+      if (!targetStage) return;
+      const lbStageList = window.lbStages || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+      const idx = lbStageList.indexOf(targetStage);
+      const prevStage = idx > 0 ? lbStageList[idx - 1] : lbStageList[0];
+      rec.stage = prevStage;
+      showToast(`Reverted: ${label}`, 'info');
+      openCandidateProfile(type, id);
+      try {
+        await dbUpdate('lb_candidates', id, { stage: prevStage });
+        addTimeline(type, id, `Reverted: ${label}`);
+      } catch(e) { console.warn('checklistUntick error', e); }
+    }
     rerenderPage();
   };
 
