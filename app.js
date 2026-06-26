@@ -3975,8 +3975,8 @@ function setUserDisplay(display, role) {
   function renderPipeline() {
     const el = document.getElementById('pipeline-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
-    const proStageList = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStageList  = window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+    const proStageList = proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+    const lbStageList  = lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
     const lbFiltered = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
     const stages = isPro ? proStageList : lbStageList;
 
@@ -4111,9 +4111,9 @@ function setUserDisplay(display, role) {
     });
     const allSel = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
     const someSel = selectedCandidates.size > 0;
-    const proStages = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStages  = window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
-    const allStages = isPro ? proStages : lbStages;
+    const proStageList2 = proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+    const lbStageList2  = lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+    const allStages = isPro ? proStageList2 : lbStageList2;
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
@@ -4204,8 +4204,8 @@ function setUserDisplay(display, role) {
 
   window.advanceStage = async function(type, id) {
     const stages = type === 'pro'
-      ? (window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'])
-      : (window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
+      ? ((proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']))
+      : (lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
     const db = type === 'pro' ? proDB : lbDB;
     const rec = db.find(r => r.id == id);
     if (!rec) return;
@@ -4846,8 +4846,8 @@ function setUserDisplay(display, role) {
     const timeline = (allTimelines?.[`${type}_${id}`]||[]).slice(-5).reverse();
     const link = docLink(r);
     const safeLink = safeUrl(link);
-    const proStageList = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStageList  = window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+    const proStageList = (proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']);
+    const lbStageList  = lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
     const stages = type==='pro'
       ? ['Submitted','Interview','Offer Letter','Medical','MOL','Visa','Travel','Travelled']
       : ['Docs In','Profile Sent','Selected','Passport','Visa','Travelled','Refund','Done'];
@@ -5070,7 +5070,7 @@ function setUserDisplay(display, role) {
     if (type === 'pro') {
       const map = PRO_MAP[label];
       if (!map) return;
-      const proStageList = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+      const proStageList = (proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']);
       const idx = proStageList.indexOf(map.stage);
       const prevStage = idx > 0 ? proStageList[idx - 1] : proStageList[0];
       rec[map.field] = null;
@@ -5084,7 +5084,7 @@ function setUserDisplay(display, role) {
     } else {
       const targetStage = LB_MAP[label];
       if (!targetStage) return;
-      const lbStageList = window.lbStages || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+      const lbStageList = (lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
       const idx = lbStageList.indexOf(targetStage);
       const prevStage = idx > 0 ? lbStageList[idx - 1] : lbStageList[0];
       rec.stage = prevStage;
