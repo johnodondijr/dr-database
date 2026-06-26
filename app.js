@@ -4083,6 +4083,7 @@ function setUserDisplay(display, role) {
     const pipelineRows = allRows();
     const proRows = pipelineRows.filter(r=>r.type==='pro').map(r=>({...r, pipelineStage:proPipelineStageValue(r)}));
     const lbRows = pipelineRows.filter(r=>r.type==='lb').map(r=>({...r, pipelineStage:lbPipelineStageValue(r)}));
+    console.log('[dreco debug] lbDB length:', (typeof lbDB!=='undefined'?lbDB:[]).length, 'lbRows:', lbRows.length, 'stages sample:', lbRows.slice(0,3).map(r=>r.pipelineStage));
     const proStageList = PRO_PIPELINE_STAGES;
     const lbStageList  = LB_PIPELINE_STAGES;
     const lbFiltered = lbCountryFilter ? lbRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbRows;
