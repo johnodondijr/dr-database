@@ -3386,7 +3386,13 @@ function setUserDisplay(display, role) {
   };
   const safeUrl = u => /^https?:\/\//i.test(String(u||'')) ? u : '';
   const balPro  = r => (typeof proBalance === 'function') ? proBalance(r) : Math.max((Number(r.commission)||0)-(Number(r.paid)||0),0);
-  const balLB   = r => Math.max((Number(r.toRefund||r.to_refund)||0) - ((Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0)), 0);
+  const LB_TRAVELLED_STAGES = new Set(['TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
+  const lbHasTravelled = r => LB_TRAVELLED_STAGES.has(String(r.stage||r.travelStatus||r.travel_status||'').toUpperCase());
+  const balLB = r => {
+    if (r.own_passport) return 0; // no refund owed
+    if (!lbHasTravelled(r)) return 0; // hasn't travelled yet — not a debt
+    return Math.max((Number(r.toRefund||r.to_refund)||0) - ((Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0)), 0);
+  };
 
   function stageColor(stage) {
     const s = String(stage||'').toUpperCase();
@@ -4089,7 +4095,7 @@ function setUserDisplay(display, role) {
     const lbBaseRows = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
     const all = isPro
       ? (proDB||[]).map(r=>({...r,type:'pro',position:r.position||'',company:r.company||'',country:r.country||'',stage:r.stage||'SUBMITTED',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Math.max((Number(r.commission)||0)-(Number(r.paid||0)),0)}))
-      : lbBaseRows.map(r=>{const r1=Number(r.r1Amt||r.r1_amt)||0,r2=Number(r.r2Amt||r.r2_amt)||0,toRef=Number(r.toRefund||r.to_refund)||0;return{...r,type:'lb',position:r.country||'General Job',company:r.company||r.country||'—',country:r.country||'—',stage:r.stage||'DOCS SUBMITTED',commission:toRef,paid:r1+r2,balance:Math.max(toRef-(r1+r2),0)};});
+      : lbBaseRows.map(r=>{const r1=Number(r.r1Amt||r.r1_amt)||0,r2=Number(r.r2Amt||r.r2_amt)||0,toRef=Number(r.toRefund||r.to_refund)||0;return{...r,type:'lb',position:r.country||'General Job',company:r.company||r.country||'—',country:r.country||'—',stage:r.stage||'DOCS SUBMITTED',commission:toRef,paid:r1+r2,balance:balLB(r)};});
     const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
     const q = candidateSearch.toLowerCase();
     let list = all.filter(r => {
@@ -4272,12 +4278,14 @@ function setUserDisplay(display, role) {
     const proPaid  = proFin.reduce((s,r)=>s+r.paid,0);
     const proBal   = proFin.reduce((s,r)=>s+r.balance,0);
     const proRate  = proTotal ? Math.round(proPaid/proTotal*100) : 0;
-    // LB stats (USD)
+    // LB stats (USD) — only post-travel candidates have real outstanding balances
     const lbFin = financeCompanyFilter ? lbRows.filter(r=>r.company===financeCompanyFilter) : lbRows;
-    const lbTotal = lbFin.reduce((s,r)=>s+r.commission,0);
-    const lbPaidAmt = lbFin.reduce((s,r)=>s+r.paid,0);
-    const lbBal   = lbFin.reduce((s,r)=>s+r.balance,0);
-    const lbOwnPP = lbFin.filter(r=>r.own_passport).length;
+    const lbTravelled = lbFin.filter(r => LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase()));
+    const lbTotal   = lbTravelled.reduce((s,r)=>s+r.commission,0); // total refund commitment (post-travel only)
+    const lbPaidAmt = lbFin.reduce((s,r)=>s+r.paid,0);            // all refunds received
+    const lbBal     = lbTravelled.reduce((s,r)=>s+r.balance,0);   // outstanding only for travelled
+    const lbOwnPP   = lbFin.filter(r=>r.own_passport).length;
+    const lbPipeline = lbFin.filter(r=>!LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase())&&!r.own_passport).length; // pre-travel, expected future refunds
     const total = rows.reduce((s,r)=>s+r.commission,0);
     const paid  = rows.reduce((s,r)=>s+r.paid,0);
     const bal   = rows.reduce((s,r)=>s+r.balance,0);
@@ -4367,10 +4375,10 @@ function setUserDisplay(display, role) {
             ${statCard('ti-alert-circle', money(proBal),   'Outstanding KES',   `${proFin.filter(r=>r.balance>0).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
             ${statCard('ti-chart-pie',    proRate+'%',     'Collection Rate',   'Paid vs invoiced',                '#FEF9C3','#A16207','#fff')}
           ` : `
-            ${statCard('ti-receipt',      moneyUSD(lbTotal),   'Total to Refund', `${lbFin.length} candidates`,     '#E0E7FF','#4338CA','#fff')}
-            ${statCard('ti-wallet',       moneyUSD(lbPaidAmt), 'Collected USD',   'Refunds received',               '#DCFCE7','#16A34A','#fff')}
-            ${statCard('ti-alert-circle', moneyUSD(lbBal),     'Outstanding USD', `${lbFin.filter(r=>r.balance>0&&!r.own_passport).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
-            ${statCard('ti-passport',     lbOwnPP+'',          'Own Passport',    'No refund required',             '#F0FDF4','#059669','#fff')}
+            ${statCard('ti-wallet',       moneyUSD(lbPaidAmt),  'Refunds Collected', 'Received so far',                                         '#DCFCE7','#16A34A','#fff')}
+            ${statCard('ti-alert-circle', moneyUSD(lbBal),      'Outstanding USD',   `${lbTravelled.filter(r=>r.balance>0).length} travelled, unpaid`,  '#FEE2E2','#DC2626','#fff')}
+            ${statCard('ti-receipt',      moneyUSD(lbTotal),    'Committed (Post-Travel)', `${lbTravelled.length} have travelled`,                      '#E0E7FF','#4338CA','#fff')}
+            ${statCard('ti-clock',        lbPipeline+'',        'In Pipeline',       'Pre-travel — refund not yet due',                                 '#FEF9C3','#A16207','#fff')}
           `}
         </div>
 
