@@ -4072,10 +4072,10 @@ function setUserDisplay(display, role) {
     const list = filterCandidates().filter(r => selectedCandidates.has(r.type+'_'+r.id));
     for (const r of list) {
       const table = r.type==='pro' ? 'pro_candidates' : 'lb_candidates';
-      await dbUpdate(table, r.id, {stage});
+      await dbUpdate(table, r.id, r.type==='pro' ? {stage} : {stage, travelStatus: stage});
       const db2 = r.type==='pro' ? proDB : lbDB;
       const idx = db2.findIndex(x => x.id===r.id);
-      if (idx >= 0) db2[idx].stage = stage;
+      if (idx >= 0) { if (r.type==='pro') db2[idx].stage = stage; else db2[idx].travelStatus = stage; }
     }
     selectedCandidates.clear();
     renderCandidates();
@@ -4099,7 +4099,7 @@ function setUserDisplay(display, role) {
     const lbBaseRows = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
     const all = isPro
       ? (proDB||[]).map(r=>({...r,type:'pro',position:r.position||'',company:r.company||'',country:r.country||'',stage:r.stage||'SUBMITTED',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Math.max((Number(r.commission)||0)-(Number(r.paid||0)),0)}))
-      : lbBaseRows.map(r=>{const r1=Number(r.r1Amt||r.r1_amt)||0,r2=Number(r.r2Amt||r.r2_amt)||0,toRef=Number(r.toRefund||r.to_refund)||0;return{...r,type:'lb',position:r.country||'General Job',company:r.company||r.country||'—',country:r.country||'—',stage:r.stage||'DOCS SUBMITTED',commission:toRef,paid:r1+r2,balance:balLB(r)};});
+      : lbBaseRows.map(r=>{const r1=Number(r.r1Amt||r.r1_amt)||0,r2=Number(r.r2Amt||r.r2_amt)||0,toRef=Number(r.toRefund||r.to_refund)||0;return{...r,type:'lb',position:r.country||'General Job',company:r.company||r.country||'—',country:r.country||'—',stage:r.travelStatus||r.travel_status||r.stage||'DOCS SUBMITTED',commission:toRef,paid:r1+r2,balance:balLB(r)};});
     const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
     const q = candidateSearch.toLowerCase();
     let list = all.filter(r => {
@@ -4209,16 +4209,17 @@ function setUserDisplay(display, role) {
     const db = type === 'pro' ? proDB : lbDB;
     const rec = db.find(r => r.id == id);
     if (!rec) return;
-    const cur = (rec.stage || stages[0]).toUpperCase();
+    const cur = (type === 'pro' ? rec.stage : (rec.travelStatus || rec.travel_status) || stages[0]).toUpperCase();
     const idx = stages.findIndex(s => s.toUpperCase() === cur);
     if (idx === -1 || idx >= stages.length - 1) { showToast('Already at final stage','info'); return; }
     const nextStage = stages[idx + 1];
-    rec.stage = nextStage;
+    if (type === 'pro') rec.stage = nextStage; else rec.travelStatus = nextStage;
     showToast(`Moved to ${nextStage}`, 'success');
     renderCandidates();
     try {
       const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
-      await dbUpdate(table, id, { stage: nextStage });
+      const updateField = type === 'pro' ? { stage: nextStage } : { stage: nextStage, travelStatus: nextStage };
+      await dbUpdate(table, id, updateField);
     } catch(e) { console.warn('advanceStage save error', e); }
   };
 
