@@ -322,6 +322,8 @@ let allDocs       = {};
 let allTimelines  = {};
 let proStages     = ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
 let lbStages      = ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+const PRO_PIPELINE_STAGES = ['PENDING OFFER LETTER','OFFER LETTER','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+const LB_PIPELINE_STAGES = ['SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
 let drecoExpenses = JSON.parse(safeLocalGet('dreco_expenses') || '[]');
 let drecoEvents   = JSON.parse(safeLocalGet('dreco_events') || '[]');
 let drecoAudit    = JSON.parse(safeLocalGet('dreco_audit') || '[]');
@@ -466,9 +468,21 @@ function cleanStage(value, fallback = '') {
 function canonicalProStage(stage) {
   const value = cleanStage(stage);
   const legacyMap = {
-    'PENDING OFFER LETTER': 'OFFER LETTER',
+    'PENDING OFFER': 'PENDING OFFER LETTER',
+    'PENDING OL': 'PENDING OFFER LETTER',
+    'OFFER': 'OFFER LETTER',
+    'OL': 'OFFER LETTER',
+    'MEDICAL': 'MOL',
+    'MEDICAL & ATTESTATION': 'MOL',
     'PENDING MOL': 'MOL',
+    'WORK PERMIT': 'MOL',
     'PENDING VISA': 'VISA',
+    'TICKET BOOKED': 'PENDING TRAVEL',
+    'READY TO TRAVEL': 'PENDING TRAVEL',
+    'TRAVEL': 'PENDING TRAVEL',
+    'TRAVELING': 'TRAVELLED',
+    'TRAVELLING': 'TRAVELLED',
+    'TRAVELED': 'TRAVELLED',
   };
   return legacyMap[value] || value;
 }
@@ -477,6 +491,28 @@ function proStageValue(row = {}) {
 }
 function lbStageValue(row = {}) {
   return cleanStage(row.stage || row.travelStatus || row.travel_status, lbStages[0] || 'DOCS SUBMITTED');
+}
+function proPipelineStageValue(row = {}) {
+  const raw = row.raw || row;
+  const stage = canonicalProStage(raw.stage || row.stage);
+  if (stage === 'TRAVELLED') return 'TRAVELLED';
+  if (toInput(raw.travel || row.travel)) return 'PENDING TRAVEL';
+  if (toInput(raw.visa || row.visa)) return 'VISA';
+  if (toInput(raw.mol || row.mol)) return 'MOL';
+  if (toInput(raw.ol || row.ol)) return 'OFFER LETTER';
+  if (PRO_PIPELINE_STAGES.includes(stage)) return stage;
+  if (['SUBMITTED','INTERVIEW','PENDING INTERVIEW','NOT YET',''].includes(stage)) return 'PENDING OFFER LETTER';
+  return 'PENDING OFFER LETTER';
+}
+function lbPipelineStageValue(row = {}) {
+  const raw = row.raw || row;
+  const stage = cleanStage(raw.stage || raw.travelStatus || raw.travel_status || row.stage);
+  const map = {
+    'DOCS SUBMITTED': 'SUBMITTED',
+    'DOCUMENTS SUBMITTED': 'SUBMITTED',
+    'NOT YET': 'SUBMITTED',
+  };
+  return LB_PIPELINE_STAGES.includes(map[stage] || stage) ? (map[stage] || stage) : 'SUBMITTED';
 }
 function stageListWithData(configured = [], rows = [], getter = row => row.stage, normalizer = cleanStage) {
   const seen = new Set();
@@ -4045,10 +4081,10 @@ function setUserDisplay(display, role) {
     const el = document.getElementById('pipeline-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
     const pipelineRows = allRows();
-    const proRows = pipelineRows.filter(r=>r.type==='pro');
-    const lbRows = pipelineRows.filter(r=>r.type==='lb');
-    const proStageList = stageListWithData(proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'], proRows, r=>r.stage, canonicalProStage);
-    const lbStageList  = stageListWithData(lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'], lbRows, r=>r.stage);
+    const proRows = pipelineRows.filter(r=>r.type==='pro').map(r=>({...r, pipelineStage:proPipelineStageValue(r)}));
+    const lbRows = pipelineRows.filter(r=>r.type==='lb').map(r=>({...r, pipelineStage:lbPipelineStageValue(r)}));
+    const proStageList = PRO_PIPELINE_STAGES;
+    const lbStageList  = LB_PIPELINE_STAGES;
     const lbFiltered = lbCountryFilter ? lbRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbRows;
     const stages = isPro ? proStageList : lbStageList;
 
@@ -4065,8 +4101,8 @@ function setUserDisplay(display, role) {
         <div class="dv5-kanban" style="margin-top:12px">
           ${stages.map(stage => {
             const items = isPro
-              ? proRows.filter(r=>r.stage===stage)
-              : lbFiltered.filter(r=>r.stage===stage);
+              ? proRows.filter(r=>r.pipelineStage===stage)
+              : lbFiltered.filter(r=>r.pipelineStage===stage);
             const label = stage.replace(/^DOCS /,'');
             return `<div class="dv5-col">
               <div class="dv5-col-head">
