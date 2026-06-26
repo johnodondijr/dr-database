@@ -3994,7 +3994,7 @@ function setUserDisplay(display, role) {
           ${stages.map(stage => {
             const items = isPro
               ? (proDB||[]).filter(r=>r.stage===stage)
-              : lbFiltered.filter(r=>r.stage===stage);
+              : lbFiltered.filter(r=>(r.travelStatus||r.travel_status||r.stage)===stage);
             const label = stage.replace(/^(PENDING |DOCS )/,'');
             return `<div class="dv5-col">
               <div class="dv5-col-head">
