@@ -1497,19 +1497,19 @@ function setKanbanSource(src,btn){
 }
 function renderKanban(){
   const board=document.getElementById('kanban-board'); if(!board) return;
+  const kanbanRows=allRows().filter(r=>r.type===kanbanSource);
   const stages=kanbanSource==='pro'
-    ? stageListWithData(proStages, proDB, proStageValue, canonicalProStage)
-    : stageListWithData(lbStages, lbDB, lbStageValue);
-  const rows=kanbanSource==='pro'?proDB:lbDB;
+    ? stageListWithData(proStages, kanbanRows, r=>r.stage, canonicalProStage)
+    : stageListWithData(lbStages, kanbanRows, r=>r.stage);
   board.innerHTML=stages.map(stage=>{
-    const items=rows.filter(r=>(kanbanSource==='pro'?proStageValue(r):lbStageValue(r))===stage);
+    const items=kanbanRows.filter(r=>r.stage===stage);
     const cards=items.length?items.map(r=>{
       const meta=kanbanSource==='pro'
         ? `${r.position||'No position'}  |  ${r.company||'No company'}`
-        : `${r.ppStatus||r.pp_status||'Passport'}  |  ${getRefundStatus(r)}`;
+        : `${r.own_passport?'Own passport':'Passport'}  |  ${getRefundStatus(r.raw||r)}`;
       const footer=kanbanSource==='pro'
         ? `<span class="kanban-card-country">${r.country||'-'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
-        : `<span class="kanban-card-country">${r.phone||'-'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.toRefund||r.to_refund)||0)}</span>`;
+        : `<span class="kanban-card-country">${r.phone||'-'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.commission)||0)}</span>`;
       return `<div class="kanban-card" onclick="${kanbanSource==='pro'?'editPro':'editLB'}(${r.id})">
         <div class="kanban-card-name">${r.name}</div>
         <div class="kanban-card-meta"><i class="ti ti-id"></i>${meta}</div>
@@ -4044,9 +4044,12 @@ function setUserDisplay(display, role) {
   function renderPipeline() {
     const el = document.getElementById('pipeline-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
-    const proStageList = stageListWithData(proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'], proDB || [], proStageValue, canonicalProStage);
-    const lbStageList  = stageListWithData(lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'], lbDB || [], lbStageValue);
-    const lbFiltered = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
+    const pipelineRows = allRows();
+    const proRows = pipelineRows.filter(r=>r.type==='pro');
+    const lbRows = pipelineRows.filter(r=>r.type==='lb');
+    const proStageList = stageListWithData(proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'], proRows, r=>r.stage, canonicalProStage);
+    const lbStageList  = stageListWithData(lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'], lbRows, r=>r.stage);
+    const lbFiltered = lbCountryFilter ? lbRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbRows;
     const stages = isPro ? proStageList : lbStageList;
 
     el.innerHTML = `
@@ -4062,8 +4065,8 @@ function setUserDisplay(display, role) {
         <div class="dv5-kanban" style="margin-top:12px">
           ${stages.map(stage => {
             const items = isPro
-              ? (proDB||[]).filter(r=>proStageValue(r)===stage)
-              : lbFiltered.filter(r=>lbStageValue(r)===stage);
+              ? proRows.filter(r=>r.stage===stage)
+              : lbFiltered.filter(r=>r.stage===stage);
             const label = stage.replace(/^DOCS /,'');
             return `<div class="dv5-col">
               <div class="dv5-col-head">
@@ -4078,7 +4081,7 @@ function setUserDisplay(display, role) {
                     <div class="dv5-pipe-foot">
                       <span><i class="ti ti-id"></i>${h(r.pp||'No PP')}</span>
                       ${isPro && r.commission ? `<span>${money(r.commission)}</span>` : ''}
-                      ${!isPro && r.toRefund ? `<span>${moneyUSD(r.toRefund)}</span>` : ''}
+                      ${!isPro && r.commission ? `<span>${moneyUSD(r.commission)}</span>` : ''}
                       ${!isPro && r.own_passport ? `<span style="color:#059669;font-size:9px">Own PP</span>` : ''}
                     </div>
                   </div>`).join('') : '<div class="dv5-empty">No candidates</div>'}
