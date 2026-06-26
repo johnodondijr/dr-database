@@ -3531,26 +3531,30 @@ function setUserDisplay(display, role) {
     if (r.type === 'lb') {
       const id = r.id;
       return [
-        {label:'National ID',       done: !!(allDocs?.[`lb_${id}_id`]       || docTicks?.[`lb_${id}_National ID`])},
-        {label:'Birth Certificate', done: !!(allDocs?.[`lb_${id}_birth`]     || docTicks?.[`lb_${id}_Birth Certificate`])},
-        {label:'Parent ID',         done: !!(allDocs?.[`lb_${id}_parent_id`] || docTicks?.[`lb_${id}_Parent ID`])},
-        {label:'Photo',             done: !!(allDocs?.[`lb_${id}_photo`]     || docTicks?.[`lb_${id}_Photo`])},
-        {label:'Passport Copy',     done: !!(allDocs?.[`lb_${id}_passport`]  || docTicks?.[`lb_${id}_Passport Copy`])},
-        {label:'Selected',          done: ['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s)},
-        {label:'Travelled',         done: ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s)},
-        {label:'Refund processed',  done: s==='REFUND COMPLETE' || r.own_passport},
+        {label:'National ID',       done: !!(allDocs?.[`lb_${id}_id`]       || docTicks?.[`lb_${id}_National ID`]),  action:'tick'},
+        {label:'Birth Certificate', done: !!(allDocs?.[`lb_${id}_birth`]     || docTicks?.[`lb_${id}_Birth Certificate`]), action:'tick'},
+        {label:'Parent ID',         done: !!(allDocs?.[`lb_${id}_parent_id`] || docTicks?.[`lb_${id}_Parent ID`]),   action:'tick'},
+        {label:'Photo',             done: !!(allDocs?.[`lb_${id}_photo`]     || docTicks?.[`lb_${id}_Photo`]),       action:'tick'},
+        {label:'Passport Copy',     done: !!(allDocs?.[`lb_${id}_passport`]  || docTicks?.[`lb_${id}_Passport Copy`]), action:'tick'},
+        {label:'Profile Sent',      done: ['PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
+        {label:'Selected',          done: ['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
+        {label:'Passport Applied',  done: ['PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
+        {label:'Visa Processing',   done: ['VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
+        {label:'Travelled',         done: ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
+        {label:'Refund processed',  done: s==='REFUND COMPLETE' || r.own_passport, action: r.own_passport ? null : 'edit'},
       ];
     }
     const proStageOrder = ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
     const idx = proStageOrder.indexOf(s);
     return [
-      {label:'Documents uploaded',   done: hasDoc(r)},
-      {label:'Offer letter received',done: !!r.raw?.ol || idx >= proStageOrder.indexOf('OFFER LETTER')},
-      {label:'Medical cleared',      done: !!r.raw?.medical || idx >= proStageOrder.indexOf('MEDICAL & ATTESTATION')},
-      {label:'MOL submitted',        done: !!r.raw?.mol || idx >= proStageOrder.indexOf('MOL')},
-      {label:'Visa stamped',         done: !!r.raw?.visa || idx >= proStageOrder.indexOf('VISA')},
-      {label:'Ticket booked',        done: !!r.travel || s==='TRAVELLED'},
-      {label:'Commission collected', done: r.balance === 0 && r.commission > 0},
+      {label:'Documents uploaded',   done: hasDoc(r),                                                          action:'docs'},
+      {label:'Interview done',       done: idx >= proStageOrder.indexOf('INTERVIEW'),                          action:'stage'},
+      {label:'Offer letter received',done: !!r.raw?.ol || idx >= proStageOrder.indexOf('OFFER LETTER'),       action:'stage'},
+      {label:'Medical cleared',      done: !!r.raw?.medical || idx >= proStageOrder.indexOf('MEDICAL & ATTESTATION'), action:'stage'},
+      {label:'MOL submitted',        done: !!r.raw?.mol || idx >= proStageOrder.indexOf('MOL'),               action:'stage'},
+      {label:'Visa stamped',         done: !!r.raw?.visa || idx >= proStageOrder.indexOf('VISA'),             action:'stage'},
+      {label:'Ticket booked',        done: !!r.travel || s==='TRAVELLED',                                     action:'stage'},
+      {label:'Commission collected', done: r.balance === 0 && r.commission > 0,                               action:'edit'},
     ];
   }
   function checklistPct(r) {
@@ -4823,12 +4827,13 @@ function setUserDisplay(display, role) {
     const timeline = (allTimelines?.[`${type}_${id}`]||[]).slice(-5).reverse();
     const link = docLink(r);
     const safeLink = safeUrl(link);
+    const proStageList = window.proStages || ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+    const lbStageList  = window.lbStages  || ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
     const stages = type==='pro'
-      ? ['Submitted','Offer','MOL','Visa','Travel','Travelled']
-      : ['Registered','Documents','Payment','Travelled'];
-    const stageIdx = type==='pro'
-      ? ['—','PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'].indexOf(r.stage)
-      : r.stage==='TRAVELLED'?3:r.paid>0?2:1;
+      ? ['Submitted','Interview','Offer Letter','Medical','MOL','Visa','Travel','Travelled']
+      : ['Docs In','Profile Sent','Selected','Passport','Visa','Travelled','Refund','Done'];
+    const stageListRef = type==='pro' ? proStageList : lbStageList;
+    const stageIdx = stageListRef.indexOf(r.stage);
 
     modal.innerHTML = `
       <div class="dv5-profile-panel">
@@ -4864,30 +4869,58 @@ function setUserDisplay(display, role) {
         </div>
         <div class="dv5-profile-grid">
           <div class="dv5-card">
-            <div class="dv5-card-head"><span class="dv5-card-title">Stage Checklist</span><span class="dv5-card-sub">${pct}%</span></div>
-            ${cl.map(x=>`
-              <div class="dv5-check-row">
-                <i class="ti ${x.done?'ti-circle-check-filled':'ti-circle'}" style="color:${x.done?'#22A06B':'#ccc'}"></i>
-                <span>${h(x.label)}</span>
-              </div>`).join('')}
+            <div class="dv5-card-head">
+              <span class="dv5-card-title">Stage Checklist</span>
+              <span class="dv5-card-sub">${pct}%</span>
+            </div>
+            <div style="height:4px;background:#f0f0f0;border-radius:2px;margin:0 0 12px">
+              <div style="height:100%;width:${pct}%;background:${pct===100?'#22A06B':'#5347CE'};border-radius:2px;transition:width .4s"></div>
+            </div>
+            ${cl.map(x => {
+              if (x.done) return `
+                <div class="dv5-check-row done" style="opacity:.55;pointer-events:none">
+                  <i class="ti ti-circle-check-filled" style="color:#22A06B;font-size:18px;flex-shrink:0"></i>
+                  <span style="text-decoration:line-through">${h(x.label)}</span>
+                </div>`;
+              if (x.action === 'docs') return `
+                <button class="dv5-check-row clickable" onclick="openDocs('${type}',${JSON.stringify(id)},'${js(r.name)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
+                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
+                  <span>${h(x.label)}</span>
+                  <span class="dv5-check-hint">Upload →</span>
+                </button>`;
+              if (x.action === 'edit') return `
+                <button class="dv5-check-row clickable" onclick="${type==='pro'?`editPro(${id})`:`editLB(${id})`}" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
+                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
+                  <span>${h(x.label)}</span>
+                  <span class="dv5-check-hint">Enter amount →</span>
+                </button>`;
+              return `
+                <button class="dv5-check-row clickable" onclick="window.checklistTick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
+                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
+                  <span>${h(x.label)}</span>
+                  <span class="dv5-check-hint">Mark done ✓</span>
+                </button>`;
+            }).join('')}
           </div>
           <div class="dv5-card">
             <div class="dv5-card-head"><span class="dv5-card-title">Details</span></div>
             <div class="dv5-detail-grid">
-              <span>Submitted</span><strong>${h(fmt(r.submitted))}</strong>
+              <span>${type==='pro'?'Submitted':'Doc Date'}</span><strong>${h(fmt(r.submitted||r.travelDate))}</strong>
               <span>Stage</span><strong>${h(r.stage)}</strong>
-              <span>Company</span><strong>${h(r.company)}</strong>
-              ${type==='pro' && r.raw?.mol ? `<span>MOL Date</span><strong>${h(fmt(r.raw.mol))}</strong>` : ''}
-              ${type==='pro' && r.raw?.visa ? `<span>Visa Date</span><strong>${h(fmt(r.raw.visa))}</strong>` : ''}
+              <span>${type==='pro'?'Company':'Country'}</span><strong>${h(r.company||r.country||'—')}</strong>
+              ${type==='pro' && r.raw?.ol     ? `<span>Offer Letter</span><strong>${h(fmt(r.raw.ol))}</strong>` : ''}
+              ${type==='pro' && r.raw?.medical? `<span>Medical</span><strong>${h(fmt(r.raw.medical))}</strong>` : ''}
+              ${type==='pro' && r.raw?.mol    ? `<span>MOL Date</span><strong>${h(fmt(r.raw.mol))}</strong>` : ''}
+              ${type==='pro' && r.raw?.visa   ? `<span>Visa Date</span><strong>${h(fmt(r.raw.visa))}</strong>` : ''}
               ${r.travel ? `<span>Travel Date</span><strong>${h(fmt(r.travel))}</strong>` : ''}
             </div>
           </div>
           <div class="dv5-card">
             <div class="dv5-card-head"><span class="dv5-card-title">Finance</span></div>
             <div class="dv5-detail-grid">
-              <span>Commission</span><strong>${money(r.commission)}</strong>
-              <span>Paid</span><strong>${money(r.paid)}</strong>
-              <span>Balance</span><strong style="color:${r.balance>0?'#B83232':'#22A06B'}">${money(r.balance)}</strong>
+              <span>${type==='pro'?'Commission':'To Refund'}</span><strong>${type==='pro'?money(r.commission):moneyUSD(r.commission)}</strong>
+              <span>Paid</span><strong>${type==='pro'?money(r.paid):moneyUSD(r.paid)}</strong>
+              <span>Balance</span><strong style="color:${r.balance>0?'#B83232':'#22A06B'}">${type==='pro'?money(r.balance):moneyUSD(r.balance)}</strong>
               <span>Documents</span><strong>${link?'Uploaded':'Missing'}</strong>
             </div>
             ${safeLink?`<div style="margin-top:12px">
@@ -4917,6 +4950,70 @@ function setUserDisplay(display, role) {
   window.closeProfile = function() {
     const m = document.getElementById('dv5-profile-modal');
     if (m) m.style.display = 'none';
+  };
+
+  // Map checklist label → {field to set today, stage to advance to}
+  const PRO_CHECKLIST_MAP = {
+    'Interview done':       { field:'interview', stage:'INTERVIEW' },
+    'Offer letter received':{ field:'ol',        stage:'OFFER LETTER' },
+    'Medical cleared':      { field:'medical',   stage:'MEDICAL & ATTESTATION' },
+    'MOL submitted':        { field:'mol',       stage:'MOL' },
+    'Visa stamped':         { field:'visa',      stage:'VISA' },
+    'Ticket booked':        { field:'travel',    stage:'PENDING TRAVEL' },
+  };
+  const LB_CHECKLIST_STAGE_MAP = {
+    'Profile Sent':    'PROFILE SENT',
+    'Selected':        'SELECTED',
+    'Passport Applied':'PASSPORT APPLIED',
+    'Visa Processing': 'VISA PROCESSING',
+    'Travelled':       'TRAVELLED',
+  };
+
+  window.checklistTick = async function(type, id, label) {
+    const today = new Date().toISOString().slice(0,10);
+    const db = type === 'pro' ? proDB : lbDB;
+    const rec = db.find(r => String(r.id) === String(id));
+    if (!rec) return;
+
+    let updates = {};
+
+    if (type === 'pro') {
+      const map = PRO_CHECKLIST_MAP[label];
+      if (!map) return;
+      updates[map.field] = today;
+      updates.stage = map.stage;
+      rec[map.field] = today;
+      rec.stage = map.stage;
+    } else {
+      const newStage = LB_CHECKLIST_STAGE_MAP[label];
+      if (newStage) {
+        updates.stage = newStage;
+        rec.stage = newStage;
+        if (newStage === 'TRAVELLED') { updates.travelDate = today; rec.travelDate = today; }
+      } else {
+        // doc tick
+        docTicks[`lb_${id}_${label}`] = true;
+        saveDocTicks();
+        openCandidateProfile(type, id);
+        return;
+      }
+    }
+
+    // Optimistic UI update
+    openCandidateProfile(type, id);
+    showToast(`✓ ${label}`, 'success');
+
+    // Save to Supabase
+    try {
+      const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
+      await dbUpdate(table, id, updates);
+      addTimeline(type, id, `Checked: ${label}`);
+    } catch(e) {
+      console.warn('checklistTick save error', e);
+    }
+
+    // Refresh any open page
+    rerenderPage();
   };
 
   // ── LOGIN RATE LIMITER (SEC-12 fix) ──────────────────────
@@ -5236,8 +5333,12 @@ function setUserDisplay(display, role) {
 .dv5-step.done span { background:#22A06B; color:#fff; border-color:#22A06B; }
 .dv5-step.active span { background:#5347CE; color:#fff; border-color:#5347CE; }
 .dv5-profile-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
-.dv5-check-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border,#E8E8E8); font-size:12px; font-weight:700; color:#4B5567; }
+.dv5-check-row { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid var(--border,#E8E8E8); font-size:13px; font-weight:600; color:#374151; border-radius:6px; margin:1px 0; }
 .dv5-check-row:last-child { border:none; }
+.dv5-check-row.clickable:hover { background:#f5f3ff; color:#5347CE; }
+.dv5-check-row.clickable:hover i { color:#5347CE !important; }
+.dv5-check-hint { margin-left:auto; font-size:11px; font-weight:500; color:#9ca3af; white-space:nowrap; opacity:0; transition:opacity .15s; }
+.dv5-check-row.clickable:hover .dv5-check-hint { opacity:1; color:#5347CE; }
 .dv5-detail-grid { display:grid; grid-template-columns:1fr auto; gap:8px; }
 .dv5-detail-grid span { font-size:12px; color:#7B8496; }
 .dv5-detail-grid strong { font-size:12px; color:var(--text,#18191B); text-align:right; }
