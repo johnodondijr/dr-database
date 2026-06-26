@@ -4329,11 +4329,11 @@ function setUserDisplay(display, role) {
   window.renderTasksPage = renderTasks;
 
   // ── 5. FINANCE ────────────────────────────────────────────
-  let financeCompanyFilter = '';
+  let financePositionFilter = '';
   let financeTab = 'latest'; // 'latest' | 'upcoming'
   let financeDatePreset = 'all'; // 'all','this_month','last_month','this_quarter','this_year'
   let financeClientSearch = '';
-  window.setFinanceCompany    = v => { financeCompanyFilter = v; renderFinance(); };
+  window.setFinancePosition   = v => { financePositionFilter = v; renderFinance(); };
   window.setFinanceTab        = v => { financeTab = v; renderFinance(); };
   window.setFinanceDatePreset = v => { financeDatePreset = v; renderFinance(); };
   window.setFinanceClientSearch = v => { financeClientSearch = v; renderFinance(); };
@@ -4346,20 +4346,18 @@ function setUserDisplay(display, role) {
     const lbAllRows = allFinRows.filter(r=>r.type==='lb');
     const lbRows  = lbCountryFilter ? lbAllRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbAllRows;
     const activeRows = isPro ? proRows : lbRows;
-    const companies = isPro
-      ? [...new Set(activeRows.map(r=>r.company).filter(Boolean))].sort()
-      : [...new Set(activeRows.map(r=>r.country||r.company).filter(Boolean))].sort();
-    const rows = financeCompanyFilter
-      ? activeRows.filter(r=>isPro ? r.company===financeCompanyFilter : (r.country===financeCompanyFilter||r.company===financeCompanyFilter))
+    const positions = [...new Set(activeRows.map(r=>r.position).filter(Boolean))].sort();
+    const rows = financePositionFilter
+      ? activeRows.filter(r=>r.position===financePositionFilter)
       : activeRows;
     // Pro stats (KES)
-    const proFin = financeCompanyFilter ? proRows.filter(r=>r.company===financeCompanyFilter) : proRows;
+    const proFin = financePositionFilter ? proRows.filter(r=>r.position===financePositionFilter) : proRows;
     const proTotal = proFin.reduce((s,r)=>s+r.commission,0);
     const proPaid  = proFin.reduce((s,r)=>s+r.paid,0);
     const proBal   = proFin.reduce((s,r)=>s+r.balance,0);
     const proRate  = proTotal ? Math.round(proPaid/proTotal*100) : 0;
     // LB stats (USD) — only post-travel candidates have real outstanding balances
-    const lbFin = financeCompanyFilter ? lbRows.filter(r=>r.country===financeCompanyFilter||r.company===financeCompanyFilter) : lbRows;
+    const lbFin = financePositionFilter ? lbRows.filter(r=>r.position===financePositionFilter) : lbRows;
     const lbTravelled = lbFin.filter(r => LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase()));
     const lbPreTravel = lbFin.filter(r => !LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase())&&!r.own_passport);
     const lbTotal   = lbTravelled.reduce((s,r)=>s+r.commission,0); // total refund commitment (post-travel only)
@@ -4388,13 +4386,14 @@ function setUserDisplay(display, role) {
     });
 
     // Outstanding by company
-    const byCompany = {};
+    const byPosition = {};
     rows.filter(r=>r.balance>0).forEach(r => {
-      if (!byCompany[r.company]) byCompany[r.company] = {name:r.company,balance:0,count:0};
-      byCompany[r.company].balance += r.balance;
-      byCompany[r.company].count++;
+      const pos = r.position || 'Unknown Position';
+      if (!byPosition[pos]) byPosition[pos] = {name:pos,balance:0,count:0};
+      byPosition[pos].balance += r.balance;
+      byPosition[pos].count++;
     });
-    const companyDebt = Object.values(byCompany).sort((a,b)=>b.balance-a.balance);
+    const positionDebt = Object.values(byPosition).sort((a,b)=>b.balance-a.balance);
 
     // Date range preset filter
     const now2 = new Date();
@@ -4441,9 +4440,9 @@ function setUserDisplay(display, role) {
           <div class="dv5-head-actions">
             ${jobTypeTabs()}
             <input class="dv5-input" placeholder="Search client…" value="${h(financeClientSearch)}" oninput="window.setFinanceClientSearch(this.value)" style="min-width:150px">
-            <select class="dv5-select" onchange="setFinanceCompany(this.value)" style="min-width:130px">
-              <option value="">${isPro?'All Companies':'All Countries'}</option>
-              ${companies.map(c=>`<option value="${h(c)}" ${financeCompanyFilter===c?'selected':''}>${h(c)}</option>`).join('')}
+            <select class="dv5-select" onchange="setFinancePosition(this.value)" style="min-width:130px">
+              <option value="">All Positions</option>
+              ${positions.map(c=>`<option value="${h(c)}" ${financePositionFilter===c?'selected':''}>${h(c)}</option>`).join('')}
             </select>
             <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
           </div>
@@ -4483,13 +4482,13 @@ function setUserDisplay(display, role) {
           </div>
           <div class="dv5-card">
             <div class="dv5-card-head">
-              <span class="dv5-card-title">Outstanding by Company</span>
+              <span class="dv5-card-title">Outstanding by Position</span>
               <span class="dv5-card-sub">${isPro?money(bal):moneyUSD(bal)}</span>
             </div>
             <div class="dv5-task-list">
-              ${companyDebt.slice(0,8).map(c=>`
-                <div class="dv5-task-item" onclick="setFinanceCompany('${js(c.name)}')">
-                  <div class="dv5-task-icon high"><i class="ti ti-building"></i></div>
+              ${positionDebt.slice(0,8).map(c=>`
+                <div class="dv5-task-item" onclick="setFinancePosition('${js(c.name)}')">
+                  <div class="dv5-task-icon high"><i class="ti ti-briefcase"></i></div>
                   <div class="dv5-task-body">
                     <div class="dv5-task-title">${h(c.name)}</div>
                     <div class="dv5-task-meta">${c.count} candidate${c.count!==1?'s':''}</div>
@@ -4504,7 +4503,7 @@ function setUserDisplay(display, role) {
         <div class="dv5-table-card">
           <div class="dv5-tx-header">
             <div>
-              <div class="dv5-card-title">Transactions${financeCompanyFilter?' — '+h(financeCompanyFilter):''}</div>
+              <div class="dv5-card-title">Transactions${financePositionFilter?' — '+h(financePositionFilter):''}</div>
               <div class="dv5-card-sub" style="margin-top:2px">${financeTab==='latest'?filteredPayments.length:filteredUpcoming.length} records${searchQ?' (filtered)':''}</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
