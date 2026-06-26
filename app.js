@@ -133,7 +133,10 @@ async function postAuthAction(payload, accessToken = '') {
     },
     body: JSON.stringify(payload),
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await response.json().catch(() => null);
+  if (response.status === 404 || !data) {
+    throw new Error('Auth API is unavailable. Using local workspace mode.');
+  }
   if (!response.ok) throw new Error(data.error || 'Auth service request failed.');
   return data;
 }
@@ -381,6 +384,7 @@ function setCurrentWorkspace(account) {
 }
 function updateWorkspaceLabels() {
   const mappings = [
+    ['#topbar-workspace-name', getCompanyName()],
     ['#nav-lb .nav-item-label', 'General Jobs'],
     ['#nav-lb', 'General Jobs', 'data-title'],
     ['#bnav-lb span', 'General'],
@@ -842,17 +846,25 @@ async function doSignup() {
       return fail(err.message || 'Password could not be secured. Use HTTPS and try again.');
     }
   }
+  const signupAccount = normalizeAccount(username, {
+    ...STAFF_ACCOUNTS[username],
+    role: 'admin',
+    display,
+    companyId,
+    companyName,
+    generalJobsCountries,
+  });
+  STAFF_ACCOUNTS[username] = signupAccount;
   await saveStaffAccounts();
   errEl.style.display = 'none';
-  const account = STAFF_ACCOUNTS[username];
   enterApp({
     username,
-    role: account.role,
-    display: account.display,
-    companyId: account.companyId,
-    companyName: account.companyName,
-    generalJobsCountries: account.generalJobsCountries,
-    authUserId: account.authUserId,
+    role: signupAccount.role,
+    display: signupAccount.display,
+    companyId: signupAccount.companyId,
+    companyName: signupAccount.companyName,
+    generalJobsCountries: signupAccount.generalJobsCountries,
+    authUserId: signupAccount.authUserId,
   });
 }
 
