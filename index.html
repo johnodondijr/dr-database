@@ -3372,8 +3372,52 @@ input, textarea, select, [contenteditable] {
 #app .sidebar-user-card .suc-org{font-size:11px!important;line-height:1.25!important;max-width:100%!important}
 
 /* ══════════════════════════════════════════════════════════════
-   HRISELINK-INSPIRED THEME — clean minimal enterprise UI
+   HRISELINK-INSPIRED THEME v2 — clean minimal enterprise UI
    ══════════════════════════════════════════════════════════════ */
+
+/* Metric card icon box */
+.mc-icon{width:38px;height:38px;background:#F3F4F6;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;flex-shrink:0}
+.mc-icon i{font-size:19px;color:#6B7280}
+
+/* Tabs — HRISELINK bordered-button style */
+.pill-tabs{gap:2px!important;background:transparent!important}
+.pill-tab{padding:6px 14px!important;border-radius:8px!important;border:1px solid transparent!important;font-size:13px!important;font-weight:500!important;color:#6B7280!important;background:transparent!important;box-shadow:none!important}
+.pill-tab.active{background:#ffffff!important;border:1px solid #E5E7EB!important;color:#111827!important;font-weight:600!important;box-shadow:0 1px 3px rgba(0,0,0,.06)!important}
+.pill-tab:hover:not(.active){background:#F9FAFB!important;color:#374151!important;border-color:transparent!important}
+
+/* Sidebar search bar */
+.sidebar-search-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;margin:0 10px 10px;border:1px solid #E8EAED;border-radius:9px;background:#F9FAFB;cursor:pointer;transition:border-color .14s,background .14s;text-decoration:none}
+.sidebar-search-bar i{font-size:14px;color:#9CA3AF;flex-shrink:0}
+.sidebar-search-bar span{flex:1;font-size:12px;color:#9CA3AF;font-weight:500;user-select:none}
+.sidebar-search-bar kbd{font-size:10px;font-weight:700;color:#9CA3AF;background:#F3F4F6;border:1px solid #E8EAED;border-radius:4px;padding:1px 5px;font-family:inherit;flex-shrink:0}
+.sidebar-search-bar:hover{border-color:#D1D5DB;background:#ffffff}
+.sidebar.collapsed .sidebar-search-bar{display:none!important}
+
+/* Hide click-hint — not in HRISELINK */
+.click-hint{display:none!important}
+
+/* Topbar workspace switcher — minimal */
+.topbar-workspace{font-size:12px!important;color:#6B7280!important;background:transparent!important;border:1px solid #E8EAED!important;border-radius:8px!important;padding:5px 10px!important;gap:5px!important}
+.topbar-workspace i{font-size:13px!important;color:#9CA3AF!important}
+.topbar-workspace:hover{background:#F9FAFB!important;border-color:#D1D5DB!important;color:#111827!important}
+
+/* Panel header two-row layout */
+.panel-header{flex-wrap:wrap!important;row-gap:10px!important}
+.panel-actions{border-top:1px solid #F1F3F5;padding-top:10px;width:100%;margin-top:2px;flex-wrap:wrap;gap:6px}
+
+/* Table header — cleaner weight */
+th{font-size:12px!important;font-weight:600!important;color:#6B7280!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap!important}
+
+/* Sidebar bottom workspace badge */
+.sidebar-workspace-badge{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:0 10px;border-radius:10px;background:#F3F4F6;border:1px solid #E8EAED;cursor:pointer;transition:background .14s}
+.sidebar-workspace-badge:hover{background:#EAECEF}
+.sidebar.collapsed .sidebar-workspace-badge{justify-content:center;padding:8px 0;margin:0 auto;width:38px;height:38px;border-radius:50%}
+.sidebar-ws-av{width:30px;height:30px;border-radius:8px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.sidebar-ws-info{min-width:0;flex:1}
+.sidebar-ws-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-ws-sub{font-size:11px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-ws-caret{color:#9CA3AF;font-size:14px;flex-shrink:0}
+.sidebar.collapsed .sidebar-ws-info,.sidebar.collapsed .sidebar-ws-caret{display:none}
 
 /* App shell */
 #app,.app-layout,.main-area{background:#F4F5F7!important}
@@ -3750,7 +3794,14 @@ tr:last-child td{border-bottom:none!important}
       </button>
       <div class="sidebar-divider"></div>
 
-                        <div class="nav-section-label">General</div>
+      <!-- Sidebar search -->
+      <div class="sidebar-search-bar" role="button" tabindex="0" onclick="document.querySelector('.topbar-search-btn')&&document.querySelector('.topbar-search-btn').click()">
+        <i class="ti ti-search"></i>
+        <span>Search...</span>
+        <kbd>⌘K</kbd>
+      </div>
+
+      <div class="nav-section-label">General</div>
       <button type="button" class="nav-item active" id="nav-dash" data-title="Dashboard" aria-label="Dashboard" onclick="switchTab('dash')">
         <i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span>
       </button>
@@ -3798,6 +3849,16 @@ tr:last-child td{border-bottom:none!important}
       </button>
 
       <div class="nav-spacer"></div>
+
+      <!-- Workspace badge -->
+      <div class="sidebar-workspace-badge" onclick="switchTab('settings')" role="button" tabindex="0">
+        <div class="sidebar-ws-av" id="sidebar-ws-av">DR</div>
+        <div class="sidebar-ws-info">
+          <div class="sidebar-ws-name" id="sidebar-ws-name">Workspace</div>
+          <div class="sidebar-ws-sub" id="sidebar-ws-sub">Settings</div>
+        </div>
+        <i class="ti ti-settings" style="font-size:15px;color:#9CA3AF;margin-left:auto;flex-shrink:0"></i>
+      </div>
 </aside>
 
     <!-- MAIN -->

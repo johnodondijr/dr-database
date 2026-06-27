@@ -399,6 +399,14 @@ function updateWorkspaceLabels() {
     if (attr) el.setAttribute(attr, value); else el.textContent = value;
   });
   renderGeneralCountryTabs();
+  // Sidebar workspace badge
+  const wsAv = document.getElementById('sidebar-ws-av');
+  const wsName = document.getElementById('sidebar-ws-name');
+  if (wsAv) {
+    const cn = getCompanyName() || 'Workspace';
+    wsAv.textContent = cn.split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase() || 'WS';
+  }
+  if (wsName) wsName.textContent = getCompanyName() || 'Workspace';
 }
 function renderGeneralCountryTabs() {
   const el = document.getElementById('general-country-tabs');
@@ -2799,11 +2807,11 @@ function renderPro(){
   proDB.forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
   const metricsEl=document.getElementById('pro-metrics');
   if(metricsEl) metricsEl.innerHTML=`
-    <div class="metric-card mc-default"><div class="metric-label">Total</div><div class="metric-val">${proDB.length}</div></div>
-    <div class="metric-card mc-amber"><div class="metric-label">In process</div><div class="metric-val amber">${proDB.filter(isInProcessPro).length}</div></div>
-    <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${proDB.filter(r=>r.stage==='TRAVELLED').length}</div></div>
-    <div class="metric-card mc-ink"><div class="metric-label">Commission billed</div><div class="metric-val sm">KES ${totalComm.toLocaleString()}</div></div>
-    <div class="metric-card mc-sage"><div class="metric-label">Outstanding</div><div class="metric-val sm amber">KES ${(totalComm-totalPaid).toLocaleString()}</div></div>`;
+    <div class="metric-card mc-default"><div class="mc-icon"><i class="ti ti-users"></i></div><div class="metric-label">Total</div><div class="metric-val">${proDB.length}</div></div>
+    <div class="metric-card mc-amber"><div class="mc-icon"><i class="ti ti-clock"></i></div><div class="metric-label">In process</div><div class="metric-val amber">${proDB.filter(isInProcessPro).length}</div></div>
+    <div class="metric-card mc-green"><div class="mc-icon"><i class="ti ti-plane-departure"></i></div><div class="metric-label">Travelled</div><div class="metric-val green">${proDB.filter(r=>r.stage==='TRAVELLED').length}</div></div>
+    <div class="metric-card mc-ink"><div class="mc-icon"><i class="ti ti-coin"></i></div><div class="metric-label">Commission billed</div><div class="metric-val sm">KES ${totalComm.toLocaleString()}</div></div>
+    <div class="metric-card mc-sage"><div class="mc-icon"><i class="ti ti-alert-circle"></i></div><div class="metric-label">Outstanding</div><div class="metric-val sm amber">KES ${(totalComm-totalPaid).toLocaleString()}</div></div>`;
 
   const companies=[...new Set(proDB.map(r=>r.company).filter(Boolean))].sort();
   const csel=document.getElementById('pro-company-f');
@@ -2991,11 +2999,11 @@ function renderLB(){
   const lbIncomplete=countryRows.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED'&&getRefundStatus(r)==='incomplete').length;
   const metricsEl=document.getElementById('lb-metrics');
   if(metricsEl) metricsEl.innerHTML=`
-    <div class="metric-card mc-default"><div class="metric-label">${escHTML(country)} total</div><div class="metric-val">${countryRows.length}</div></div>
-    <div class="metric-card mc-amber"><div class="metric-label">In process</div><div class="metric-val amber">${countryRows.filter(isInProcessLB).length}</div></div>
-    <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${countryRows.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
-    <div class="metric-card mc-ink"><div class="metric-label">Collected</div><div class="metric-val sm green">${moneyUSD(lbFees)}</div></div>
-    <div class="metric-card mc-red"><div class="metric-label">Outstanding</div><div class="metric-val sm red">${moneyUSD(lbOwed-lbPaid)}</div></div>`;
+    <div class="metric-card mc-default"><div class="mc-icon"><i class="ti ti-users"></i></div><div class="metric-label">${escHTML(country)} total</div><div class="metric-val">${countryRows.length}</div></div>
+    <div class="metric-card mc-amber"><div class="mc-icon"><i class="ti ti-clock"></i></div><div class="metric-label">In process</div><div class="metric-val amber">${countryRows.filter(isInProcessLB).length}</div></div>
+    <div class="metric-card mc-green"><div class="mc-icon"><i class="ti ti-plane-departure"></i></div><div class="metric-label">Travelled</div><div class="metric-val green">${countryRows.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
+    <div class="metric-card mc-ink"><div class="mc-icon"><i class="ti ti-cash"></i></div><div class="metric-label">Collected</div><div class="metric-val sm green">${moneyUSD(lbFees)}</div></div>
+    <div class="metric-card mc-red"><div class="mc-icon"><i class="ti ti-alert-circle"></i></div><div class="metric-label">Outstanding</div><div class="metric-val sm red">${moneyUSD(lbOwed-lbPaid)}</div></div>`;
 
   const data=getFilteredLB();
   const totalPages=Math.max(1,Math.ceil(data.length/PER_PAGE));
