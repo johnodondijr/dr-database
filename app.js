@@ -3411,6 +3411,16 @@ function openChangePassword() {
   setTimeout(()=>document.getElementById('pd-current-pw')?.focus(),0);
 }
 
+function bindAccountMenuTriggers(root = document) {
+  root.querySelectorAll?.('.sidebar-account-trigger,.topbar-profile-btn').forEach(trigger => {
+    if (trigger.dataset.accountMenuBound === '1') return;
+    trigger.dataset.accountMenuBound = '1';
+    trigger.addEventListener('click', e => {
+      toggleProfileDropdown(e);
+    });
+  });
+}
+
 // Open account menu from either the static sidebar card or the dynamic v5 shell.
 document.addEventListener('click', e => {
   const trigger = e.target.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
@@ -3420,6 +3430,11 @@ document.addEventListener('click', e => {
   }
   closeProfileDropdown();
 });
+
+window.toggleProfileDropdown = toggleProfileDropdown;
+window.closeProfileDropdown = closeProfileDropdown;
+window.openProfileEdit = openProfileEdit;
+window.openChangePassword = openChangePassword;
 
 async function saveProfileChanges() {
   const msgEl = document.getElementById('pd-msg');
@@ -4067,7 +4082,7 @@ function setUserDisplay(display, role) {
       ${navItem('settings')}
       <div class="nav-spacer"></div>
       <div class="sidebar-divider" style="margin-bottom:10px"></div>
-      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" onclick="toggleProfileDropdown(event)" type="button">
+      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" type="button">
         <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
         <div class="dv5-suc-body suc-info">
           <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
@@ -4075,6 +4090,7 @@ function setUserDisplay(display, role) {
         </div>
       </button>`;
     sidebarBuilt = true;
+    bindAccountMenuTriggers(side);
   }
 
   function markActive(t) {
