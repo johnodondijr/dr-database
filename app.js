@@ -3339,9 +3339,28 @@ function showToast(msg,type=''){
 // PROFILE DROPDOWN
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function toggleProfileDropdown(e) {
-  e.stopPropagation();
+  if (e?.stopPropagation) e.stopPropagation();
   const dd = document.getElementById('profile-dropdown');
+  if (!dd) return;
+  const trigger = e?.currentTarget?.closest?.('.sidebar-account-trigger,.topbar-profile-btn')
+    || e?.target?.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
   const open = dd.classList.toggle('open');
+  if (open && trigger) {
+    const rect = trigger.getBoundingClientRect();
+    const width = Math.min(292, window.innerWidth - 20);
+    const isSidebar = trigger.classList.contains('sidebar-account-trigger');
+    const left = isSidebar
+      ? Math.min(rect.right + 10, window.innerWidth - width - 10)
+      : Math.max(10, Math.min(rect.right - width, window.innerWidth - width - 10));
+    const top = isSidebar
+      ? Math.max(10, Math.min(rect.top, window.innerHeight - 260))
+      : Math.min(rect.bottom + 10, window.innerHeight - 260);
+    dd.style.setProperty('left', `${left}px`, 'important');
+    dd.style.setProperty('top', `${top}px`, 'important');
+    dd.style.setProperty('right', 'auto', 'important');
+    dd.style.setProperty('bottom', 'auto', 'important');
+    dd.style.setProperty('width', `${width}px`, 'important');
+  }
   // clear messages when opening
   if (open) {
     const msg = document.getElementById('pd-msg');
@@ -3388,8 +3407,13 @@ function openChangePassword() {
   setTimeout(()=>document.getElementById('pd-current-pw')?.focus(),0);
 }
 
-// close dropdown when clicking outside
-document.addEventListener('click', () => {
+// Open account menu from either the static sidebar card or the dynamic v5 shell.
+document.addEventListener('click', e => {
+  const trigger = e.target.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
+  if (trigger) {
+    toggleProfileDropdown(e);
+    return;
+  }
   closeProfileDropdown();
 });
 
