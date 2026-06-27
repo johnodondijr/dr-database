@@ -2,7 +2,7 @@
 // SUPABASE CONFIG - replace with your project values
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 const SUPABASE_URL      = 'https://pizirpyvkxzghvxlipzc.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_UIyIdjowYK4Klg2tU4Nz8A_t1BV2QgQ';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpemlycHl2a3h6Z2h2eGxpcHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDgyOTIsImV4cCI6MjA5NjkyNDI5Mn0.MPaIYYhStetM3Wxre2SlF3xO1VfXeb9QxsMm9nyqrZA';
 const HAS_SUPABASE_CONFIG =
   SUPABASE_URL &&
   SUPABASE_ANON_KEY &&
@@ -16,43 +16,20 @@ const LOCAL_STAFF_KEY = 'dreco_staff_accounts_v1';
 const CLOUD_ACCOUNTS_KEY = 'dreco_accounts_v2';
 const AUTH_API_PATH = '/api/dreco-auth';
 const AUTH_EMAIL_DOMAIN = 'dreco.local';
-const DEFAULT_COMPANY = {
-  id: 'destiny-recruitment-consults',
-  name: 'Destiny Recruit Consults',
-  generalJobsCountries: ['Lebanon','Oman','Saudi Arabia'],
-};
-const DEFAULT_ADMIN_USERNAME = 'johnfred';
-const DEFAULT_ADMIN_BLOCKED_ALIASES = ['john_fred','john-fred','john.fred'];
-const LEGACY_DESTINY_USERS = ['fred','robert','doreen','maxwell','consolata',...DEFAULT_ADMIN_BLOCKED_ALIASES];
-const LEGACY_DESTINY_HASHES = {
-  fred: '5c6afc95abc51f229a78063cb8e582f4e7ab0198cfb30b47be8e015879e81e49',
-  robert: '0dfd05497b2dfbe6c66f70a108aae220eae2fc5259b1b9c3902d4df58d9b9004',
-  doreen: 'd11a421078a81e9751c62a48627b340d68f5d760647293f8719963ff44b2b327',
-  maxwell: '97ba06b052118b7bd451b7b0bdc8d6aa9aad347fe2f4768f93c25c0a0d181050',
-  consolata: 'b0a93dc7415fc8bb713a780060bd8796aeacd1814fc712d49868ba25674e0643',
-};
+const DEFAULT_COMPANY = { id: '', name: '', generalJobsCountries: [] };
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // STAFF ACCOUNTS
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
-const STAFF_ACCOUNTS = {
-  johnfred: { passwordSalt: 'b82c14689cdb8a3aca838dd4cc8e7eb2', passwordHash: '9979506b17f4c70fc190c836355e6418452570f7605e5f7ebfaf1bdfbc31c136', hashVersion: 'pbkdf2-sha256-200k', role: 'admin', display: 'John Fred', companyId: DEFAULT_COMPANY.id, companyName: DEFAULT_COMPANY.name, generalJobsCountries: DEFAULT_COMPANY.generalJobsCountries },
-};
-// Frozen snapshot of hardcoded accounts — used by doLogin to verify admin
-// credentials without touching cloud or localStorage. Never mutated.
-const _HARDCODED_SNAPSHOT = Object.freeze(
-  Object.fromEntries(Object.entries(STAFF_ACCOUNTS).map(([u, a]) => [u, Object.freeze({ ...a })]))
-);
-// Recovery via shared code removed — password resets go through admin only.
+const STAFF_ACCOUNTS = {};
 
 function normalizeAccount(username, account = {}) {
-  let companyName = (account.companyName || DEFAULT_COMPANY.name).trim();
-  const companyId = account.companyId || slugify(companyName) || DEFAULT_COMPANY.id;
-  if (companyId === DEFAULT_COMPANY.id) companyName = DEFAULT_COMPANY.name;
+  let companyName = (account.companyName || '').trim();
+  const companyId = account.companyId || slugify(companyName) || '';
   const legacyCountry = account.generalJobsCountry || String(account.generalJobsLabel || '').replace(/\s+Jobs$/i,'');
   const generalJobsCountries = Array.isArray(account.generalJobsCountries) && account.generalJobsCountries.length
     ? account.generalJobsCountries
-    : (legacyCountry ? [legacyCountry] : DEFAULT_COMPANY.generalJobsCountries);
+    : (legacyCountry ? [legacyCountry] : []);
   const normalized = {
     role: account.role || 'staff',
     display: account.display || username,
@@ -74,38 +51,6 @@ function normalizeAllAccounts() {
   Object.keys(STAFF_ACCOUNTS).forEach(username => {
     STAFF_ACCOUNTS[username] = normalizeAccount(username, STAFF_ACCOUNTS[username]);
   });
-}
-function cleanupLegacyDestinyUsers() {
-  const legacyAdmin = STAFF_ACCOUNTS.fred;
-  let migratedLegacyFred = false;
-  if (!STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] && legacyAdmin && (legacyAdmin.companyId || DEFAULT_COMPANY.id) === DEFAULT_COMPANY.id) {
-    STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] = {
-      ...legacyAdmin,
-      role: 'admin',
-      display: 'John Fred',
-      companyId: DEFAULT_COMPANY.id,
-      companyName: DEFAULT_COMPANY.name,
-      generalJobsCountries: legacyAdmin.generalJobsCountries || DEFAULT_COMPANY.generalJobsCountries,
-    };
-    migratedLegacyFred = true;
-  }
-  // Only remove blocked admin aliases and fred-after-migration.
-  // Never remove other legacy staff (robert, doreen, maxwell, consolata) —
-  // they are real accounts and must survive mobile first-login.
-  [...DEFAULT_ADMIN_BLOCKED_ALIASES, ...(migratedLegacyFred ? ['fred'] : [])].forEach(username => {
-    const account = STAFF_ACCOUNTS[username];
-    const isDefaultCompany = account && (account.companyId || DEFAULT_COMPANY.id) === DEFAULT_COMPANY.id;
-    if (isDefaultCompany) delete STAFF_ACCOUNTS[username];
-  });
-  if (STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME]) {
-    STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME] = normalizeAccount(DEFAULT_ADMIN_USERNAME, {
-      ...STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME],
-      role: 'admin',
-      display: STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME].display || 'John Fred',
-      companyId: DEFAULT_COMPANY.id,
-      companyName: STAFF_ACCOUNTS[DEFAULT_ADMIN_USERNAME].companyName || DEFAULT_COMPANY.name,
-    });
-  }
 }
 function slugify(value) {
   return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);
@@ -133,10 +78,7 @@ async function postAuthAction(payload, accessToken = '') {
     },
     body: JSON.stringify(payload),
   });
-  const data = await response.json().catch(() => null);
-  if (response.status === 404 || !data) {
-    throw new Error('Auth API is unavailable. Using local workspace mode.');
-  }
+  const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Auth service request failed.');
   return data;
 }
@@ -210,88 +152,89 @@ async function verifyAccountPassword(account, password) {
   }
   return { ok: false, migrated: false };
 }
-async function loadStaffAccounts() {
-  // Snapshot the hardcoded defaults so cloud/local cannot corrupt them.
-  const hardcodedDefaults = {};
-  Object.entries(STAFF_ACCOUNTS).forEach(([u, a]) => {
-    if (a.passwordHash && a.passwordSalt) hardcodedDefaults[u] = { ...a };
-  });
-
-  // Step 1: Load local accounts
-  let localAccounts = {};
+async function loadAccountFromCloud(username) {
+  if (!db) return null;
   try {
-    const saved = safeLocalGet(LOCAL_STAFF_KEY);
-    if (saved) localAccounts = JSON.parse(saved);
+    const { data, error } = await db.from('app_settings').select('value').eq('key', `user:${username}`).maybeSingle();
+    if (error || !data?.value) return null;
+    return typeof data.value === 'object' ? data.value : JSON.parse(data.value);
+  } catch { return null; }
+}
+async function saveAccountToCloud(username, account) {
+  if (!db) return;
+  try {
+    await db.from('app_settings').upsert({ key: `user:${username}`, value: account }, { onConflict: 'key' });
   } catch (err) {
-    console.warn('Saved staff accounts could not be loaded:', err);
+    console.warn('Cloud account save failed:', err);
   }
-
-  // Step 2: Load cloud accounts (if available)
-  let cloudAccounts = {};
-  if (db) {
-    try {
-      const { data, error } = await db.from('app_settings').select('value').eq('key', CLOUD_ACCOUNTS_KEY).maybeSingle();
-      if (error) throw error;
-      if (data?.value && typeof data.value === 'object') cloudAccounts = data.value;
-    } catch (err) {
-      console.warn('Cloud staff accounts could not be loaded:', err);
-    }
+}
+async function loadCompanyStaffList(companyId) {
+  if (!db) return [];
+  try {
+    const { data, error } = await db.from('app_settings').select('value').eq('key', `staff:${companyId}`).maybeSingle();
+    if (error || !data?.value) return [];
+    return Array.isArray(data.value) ? data.value : [];
+  } catch { return []; }
+}
+async function saveCompanyStaffList(companyId, usernames) {
+  if (!db) return;
+  try {
+    await db.from('app_settings').upsert({ key: `staff:${companyId}`, value: usernames }, { onConflict: 'key' });
+  } catch (err) {
+    console.warn('Cloud staff list save failed:', err);
   }
-
-  // Step 3: Merge — cloud first as the base, then local on top.
-  Object.assign(STAFF_ACCOUNTS, cloudAccounts);
-  Object.keys(localAccounts).forEach(username => {
-    const local = localAccounts[username];
-    const existing = STAFF_ACCOUNTS[username];
-    if (existing && local.passwordHash && local.passwordSalt) {
-      STAFF_ACCOUNTS[username] = { ...existing, ...local };
-    } else if (local) {
-      STAFF_ACCOUNTS[username] = { ...(existing || {}), ...local };
-    }
-  });
-
-  // Step 4: Re-apply hardcoded password hashes.
-  // They are the canonical source of truth UNLESS the user has deliberately
-  // changed their password (detected by local hash differing from the hardcoded one).
-  // A hash that matches the hardcoded default or is empty/missing means the
-  // local copy is stale/corrupted and the hardcoded value should win.
-  Object.entries(hardcodedDefaults).forEach(([u, defaults]) => {
-    const current = STAFF_ACCOUNTS[u];
-    const localHash = localAccounts[u]?.passwordHash;
-    // "Custom" means the user changed their password to something other than the default
-    const localIsCustom = localHash && localHash !== defaults.passwordHash;
-    if (localIsCustom) return; // deliberate password change — keep it
-    if (current) {
-      STAFF_ACCOUNTS[u] = { ...current, passwordHash: defaults.passwordHash, passwordSalt: defaults.passwordSalt, hashVersion: defaults.hashVersion };
-    } else {
-      STAFF_ACCOUNTS[u] = { ...defaults };
-    }
-  });
-
-  // Step 5: Persist the merged result locally for next time
-  safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
-
-  // Step 6: Normalise and clean up exactly once
-  normalizeAllAccounts();
-  cleanupLegacyDestinyUsers();
-
-  // Step 7: Push corrected accounts back to cloud so stale hashes don't persist
-  if (db) {
-    try {
-      await db.from('app_settings').upsert({ key: CLOUD_ACCOUNTS_KEY, value: STAFF_ACCOUNTS }, { onConflict: 'key' });
-    } catch (_) {}
+}
+async function loadStaffAccounts() {
+  // Migration path: load old-format accounts from localStorage so legacy logins still work
+  try {
+    const oldStore = JSON.parse(safeLocalGet(LOCAL_STAFF_KEY) || '{}');
+    Object.entries(oldStore).forEach(([username, data]) => {
+      if (!STAFF_ACCOUNTS[username]) STAFF_ACCOUNTS[username] = normalizeAccount(username, data);
+    });
+  } catch {}
+}
+async function loadCompanyStaffAccounts() {
+  const companyId = getCompanyId();
+  // Load from cloud staff list
+  const cloudList = await loadCompanyStaffList(companyId);
+  for (const username of cloudList) {
+    if (STAFF_ACCOUNTS[username]) continue;
+    const data = await loadAccountFromCloud(username);
+    if (data) STAFF_ACCOUNTS[username] = normalizeAccount(username, data);
   }
+  // Load from local staff list
+  try {
+    const localList = JSON.parse(safeLocalGet(`dreco_staff_${companyId}`) || '[]');
+    for (const username of localList) {
+      if (STAFF_ACCOUNTS[username]) continue;
+      try {
+        const localData = safeLocalGet(`dreco_account_${username}`);
+        if (localData) STAFF_ACCOUNTS[username] = normalizeAccount(username, JSON.parse(localData));
+      } catch {}
+    }
+  } catch {}
+  // Migration: old single-blob format
+  try {
+    const oldStore = JSON.parse(safeLocalGet(LOCAL_STAFF_KEY) || '{}');
+    Object.entries(oldStore).forEach(([username, data]) => {
+      if (!STAFF_ACCOUNTS[username] && (data.companyId || '') === companyId) {
+        STAFF_ACCOUNTS[username] = normalizeAccount(username, data);
+      }
+    });
+  } catch {}
 }
 async function saveStaffAccounts() {
   normalizeAllAccounts();
-  cleanupLegacyDestinyUsers();
-  safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
-  if (db) {
-    try {
-      await db.from('app_settings').upsert({ key: CLOUD_ACCOUNTS_KEY, value: STAFF_ACCOUNTS }, { onConflict: 'key' });
-    } catch (err) {
-      console.warn('Cloud staff accounts could not be saved:', err);
-    }
+  const companyId = getCompanyId();
+  const companyUsernames = [];
+  for (const [username, account] of Object.entries(STAFF_ACCOUNTS)) {
+    if ((account.companyId || '') === companyId) companyUsernames.push(username);
+    safeLocalSet(`dreco_account_${username}`, JSON.stringify(account));
+    await saveAccountToCloud(username, account);
+  }
+  if (companyUsernames.length > 0) {
+    safeLocalSet(`dreco_staff_${companyId}`, JSON.stringify(companyUsernames));
+    await saveCompanyStaffList(companyId, companyUsernames);
   }
 }
 
@@ -320,10 +263,8 @@ let proDB         = [];
 let lbDB          = [];
 let allDocs       = {};
 let allTimelines  = {};
-let proStages     = ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-let lbStages      = ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
-const PRO_PIPELINE_STAGES = ['PENDING OFFER LETTER','OFFER LETTER','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-const LB_PIPELINE_STAGES = ['SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+let proStages     = ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
+let lbStages      = ['NOT YET','TRAVELLED','NOT TRAVELLED'];
 let drecoExpenses = JSON.parse(safeLocalGet('dreco_expenses') || '[]');
 let drecoEvents   = JSON.parse(safeLocalGet('dreco_events') || '[]');
 let drecoAudit    = JSON.parse(safeLocalGet('dreco_audit') || '[]');
@@ -344,6 +285,7 @@ window.proStagePillFilter = '';
 window.lbTravelPillFilter = '';
 window.lbPPFilter         = '';
 window.generalCountryFilter = '';
+let kanbanSource = 'pro';
 let calSource = 'pro';
 let calDate = new Date();
 let appStorageMode = db ? 'cloud' : 'local';
@@ -385,7 +327,6 @@ function setCurrentWorkspace(account) {
 }
 function updateWorkspaceLabels() {
   const mappings = [
-    ['#topbar-workspace-name', getCompanyName()],
     ['#nav-lb .nav-item-label', 'General Jobs'],
     ['#nav-lb', 'General Jobs', 'data-title'],
     ['#bnav-lb span', 'General'],
@@ -437,7 +378,7 @@ async function persistWorkspaceCountries(countries) {
   const clean = [...new Set(countries.map(c => String(c || '').trim()).filter(Boolean))];
   const companyId = getCompanyId();
   Object.keys(STAFF_ACCOUNTS).forEach(username => {
-    if ((STAFF_ACCOUNTS[username].companyId || DEFAULT_COMPANY.id) === companyId) {
+    if ((STAFF_ACCOUNTS[username].companyId || '') === companyId) {
       STAFF_ACCOUNTS[username].generalJobsCountries = clean;
     }
   });
@@ -448,10 +389,9 @@ async function persistWorkspaceCountries(countries) {
 }
 
 function getDefaultLocalStore() {
-  const isDefaultCompany = getCompanyId() === DEFAULT_COMPANY.id;
   return {
-    pro: isDefaultCompany ? JSON.parse(JSON.stringify(PRO_SEED)).map(normalizeProRecord) : [],
-    lb: isDefaultCompany ? JSON.parse(JSON.stringify(LB_SEED)).map(normalizeLBRecord) : [],
+    pro: [],
+    lb: [],
     docs: {},
     timelines: {},
     proStages: [...proStages],
@@ -461,92 +401,7 @@ function getDefaultLocalStore() {
 function toNumOrNull(v) {
   return v===''||v===null||v===undefined ? null : Number(v);
 }
-function cleanStage(value, fallback = '') {
-  return String(value || fallback || '').trim().toUpperCase();
-}
-function canonicalProStage(stage) {
-  const value = cleanStage(stage);
-  const legacyMap = {
-    'PENDING OFFER': 'PENDING OFFER LETTER',
-    'PENDING OL': 'PENDING OFFER LETTER',
-    'OFFER': 'OFFER LETTER',
-    'OL': 'OFFER LETTER',
-    'MEDICAL': 'MOL',
-    'MEDICAL & ATTESTATION': 'MOL',
-    'PENDING MOL': 'MOL',
-    'WORK PERMIT': 'MOL',
-    'PENDING VISA': 'VISA',
-    'TICKET BOOKED': 'PENDING TRAVEL',
-    'READY TO TRAVEL': 'PENDING TRAVEL',
-    'TRAVEL': 'PENDING TRAVEL',
-    'TRAVELING': 'TRAVELLED',
-    'TRAVELLING': 'TRAVELLED',
-    'TRAVELED': 'TRAVELLED',
-  };
-  return legacyMap[value] || value;
-}
-function proStageValue(row = {}) {
-  return canonicalProStage(row.stage || proStages[0] || 'SUBMITTED');
-}
-function lbStageValue(row = {}) {
-  return cleanStage(row.stage || row.travelStatus || row.travel_status, lbStages[0] || 'DOCS SUBMITTED');
-}
-function proPipelineStageValue(row = {}) {
-  const raw = row.raw || row;
-  const stage = canonicalProStage(raw.stage || row.stage);
-  if (stage === 'TRAVELLED') return 'TRAVELLED';
-  if (toInput(raw.travel || row.travel)) return 'PENDING TRAVEL';
-  if (toInput(raw.visa || row.visa)) return 'VISA';
-  if (toInput(raw.mol || row.mol)) return 'MOL';
-  if (toInput(raw.ol || row.ol)) return 'OFFER LETTER';
-  if (PRO_PIPELINE_STAGES.includes(stage)) return stage;
-  if (['SUBMITTED','INTERVIEW','PENDING INTERVIEW','NOT YET',''].includes(stage)) return 'PENDING OFFER LETTER';
-  return 'PENDING OFFER LETTER';
-}
-function lbPipelineStageValue(row = {}) {
-  const raw = row.raw || row;
-  const stage = cleanStage(raw.stage || raw.travelStatus || raw.travel_status || row.stage);
-  const map = {
-    'DOCS SUBMITTED': 'SUBMITTED',
-    'DOCUMENTS SUBMITTED': 'SUBMITTED',
-    'NOT YET': 'SUBMITTED',
-  };
-  return LB_PIPELINE_STAGES.includes(map[stage] || stage) ? (map[stage] || stage) : 'SUBMITTED';
-}
-function stageListWithData(configured = [], rows = [], getter = row => row.stage, normalizer = cleanStage) {
-  const seen = new Set();
-  return [...configured, ...rows.map(getter)]
-    .map(stage => normalizer(stage))
-    .filter(stage => stage && !seen.has(stage) && seen.add(stage));
-}
-function proStageMatches(row, stages) {
-  const stage = proStageValue(row);
-  return [].concat(stages).map(canonicalProStage).includes(stage);
-}
-function proPaidAmount(row = {}) {
-  const splitPaid = (Number(row.paid1) || 0) + (Number(row.paid2) || 0);
-  return splitPaid || (Number(row.paid) || 0);
-}
-function lbRefundPaidAmount(row = {}) {
-  return (Number(row.r1Amt || row.r1_amt) || 0) + (Number(row.r2Amt || row.r2_amt) || 0);
-}
-function lbOwnPassport(row = {}) {
-  return !!row.own_passport || cleanStage(row.ppStatus || row.pp_status) === 'HAD PP';
-}
-function lbRefundReturned(row = {}) {
-  return cleanStage(row.notes) === 'RETURNED';
-}
-function lbRefundPrincipal(row = {}) {
-  if (lbOwnPassport(row) || lbRefundReturned(row)) return 0;
-  return Number(row.toRefund || row.to_refund) || 0;
-}
-function lbRefundOutstanding(row = {}) {
-  if (!['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(lbStageValue(row))) return 0;
-  return Math.max(lbRefundPrincipal(row) - lbRefundPaidAmount(row), 0);
-}
 function normalizeProRecord(r={}) {
-  const paid1 = toNumOrNull(r.paid1);
-  const paid2 = toNumOrNull(r.paid2);
   return {
     id:r.id,
     company_id:r.company_id||r.companyId||getCompanyId(),
@@ -556,37 +411,32 @@ function normalizeProRecord(r={}) {
     position:(r.position||'').toString().toUpperCase(),
     company:(r.company||'').toString().toUpperCase(),
     country:r.country||'',
-    stage:proStageValue(r),
+    stage:r.stage||proStages[0],
     submitted:normalizeDateField(r.submitted),
-    interview:normalizeDateField(r.interview),
+    interview:r.interview||null,
     ol:normalizeDateField(r.ol),
     mol:normalizeDateField(r.mol),
     visa:normalizeDateField(r.visa),
     travel:normalizeDateField(r.travel),
     commission:toNumOrNull(r.commission),
-    paid1,
-    paid2,
     paid:toNumOrNull(r.paid),
   };
 }
 function normalizeLBRecord(r={}) {
-  const travelStatus = lbStageValue(r);
   return {
     id:r.id,
     company_id:r.company_id||r.companyId||getCompanyId(),
-    country:(r.country||r.destination_country||DEFAULT_COMPANY.generalJobsCountries[0]||'Lebanon').toString(),
+    country:(r.country||r.destination_country||getGeneralCountries()[0]||'').toString(),
     name:(r.name||'').toString().toUpperCase(),
     phone:r.phone||'',
     ppStatus:r.ppStatus||r.pp_status||'APPLIED',
-    stage:travelStatus,
-    travelStatus,
+    travelStatus:r.travelStatus||r.travel_status||lbStages[0],
     travelDate:normalizeDateField(r.travelDate||r.travel_date),
     toRefund:Number(r.toRefund||r.to_refund)||0,
     r1Date:normalizeDateField(r.r1Date||r.r1_date),
     r1Amt:Number(r.r1Amt||r.r1_amt)||0,
     r2Date:normalizeDateField(r.r2Date||r.r2_date),
     r2Amt:Number(r.r2Amt||r.r2_amt)||0,
-    own_passport:lbOwnPassport(r),
     notes:r.notes||'',
   };
 }
@@ -634,69 +484,8 @@ function hideLoading() { document.getElementById('loading-overlay').classList.re
 // SIDEBAR TOGGLE
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  if (window.innerWidth <= 640) {
-    sb.classList.contains('mobile-open') ? closeMobileSidebar() : openMobileSidebar();
-  } else {
-    sb.classList.toggle('collapsed');
-  }
+  document.getElementById('sidebar').classList.toggle('collapsed');
 }
-function openMobileSidebar() {
-  const sb = document.getElementById('sidebar');
-  if (!sb) return;
-  // Must use setProperty with 'important' priority — CSS display:none!important
-  // beats normal inline styles, so we need inline !important to win the cascade.
-  const sp = (prop, val) => sb.style.setProperty(prop, val, 'important');
-  sp('display', 'flex');
-  sp('flex-direction', 'column');
-  sp('position', 'fixed');
-  sp('top', '0');
-  sp('left', '0');
-  sp('bottom', '0');
-  sp('width', 'min(280px, 85vw)');
-  sp('height', '100%');
-  sp('z-index', '400');
-  sp('overflow-y', 'auto');
-  sp('overflow-x', 'hidden');
-  sp('background', '#fff');
-  sp('box-shadow', '6px 0 32px rgba(0,0,0,.45)');
-  sp('border-radius', '0');
-  sp('border-right', '1px solid #E2E8F0');
-  sp('padding', '18px 12px 16px');
-  sb.style.animation = 'drawerSlideIn .22s cubic-bezier(.4,0,.2,1) both';
-  sb.classList.add('mobile-open');
-  document.getElementById('sidebar-backdrop')?.classList.add('visible');
-  document.body.style.overflow = 'hidden';
-}
-function closeMobileSidebar() {
-  const sb = document.getElementById('sidebar');
-  if (!sb) return;
-  sb.removeAttribute('style');
-  sb.classList.remove('mobile-open');
-  document.getElementById('sidebar-backdrop')?.classList.remove('visible');
-  document.body.style.overflow = '';
-}
-
-// Swipe-from-left-edge gesture
-(function() {
-  let touchStartX = 0, touchStartY = 0, dragging = false;
-  const EDGE_THRESHOLD = 28; // px from left edge to start swipe
-  const MIN_SWIPE = 60;      // px to trigger open
-
-  document.addEventListener('touchstart', (e) => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    dragging = touchStartX <= EDGE_THRESHOLD;
-  }, { passive: true });
-
-  document.addEventListener('touchend', (e) => {
-    if (!dragging) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
-    if (dx > MIN_SWIPE && dy < 80 && window.innerWidth <= 640) openMobileSidebar();
-    dragging = false;
-  }, { passive: true });
-})();
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // AUTH
@@ -788,90 +577,6 @@ function hideForgotPassword() {
   document.getElementById('forgot-section').style.display='none';
   document.getElementById('signup-section').style.display='none';
   document.getElementById('login-main').style.display='block';
-  // Reset both steps back to step 1
-  const step1 = document.getElementById('recovery-step-1');
-  const step2 = document.getElementById('recovery-step-2');
-  if (step1) step1.style.display = 'block';
-  if (step2) step2.style.display = 'none';
-  // Clear all fields
-  ['recovery-code-input','recovery-username-input','recovery-new-pw','recovery-confirm-pw'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  ['forgot-error','forgot-error-2','forgot-success','forgot-result'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.style.display = 'none';
-  });
-  _recoveryUsername = '';
-}
-// Track which username is being reset
-let _recoveryUsername = '';
-
-function verifyRecoveryCode() {
-  const errEl = document.getElementById('forgot-error');
-  errEl.textContent = 'Self-service password reset is not available. Please ask your workspace admin to reset your password from the Team page.';
-  errEl.style.display = 'block';
-}
-
-async function submitNewPassword() {
-  const newPw  = (document.getElementById('recovery-new-pw').value || '').trim();
-  const confPw = (document.getElementById('recovery-confirm-pw').value || '').trim();
-  const errEl  = document.getElementById('forgot-error-2');
-  const sucEl  = document.getElementById('forgot-success');
-
-  errEl.style.display = 'none';
-  sucEl.style.display = 'none';
-
-  if (newPw.length < 6) {
-    errEl.textContent = 'Password must be at least 6 characters.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (newPw !== confPw) {
-    errEl.textContent = 'Passwords do not match. Please try again.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (!_recoveryUsername || !STAFF_ACCOUNTS[_recoveryUsername]) {
-    errEl.textContent = 'Session expired. Please start over.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  try {
-    // Hash and save the new password — save locally first so it
-    // survives even if the cloud push fails, then push to cloud.
-    const account = STAFF_ACCOUNTS[_recoveryUsername];
-    await setAccountPassword(account, newPw);
-    // Save locally immediately so login can use it right away
-    safeLocalSet(LOCAL_STAFF_KEY, JSON.stringify(STAFF_ACCOUNTS));
-    // Then push to cloud (non-blocking on failure)
-    try { await saveStaffAccounts(); } catch(e) { console.warn('Cloud save after reset failed:', e); }
-
-    // Clear sensitive fields
-    document.getElementById('recovery-new-pw').value = '';
-    document.getElementById('recovery-confirm-pw').value = '';
-    document.getElementById('recovery-code-input').value = '';
-    document.getElementById('recovery-username-input').value = '';
-
-    sucEl.textContent = 'Password updated successfully. You can now log in.';
-    sucEl.style.display = 'block';
-
-    // Pre-fill username on login form and go back after 2 seconds
-    setTimeout(() => {
-      const uInput = document.getElementById('username-input');
-      if (uInput) uInput.value = _recoveryUsername;
-      _recoveryUsername = '';
-      hideForgotPassword();
-    }, 2000);
-
-  } catch (err) {
-    errEl.textContent = 'Failed to save password: ' + (err.message || 'Unknown error');
-    errEl.style.display = 'block';
-  }
-}
-
-function submitForgotPassword() {
-  // Legacy alias — now handled by verifyRecoveryCode()
-  verifyRecoveryCode();
 }
 function showSignup() {
   document.getElementById('login-main').style.display='none';
@@ -902,7 +607,6 @@ function enterApp(user) {
 
 
 async function doSignup() {
-  await loadStaffAccounts();
   const companyName=(document.getElementById('signup-company').value||'').trim();
   const display=(document.getElementById('signup-name').value||'').trim();
   const username=(document.getElementById('signup-username').value||'').trim().toLowerCase();
@@ -911,12 +615,13 @@ async function doSignup() {
   const fail=msg=>{ errEl.textContent=msg; errEl.style.display='block'; };
   if(!companyName) return fail('Company name is required.');
   if(!display) return fail('Your name is required.');
+  if(!username) return fail('Username is required.');
   if(!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
-  const companyId=slugify(companyName);
-  const generalJobsCountries=['Lebanon','Oman','Saudi Arabia'];
-  const isDefaultAdminBootstrap = username === DEFAULT_ADMIN_USERNAME && companyId === DEFAULT_COMPANY.id && !STAFF_ACCOUNTS[username]?.authUserId;
-  if(STAFF_ACCOUNTS[username] && !isDefaultAdminBootstrap) return fail('That username is already taken.');
   if(password.length<6) return fail('Password must be at least 6 characters.');
+  // Check username uniqueness
+  const existingCloud = await loadAccountFromCloud(username);
+  if (existingCloud || STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
+  const companyId=slugify(companyName);
   let authBacked = false;
   if (db?.auth) {
     try {
@@ -929,7 +634,7 @@ async function doSignup() {
     }
   }
   if (!authBacked) {
-    STAFF_ACCOUNTS[username]=normalizeAccount(username,{role:'admin',display,companyId,companyName,generalJobsCountries});
+    STAFF_ACCOUNTS[username]=normalizeAccount(username,{role:'admin',display,companyId,companyName,generalJobsCountries:[]});
     try {
       await setAccountPassword(STAFF_ACCOUNTS[username], password);
     } catch (err) {
@@ -937,25 +642,20 @@ async function doSignup() {
       return fail(err.message || 'Password could not be secured. Use HTTPS and try again.');
     }
   }
-  const signupAccount = normalizeAccount(username, {
-    ...STAFF_ACCOUNTS[username],
-    role: 'admin',
-    display,
-    companyId,
-    companyName,
-    generalJobsCountries,
-  });
-  STAFF_ACCOUNTS[username] = signupAccount;
-  await saveStaffAccounts();
+  const account = STAFF_ACCOUNTS[username];
+  safeLocalSet(`dreco_account_${username}`, JSON.stringify(account));
+  await saveAccountToCloud(username, account);
+  safeLocalSet(`dreco_staff_${companyId}`, JSON.stringify([username]));
+  await saveCompanyStaffList(companyId, [username]);
   errEl.style.display = 'none';
   enterApp({
     username,
-    role: signupAccount.role,
-    display: signupAccount.display,
-    companyId: signupAccount.companyId,
-    companyName: signupAccount.companyName,
-    generalJobsCountries: signupAccount.generalJobsCountries,
-    authUserId: signupAccount.authUserId,
+    role: account.role,
+    display: account.display,
+    companyId: account.companyId,
+    companyName: account.companyName,
+    generalJobsCountries: account.generalJobsCountries || [],
+    authUserId: account.authUserId,
   });
 }
 
@@ -988,94 +688,71 @@ function _clearLoginFailures(username) {
 }
 
 async function doLogin() {
-  const username = (document.getElementById('username-input').value||'').trim().toLowerCase();
-  const password = (document.getElementById('pw-input').value||'').trim();
-  const errEl = document.getElementById('login-error');
-  const fail = msg => { errEl.textContent = msg; errEl.style.display = 'block'; setLoginBusy(false); };
+  const username=(document.getElementById('username-input').value||'').trim().toLowerCase();
+  const password=(document.getElementById('pw-input').value||'').trim();
+  const errEl=document.getElementById('login-error');
+  const fail = msg => { errEl.textContent=msg; errEl.style.display='block'; setLoginBusy(false); };
   setLoginBusy(true);
-  errEl.style.display = 'none';
+  errEl.style.display='none';
 
   const lockoutMsg = _checkLoginLockout(username);
   if (lockoutMsg) { fail(lockoutMsg); return; }
 
-  if (DEFAULT_ADMIN_BLOCKED_ALIASES.includes(username)) {
-    fail(`Use ${DEFAULT_ADMIN_USERNAME} to sign in.`);
-    return;
-  }
-
-  // ── HARDCODED ACCOUNTS: verified directly, no cloud involved ─────────────
-  // These are defined at the top of this file and never touched by
-  // loadStaffAccounts / saveStaffAccounts / Supabase Auth.
-  // We read them from a frozen snapshot so runtime mutations cannot affect them.
-  const hardcodedEntry = _HARDCODED_SNAPSHOT[username];
-  if (hardcodedEntry) {
-    let check = { ok: false };
-    try {
-      check = await verifyAccountPassword(hardcodedEntry, password);
-    } catch (err) {
-      fail(err.message || 'Login failed. Ensure you are on HTTPS.');
-      return;
-    }
-    if (!check.ok) {
-      _recordLoginFailure(username);
-      const remaining = MAX_FAILURES - (_loginAttempts[username]?.count || 0);
-      fail(`Incorrect username or password.${remaining > 0 ? ` (${remaining} attempt${remaining!==1?'s':''} left)` : ''}`);
-      return;
-    }
-    _clearLoginFailures(username);
-    // Kick off a background cloud load so staff data is available after login,
-    // but don't block on it — the hardcoded account is already authoritative.
-    loadStaffAccounts().catch(() => {});
-    errEl.style.display = 'none';
-    setLoginSuccessState();
-    enterApp({ username, role: hardcodedEntry.role, display: hardcodedEntry.display, companyId: hardcodedEntry.companyId, companyName: hardcodedEntry.companyName, generalJobsCountries: hardcodedEntry.generalJobsCountries });
-    return;
-  }
-
-  // ── STAFF ACCOUNTS: loaded from cloud + localStorage ─────────────────────
-  await loadStaffAccounts();
-
-  // Try Supabase Auth first (gives us a live session token)
+  // Try Supabase Auth first
   try {
     const authLogin = await signInWithSupabaseAuth(username, password);
     if (authLogin?.account) {
       _clearLoginFailures(username);
-      // Preserve password fields — Supabase Auth doesn't store them
-      const prev = STAFF_ACCOUNTS[username] || {};
-      STAFF_ACCOUNTS[username] = normalizeAccount(username, {
-        ...authLogin.account,
-        passwordHash: prev.passwordHash || '',
-        passwordSalt: prev.passwordSalt || '',
-        hashVersion:  prev.hashVersion  || '',
-      });
-      await saveStaffAccounts();
+      const account = normalizeAccount(username, authLogin.account);
+      STAFF_ACCOUNTS[username] = account;
+      safeLocalSet(`dreco_account_${username}`, JSON.stringify(account));
+      await saveAccountToCloud(username, account);
       errEl.style.display = 'none';
       setLoginSuccessState();
-      enterApp({ username, role: authLogin.account.role, display: authLogin.account.display, companyId: authLogin.account.companyId, companyName: authLogin.account.companyName, generalJobsCountries: authLogin.account.generalJobsCountries, authUserId: authLogin.account.authUserId });
+      enterApp({ username, role: account.role, display: account.display, companyId: account.companyId, companyName: account.companyName, generalJobsCountries: account.generalJobsCountries, authUserId: account.authUserId });
       return;
     }
   } catch (err) {
-    console.warn('Supabase Auth unavailable; trying local registry:', err);
+    console.warn('Supabase Auth login unavailable; trying account registry:', err);
   }
 
-  // Fall back to local STAFF_ACCOUNTS registry
-  const account = STAFF_ACCOUNTS[username];
-  if (!account) { fail('Account not found. Check your internet connection and try again.'); return; }
+  // Load account from per-user cloud storage
+  let account = null;
+  const cloudData = await loadAccountFromCloud(username);
+  if (cloudData) {
+    account = normalizeAccount(username, cloudData);
+    STAFF_ACCOUNTS[username] = account;
+  }
+  // Fall back to new local format
+  if (!account) {
+    try {
+      const localData = safeLocalGet(`dreco_account_${username}`);
+      if (localData) { account = normalizeAccount(username, JSON.parse(localData)); STAFF_ACCOUNTS[username] = account; }
+    } catch {}
+  }
+  // Fall back to old single-blob format (migration)
+  if (!account) {
+    await loadStaffAccounts();
+    account = STAFF_ACCOUNTS[username] || null;
+  }
+
   let passwordCheck = { ok: false, migrated: false };
   try {
     passwordCheck = await verifyAccountPassword(account, password);
   } catch (err) {
-    fail(err.message || 'Login failed.');
-    return;
+    fail(err.message || 'Login failed.'); return;
   }
   if (!passwordCheck.ok) {
     _recordLoginFailure(username);
     const remaining = MAX_FAILURES - (_loginAttempts[username]?.count || 0);
-    fail(`Incorrect username or password.${remaining > 0 ? ` (${remaining} attempt${remaining!==1?'s':''} left)` : ''}`);
-    return;
+    const hint = remaining > 0 ? ` (${remaining} attempt${remaining !== 1?'s':''} left)` : '';
+    fail(`Incorrect username or password.${hint}`); return;
   }
   _clearLoginFailures(username);
-  if (passwordCheck.migrated) await saveStaffAccounts();
+  if (passwordCheck.migrated) {
+    safeLocalSet(`dreco_account_${username}`, JSON.stringify(account));
+    await saveAccountToCloud(username, account);
+  }
   errEl.style.display = 'none';
   setLoginSuccessState();
   enterApp({ username, role: account.role, display: account.display, companyId: account.companyId, companyName: account.companyName, generalJobsCountries: account.generalJobsCountries });
@@ -1094,22 +771,19 @@ function doLogout() {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  await loadStaffAccounts();
   initLoginInteractions();
   const saved=safeSessionGet('dr_user');
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      const account = STAFF_ACCOUNTS[parsed.username];
-      if (!account) throw new Error('Unknown saved user');
-      enterApp({
-        username: parsed.username,
-        role: account.role,
-        display: account.display,
-        companyId: account.companyId,
-        companyName: account.companyName,
-        generalJobsCountries: account.generalJobsCountries,
-      });
+      if (!parsed?.username || !parsed?.companyId) throw new Error('Invalid session');
+      // Refresh account data from cloud if available
+      const cloudData = await loadAccountFromCloud(parsed.username);
+      if (cloudData) {
+        STAFF_ACCOUNTS[parsed.username] = normalizeAccount(parsed.username, cloudData);
+        Object.assign(parsed, STAFF_ACCOUNTS[parsed.username]);
+      }
+      enterApp(parsed);
     } catch { safeSessionRemove('dr_user'); }
   }
   rebuildStageSelects();
@@ -1156,15 +830,10 @@ async function loadAllData() {
     const lbQuery = db.from('lb_candidates').select('*').order('id');
     const docsQuery = db.from('documents').select('*');
     const timelinesQuery = db.from('timelines').select('*');
-    if (companyId === DEFAULT_COMPANY.id) {
-      proQuery.or(`company_id.eq.${companyId},company_id.is.null`);
-      lbQuery.or(`company_id.eq.${companyId},company_id.is.null`);
-    } else {
-      proQuery.eq('company_id', companyId);
-      lbQuery.eq('company_id', companyId);
-      docsQuery.like('key', `${companyId}:%`);
-      timelinesQuery.like('key', `${companyId}:%`);
-    }
+    proQuery.or(`company_id.eq.${companyId},company_id.is.null`);
+    lbQuery.or(`company_id.eq.${companyId},company_id.is.null`);
+    docsQuery.or(`key.like.${companyId}:%,key.not.like.%:%`);
+    timelinesQuery.or(`key.like.${companyId}:%,key.not.like.%:%`);
     const [proRes,lbRes,docsRes,tlRes,stagesRes]=await Promise.all([
       proQuery,
       lbQuery,
@@ -1174,15 +843,15 @@ async function loadAllData() {
     ]);
     appStorageMode='cloud';
     lastSyncError='';
-    if (proRes.data&&proRes.data.length>0) proDB=proRes.data.map(normalizeProRecord); else if(companyId===DEFAULT_COMPANY.id) await seedProData(); else proDB=[];
-    if (lbRes.data&&lbRes.data.length>0)   lbDB=lbRes.data.map(normalizeLBRecord);   else if(companyId===DEFAULT_COMPANY.id) await seedLBData(); else lbDB=[];
+    if (proRes.data&&proRes.data.length>0) proDB=proRes.data.map(normalizeProRecord); else proDB=[];
+    if (lbRes.data&&lbRes.data.length>0)   lbDB=lbRes.data.map(normalizeLBRecord);   else lbDB=[];
     allDocs={};
     allTimelines={};
-    if (docsRes.data)   docsRes.data.forEach(r=>{ if(companyId===DEFAULT_COMPANY.id&&!String(r.key).includes(':')) allDocs[r.key]=r.data; else if(String(r.key).startsWith(`${companyId}:`)) allDocs[stripCompanyScopedKey(r.key)]=r.data; });
-    if (tlRes.data)     tlRes.data.forEach(r=>{ if(companyId===DEFAULT_COMPANY.id&&!String(r.key).includes(':')) allTimelines[r.key]=r.entries; else if(String(r.key).startsWith(`${companyId}:`)) allTimelines[stripCompanyScopedKey(r.key)]=r.entries; });
+    if (docsRes.data)   docsRes.data.forEach(r=>{ if(String(r.key).startsWith(`${companyId}:`)) allDocs[stripCompanyScopedKey(r.key)]=r.data; else if(!String(r.key).includes(':')) allDocs[r.key]=r.data; });
+    if (tlRes.data)     tlRes.data.forEach(r=>{ if(String(r.key).startsWith(`${companyId}:`)) allTimelines[stripCompanyScopedKey(r.key)]=r.entries; else if(!String(r.key).includes(':')) allTimelines[r.key]=r.entries; });
     if (stagesRes.data) {
-      const ps=stagesRes.data.find(r=>r.key===getCompanyScopedKey('pro_stages')) || stagesRes.data.find(r=>r.key==='pro_stages'&&companyId===DEFAULT_COMPANY.id);
-      const ls=stagesRes.data.find(r=>r.key===getCompanyScopedKey('lb_stages')) || stagesRes.data.find(r=>r.key==='lb_stages'&&companyId===DEFAULT_COMPANY.id);
+      const ps=stagesRes.data.find(r=>r.key===getCompanyScopedKey('pro_stages')) || stagesRes.data.find(r=>r.key==='pro_stages');
+      const ls=stagesRes.data.find(r=>r.key===getCompanyScopedKey('lb_stages')) || stagesRes.data.find(r=>r.key==='lb_stages');
       if (ps) proStages=ps.value;
       if (ls) lbStages=ls.value;
     }
@@ -1251,11 +920,15 @@ async function dbInsert(table, rec) {
 }
 async function dbUpdate(table, id, rec) {
   const ts={...rec, company_id:getCompanyId()}; delete ts.id;
-  const {error}=await db.from(table).update(ts).eq('id',id).eq('company_id',getCompanyId());
+  let query=db.from(table).update(ts).eq('id',id);
+  if(getCompanyId()) query=query.eq('company_id',getCompanyId());
+  const {error}=await query;
   if(error) throw error;
 }
 async function dbDelete(table, id) {
-  const {error}=await db.from(table).delete().eq('id',id).eq('company_id',getCompanyId());
+  let query=db.from(table).delete().eq('id',id);
+  if(getCompanyId()) query=query.eq('company_id',getCompanyId());
+  const {error}=await query;
   if(error) throw error;
 }
 function fallBackToLocal(err) {
@@ -1411,13 +1084,8 @@ function getRefundStatus(r){
   const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
   return paid>=toRef?'complete':'incomplete';
 }
-function isInProcessPro(r){ return ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL',
-  // legacy stage names for backward compat
-  'PENDING OFFER LETTER','PENDING MOL','PENDING VISA'].includes(r.stage); }
-function isInProcessLB(r){
-  const ts=lbStageValue(r);
-  return !['TRAVELLED','REFUND PENDING','REFUND COMPLETE','NOT TRAVELLED'].includes(ts)&&!lbOwnPassport(r);
-}
+function isInProcessPro(r){ return ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL'].includes(r.stage); }
+function isInProcessLB(r){ return (r.ppStatus||r.pp_status)!=='HAD PP'&&(r.travelStatus||r.travel_status)==='NOT YET'; }
 function stageBadge(s){
   const map={'PENDING OFFER LETTER':'b-pol','PENDING MOL':'b-mol','PENDING VISA':'b-visa','PENDING TRAVEL':'b-travel','TRAVELLED':'b-travelled'};
   return `<span class="badge ${map[s]||'b-na'}">${escHTML(s)}</span>`;
@@ -1439,13 +1107,12 @@ function ppBadge(s){
 // TABS + MODALS
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function switchTab(tab){
-  if (window.innerWidth <= 640) closeMobileSidebar();
   // DV5 unified tab router — handles both legacy and new tabs
-  const DV5_TABS = ['dash','pipeline','candidates','finance','documents','reports','clients','settings'];
+  const DV5_TABS = ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'];
   const DV5_ALIASES = {
     pro:'candidates', lb:'candidates',
-    kanban:'pipeline', travel:'pipeline', tasks:'pipeline',
-    calendar:'pipeline',
+    kanban:'pipeline', travel:'pipeline',
+    calendar:'tasks',
     commissions:'finance', repayments:'finance', expenses:'finance',
     team:'settings', help:'settings'
   };
@@ -1489,6 +1156,7 @@ function switchTab(tab){
     dash: ()=> (window.renderDash || renderDash)(),
     pipeline: ()=> window.renderPipelinePage?.(),
     candidates: ()=> window.renderCandidatesPage?.(),
+    tasks: ()=> window.renderTasksPage?.(),
     finance: ()=> window.renderFinancePage?.(),
     documents: ()=> window.renderDocumentsPage?.(),
     reports: ()=> window.renderReportsPage?.(),
@@ -1497,8 +1165,12 @@ function switchTab(tab){
     // Legacy fallbacks
     pro: ()=> { if(typeof rebuildProPills==='function') rebuildProPills(); if(typeof renderPro==='function') renderPro(); },
     lb: ()=> (typeof renderLB === 'function') && renderLB(),
+    kanban: ()=> (typeof renderKanban === 'function') && renderKanban(),
     travel: ()=> (typeof renderTravel === 'function') && renderTravel(),
     calendar: ()=> (typeof renderCalendar === 'function') && renderCalendar(),
+    commissions: ()=> (typeof renderCommissions === 'function') && renderCommissions(),
+    repayments: ()=> (typeof renderRepayments === 'function') && renderRepayments(),
+    expenses: ()=> (typeof renderExpenses === 'function') && renderExpenses(),
     team: ()=> (typeof renderTeam === 'function') && renderTeam(),
     help: ()=> (typeof renderHelpPage === 'function') && renderHelpPage(),
   };
@@ -1514,6 +1186,41 @@ function setBottomNav(t){
       active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
     }
   }
+}
+function setKanbanSource(src,btn){
+  kanbanSource=src;
+  document.querySelectorAll('#kanban-source-tabs .pill-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const title=document.getElementById('kanban-title');
+  const addBtn=document.getElementById('kanban-add-btn');
+  if(title) title.textContent=src==='pro'?'Professional Pipeline Board':'General Jobs Board';
+  if(addBtn) addBtn.setAttribute('onclick',src==='pro'?'openProForm()':'openLBForm()');
+  renderKanban();
+}
+function renderKanban(){
+  const board=document.getElementById('kanban-board'); if(!board) return;
+  const stages=kanbanSource==='pro'?proStages:lbStages;
+  const rows=kanbanSource==='pro'?proDB:lbDB;
+  board.innerHTML=stages.map(stage=>{
+    const items=rows.filter(r=>(kanbanSource==='pro'?r.stage:(r.travelStatus||r.travel_status))===stage);
+    const cards=items.length?items.map(r=>{
+      const meta=kanbanSource==='pro'
+        ? `${r.position||'No position'}  |  ${r.company||'No company'}`
+        : `${r.ppStatus||r.pp_status||'Passport'}  |  ${getRefundStatus(r)}`;
+      const footer=kanbanSource==='pro'
+        ? `<span class="kanban-card-country">${r.country||'-'}</span><span class="kanban-card-comm">${r.commission?'KES '+Number(r.commission).toLocaleString():''}</span>`
+        : `<span class="kanban-card-country">${r.phone||'-'}</span><span class="kanban-card-comm">${moneyUSD(Number(r.toRefund||r.to_refund)||0)}</span>`;
+      return `<div class="kanban-card" onclick="${kanbanSource==='pro'?'editPro':'editLB'}(${r.id})">
+        <div class="kanban-card-name">${r.name}</div>
+        <div class="kanban-card-meta"><i class="ti ti-id"></i>${meta}</div>
+        <div class="kanban-card-footer">${footer}</div>
+      </div>`;
+    }).join(''):'<div class="kanban-empty">No candidates</div>';
+    return `<div class="kanban-col">
+      <div class="kanban-col-header"><div class="kanban-col-title">${stage}</div><div class="kanban-col-count">${items.length}</div></div>
+      ${cards}
+    </div>`;
+  }).join('');
 }
 function setCalSource(src,btn){
   calSource=src;
@@ -1729,7 +1436,7 @@ async function removeSettingsCountry(country) {
   if (currentUser?.role !== 'admin') { showToast('Only admins can manage countries','error'); return; }
   const countries = getGeneralCountries();
   if (countries.length <= 1) { showToast('Keep at least one country','error'); return; }
-  const hasRecords = lbDB.some(r => (r.country || DEFAULT_COMPANY.generalJobsCountries[0] || 'Lebanon') === country);
+  const hasRecords = lbDB.some(r => r.country === country);
   if (hasRecords && !confirm(`${country} has General Jobs records. Remove the tab anyway? Records will not be deleted.`)) return;
   const next = countries.filter(c => c !== country);
   if (window.generalCountryFilter === country) window.generalCountryFilter = next[0] || '';
@@ -1743,10 +1450,11 @@ async function removeSettingsCountry(country) {
 function getCompanyUsers() {
   const companyId = getCompanyId();
   return Object.entries(STAFF_ACCOUNTS)
-    .filter(([, account]) => (account.companyId || DEFAULT_COMPANY.id) === companyId)
+    .filter(([, account]) => (account.companyId || '') === companyId)
     .sort(([a], [b]) => a.localeCompare(b));
 }
-function renderCompanyUsers() {
+async function renderCompanyUsers() {
+  await loadCompanyStaffAccounts();
   const card = document.getElementById('settings-users-card');
   const list = document.getElementById('settings-users-list');
   const err = document.getElementById('new-user-error');
@@ -1828,7 +1536,7 @@ async function saveWorkspaceSettings(){
   if(!companyName){ showToast('Company name is required','error'); return; }
   const companyId=getCompanyId();
   Object.keys(STAFF_ACCOUNTS).forEach(username=>{
-    if((STAFF_ACCOUNTS[username].companyId||DEFAULT_COMPANY.id)===companyId){
+    if((STAFF_ACCOUNTS[username].companyId||'')===companyId){
       STAFF_ACCOUNTS[username].companyName=companyName;
     }
   });
@@ -1945,9 +1653,7 @@ function closeModal(id){ const el=document.getElementById(id); if(el) el.classLi
 
 function moneyKES(v){ return 'KES '+Number(v||0).toLocaleString(); }
 function moneyUSD(v){ return '$'+Number(v||0).toLocaleString(); }
-function proBalance(r){
-  return Math.max((Number(r.commission)||0)-proPaidAmount(r),0);
-}
+function proBalance(r){ return (Number(r.commission)||0)-(Number(r.paid)||0); }
 function proNeedsAction(r){
   const stage=r.stage||'';
   return !hasDocs('pro',r.id) || (stage!=='TRAVELLED'&&!toInput(r.travel)) || proBalance(r)>0;
@@ -2023,7 +1729,7 @@ function readProFormSummary(){
     company:document.getElementById('pf-company')?.value||'',
     stage:document.getElementById('pf-stage')?.value||proStages[0],
     commission:Number(document.getElementById('pf-comm')?.value)||0,
-    paid:(Number(document.getElementById('pf-paid1')?.value)||0)+(Number(document.getElementById('pf-paid2')?.value)||0),
+    paid:Number(document.getElementById('pf-paid')?.value)||0,
   };
 }
 function readLBFormSummary(){
@@ -2031,17 +1737,17 @@ function readLBFormSummary(){
     name:document.getElementById('lf-name')?.value||'New General Jobs candidate',
     phone:document.getElementById('lf-phone')?.value||'',
     ppStatus:document.getElementById('lf-pp')?.value||'APPLIED',
-    travelStatus:document.getElementById('lf-stage')?.value||document.getElementById('lf-travel')?.value||lbStages[0],
+    travelStatus:document.getElementById('lf-travel')?.value||lbStages[0],
     toRefund:Number(document.getElementById('lf-torefund')?.value)||0,
     r1Amt:Number(document.getElementById('lf-r1amt')?.value)||0,
     r2Amt:Number(document.getElementById('lf-r2amt')?.value)||0,
   };
 }
 function bindModalSummaries(){
-  ['pf-name','pf-pp','pf-position','pf-company','pf-stage','pf-comm','pf-paid1','pf-paid2'].forEach(id=>{
+  ['pf-name','pf-pp','pf-position','pf-company','pf-stage','pf-comm','pf-paid'].forEach(id=>{
     const el=document.getElementById(id); if(el){ el.addEventListener('input',()=>renderProSummary(readProFormSummary())); el.addEventListener('change',()=>renderProSummary(readProFormSummary())); }
   });
-  ['lf-name','lf-phone','lf-pp','lf-stage','lf-travel','lf-torefund','lf-r1amt','lf-r2amt'].forEach(id=>{
+  ['lf-name','lf-phone','lf-pp','lf-travel','lf-torefund','lf-r1amt','lf-r2amt'].forEach(id=>{
     const el=document.getElementById(id); if(el){ el.addEventListener('input',()=>renderLBSummary(readLBFormSummary())); el.addEventListener('change',()=>renderLBSummary(readLBFormSummary())); }
   });
 }
@@ -2052,10 +1758,8 @@ function bindModalSummaries(){
 function rebuildStageSelects(){
   const proSel=document.getElementById('pf-stage');
   if(proSel) proSel.innerHTML=proStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new stage...</option>`;
-  const lbSel=document.getElementById('lf-stage');
-  if(lbSel)  lbSel.innerHTML=lbStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new stage...</option>`;
-  const lbSel2=document.getElementById('lf-travel');
-  if(lbSel2) lbSel2.innerHTML=lbStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new status...</option>`;
+  const lbSel=document.getElementById('lf-travel');
+  if(lbSel)  lbSel.innerHTML=lbStages.map(s=>`<option value="${s}">${s}</option>`).join('')+`<option value="__add_new__">+ Add new status...</option>`;
 }
 function rebuildProPills(){
   const wrap=document.getElementById('pro-stage-pills'); if(!wrap) return;
@@ -2085,7 +1789,7 @@ function handleStageSelectChange(type,selectEl){
   if(selectEl.value!=='__add_new__'){ selectEl.dataset.prev=selectEl.value; return; }
   pendingStageType=type;
   pendingStageSelect=selectEl;
-  const previous=selectEl.dataset.prev||(type==='pro'?(proStages[0]||'SUBMITTED'):(lbStages[0]||'DOCS SUBMITTED'));
+  const previous=selectEl.dataset.prev||(type==='pro'?proStages[0]:lbStages[0]);
   selectEl.value=previous;
   openStageModal(type);
 }
@@ -2144,17 +1848,13 @@ function renderDash(){
   const proTravelled=proDB.filter(r=>r.stage==='TRAVELLED').length;
   const proInProcess=proDB.filter(isInProcessPro).length;
   let totalComm=0,totalPaid=0;
-  proDB.forEach(r=>{
-    if(r.commission) totalComm+=Number(r.commission);
-    const p=(Number(r.paid1)||0)+(Number(r.paid2)||0)||(Number(r.paid)||0);
-    totalPaid+=p;
-  });
+  proDB.forEach(r=>{ if(r.commission) totalComm+=Number(r.commission); if(r.paid) totalPaid+=Number(r.paid); });
 
-  const lbTravelled=lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED').length;
+  const lbTravelled=lbDB.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length;
   const lbInProcess=lbDB.filter(isInProcessLB).length;
   let lbOwed=0,lbPaid=0,lbFees=0;
   lbDB.forEach(r=>{
-    const ts=r.stage||r.travelStatus||r.travel_status;
+    const ts=r.travelStatus||r.travel_status;
     const pp=r.ppStatus||r.pp_status;
     const notes=(r.notes||'').trim().toUpperCase();
     if(ts==='TRAVELLED'&&pp!=='HAD PP'&&notes!=='RETURNED'){
@@ -2174,24 +1874,13 @@ function renderDash(){
   const workspaceEl=document.getElementById('topbar-workspace-name');
   if(workspaceEl) workspaceEl.textContent=companyName;
 
-  const stageColors=['#5A49F8','#3B82F6','#10B981','#F59E0B','#5DD6C4','#FB9A65','#8B5CF6','#DDE2EC'];
+  const stageColors=['#5A49F8','#3B82F6','#5DD6C4','#FB9A65','#DDE2EC'];
   const stageData=[
-    {label:'Submitted', value:proDB.filter(r=>r.stage==='SUBMITTED').length, icon:'ti-clipboard-list', color:stageColors[0]},
-    {label:'Interview', value:proDB.filter(r=>r.stage==='INTERVIEW').length, icon:'ti-users', color:stageColors[1]},
-    {label:'Offer', value:proDB.filter(r=>r.stage==='OFFER LETTER').length, icon:'ti-file-description', color:stageColors[2]},
-    {label:'Medical', value:proDB.filter(r=>r.stage==='MEDICAL & ATTESTATION').length, icon:'ti-stethoscope', color:stageColors[3]},
-    {label:'MOL', value:proDB.filter(r=>r.stage==='MOL').length, icon:'ti-building-bank', color:stageColors[4]},
-    {label:'Visa', value:proDB.filter(r=>r.stage==='VISA').length, icon:'ti-id-badge-2', color:stageColors[5]},
-    {label:'Travel', value:proDB.filter(r=>r.stage==='PENDING TRAVEL').length, icon:'ti-plane', color:stageColors[6]},
-    {label:'Travelled', value:proTravelled, icon:'ti-plane-departure', color:stageColors[7]}
-  ];
-  const lbStageData=[
-    {label:'Docs In', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='DOCS SUBMITTED').length, icon:'ti-folder', color:stageColors[0]},
-    {label:'Sent', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='PROFILE SENT').length, icon:'ti-send', color:stageColors[1]},
-    {label:'Selected', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='SELECTED').length, icon:'ti-star', color:stageColors[2]},
-    {label:'Passport', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='PASSPORT APPLIED').length, icon:'ti-passport', color:stageColors[3]},
-    {label:'Visa', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='VISA PROCESSING').length, icon:'ti-id-badge-2', color:stageColors[4]},
-    {label:'Travelled', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED').length, icon:'ti-plane-departure', color:stageColors[5]},
+    {label:'Offer', value:proDB.filter(r=>r.stage==='PENDING OFFER LETTER').length, icon:'ti-file-description', color:stageColors[0]},
+    {label:'MOL', value:proDB.filter(r=>r.stage==='PENDING MOL').length, icon:'ti-building-bank', color:stageColors[1]},
+    {label:'Visa', value:proDB.filter(r=>r.stage==='PENDING VISA').length, icon:'ti-id-badge-2', color:stageColors[2]},
+    {label:'Finance', value:proDB.filter(r=>proBalance(r)>0).length, icon:'ti-wallet', color:stageColors[3]},
+    {label:'Travelled', value:proTravelled, icon:'ti-plane-departure', color:stageColors[4]}
   ];
   const stageTotal=Math.max(stageData.reduce((sum,item)=>sum+item.value,0),1);
 
@@ -2231,35 +1920,27 @@ function renderDash(){
     <div class="ref-dashboard">
       <div class="ref-dashboard-head">
         <div><h1>Good afternoon, ${escHTML(firstName)}</h1><p>Here's what's happening in your workspace today.</p></div>
+        <button class="ref-date-btn" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i><span>Open calendar</span><i class="ti ti-chevron-right"></i></button>
       </div>
 
       <div class="ref-board-grid">
         <div class="ref-main-column">
           <div class="ref-kpi-row">
-            ${renderRefKpi('Total Candidates',totalCandidates,'All active records','ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
-            ${renderRefKpi('In Process',totalInProcess,'Active pipeline','ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
-            ${renderRefKpi('Travelled',totalTravelled,'Successful placements','ti-plane-departure','#EFEAFF','','openTravelledView()')}
-            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'Revenue collected','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
+            ${renderRefKpi('Total Candidates',totalCandidates,'12%','ti-clipboard-list','#EFEAFF','','switchTab(\'pro\')')}
+            ${renderRefKpi('In Process',totalInProcess,'8%','ti-briefcase','#EAF2FF','','switchTab(\'kanban\')')}
+            ${renderRefKpi('Travelled',totalTravelled,'15%','ti-plane-departure','#EFEAFF','','openTravelledView()')}
+            ${renderRefKpi('Professional Collected','KES '+totalPaid.toLocaleString(),'18%','ti-coin','#EAFBF3','wide','switchTab(\'reports\')')}
           </div>
 
           ${renderSmartAlertsHTML()}
 
           <section class="ref-card ref-pipeline-overview">
-            <div class="ref-card-title">Professional Jobs Pipeline <i class="ti ti-info-circle"></i></div>
+            <div class="ref-card-title">Pipeline Overview <i class="ti ti-info-circle"></i></div>
             <div class="ref-stage-row">
               ${stageData.map((item,i)=>`<div class="ref-stage-box"><div class="ref-stage-icon"><i class="ti ${item.icon}"></i></div><div><div class="ref-stage-label">${item.label}</div><div class="ref-stage-value">${item.value}</div></div><div class="ref-stage-percent">${Math.round(item.value/stageTotal*100)}%</div></div>${i<stageData.length-1?'<i class="ti ti-arrow-right ref-stage-arrow"></i>':''}`).join('')}
             </div>
-            <div class="ref-pipe-line"><span style="width:${Math.max(6,Math.round(proInProcess/Math.max(proDB.length,1)*100))}%"></span></div>
-            <div class="ref-pipe-foot"><span>${proInProcess} in process</span><span>${proTravelled} travelled</span></div>
-          </section>
-
-          <section class="ref-card ref-pipeline-overview">
-            <div class="ref-card-title">General Jobs Pipeline <i class="ti ti-info-circle"></i></div>
-            <div class="ref-stage-row">
-              ${lbStageData.map((item,i)=>`<div class="ref-stage-box"><div class="ref-stage-icon"><i class="ti ${item.icon}"></i></div><div><div class="ref-stage-label">${item.label}</div><div class="ref-stage-value">${item.value}</div></div></div>${i<lbStageData.length-1?'<i class="ti ti-arrow-right ref-stage-arrow"></i>':''}`).join('')}
-            </div>
-            <div class="ref-pipe-line"><span style="width:${Math.max(6,Math.round(lbInProcess/Math.max(lbDB.length,1)*100))}%"></span></div>
-            <div class="ref-pipe-foot"><span>${lbInProcess} in process</span><span>${lbTravelled} travelled</span></div>
+            <div class="ref-pipe-line"><span style="width:${Math.max(6,Math.round(totalInProcess/Math.max(totalCandidates,1)*100))}%"></span></div>
+            <div class="ref-pipe-foot"><span>${totalInProcess} in process</span><span>${totalTravelled} travelled</span></div>
           </section>
 
           <div class="ref-chart-grid">
@@ -2473,21 +2154,21 @@ function renderTravel(){
   tb.innerHTML=shown.length?shown.map(r=>`<tr onclick="${r.type==='pro'?'editPro':'editLB'}(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${r.workflow}</td><td>${escHTML(r.company)}</td><td>${escHTML(r.status)}</td><td>${fmtDate(r.date)}</td><td>${escHTML(r.airline)}</td><td>${escHTML(r.time)}</td><td>${escHTML(r.notes)}</td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No travel records found</div></td></tr>';
 }
 function renderCommissions(){
-  const billed=proDB.reduce((sum,row)=>sum+(Number(row.commission)||0),0), paid=proDB.reduce((sum,row)=>sum+proPaidAmount(row),0);
-  const rows=[...proDB].sort((a,b)=>latestCommissionTs(b)-latestCommissionTs(a) || proPaidAmount(b)-proPaidAmount(a));
+  const billed=proDB.reduce((sum,row)=>sum+(Number(row.commission)||0),0), paid=proDB.reduce((sum,row)=>sum+(Number(row.paid)||0),0);
+  const rows=[...proDB].sort((a,b)=>latestCommissionTs(b)-latestCommissionTs(a) || Number(b.paid||0)-Number(a.paid||0));
   renderMetricCards('commission-metrics',[{label:'Billed',value:moneyKES(billed),cls:'mc-ink',small:true},{label:'Received',value:moneyKES(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyKES(billed-paid),cls:'mc-amber',small:true}]);
   renderTransactionHistory('commission-history', getCommissionTransactions(), moneyKES);
   const tb=document.getElementById('commissions-tbody'); if(!tb) return;
-  tb.innerHTML=rows.length?rows.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(proPaidAmount(r))}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
+  tb.innerHTML=rows.length?rows.map(r=>`<tr onclick="editPro(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.company||'-')}</td><td>${escHTML(r.position||'-')}</td><td>${moneyKES(r.commission)}</td><td>${moneyKES(r.paid)}</td><td>${moneyKES(proBalance(r))}</td><td>${escHTML(getLatestTimelineText('pro',r.id))}</td><td><button class="action-link" onclick="event.stopPropagation();editPro(${r.id})">Update</button></td></tr>`).join(''):'<tr><td colspan="8"><div class="mini-empty">No commission records yet</div></td></tr>';
 }
 function renderRepayments(){
   const travelled=lbDB.filter(isTravelledLB).sort((a,b)=>latestRepaymentTs(b)-latestRepaymentTs(a));
-  const owed=travelled.reduce((sum,row)=>sum+lbRefundPrincipal(row),0);
-  const paid=travelled.reduce((sum,row)=>sum+lbRefundPaidAmount(row),0);
+  const owed=travelled.reduce((sum,row)=>sum+(Number(row.toRefund||row.to_refund)||0),0);
+  const paid=travelled.reduce((sum,row)=>sum+(Number(row.r1Amt||row.r1_amt)||0)+(Number(row.r2Amt||row.r2_amt)||0),0);
   renderMetricCards('repayment-metrics',[{label:'Travelled clients',value:travelled.length,cls:'mc-default'},{label:'Paid',value:moneyUSD(paid),cls:'mc-green',small:true},{label:'Outstanding',value:moneyUSD(owed-paid),cls:'mc-amber',small:true}]);
   renderTransactionHistory('repayment-history', getRepaymentTransactions(), moneyUSD);
   const tb=document.getElementById('repayments-tbody'); if(!tb) return;
-  tb.innerHTML=travelled.length?travelled.map(r=>{const toR=lbRefundPrincipal(r),p=lbRefundPaidAmount(r);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${fmtDate(r.travelDate||r.travel_date)}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(lbRefundOutstanding(r))}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No travelled clients with repayment records yet</div></td></tr>';
+  tb.innerHTML=travelled.length?travelled.map(r=>{const toR=Number(r.toRefund||r.to_refund)||0,p=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);return `<tr onclick="editLB(${r.id})"><td class="name-cell">${escHTML(r.name)}</td><td>${escHTML(r.ppStatus||r.pp_status||'-')}</td><td>${fmtDate(r.travelDate||r.travel_date)}</td><td>${moneyUSD(toR)}</td><td>${moneyUSD(p)}</td><td>${moneyUSD(toR-p)}</td><td>${fmtDate(r.r1Date||r.r1_date)} ${r.r1Amt?moneyUSD(r.r1Amt):''}<br>${fmtDate(r.r2Date||r.r2_date)} ${r.r2Amt?moneyUSD(r.r2Amt):''}</td><td><button class="action-link" onclick="event.stopPropagation();editLB(${r.id})">Update</button></td></tr>`}).join(''):'<tr><td colspan="8"><div class="mini-empty">No travelled clients with repayment records yet</div></td></tr>';
 }
 function renderExpenses(){
   const total=drecoExpenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
@@ -2537,7 +2218,8 @@ async function submitQuickUser(){
   const fail=msg=>{ if(err){ err.textContent=msg; err.style.display='block'; } };
   if(!display) return fail('Display name is required.');
   if(!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
-  if(STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
+  const existingUser = await loadAccountFromCloud(username);
+  if(existingUser || STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
   if(password.length<6) return fail('Temporary password must be at least 6 characters.');
   STAFF_ACCOUNTS[username]=normalizeAccount(username,{role,display,companyId:getCompanyId(),companyName:getCompanyName(),generalJobsCountries:getGeneralCountries()});
   try{ await setAccountPassword(STAFF_ACCOUNTS[username],password); await saveStaffAccounts(); }
@@ -2621,12 +2303,12 @@ function deleteCalendarEvent(){
 function openTravelEventPrompt(){ switchTab('travel'); showToast('Open a candidate row to add airline, travel time, and notes.','success'); }
 function renderHelpPage(){
   const el=document.getElementById('help-section-content'); if(!el) return;
-  el.innerHTML=`<div class="settings-page-card"><h3>Daily workflow</h3><p>Use Dashboard for an overview, Pipeline to move candidates through stages, and Reports for management review.</p><div class="setting-row"><span>Pipeline</span><button onclick="switchTab('pipeline')">Open</button></div></div><div class="settings-page-card"><h3>Records</h3><p>Professional Jobs and General Jobs are separate workflows. Travel combines both lists and sorts latest travel first.</p><div class="setting-row"><span>Professional Jobs</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General Jobs</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Finance</h3><p>Commissions focus on professional job income. Repayments only track travelled general-job clients. Expenses capture money spent on clients.</p><div class="setting-row"><span>Commissions</span><button onclick="switchTab('commissions')">Open</button></div><div class="setting-row"><span>Expenses</span><button onclick="switchTab('expenses')">Open</button></div></div><div class="settings-page-card"><h3>Support note</h3><p>For shared multi-user work, keep Supabase configured. Local mode is useful for solo testing, but cloud mode is better for office use.</p><div class="setting-row"><span>Settings</span><button onclick="switchTab('settings')">Open</button></div></div>`;
+  el.innerHTML=`<div class="settings-page-card"><h3>Daily workflow</h3><p>Use Dashboard for status, Pipeline Board for movement, Calendar for deadlines, and Reports for management review.</p><div class="setting-row"><span>Pipeline board</span><button onclick="switchTab('kanban')">Open</button></div><div class="setting-row"><span>Calendar</span><button onclick="switchTab('calendar')">Open</button></div></div><div class="settings-page-card"><h3>Records</h3><p>Professional Jobs and General Jobs are separate workflows. Travel combines both lists and sorts latest travel first.</p><div class="setting-row"><span>Professional Jobs</span><button onclick="switchTab('pro')">Open</button></div><div class="setting-row"><span>General Jobs</span><button onclick="switchTab('lb')">Open</button></div></div><div class="settings-page-card"><h3>Finance</h3><p>Commissions focus on professional job income. Repayments only track travelled general-job clients. Expenses capture money spent on clients.</p><div class="setting-row"><span>Commissions</span><button onclick="switchTab('commissions')">Open</button></div><div class="setting-row"><span>Expenses</span><button onclick="switchTab('expenses')">Open</button></div></div><div class="settings-page-card"><h3>Support note</h3><p>For shared multi-user work, keep Supabase configured. Local mode is useful for solo testing, but cloud mode is better for office use.</p><div class="setting-row"><span>Settings</span><button onclick="switchTab('settings')">Open</button></div></div>`;
 }
 function openSettingsModal(){ const kpis=document.getElementById('settings-kpis'); if(kpis) kpis.innerHTML=`<div class="settings-kpi"><strong>${proDB.length}</strong><span>Professional</span></div><div class="settings-kpi"><strong>${lbDB.length}</strong><span>General Jobs records</span></div><div class="settings-kpi"><strong>${Object.keys(allDocs).length}</strong><span>Doc links</span></div>`; const mode=document.getElementById('settings-storage-mode'); if(mode) mode.textContent=lastSyncError?`${getStorageLabel()}: ${lastSyncError}`:getStorageLabel(); const companyInput=document.getElementById('settings-company-name'); if(companyInput) companyInput.value=getCompanyName(); renderSettingsCountries(); renderCompanyUsers(); document.getElementById('settings-modal')?.classList.add('open'); }
-function renderRefKpi(label,value,sub,icon,bg,extra='',action=''){
+function renderRefKpi(label,value,change,icon,bg,extra='',action=''){
   const onclick=action?` onclick="${action}"`:'';
-  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(String(value))}</strong><em>${escHTML(sub)}</em></div></div>`;
+  return `<div class="ref-kpi ${extra}"${onclick}><div class="ref-kpi-icon" style="background:${bg}"><i class="ti ${icon}"></i></div><div><span>${escHTML(label)}</span><strong>${escHTML(value)}</strong><em><i class="ti ti-arrow-up"></i>${escHTML(change)} <small>vs last week</small></em></div></div>`;
 }
 function renderRefTask(title,meta,due){
   return `<div class="ref-task"><span></span><div><strong>${escHTML(title)}</strong><small>${escHTML(meta)}</small></div><em>${escHTML(due)}</em></div>`;
@@ -2643,40 +2325,21 @@ function buildConic(items,total){
 }
 // PROFESSIONAL
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
-let lastProFiltered=[];
-let lastLBFiltered=[];
 function getFilteredPro(){
   const q=(document.getElementById('pro-search')?.value||'').toLowerCase();
   const stage=window.proStagePillFilter||'';
   const comp=document.getElementById('pro-company-f')?.value||'';
   const pos=document.getElementById('pro-position-f')?.value||'';
   const action=document.getElementById('pro-action-f')?.value||'';
-  const dateFrom=document.getElementById('pro-date-from')?.value||'';
-  const dateTo=document.getElementById('pro-date-to')?.value||'';
-  lastProFiltered=proDB.filter(r=>{
+  return proDB.filter(r=>{
     const text=`${r.name} ${r.pp||''} ${r.company||''} ${r.position||''}`.toLowerCase();
     const outstanding=proBalance(r)>0;
     const actionMatch=!action ||
       (action==='needs-action'&&proNeedsAction(r)) ||
       (action==='outstanding'&&outstanding) ||
       (action==='no-docs'&&!hasDocs('pro',r.id));
-    let dateMatch=true;
-    if(dateFrom||dateTo){
-      const sub=toInput(r.submitted);
-      if(!sub){ dateMatch=false; }
-      else {
-        if(dateFrom&&sub<dateFrom) dateMatch=false;
-        if(dateTo&&sub>dateTo) dateMatch=false;
-      }
-    }
-    return (!q||text.includes(q))&&(!stage||r.stage===stage)&&(!comp||r.company===comp)&&(!pos||r.position===pos)&&actionMatch&&dateMatch;
+    return (!q||text.includes(q))&&(!stage||r.stage===stage)&&(!comp||r.company===comp)&&(!pos||r.position===pos)&&actionMatch;
   });
-  return lastProFiltered;
-}
-function clearProDates(){
-  const f=document.getElementById('pro-date-from'); if(f) f.value='';
-  const t=document.getElementById('pro-date-to'); if(t) t.value='';
-  renderPro();
 }
 function renderPro(){
   let totalComm=0,totalPaid=0;
@@ -2734,9 +2397,9 @@ function renderPro(){
 function openProForm(){
   editingProId=null;
   document.getElementById('pro-modal-title').textContent='Add professional candidate';
-  ['pf-name','pf-pp','pf-phone','pf-position','pf-company','pf-country','pf-submitted','pf-interview','pf-ol','pf-medical','pf-mol','pf-visa','pf-travel','pf-comm','pf-paid','pf-paid1','pf-paid2']
+  ['pf-name','pf-pp','pf-phone','pf-position','pf-company','pf-country','pf-submitted','pf-interview','pf-ol','pf-mol','pf-visa','pf-travel','pf-comm','pf-paid']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  const stEl=document.getElementById('pf-stage'); if(stEl){ stEl.value=proStages[0]||'SUBMITTED'; stEl.dataset.prev=stEl.value; }
+  const stEl=document.getElementById('pf-stage'); if(stEl){ stEl.value=proStages[0]||'PENDING OFFER LETTER'; stEl.dataset.prev=stEl.value; }
   renderProSummary(null);
   document.getElementById('pro-form-timeline').innerHTML='<div class="tl-empty">Save candidate first to see timeline.</div>';
   document.getElementById('pro-tab-details').style.display='';
@@ -2752,17 +2415,9 @@ function editPro(id){
   document.getElementById('pf-phone').value=r.phone||''; document.getElementById('pf-position').value=r.position||'';
   document.getElementById('pf-company').value=r.company||''; document.getElementById('pf-country').value=r.country||'';
   const stEl=document.getElementById('pf-stage'); if(stEl){ stEl.value=r.stage; stEl.dataset.prev=r.stage; }
-  document.getElementById('pf-comm').value=r.commission||'';
-  // Split paid: use paid1/paid2 if present, else treat old r.paid as paid1
-  const p1=r.paid1!=null?r.paid1:(r.paid!=null&&r.paid2==null?r.paid:0);
-  const p2=r.paid2!=null?r.paid2:0;
-  const pfp1=document.getElementById('pf-paid1'); if(pfp1) pfp1.value=p1||'';
-  const pfp2=document.getElementById('pf-paid2'); if(pfp2) pfp2.value=p2||'';
-  const pfp=document.getElementById('pf-paid'); if(pfp) pfp.value=(Number(p1)||0)+(Number(p2)||0)||'';
+  document.getElementById('pf-comm').value=r.commission||''; document.getElementById('pf-paid').value=r.paid||'';
   document.getElementById('pf-submitted').value=toInput(r.submitted); document.getElementById('pf-interview').value=toInput(r.interview);
-  document.getElementById('pf-ol').value=toInput(r.ol);
-  const pfMed=document.getElementById('pf-medical'); if(pfMed) pfMed.value=toInput(r.medical);
-  document.getElementById('pf-mol').value=toInput(r.mol);
+  document.getElementById('pf-ol').value=toInput(r.ol); document.getElementById('pf-mol').value=toInput(r.mol);
   document.getElementById('pf-visa').value=toInput(r.visa); document.getElementById('pf-travel').value=toInput(r.travel);
   renderProSummary(r);
   document.getElementById('pro-form-timeline').innerHTML=renderTimelineHTML('pro',id);
@@ -2784,13 +2439,10 @@ async function savePro(){
     company:document.getElementById('pf-company').value.trim().toUpperCase(), country:document.getElementById('pf-country').value.trim(),
     stage:newStage, submitted:document.getElementById('pf-submitted').value||null,
     interview:document.getElementById('pf-interview').value||null, ol:document.getElementById('pf-ol').value||null,
-    medical:document.getElementById('pf-medical')?.value||null,
     mol:document.getElementById('pf-mol').value||null, visa:document.getElementById('pf-visa').value||null,
     travel:document.getElementById('pf-travel').value||null,
     commission:document.getElementById('pf-comm').value?Number(document.getElementById('pf-comm').value):null,
-    paid1:document.getElementById('pf-paid1')?.value?Number(document.getElementById('pf-paid1').value):null,
-    paid2:document.getElementById('pf-paid2')?.value?Number(document.getElementById('pf-paid2').value):null,
-    paid:(Number(document.getElementById('pf-paid1')?.value)||0)+(Number(document.getElementById('pf-paid2')?.value)||0)||null,
+    paid:document.getElementById('pf-paid').value?Number(document.getElementById('pf-paid').value):null,
   };
   const validationError=validateProRecord(rec);
   if(validationError){ showToast(validationError,'error'); return; }
@@ -2806,7 +2458,6 @@ async function savePro(){
     auditAction('Professional Jobs','Candidate added',rec.name);
     showToast('Candidate added ✓','success');
   }
-  editingProId = null;
   closeModal('pro-modal'); renderPro(); renderDash(); await saveProRecord(rec);
 }
 async function deletePro(id){
@@ -2825,43 +2476,26 @@ function getFilteredLB(){
   const refund=document.getElementById('lb-refund-f')?.value||'';
   const action=document.getElementById('lb-action-f')?.value||'';
   const country=getActiveGeneralCountry();
-  const dateFrom=document.getElementById('lb-date-from')?.value||'';
-  const dateTo=document.getElementById('lb-date-to')?.value||'';
-  lastLBFiltered=lbDB.filter(r=>{
+  return lbDB.filter(r=>{
     const text=`${r.name} ${r.phone||''}`.toLowerCase();
-    const ts=r.stage||r.travelStatus||r.travel_status||'';
+    const ts=r.travelStatus||r.travel_status||'';
     const ps=r.ppStatus||r.pp_status||'';
     const rs=getRefundStatus(r);
-    const rcountry=r.country||DEFAULT_COMPANY.generalJobsCountries[0]||'Lebanon';
+    const rcountry=r.country||getGeneralCountries()[0]||'';
     const actionMatch=!action ||
       (action==='needs-action'&&lbNeedsAction(r)) ||
       (action==='incomplete-refund'&&rs==='incomplete') ||
       (action==='no-docs'&&!hasDocs('lb',r.id));
-    let dateMatch=true;
-    if(dateFrom||dateTo){
-      const td=toInput(r.travelDate||r.travel_date);
-      if(!td){ dateMatch=false; }
-      else {
-        if(dateFrom&&td<dateFrom) dateMatch=false;
-        if(dateTo&&td>dateTo) dateMatch=false;
-      }
-    }
-    return rcountry===country&&(!q||text.includes(q))&&(!travel||ts===travel)&&(!pp||ps===pp)&&(!refund||rs===refund)&&actionMatch&&dateMatch;
+    return rcountry===country&&(!q||text.includes(q))&&(!travel||ts===travel)&&(!pp||ps===pp)&&(!refund||rs===refund)&&actionMatch;
   });
-  return lastLBFiltered;
-}
-function clearLBDates(){
-  const f=document.getElementById('lb-date-from'); if(f) f.value='';
-  const t=document.getElementById('lb-date-to'); if(t) t.value='';
-  renderLB();
 }
 function renderLB(){
   renderGeneralCountryTabs();
   let lbOwed=0,lbPaid=0,lbFees=0;
   const country=getActiveGeneralCountry();
-  const countryRows=lbDB.filter(r=>(r.country||DEFAULT_COMPANY.generalJobsCountries[0]||'Lebanon')===country);
+  const countryRows=lbDB.filter(r=>(r.country||getGeneralCountries()[0]||'')===country);
   countryRows.forEach(r=>{
-    const ts=r.stage||r.travelStatus||r.travel_status;
+    const ts=r.travelStatus||r.travel_status;
     const pp=r.ppStatus||r.pp_status;
     const notes=(r.notes||'').trim().toUpperCase();
     if(ts==='TRAVELLED'&&pp!=='HAD PP'&&notes!=='RETURNED'){
@@ -2870,12 +2504,12 @@ function renderLB(){
       lbOwed+=toR; lbPaid+=paid; lbFees+=paid;
     }
   });
-  const lbIncomplete=countryRows.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED'&&getRefundStatus(r)==='incomplete').length;
+  const lbIncomplete=countryRows.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED'&&getRefundStatus(r)==='incomplete').length;
   const metricsEl=document.getElementById('lb-metrics');
   if(metricsEl) metricsEl.innerHTML=`
     <div class="metric-card mc-default"><div class="metric-label">${escHTML(country)} total</div><div class="metric-val">${countryRows.length}</div></div>
     <div class="metric-card mc-amber"><div class="metric-label">In process</div><div class="metric-val amber">${countryRows.filter(isInProcessLB).length}</div></div>
-    <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${countryRows.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
+    <div class="metric-card mc-green"><div class="metric-label">Travelled</div><div class="metric-val green">${countryRows.filter(r=>(r.travelStatus||r.travel_status)==='TRAVELLED').length}</div></div>
     <div class="metric-card mc-ink"><div class="metric-label">Collected</div><div class="metric-val sm green">${moneyUSD(lbFees)}</div></div>
     <div class="metric-card mc-red"><div class="metric-label">Outstanding</div><div class="metric-val sm red">${moneyUSD(lbOwed-lbPaid)}</div></div>`;
 
@@ -2883,15 +2517,12 @@ function renderLB(){
   const totalPages=Math.max(1,Math.ceil(data.length/PER_PAGE));
   if(lbPage>totalPages) lbPage=1;
   const slice=data.slice((lbPage-1)*PER_PAGE,lbPage*PER_PAGE);
-  // batch select button
-  const batchBtn=document.getElementById('lb-batch-send-btn');
-  if(batchBtn){ batchBtn.style.display=window.lbSelected&&window.lbSelected.size>0?'inline-flex':'none'; if(window.lbSelected&&window.lbSelected.size>0) batchBtn.textContent=`Send Profiles (${window.lbSelected.size})`; }
   const tbody=document.getElementById('lb-tbody'); if(!tbody) return;
-  if(!slice.length){ tbody.innerHTML=`<tr><td colspan="13"><div class="empty">No candidates found</div></td></tr>`; }
+  if(!slice.length){ tbody.innerHTML=`<tr><td colspan="12"><div class="empty">No candidates found</div></td></tr>`; }
   else {
     tbody.innerHTML=slice.map((r,i)=>{
       const rs=getRefundStatus(r);
-      const ts=r.stage||r.travelStatus||r.travel_status||'';
+      const ts=r.travelStatus||r.travel_status||'';
       const ps=r.ppStatus||r.pp_status||'';
       const toR=Number(r.toRefund||r.to_refund)||0;
       const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
@@ -2900,9 +2531,7 @@ function renderLB(){
       const hd=hasDocs('lb',r.id);
       const name=escHTML(r.name);
       const phone=r.phone ? escHTML(r.phone) : '&mdash;';
-      const sel=window.lbSelected&&window.lbSelected.has(r.id);
-      return `<tr onclick="editLB(${r.id})" class="${sel?'row-selected':''}">
-        <td onclick="event.stopPropagation()"><input type="checkbox" ${sel?'checked':''} onchange="toggleLBSelect(${r.id},this.checked)" style="cursor:pointer"></td>
+      return `<tr onclick="editLB(${r.id})">
         <td>${(lbPage-1)*PER_PAGE+i+1}</td>
         <td class="name-cell">${name}</td>
         <td>${phone}</td>
@@ -2921,22 +2550,13 @@ function renderLB(){
   renderPagination('lb-pagination',lbPage,totalPages,data.length,'lb');
 }
 
-function toggleLBOwnPassport(checked){
-  const refSec=document.getElementById('lb-refund-section');
-  const noRef=document.getElementById('lb-no-refund-notice');
-  if(refSec) refSec.style.display=checked?'none':'';
-  if(noRef) noRef.style.display=checked?'':'none';
-}
 function openLBForm(){
   editingLbId=null;
   document.getElementById('lb-modal-title').textContent=`Add General Jobs candidate - ${getActiveGeneralCountry()}`;
-  ['lf-name','lf-phone','lf-tdate','lf-torefund','lf-r1date','lf-r1amt','lf-r2date','lf-r2amt','lf-notes','lf-submitted-date','lf-selected-date','lf-passport-date','lf-visa-date']
+  ['lf-name','lf-phone','lf-tdate','lf-torefund','lf-r1date','lf-r1amt','lf-r2date','lf-r2amt','lf-notes']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('lf-pp').value='APPLIED';
-  const ownEl=document.getElementById('lf-own-passport'); if(ownEl) ownEl.checked=false;
-  toggleLBOwnPassport(false);
-  const stEl=document.getElementById('lf-stage'); if(stEl){ stEl.value=lbStages[0]||'DOCS SUBMITTED'; stEl.dataset.prev=stEl.value; }
-  const tvEl=document.getElementById('lf-travel'); if(tvEl){ tvEl.value=lbStages[0]||'DOCS SUBMITTED'; tvEl.dataset.prev=tvEl.value; }
+  const tvEl=document.getElementById('lf-travel'); if(tvEl){ tvEl.value=lbStages[0]||'NOT YET'; tvEl.dataset.prev=tvEl.value; }
   renderLBSummary(null);
   document.getElementById('lb-form-timeline').innerHTML='<div class="tl-empty">Save candidate first to see timeline.</div>';
   document.getElementById('lb-tab-details').style.display='';
@@ -2950,17 +2570,8 @@ function editLB(id){
   document.getElementById('lb-modal-title').textContent='Edit - '+r.name;
   document.getElementById('lf-name').value=r.name; document.getElementById('lf-phone').value=r.phone||'';
   document.getElementById('lf-pp').value=r.ppStatus||r.pp_status||'APPLIED';
-  const ownPP=!!r.own_passport;
-  const ownEl=document.getElementById('lf-own-passport'); if(ownEl) ownEl.checked=ownPP;
-  toggleLBOwnPassport(ownPP);
-  const lbStageVal=r.stage||r.travelStatus||r.travel_status||lbStages[0]||'DOCS SUBMITTED';
-  const stEl=document.getElementById('lf-stage'); if(stEl){ stEl.value=lbStageVal; stEl.dataset.prev=lbStageVal; }
-  const tvEl=document.getElementById('lf-travel'); if(tvEl){ tvEl.value=lbStageVal; tvEl.dataset.prev=lbStageVal; }
+  const tvEl=document.getElementById('lf-travel'); if(tvEl){ tvEl.value=r.travelStatus||r.travel_status||'NOT YET'; tvEl.dataset.prev=tvEl.value; }
   document.getElementById('lf-tdate').value=toInput(r.travelDate||r.travel_date);
-  const lsd=document.getElementById('lf-submitted-date'); if(lsd) lsd.value=toInput(r.submitted_date);
-  const lseld=document.getElementById('lf-selected-date'); if(lseld) lseld.value=toInput(r.selected_date);
-  const lpd=document.getElementById('lf-passport-date'); if(lpd) lpd.value=toInput(r.passport_date);
-  const lvd=document.getElementById('lf-visa-date'); if(lvd) lvd.value=toInput(r.visa_date);
   document.getElementById('lf-torefund').value=r.toRefund||r.to_refund||'';
   document.getElementById('lf-r1date').value=toInput(r.r1Date||r.r1_date);
   document.getElementById('lf-r1amt').value=r.r1Amt||r.r1_amt||'';
@@ -2979,27 +2590,20 @@ async function saveLB(){
   if(!name){ showToast('Full name is required','error'); return; }
   const ppStatus=document.getElementById('lf-pp').value;
   const isHadPP=ppStatus==='HAD PP';
-  const own_passport=!!(document.getElementById('lf-own-passport')?.checked)||isHadPP;
   const oldRec=editingLbId?{...(lbDB.find(x=>x.id==editingLbId)||{})}:null;
-  const oldTravel=oldRec?oldRec.stage||oldRec.travelStatus:null;
-  const newStageEl=document.getElementById('lf-stage');
-  const newTravel=newStageEl?.value||document.getElementById('lf-travel')?.value||lbStages[0];
+  const oldTravel=oldRec?oldRec.travelStatus:null;
+  const newTravel=document.getElementById('lf-travel').value;
   const rec={
     company_id:getCompanyId(),
     country:getActiveGeneralCountry(),
     name:name.toUpperCase(), phone:document.getElementById('lf-phone').value.trim(),
-    ppStatus, stage:newTravel, travelStatus:newTravel,
-    own_passport,
-    submitted_date:document.getElementById('lf-submitted-date')?.value||null,
-    selected_date:document.getElementById('lf-selected-date')?.value||null,
-    passport_date:document.getElementById('lf-passport-date')?.value||null,
-    visa_date:document.getElementById('lf-visa-date')?.value||null,
+    ppStatus, travelStatus:newTravel,
     travelDate:document.getElementById('lf-tdate').value||null,
-    toRefund:own_passport?0:(Number(document.getElementById('lf-torefund').value)||0),
+    toRefund:isHadPP?0:(Number(document.getElementById('lf-torefund').value)||0),
     r1Date:document.getElementById('lf-r1date').value||null,
-    r1Amt:own_passport?0:(Number(document.getElementById('lf-r1amt').value)||0),
+    r1Amt:isHadPP?0:(Number(document.getElementById('lf-r1amt').value)||0),
     r2Date:document.getElementById('lf-r2date').value||null,
-    r2Amt:own_passport?0:(Number(document.getElementById('lf-r2amt').value)||0),
+    r2Amt:isHadPP?0:(Number(document.getElementById('lf-r2amt').value)||0),
     notes:document.getElementById('lf-notes').value.trim(),
   };
   const validationError=validateLBRecord(rec);
@@ -3012,42 +2616,16 @@ async function saveLB(){
     showToast('Candidate updated ✓','success');
   } else {
     rec.id=Date.now(); lbDB.push(rec);
-    addTimeline('lb',rec.id,`Added - Stage: ${newTravel}${own_passport?' (Own PP)':''}`);
+    addTimeline('lb',rec.id,`Added - ${ppStatus}, ${newTravel}`);
     auditAction('General Jobs','Candidate added',rec.name);
     showToast('Candidate added ✓','success');
   }
-  editingLbId = null;
   closeModal('lb-modal'); renderLB(); renderDash(); await saveLBRecord(rec);
 }
 async function deleteLB(id){
   const r=lbDB.find(x=>x.id==id);
   if(!confirm(`Delete ${r?r.name:'this candidate'}? Cannot be undone.`)) return;
   lbDB=lbDB.filter(x=>x.id!=id); auditAction('General Jobs','Candidate deleted',r?.name||''); showToast('Deleted','success'); renderLB(); renderDash(); await deleteLBRecord(id);
-}
-
-window.lbSelected = new Set();
-function toggleLBSelect(id,checked){
-  if(!window.lbSelected) window.lbSelected=new Set();
-  if(checked) window.lbSelected.add(id); else window.lbSelected.delete(id);
-  const batchBtn=document.getElementById('lb-batch-send-btn');
-  if(batchBtn){ batchBtn.style.display=window.lbSelected.size>0?'inline-flex':'none'; if(window.lbSelected.size>0) batchBtn.textContent=`Send Profiles (${window.lbSelected.size})`; }
-}
-async function batchSendProfiles(){
-  if(!window.lbSelected||window.lbSelected.size===0){ showToast('No candidates selected','error'); return; }
-  if(!confirm(`Mark ${window.lbSelected.size} candidate(s) as PROFILE SENT?`)) return;
-  const promises=[];
-  window.lbSelected.forEach(id=>{
-    const i=lbDB.findIndex(x=>x.id==id);
-    if(i<0) return;
-    lbDB[i]={...lbDB[i],stage:'PROFILE SENT',travelStatus:'PROFILE SENT'};
-    addTimeline('lb',id,'Stage set to PROFILE SENT (batch)');
-    promises.push(saveLBRecord(lbDB[i]));
-  });
-  await Promise.all(promises);
-  window.lbSelected=new Set();
-  auditAction('General Jobs','Batch profile sent',`${window.lbSelected.size||'Multiple'} candidates`);
-  showToast('Profiles marked as SENT','success');
-  renderLB(); renderDash();
 }
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
@@ -3061,10 +2639,7 @@ function openDocs(type,id,name){
   const input=document.getElementById('docs-link-input');
   const openBtn=document.getElementById('docs-open-btn');
   input.value=existing; openBtn.disabled=!existing.trim(); renderDocChecklist(type,id);
-  const dm=document.getElementById('docs-modal');
-  // Elevate z-index above any open profile/lb modal (z-index:200) so docs always appears on top
-  dm.style.setProperty('z-index','19999','important');
-  dm.classList.add('open');
+  document.getElementById('docs-modal').classList.add('open');
 }
 function onDocsLinkInput(){ document.getElementById('docs-open-btn').disabled=!document.getElementById('docs-link-input').value.trim(); }
 function openCurrentDocLink(){ const v=document.getElementById('docs-link-input').value.trim(); if(v) window.open(v,'_blank'); }
@@ -3085,7 +2660,6 @@ async function saveDocs(){
   allDocs[dbKey]=link;
   addTimeline(type,id,link?'Documents link updated':'Documents link removed');
   auditAction('Documents',link?'Documents link updated':'Documents link removed',docsTarget.name||'Candidate');
-  docsTarget = null;
   closeModal('docs-modal'); showToast('Documents saved','success');
   if(type==='pro') renderPro(); else renderLB();
   await saveDocsToDB(dbKey,link);
@@ -3095,27 +2669,23 @@ async function saveDocs(){
 // EXPORT CSV
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function exportCSV(type){
-  let headers,rows,filename,isFiltered=false;
+  let headers,rows,filename;
   if(type==='pro'){
     headers=['#','Name','Passport','Phone','Position','Company','Country','Stage','Commission (KES)','Paid (KES)','Balance (KES)','Submitted','Interview','Offer Letter','MOL','Visa','Travel Date'];
-    const src=lastProFiltered.length?lastProFiltered:proDB;
-    isFiltered=src.length<proDB.length;
-    rows=src.map((r,i)=>[i+1,r.name,r.pp||'',r.phone||'',r.position||'',r.company||'',r.country||'',r.stage,
+    rows=proDB.map((r,i)=>[i+1,r.name,r.pp||'',r.phone||'',r.position||'',r.company||'',r.country||'',r.stage,
       r.commission||'',r.paid||'',(r.commission&&r.paid)?Number(r.commission)-Number(r.paid):'',
       fmtDate(r.submitted),fmtDate(r.interview),fmtDate(r.ol),fmtDate(r.mol),fmtDate(r.visa),fmtDate(r.travel)]);
-    filename=isFiltered?'Dreco_Professional_Filtered':'Dreco_Professional';
+    filename='Dreco_Professional';
   } else {
     headers=['#','Name','Phone','Passport Status','Travel Status','Travel Date','To Refund (USD)','Refunded (USD)','Balance (USD)','Refund Status','Notes'];
-    const src=lastLBFiltered.length?lastLBFiltered:lbDB;
-    isFiltered=src.length<lbDB.length;
-    rows=src.map((r,i)=>{
+    rows=lbDB.map((r,i)=>{
       const rs=getRefundStatus(r); const toR=Number(r.toRefund||r.to_refund)||0;
       const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
       return [i+1,r.name,r.phone||'',r.ppStatus||r.pp_status||'',r.travelStatus||r.travel_status||'',
         fmtDate(r.travelDate||r.travel_date),rs==='N/A'?'':toR,rs==='N/A'?'':paid,
         (rs==='N/A'||rs==='RETURNED')?'':toR-paid,rs,r.notes||''];
     });
-    filename=isFiltered?'Dreco_General_Filtered':'Dreco_LB';
+    filename='Dreco_LB';
   }
   const esc=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
   const csv=[headers.map(esc).join(','),...rows.map(r=>r.map(esc).join(','))].join('\n');
@@ -3312,19 +2882,18 @@ function setUserDisplay(display, role) {
   // sidebar role
   const rEl = document.getElementById('sidebar-user-role');
   if (rEl) rEl.textContent = role === 'admin' ? 'Administrator' : 'Staff';
-  // pd name + email (shadcn style)
+  // pd name + role badge
   const pdName = document.getElementById('pd-name');
   if (pdName) pdName.textContent = display;
+  const pdBadge = document.getElementById('pd-role-badge');
   const pdRoleText = document.getElementById('pd-role-text');
-  if (pdRoleText) pdRoleText.textContent = (currentUser?.username||'user') + '@dreco.app';
-  // suc email
-  const sucEmail = document.getElementById('suc-email');
-  if (sucEmail) sucEmail.textContent = (currentUser?.username||'user') + '@dreco.app';
-  // pd avatar (shadcn dropdown)
-  const pdAv = document.getElementById('pd-avatar');
-  if (pdAv) { pdAv.textContent = initials; pdAv.className = 'dv5-pd-av'; }
+  if (pdBadge && pdRoleText) {
+    const isAdmin = role === 'admin';
+    pdBadge.className = 'pd-role-badge' + (isAdmin ? ' admin' : '');
+    pdRoleText.textContent = isAdmin ? 'Administrator' : 'Staff';
+  }
   const sucOrg = document.querySelector('.suc-org');
-  if (sucOrg) sucOrg.textContent = (currentUser?.username||'user') + '@dreco.app';
+  if (sucOrg) sucOrg.textContent = getCompanyName();
   updateWorkspaceLabels();
 }
 
@@ -3361,11 +2930,11 @@ function setUserDisplay(display, role) {
   'use strict';
 
   // ── Constants ────────────────────────────────────────────
-  const TABS    = ['dash','pipeline','candidates','finance','documents','reports','clients','settings'];
+  const TABS    = ['dash','pipeline','candidates','tasks','finance','documents','reports','clients','settings'];
   const ALIASES = {
     pro:'candidates', lb:'candidates',
-    kanban:'pipeline', travel:'pipeline', tasks:'pipeline',
-    calendar:'pipeline',
+    kanban:'pipeline', travel:'pipeline',
+    calendar:'tasks',
     commissions:'finance', repayments:'finance', expenses:'finance',
     team:'settings', help:'settings'
   };
@@ -3379,47 +2948,6 @@ function setUserDisplay(display, role) {
     tasks:'ti-checkbox', finance:'ti-coin', documents:'ti-file-description',
     reports:'ti-chart-bar', clients:'ti-building-skyscraper', settings:'ti-settings'
   };
-
-  // ── Global job-type tab (Pro / General) ──────────────────
-  let jobTypeTab = 'pro';
-  let lbCountryFilter = '';
-  function rerenderPage() {
-    const renderers = {
-      dash: window.renderDash, pipeline: window.renderPipelinePage,
-      candidates: window.renderCandidatesPage, finance: window.renderFinancePage,
-      documents: window.renderDocumentsPage, reports: window.renderReportsPage,
-      clients: window.renderClientsPage,
-    };
-    for (const [id, fn] of Object.entries(renderers)) {
-      const el = document.getElementById(id+'-section');
-      if (el && el.style.display !== 'none' && typeof fn === 'function') { fn(); break; }
-    }
-  }
-  window.setJobTypeTab = v => { jobTypeTab = v; candidateStageFilter = ''; lbCountryFilter = ''; rerenderPage(); };
-  window.setLbCountry  = v => { lbCountryFilter = v; rerenderPage(); };
-
-  // Shared shadcn-style Pro/General tabs widget
-  function jobTypeTabs(suffix='') {
-    return `<div class="dv5-job-type-tabs" style="display:flex;align-items:center;gap:0;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;background:#f4f4f5">
-      <button class="dv5-jt-tab${jobTypeTab==='pro'?' active':''}" onclick="window.setJobTypeTab('pro')" style="padding:7px 18px;font-size:13px;font-weight:600;border:0;background:${jobTypeTab==='pro'?'#fff':'transparent'};color:${jobTypeTab==='pro'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='pro'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
-        <i class="ti ti-briefcase" style="margin-right:5px;font-size:12px"></i>Professional
-      </button>
-      <button class="dv5-jt-tab${jobTypeTab==='lb'?' active':''}" onclick="window.setJobTypeTab('lb')" style="padding:7px 18px;font-size:13px;font-weight:600;border:0;background:${jobTypeTab==='lb'?'#fff':'transparent'};color:${jobTypeTab==='lb'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='lb'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
-        <i class="ti ti-globe" style="margin-right:5px;font-size:12px"></i>General Jobs
-      </button>
-    </div>`;
-  }
-
-  // Country sub-filter for General Jobs
-  function lbCountryBar(rows) {
-    const countries = [...new Set(rows.map(r=>r.country).filter(Boolean))].sort();
-    if (countries.length < 2) return '';
-    return `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
-      <span style="font-size:11px;font-weight:600;color:#71717a;letter-spacing:.04em">DESTINATION:</span>
-      <button onclick="window.setLbCountry('')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${!lbCountryFilter?'#5347CE':'#e4e4e7'};background:${!lbCountryFilter?'#5347CE':'transparent'};color:${!lbCountryFilter?'#fff':'#71717a'};cursor:pointer;font-weight:600">All</button>
-      ${countries.map(c=>`<button onclick="window.setLbCountry('${js(c)}')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${lbCountryFilter===c?'#5347CE':'#e4e4e7'};background:${lbCountryFilter===c?'#5347CE':'transparent'};color:${lbCountryFilter===c?'#fff':'#71717a'};cursor:pointer;font-weight:600">${h(c)}</button>`).join('')}
-    </div>`;
-  }
 
   // ── Micro-helpers ─────────────────────────────────────────
   const $ = (s, root=document) => root.querySelector(s);
@@ -3437,35 +2965,17 @@ function setUserDisplay(display, role) {
   const avatar = name => `<div class="dv5-avatar">${h(ini(name))}</div>`;
   const docKey  = r => `${r.type}_${r.id}`;
   const docLink = r => allDocs?.[docKey(r)] || '';
-  const hasDoc  = r => {
-    if (!!String(docLink(r)||'').trim()) return true;
-    if (r.type === 'lb') {
-      const id = r.id;
-      return !!(allDocs?.[`lb_${id}_id`]||allDocs?.[`lb_${id}_birth`]||allDocs?.[`lb_${id}_photo`]||allDocs?.[`lb_${id}_passport`]||docTicks?.[`lb_${id}_National ID`]||docTicks?.[`lb_${id}_Photo`]);
-    }
-    return false;
-  };
+  const hasDoc  = r => !!String(docLink(r)||'').trim();
   const safeUrl = u => /^https?:\/\//i.test(String(u||'')) ? u : '';
   const balPro  = r => (typeof proBalance === 'function') ? proBalance(r) : Math.max((Number(r.commission)||0)-(Number(r.paid)||0),0);
-  const LB_TRAVELLED_STAGES = new Set(['TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
-  const lbHasTravelled = r => LB_TRAVELLED_STAGES.has(String(r.stage||r.travelStatus||r.travel_status||'').toUpperCase());
-  const balLB = r => {
-    if (lbOwnPassport(r) || lbRefundReturned(r)) return 0; // no refund owed
-    if (!lbHasTravelled(r)) return 0; // hasn't travelled yet — not a debt
-    return lbRefundOutstanding(r);
-  };
+  const balLB   = r => Math.max((Number(r.toRefund||r.to_refund)||0) - ((Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0)), 0);
 
   function stageColor(stage) {
     const s = String(stage||'').toUpperCase();
     if (s==='TRAVELLED') return 'green';
-    if (s==='REFUND COMPLETE') return 'green';
     if (s.includes('VISA')) return 'blue';
     if (s.includes('MOL')||s.includes('OFFER')) return 'amber';
-    if (s.includes('TRAVEL')||s==='PASSPORT APPLIED') return 'purple';
-    if (s==='SELECTED') return 'blue';
-    if (s==='PROFILE SENT') return 'amber';
-    if (s==='REFUND PENDING') return 'red';
-    if (s==='DOCS SUBMITTED'||s==='SUBMITTED') return 'gray';
+    if (s.includes('TRAVEL')) return 'purple';
     if (s==='NOT YET') return 'red';
     return 'gray';
   }
@@ -3481,45 +2991,27 @@ function setUserDisplay(display, role) {
 
   // ── Unified candidate row normaliser ──────────────────────
   function allRows() {
-    const pro = (Array.isArray(proDB) ? proDB : []).map(r => {
-      const paid1=Number(r.paid1)||0;
-      const paid2=Number(r.paid2)||0;
-      const paid=proPaidAmount(r);
-      return {
-        type:'pro', id:r.id, name:r.name||'—', pp:r.pp||'', phone:r.phone||'',
-        position:r.position||'—', company:r.company||'—', country:r.country||'—',
-        stage:proStageValue(r), submitted:r.submitted, interview:r.interview,
-        ol:r.ol, medical:r.medical||null, mol:r.mol, visa:r.visa, travel:r.travel,
-        owner:r.owner||currentUser?.display||'Team',
-        commission:Number(r.commission)||0,
-        paid1, paid2, paid,
-        balance:proBalance(r),
-        currency:'KES', raw:r
-      };
-    });
-    const lb = (Array.isArray(lbDB) ? lbDB : []).map(r => {
-      const r1Amt = Number(r.r1Amt||r.r1_amt)||0;
-      const r2Amt = Number(r.r2Amt||r.r2_amt)||0;
-      return {
-        type:'lb', id:r.id, name:r.name||'—', pp:r.pp||r.passport||'', phone:r.phone||'',
-        position: r.country || 'General Job',
-        company:r.company||r.country||'—',
-        country:r.country||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'—')||'—',
-        stage:lbStageValue(r),
-        submitted:r.submitted_date||r.submitted||null,
-        travelDate:r.travelDate||r.travel_date||null,
-        interview:null, mol:null, visa:null,
-        travel:r.travelDate||r.travel_date||null,
-        own_passport:lbOwnPassport(r),
-        owner:currentUser?.display||'Team',
-        commission:lbRefundPrincipal(r),
-        r1Amt, r2Amt,
-        r1Date:r.r1Date||r.r1_date||null,
-        r2Date:r.r2Date||r.r2_date||null,
-        paid: r1Amt + r2Amt,
-        balance:balLB(r), currency:'USD', raw:r
-      };
-    });
+    const pro = (Array.isArray(proDB) ? proDB : []).map(r => ({
+      type:'pro', id:r.id, name:r.name||'—', pp:r.pp||'', phone:r.phone||'',
+      position:r.position||'—', company:r.company||'—', country:r.country||'—',
+      stage:r.stage||'—', submitted:r.submitted, interview:r.interview,
+      mol:r.mol, visa:r.visa, travel:r.travel,
+      owner:r.owner||currentUser?.display||'Team',
+      commission:Number(r.commission)||0, paid:Number(r.paid)||0,
+      balance:balPro(r), raw:r
+    }));
+    const lb = (Array.isArray(lbDB) ? lbDB : []).map(r => ({
+      type:'lb', id:r.id, name:r.name||'—', pp:r.pp||r.passport||'', phone:r.phone||'',
+      position:'General Job', company:r.company||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'General')||'—',
+      country:r.country||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'—')||'—',
+      stage:r.travelStatus||r.travel_status||'NOT YET',
+      submitted:r.travelDate||r.travel_date, interview:null, mol:null, visa:null,
+      travel:r.travelDate||r.travel_date,
+      owner:currentUser?.display||'Team',
+      commission:Number(r.toRefund||r.to_refund)||0,
+      paid:(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0),
+      balance:balLB(r), raw:r
+    }));
     return [...pro, ...lb];
   }
 
@@ -3547,28 +3039,21 @@ function setUserDisplay(display, role) {
     allRows().forEach(r => {
       const edit = r.type==='pro' ? `editPro(${r.id})` : `editLB(${r.id})`;
       const docs = `openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')`;
-      const balStr = r.currency==='USD' ? moneyUSD(r.balance) : money(r.balance);
-      const meta = `${r.company||r.country||'—'}`;
       if (!hasDoc(r))
         tasks.push({priority:'High', label:'High', title:`Upload documents — ${r.name}`,
-          meta, action:docs, icon:'ti-folder-x'});
+          meta:`${r.position} · ${r.company}`, action:docs, icon:'ti-folder-x'});
       if (r.balance > 0)
-        tasks.push({priority:'High', label:'High',
-          title: r.type==='pro' ? `Collect commission — ${r.name}` : `Process refund — ${r.name}`,
-          meta:`Balance ${balStr}`, action:edit, icon:'ti-coin'});
-      if (r.type==='pro') {
-        if (String(r.stage).toUpperCase()==='MOL')
-          tasks.push({priority:'Medium', label:'Med', title:`MOL submission — ${r.name}`, meta, action:edit, icon:'ti-file-check'});
-        if (String(r.stage).toUpperCase()==='VISA')
-          tasks.push({priority:'Medium', label:'Med', title:`Visa follow-up — ${r.name}`, meta, action:edit, icon:'ti-id-badge-2'});
-        if (String(r.stage).toUpperCase()==='PENDING TRAVEL')
-          tasks.push({priority:'High', label:'High', title:`Book ticket — ${r.name}`, meta, action:edit, icon:'ti-plane-departure'});
-      } else {
-        if (r.stage==='SELECTED')
-          tasks.push({priority:'High', label:'High', title:`Apply passport — ${r.name}`, meta, action:edit, icon:'ti-passport'});
-        if (r.stage==='REFUND PENDING')
-          tasks.push({priority:'Medium', label:'Med', title:`Refund pending — ${r.name}`, meta:`${balStr} to refund`, action:edit, icon:'ti-credit-card'});
-      }
+        tasks.push({priority:'High', label:'High', title:`Collect commission — ${r.name}`,
+          meta:`Balance ${money(r.balance)}`, action:edit, icon:'ti-coin'});
+      if (String(r.stage).includes('MOL'))
+        tasks.push({priority:'Medium', label:'Med', title:`MOL submission — ${r.name}`,
+          meta:`${r.company} · ${r.position}`, action:edit, icon:'ti-file-check'});
+      if (String(r.stage).includes('VISA'))
+        tasks.push({priority:'Medium', label:'Med', title:`Visa follow-up — ${r.name}`,
+          meta:`${r.company} · ${r.position}`, action:edit, icon:'ti-id-badge-2'});
+      if (String(r.stage).includes('TRAVEL'))
+        tasks.push({priority:'High', label:'High', title:`Book ticket — ${r.name}`,
+          meta:`${r.company} · ${r.position}`, action:edit, icon:'ti-plane-departure'});
     });
     return tasks;
   }
@@ -3589,141 +3074,30 @@ function setUserDisplay(display, role) {
   // ── Checklist per candidate profile ───────────────────────
   function buildChecklist(r) {
     const s = String(r.stage||'').toUpperCase();
-    if (r.type === 'lb') {
-      const id = r.id;
-      return [
-        {label:'National ID',       done: !!(allDocs?.[`lb_${id}_id`]       || docTicks?.[`lb_${id}_National ID`]),  action:'tick'},
-        {label:'Birth Certificate', done: !!(allDocs?.[`lb_${id}_birth`]     || docTicks?.[`lb_${id}_Birth Certificate`]), action:'tick'},
-        {label:'Parent ID',         done: !!(allDocs?.[`lb_${id}_parent_id`] || docTicks?.[`lb_${id}_Parent ID`]),   action:'tick'},
-        {label:'Photo',             done: !!(allDocs?.[`lb_${id}_photo`]     || docTicks?.[`lb_${id}_Photo`]),       action:'tick'},
-        {label:'Passport Copy',     done: !!(allDocs?.[`lb_${id}_passport`]  || docTicks?.[`lb_${id}_Passport Copy`]), action:'tick'},
-        {label:'Profile Sent',      done: ['PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
-        {label:'Selected',          done: ['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
-        {label:'Passport Applied',  done: ['PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
-        {label:'Visa Processing',   done: ['VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
-        {label:'Travelled',         done: ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
-        {label:'Refund processed',  done: s==='REFUND COMPLETE' || r.own_passport, action: r.own_passport ? null : 'edit'},
-      ];
-    }
-    const proStageOrder = ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const idx = proStageOrder.indexOf(s);
-    return [
-      {label:'Documents uploaded',   done: hasDoc(r),                                                          action:'docs'},
-      {label:'Interview done',       done: idx >= proStageOrder.indexOf('INTERVIEW'),                          action:'stage'},
-      {label:'Offer letter received',done: !!r.raw?.ol || idx >= proStageOrder.indexOf('OFFER LETTER'),       action:'stage'},
-      {label:'Medical cleared',      done: !!r.raw?.medical || idx >= proStageOrder.indexOf('MEDICAL & ATTESTATION'), action:'stage'},
-      {label:'MOL submitted',        done: !!r.raw?.mol || idx >= proStageOrder.indexOf('MOL'),               action:'stage'},
-      {label:'Visa stamped',         done: !!r.raw?.visa || idx >= proStageOrder.indexOf('VISA'),             action:'stage'},
-      {label:'Ticket booked',        done: !!r.travel || s==='TRAVELLED',                                     action:'stage'},
-      {label:'Commission collected', done: r.balance === 0 && r.commission > 0,                               action:'edit'},
+    const list = [
+      {label:'Documents uploaded',   done: hasDoc(r)},
+      {label:'Offer letter received',done: !!r.raw?.ol || s !== '—'},
+      {label:'MOL submitted',        done: !!r.raw?.mol || ['PENDING VISA','PENDING TRAVEL','TRAVELLED'].some(x=>s.includes(x.replace('PENDING ','').replace('PENDING','').trim()))},
+      {label:'Visa stamped',         done: !!r.raw?.visa || ['PENDING TRAVEL','TRAVELLED'].some(x=>s.includes(x.replace('PENDING ','').trim()))},
+      {label:'Ticket booked',        done: !!r.travel || s==='TRAVELLED'},
+      {label:'Commission collected', done: r.balance === 0 && r.commission > 0},
     ];
+    return list;
   }
   function checklistPct(r) {
     const cl = buildChecklist(r);
     return Math.round(cl.filter(x=>x.done).length / cl.length * 100);
   }
 
-  // ── Chart helpers ─────────────────────────────────────────
-  function buildBarChart(rows) {
-    const now = new Date();
-    const months = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({ label: d.toLocaleString('default',{month:'short'}), key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, count:0 });
-    }
-    rows.forEach(r => {
-      if (String(r.stage).toUpperCase() !== 'TRAVELLED') return;
-      const d = r.date ? new Date(r.date) : null; if (!d || isNaN(d)) return;
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      const m = months.find(x => x.key === key); if (m) m.count++;
-    });
-    const max = Math.max(...months.map(m => m.count), 1);
-    return `<div style="display:flex;align-items:flex-end;gap:6px;height:140px;padding:0 0 4px">
-      ${months.map(b => {
-        const pct = Math.max(Math.round((b.count/max)*100), b.count>0?6:2);
-        return `<div class="dv5-bar-col" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;position:relative">
-          <div class="dv5-bar-tip" style="position:absolute;bottom:calc(${pct}% + 10px);left:50%;transform:translateX(-50%);background:#18191B;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${b.count} placed</div>
-          <div style="width:100%;border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#5347CE 0%,#9B8CFF 100%);height:${pct}%;min-height:3px;transition:height .4s cubic-bezier(.4,0,.2,1),opacity .12s;cursor:default" onmouseenter="this.previousElementSibling.style.opacity=1;this.style.opacity=.7" onmouseleave="this.previousElementSibling.style.opacity=0;this.style.opacity=1"></div>
-          <span style="font-size:10px;color:var(--text-3,#999);font-weight:700">${h(b.label)}</span>
-        </div>`;
-      }).join('')}
-    </div>`;
-  }
-
-  function buildFunnelChart(flowSteps) {
-    const max = Math.max(...flowSteps.map(([,v]) => v), 1);
-    const colors = ['#5347CE','#6B5FDB','#8370E8','#9B82F4','#B39CFF','#CABFFF'];
-    return `<div style="display:flex;flex-direction:column;gap:8px;padding:8px 0;justify-content:center;height:100%">
-      ${flowSteps.map(([label,val],i) => {
-        const pct = Math.max(Math.round((val/max)*100), val>0?4:1);
-        return `<div style="display:flex;align-items:center;gap:10px;position:relative" class="dv5-funnel-row">
-          <span style="font-size:10px;font-weight:700;color:var(--text-3,#999);width:56px;flex-shrink:0;text-align:right">${h(label)}</span>
-          <div style="flex:1;height:18px;background:var(--bg,#F3F3F3);border-radius:4px;overflow:hidden;position:relative" onmouseenter="this.nextElementSibling.style.opacity=1" onmouseleave="this.nextElementSibling.style.opacity=0">
-            <div style="width:${pct}%;height:100%;background:${colors[i]||colors[5]};border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
-          </div>
-          <span style="font-size:11px;font-weight:800;color:var(--text,#18191B);width:22px;text-align:right;flex-shrink:0">${h(String(val))}</span>
-          <div style="position:absolute;right:30px;top:-26px;background:#18191B;color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${h(label)}: ${h(String(val))}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
-  }
-
   // ── KPI card helper ───────────────────────────────────────
-  function kpi(label, value, note, icon, action='', color='purple', trend='') {
+  function kpi(label, value, note, icon, action='') {
     const click = action ? `onclick="${action}"` : '';
     const clickable = action ? 'style="cursor:pointer"' : '';
-    let trendHtml = '';
-    if (trend) {
-      const up = trend.startsWith('+');
-      const trendColor = up ? '#059669' : '#E11D48';
-      const trendBg = up ? '#ECFDF5' : '#FFF1F2';
-      const trendIcon = up ? 'ti-trending-up' : 'ti-trending-down';
-      trendHtml = `<span class="dv5-kpi-trend" style="display:inline-flex;align-items:center;gap:3px;margin-top:6px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;background:${trendBg};color:${trendColor}"><i class="ti ${trendIcon}" style="font-size:10px"></i>${h(trend)}</span>`;
-    }
     return `<div class="dv5-kpi" ${click} ${clickable}>
-      <div class="dv5-kpi-icon ${color||'purple'}"><i class="ti ${h(icon)}"></i></div>
+      <div class="dv5-kpi-icon"><i class="ti ${h(icon)}"></i></div>
       <div class="dv5-kpi-val">${h(String(value))}</div>
       <div class="dv5-kpi-label">${h(label)}</div>
       <div class="dv5-kpi-note">${h(note)}</div>
-      ${trendHtml}
-    </div>`;
-  }
-
-  // ── Colored stat card (shadcn hotel style) ───────────────
-  // bgColor: CSS color string for card background
-  // iconBg: CSS color string for icon square background
-  function statCard(icon, value, label, sub, bgColor, iconBg, iconColor, action='') {
-    const click = action ? `onclick="${action}"` : '';
-    const cursor = action ? 'cursor:pointer' : 'cursor:default';
-    return `<div class="dv5-stat-card" style="background:${bgColor};${cursor}" ${click}>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="dv5-stat-icon" style="background:${iconBg};color:${iconColor}"><i class="ti ${h(icon)}"></i></div>
-        <i class="ti ti-dots-vertical" style="font-size:15px;color:${iconColor};opacity:.5"></i>
-      </div>
-      <div class="dv5-stat-val">${h(String(value))}</div>
-      <div class="dv5-stat-label">${h(label)}</div>
-      <div class="dv5-stat-sub">${h(sub)}</div>
-    </div>`;
-  }
-
-  // ── File manager card (shadcn file manager) ───────────────
-  function fileCard(icon, iconColor, barColor, label, count, total, caption, action='') {
-    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-    const click = action ? `onclick="${action}"` : '';
-    return `<div class="dv5-file-card" ${click}>
-      <div class="dv5-file-card-head">
-        <span class="dv5-file-card-label">${h(label)}</span>
-        <i class="ti ${h(icon)}" style="font-size:18px;color:${iconColor}"></i>
-      </div>
-      <div class="dv5-file-count">${h(String(count))}</div>
-      <div class="dv5-file-bar-wrap">
-        <div class="dv5-file-bar" style="width:${pct}%;background:${barColor}"></div>
-      </div>
-      <div class="dv5-file-foot">
-        <span>${h(caption)}</span>
-        <span>${pct}%</span>
-      </div>
-      <div class="dv5-file-link">View more <i class="ti ti-arrow-right" style="font-size:11px"></i></div>
     </div>`;
   }
 
@@ -3770,7 +3144,7 @@ function setUserDisplay(display, role) {
           }
         });
       });
-      bars.push({label:monthLabel, height:paid>0 ? Math.min(Math.round(paid/1000),100) : 0});
+      bars.push({label:monthLabel, height:paid>0 ? Math.min(Math.round(paid/1000),100) : Math.floor(20+Math.random()*40)});
     }
     return bars.map(b => `<div class="dv5-bar-wrap"><div class="dv5-bar" style="height:${b.height}%"></div><span>${h(b.label)}</span></div>`).join('');
   }
@@ -3816,8 +3190,8 @@ function setUserDisplay(display, role) {
     const side = document.querySelector('#app .sidebar');
     if (!side) return;
     const navItem = t => `<a class="nav-item" id="nav-${t}" onclick="switchTab('${t}')" title="${h(TITLES[t])}">
-      <i class="ti ${h(ICONS[t])}" style="font-size:15px;width:16px;flex-shrink:0"></i>
-      <span class="nav-item-label" style="font-size:12.5px;font-weight:500;letter-spacing:0">${h(TITLES[t])}</span>
+      <i class="ti ${h(ICONS[t])}"></i>
+      <span class="nav-item-label">${h(TITLES[t])}</span>
     </a>`;
     side.innerHTML = `
       <div class="sidebar-top">
@@ -3835,23 +3209,21 @@ function setUserDisplay(display, role) {
           <i class="ti ti-chevrons-left"></i>
         </button>
       </div>
-      <div class="sidebar-divider"></div>
-      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Workspace</div>
-      ${['dash','pipeline','candidates'].map(navItem).join('')}
-      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Operations</div>
-      ${['finance','documents','reports','clients'].map(navItem).join('')}
-      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">System</div>
-      ${navItem('settings')}
-      <div class="nav-spacer"></div>
-      <div class="sidebar-divider" style="margin-bottom:10px"></div>
-      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" onclick="toggleProfileDropdown(event)" type="button">
-        <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
-        <div class="dv5-suc-body suc-info">
-          <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
-          <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
+      <button class="sidebar-user-card sidebar-account-trigger" onclick="toggleProfileDropdown(event)" type="button">
+        <div class="suc-avatar" id="suc-avatar">${h(ini(currentUser?.display))}</div>
+        <div class="suc-info">
+          <div class="suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
+          <div class="suc-org">${h(co())}</div>
         </div>
-        <i class="ti ti-dots-vertical" style="font-size:15px;color:#A1A1AA;margin-left:auto;flex-shrink:0"></i>
-      </button>`;
+      </button>
+      <div class="sidebar-divider"></div>
+      <div class="nav-section-label">Workspace</div>
+      ${['dash','pipeline','candidates','tasks'].map(navItem).join('')}
+      <div class="nav-section-label">Operations</div>
+      ${['finance','documents','reports','clients'].map(navItem).join('')}
+      <div class="nav-section-label">System</div>
+      ${navItem('settings')}
+      <div class="nav-spacer"></div>`;
     sidebarBuilt = true;
   }
 
@@ -3873,55 +3245,24 @@ function setUserDisplay(display, role) {
   function renderDash() {
     ensureSections(); buildSidebar();
     const el = document.getElementById('dash-section'); if (!el) return;
-    const isPro = jobTypeTab === 'pro';
-    const proRows = proDB || [];
-    const lbFiltered = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    const rows = isPro ? proRows : lbFiltered;
-
-    // Use normalised allRows for accurate computed fields (balance, hasDoc)
-    const allNorm = allRows();
-    const proNorm = allNorm.filter(r=>r.type==='pro');
-    const lbNorm  = lbCountryFilter ? allNorm.filter(r=>r.type==='lb'&&r.country===lbCountryFilter) : allNorm.filter(r=>r.type==='lb');
-    const normRows = isPro ? proNorm : lbNorm;
-
-    // Pro-specific dash metrics
-    const awaitMol  = proNorm.filter(r=>proStageMatches(r, ['MOL','PENDING MOL'])).length;
-    const visaReady = proNorm.filter(r=>proStageMatches(r, ['VISA','PENDING VISA'])).length;
-    const tickets   = proNorm.filter(r=>r.stage==='PENDING TRAVEL').length;
-    const unpaidPro = proNorm.filter(r=>r.balance>0).length;
-    // LB-specific
-    const lbRefundPending = lbNorm.filter(r=>r.stage==='REFUND PENDING').length;
-    const lbSelected      = lbNorm.filter(r=>r.stage==='SELECTED').length;
-    const unpaidLB        = lbNorm.filter(r=>r.balance>0&&!r.own_passport).length;
-
-    const missDocs  = normRows.filter(r=>!hasDoc(r)).length;
-    const travelled = normRows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
-    const totalPaidPro = proNorm.reduce((s,r)=>s+r.paid,0);
-    const totalPaidLB  = lbNorm.reduce((s,r)=>s+r.paid,0);
-
-    const proFlowSteps = [
-      ['Submitted',  proNorm.filter(r=>r.stage==='SUBMITTED').length],
-      ['Interview',  proNorm.filter(r=>r.stage==='INTERVIEW').length],
-      ['Offer',      proNorm.filter(r=>proStageMatches(r, ['OFFER LETTER','PENDING OFFER LETTER'])).length],
-      ['Medical',    proNorm.filter(r=>r.stage==='MEDICAL & ATTESTATION').length],
-      ['MOL',        proNorm.filter(r=>proStageMatches(r, ['MOL','PENDING MOL'])).length],
-      ['Visa',       proNorm.filter(r=>proStageMatches(r, ['VISA','PENDING VISA'])).length],
-      ['Travel',     proNorm.filter(r=>r.stage==='PENDING TRAVEL').length],
-      ['Travelled',  proNorm.filter(r=>r.stage==='TRAVELLED').length],
+    const rows = allRows();
+    const awaitMol  = (proDB||[]).filter(r=>r.stage==='PENDING MOL').length;
+    const visaReady = (proDB||[]).filter(r=>r.stage==='PENDING VISA').length;
+    const unpaid    = rows.filter(r=>r.balance>0).length;
+    const tickets   = (proDB||[]).filter(r=>r.stage==='PENDING TRAVEL').length;
+    const missDocs  = rows.filter(r=>!hasDoc(r)).length;
+    const travelled = rows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
+    const totalPaid = rows.reduce((s,r)=>s+r.paid,0);
+    // Pipeline flow steps
+    const flowSteps = [
+      ['Submitted', rows.length],
+      ['Interview', (proDB||[]).filter(r=>r.interview).length],
+      ['Offer',     (proDB||[]).filter(r=>r.ol||r.stage==='PENDING OFFER LETTER').length],
+      ['MOL',       (proDB||[]).filter(r=>r.mol||r.stage==='PENDING MOL').length],
+      ['Visa',      (proDB||[]).filter(r=>r.visa||r.stage==='PENDING VISA').length],
+      ['Travelled', travelled],
     ];
-    const lbFlowSteps = [
-      ['Docs In',    lbNorm.filter(r=>r.stage==='DOCS SUBMITTED').length],
-      ['Profile Sent',lbNorm.filter(r=>r.stage==='PROFILE SENT').length],
-      ['Selected',   lbNorm.filter(r=>r.stage==='SELECTED').length],
-      ['Passport',   lbNorm.filter(r=>r.stage==='PASSPORT APPLIED').length],
-      ['Visa',       lbNorm.filter(r=>r.stage==='VISA PROCESSING').length],
-      ['Travelled',  lbNorm.filter(r=>r.stage==='TRAVELLED').length],
-      ['Refund',     lbNorm.filter(r=>r.stage==='REFUND PENDING').length],
-      ['Done',       lbNorm.filter(r=>r.stage==='REFUND COMPLETE').length],
-    ];
-    const flowSteps = isPro ? proFlowSteps : lbFlowSteps;
     const tasks = buildTasks().slice(0,5);
-
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
@@ -3930,47 +3271,30 @@ function setUserDisplay(display, role) {
             <p>Here's what needs your attention today.</p>
           </div>
           <div class="dv5-head-actions">
-            ${jobTypeTabs()}
-            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add ${isPro?'Professional':'General'}</button>
+            <button class="dv5-btn" onclick="switchTab('tasks')"><i class="ti ti-checkbox"></i>View all tasks</button>
+            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>New Candidate</button>
           </div>
         </div>
-        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
 
         <div class="dv5-priority-grid">
-          ${isPro ? `
-            ${priority('ti-file-description', awaitMol,  'Awaiting MOL',       'Submit to ministry',   '#FFF4DE', "switchTab('pipeline')")}
-            ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',        'Ready to travel',      '#E9F3FF', "switchTab('pipeline')")}
-            ${priority('ti-coin',             unpaidPro, 'Unpaid Commissions', 'Requires follow up',   '#E8F8EE', "switchTab('finance')")}
-            ${priority('ti-plane-departure',  tickets,   'Tickets Pending',    'Awaiting issue',       '#F1EFFF', "switchTab('pipeline')")}
-            ${priority('ti-alert-circle',     missDocs,  'Missing Documents',  'Compliance gap',       '#FEECEF', "switchTab('documents')")}
-          ` : `
-            ${priority('ti-users',            lbSelected,      'Selected',           'Awaiting passport',    '#E9F3FF', "switchTab('pipeline')")}
-            ${priority('ti-credit-card',      lbRefundPending, 'Refund Pending',     'Refunds to process',   '#FFF4DE', "switchTab('finance')")}
-            ${priority('ti-coin',             unpaidLB,        'Outstanding USD',    'Refunds not started',  '#E8F8EE', "switchTab('finance')")}
-            ${priority('ti-passport',         lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length, 'Passport Applied', 'Awaiting passport', '#F1EFFF', "switchTab('pipeline')")}
-            ${priority('ti-alert-circle',     missDocs,        'Missing Documents',  'Compliance gap',       '#FEECEF', "switchTab('documents')")}
-          `}
+          ${priority('ti-file-description', awaitMol,  'Awaiting MOL',        'Submit to ministry',    '#FFF4DE', "switchTab('pipeline')")}
+          ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',         'Ready to travel',       '#E9F3FF', "switchTab('pipeline')")}
+          ${priority('ti-coin',             unpaid,    'Unpaid Commissions',  'Requires follow up',    '#E8F8EE', "switchTab('finance')")}
+          ${priority('ti-plane-departure',  tickets,   'Tickets Pending',     'Awaiting issue',        '#F1EFFF', "switchTab('pipeline')")}
+          ${priority('ti-alert-circle',     missDocs,  'Missing Documents',   'Compliance gap',        '#FEECEF', "switchTab('documents')")}
         </div>
 
-        <div class="dv5-card dv5-card-pipeline">
-          <div class="dv5-card-head" style="margin-bottom:16px">
-            <span class="dv5-card-title" style="color:#fff;font-size:14px">${isPro?'Professional':'General Jobs'} Pipeline</span>
-            <button class="dv5-link" style="color:rgba(255,255,255,.6);font-size:11px" onclick="switchTab('pipeline')">View all →</button>
+        <div class="dv5-card">
+          <div class="dv5-card-head">
+            <span class="dv5-card-title">Pipeline Overview</span>
+            <button class="dv5-link" onclick="switchTab('pipeline')">View pipeline →</button>
           </div>
-          <div class="dv5-pipeline-flow" style="justify-content:space-between">
-            ${flowSteps.map(([label,val], i) => {
-              const maxVal = Math.max(...flowSteps.map(([,v])=>v), 1);
-              const pct = Math.round((val/maxVal)*100);
-              const isLast = i === flowSteps.length - 1;
-              return `
-              <div class="dv5-flow-step" style="flex:1;position:relative;padding:0 8px">
-                <strong style="font-size:28px">${h(String(val))}</strong>
-                <span style="font-size:10px;letter-spacing:.04em;text-transform:uppercase">${h(label)}</span>
-                <div style="margin-top:8px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden">
-                  <div style="height:100%;width:${pct}%;background:${isLast?'#EEFA94':'rgba(255,255,255,.45)'};border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
-                </div>
-              </div>${!isLast ? '<div class="dv5-flow-arrow" style="flex-shrink:0;padding:0 2px;padding-bottom:18px"><i class="ti ti-chevron-right"></i></div>' : ''}`;
-            }).join('')}
+          <div class="dv5-pipeline-flow">
+            ${flowSteps.map(([label,val]) => `
+              <div class="dv5-flow-step">
+                <strong>${h(String(val))}</strong>
+                <span>${h(label)}</span>
+              </div>`).join('<div class="dv5-flow-arrow"><i class="ti ti-chevron-right"></i></div>')}
           </div>
         </div>
 
@@ -3985,7 +3309,7 @@ function setUserDisplay(display, role) {
           <div class="dv5-card">
             <div class="dv5-card-head">
               <span class="dv5-card-title">Upcoming Reminders</span>
-              <button class="dv5-link" onclick="switchTab('pipeline')">View all →</button>
+              <button class="dv5-link" onclick="switchTab('tasks')">View all →</button>
             </div>
             <div class="dv5-task-list">
               ${tasks.length ? tasks.map(taskRow).join('') : '<div class="dv5-empty">No urgent tasks. Workspace is clear.</div>'}
@@ -3993,39 +3317,12 @@ function setUserDisplay(display, role) {
           </div>
         </div>
 
-        <div class="dv5-two-col" style="margin-bottom:12px">
-          <div class="dv5-card" style="margin-bottom:0">
-            <div class="dv5-card-head">
-              <div>
-                <span class="dv5-card-title">Placements by Month</span>
-                <div class="dv5-card-sub">${isPro?'Professional':'General'} — last 6 months</div>
-              </div>
-            </div>
-            ${buildBarChart(rows)}
-          </div>
-          <div class="dv5-card" style="margin-bottom:0">
-            <div class="dv5-card-head">
-              <div>
-                <span class="dv5-card-title">Pipeline Funnel</span>
-                <div class="dv5-card-sub">Candidates per stage</div>
-              </div>
-            </div>
-            ${buildFunnelChart(flowSteps)}
-          </div>
-        </div>
-
-        <div class="dv5-stat-grid" style="margin-top:0">
-          ${isPro ? `
-            ${statCard('ti-users',      proNorm.length,                                         'Professional',    `Total candidates`,      '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
-            ${statCard('ti-plane',      travelled,                                              'Placements',      `Completed`,             '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-users-group',proNorm.filter(r=>r.stage!=='TRAVELLED').length,        'Active Pipeline', `In progress`,           '#FCE7F3','#9D174D','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-wallet',     money(totalPaidPro),                                   'Revenue (KES)',   `Commission collected`,   '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
-          ` : `
-            ${statCard('ti-users',      lbNorm.length,                                          'General Jobs',    `Total candidates`,      '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
-            ${statCard('ti-plane',      travelled,                                              'Travelled',       `Successfully placed`,   '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-passport',   lbNorm.filter(r=>r.own_passport).length,               'Own Passport',    `No refund required`,    '#F0FDF4','#059669','#fff', "switchTab('candidates')")}
-            ${statCard('ti-wallet',     moneyUSD(totalPaidLB),                                 'Refunds (USD)',   `Refunds collected`,      '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
-          `}
+        <div class="dv5-kpi-grid" style="margin-top:16px">
+          ${kpi('Total Candidates', rows.length,    'All active records',     'ti-users',              "switchTab('candidates')")}
+          ${kpi('Travelled',        travelled,       'Completed placements',   'ti-plane',              "switchTab('pipeline')")}
+          ${kpi('Collected',        money(totalPaid),'Recorded payments',      'ti-wallet',             "switchTab('finance')")}
+          ${kpi('Clients',          buildClients().length, 'Companies served', 'ti-building',           "switchTab('clients')")}
+          ${kpi('Documents',        Object.values(allDocs||{}).filter(Boolean).length, 'Drive links saved','ti-folder', "switchTab('documents')")}
         </div>
       </div>`;
   }
@@ -4034,46 +3331,33 @@ function setUserDisplay(display, role) {
   // ── 2. PIPELINE ───────────────────────────────────────────
   function renderPipeline() {
     const el = document.getElementById('pipeline-section'); if (!el) return;
-    const isPro = jobTypeTab === 'pro';
-    const pipelineRows = allRows();
-    const proRows = pipelineRows.filter(r=>r.type==='pro').map(r=>({...r, pipelineStage:proPipelineStageValue(r)}));
-    const lbRows = pipelineRows.filter(r=>r.type==='lb').map(r=>({...r, pipelineStage:lbPipelineStageValue(r)}));
-    const proStageList = PRO_PIPELINE_STAGES;
-    const lbStageList  = LB_PIPELINE_STAGES;
-    const lbFiltered = lbCountryFilter ? lbRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbRows;
-    const stages = isPro ? proStageList : lbStageList;
-
+    const stages = ['PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'];
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Pipeline</h1><p>${isPro?'Professional candidates — KES commission pipeline.':'General Jobs — USD refund pipeline.'}</p></div>
+          <div><h1>Pipeline</h1><p>Candidate progress through offer, MOL, visa, ticketing, and travel.</p></div>
           <div class="dv5-head-actions">
-            ${jobTypeTabs()}
-            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add ${isPro?'Professional':'General'}</button>
+            <button class="dv5-btn" onclick="renderPipeline()"><i class="ti ti-refresh"></i>Refresh</button>
+            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate</button>
           </div>
         </div>
-        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
-        <div class="dv5-kanban" style="margin-top:12px">
+        <div class="dv5-kanban">
           ${stages.map(stage => {
-            const items = isPro
-              ? proRows.filter(r=>r.pipelineStage===stage)
-              : lbFiltered.filter(r=>r.pipelineStage===stage);
-            const label = stage.replace(/^DOCS /,'');
+            const items = (proDB||[]).filter(r=>r.stage===stage);
+            const label = stage.replace('PENDING ','');
             return `<div class="dv5-col">
               <div class="dv5-col-head">
                 <span>${h(label)}</span>
                 <span class="dv5-col-count">${items.length}</span>
               </div>
               <div class="dv5-col-body">
-                ${items.length ? items.map(r => `
-                  <div class="dv5-pipe-card" onclick="${isPro?`editPro(${r.id})`:`editLB(${r.id})`}">
+                ${items.length ? items.slice(0,30).map(r => `
+                  <div class="dv5-pipe-card" onclick="editPro(${r.id})">
                     <div class="dv5-pipe-name">${h(r.name)}</div>
-                    <div class="dv5-pipe-meta">${h(r.position||r.country||'—')} · ${h(r.company||'—')}</div>
+                    <div class="dv5-pipe-meta">${h(r.position||'—')} · ${h(r.company||'—')}</div>
                     <div class="dv5-pipe-foot">
                       <span><i class="ti ti-id"></i>${h(r.pp||'No PP')}</span>
-                      ${isPro && r.commission ? `<span>${money(r.commission)}</span>` : ''}
-                      ${!isPro && r.commission ? `<span>${moneyUSD(r.commission)}</span>` : ''}
-                      ${!isPro && r.own_passport ? `<span style="color:#059669;font-size:9px">Own PP</span>` : ''}
+                      ${r.commission ? `<span>${money(r.commission)}</span>` : ''}
                     </div>
                   </div>`).join('') : '<div class="dv5-empty">No candidates</div>'}
               </div>
@@ -4088,158 +3372,71 @@ function setUserDisplay(display, role) {
   let candidateSearch = '';
   let candidateTypeFilter = '';
   let candidateStageFilter = '';
-  let candidateViewFilter = 'all';
-  let selectedCandidates = new Set(); // 'type_id' strings
+  let candidateViewFilter = 'all'; // all | my | follow | short
 
   function setCandidateSearch(v) { candidateSearch = v; renderCandidates(); }
   window.setCandidateSearch = setCandidateSearch;
-  window.setCandidateStageFilter = v => { candidateStageFilter = v; renderCandidates(); };
-  window.setCandidateViewFilter  = v => { candidateViewFilter  = v; renderCandidates(); };
-  window.clearSelectedCandidates = () => { selectedCandidates.clear(); renderCandidates(); };
 
   function filterCandidates() {
-    // Always scoped to the active job type tab
-    let rows = allRows().filter(r => r.type === jobTypeTab);
+    let rows = allRows();
     const q = candidateSearch.toLowerCase();
+    if (candidateTypeFilter)  rows = rows.filter(r=>r.type===candidateTypeFilter);
     if (candidateStageFilter) rows = rows.filter(r=>r.stage===candidateStageFilter);
+    if (candidateViewFilter==='my')    rows = rows.filter(r=>r.owner===currentUser?.display);
     if (candidateViewFilter==='follow') rows = rows.filter(r=>r.balance>0||!hasDoc(r));
-    if (candidateViewFilter==='balance') rows = rows.filter(r=>r.balance>0);
     if (q) rows = rows.filter(r=>[r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q));
     return rows;
   }
 
-  function toggleCandSelect(key, checked) {
-    if (checked) selectedCandidates.add(key);
-    else selectedCandidates.delete(key);
-    const bar = document.getElementById('cand-bulk-bar');
-    const countEl = document.getElementById('cand-bulk-count');
-    if (bar) bar.style.display = selectedCandidates.size > 0 ? 'flex' : 'none';
-    if (countEl) countEl.textContent = selectedCandidates.size + ' selected';
-    const selectAll = document.getElementById('cand-select-all');
-    if (selectAll) {
-      const list = filterCandidates();
-      selectAll.indeterminate = selectedCandidates.size > 0 && selectedCandidates.size < list.length;
-      selectAll.checked = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
-    }
-  }
-  window.toggleCandSelect = toggleCandSelect;
-
-  function toggleSelectAll(checked) {
-    filterCandidates().forEach(r => {
-      const key = r.type+'_'+r.id;
-      if (checked) selectedCandidates.add(key); else selectedCandidates.delete(key);
-    });
-    renderCandidates();
-  }
-  window.toggleSelectAll = toggleSelectAll;
-
-  async function bulkChangeStage(stage) {
-    if (!stage || !selectedCandidates.size) return;
-    const list = filterCandidates().filter(r => selectedCandidates.has(r.type+'_'+r.id));
-    for (const r of list) {
-      const table = r.type==='pro' ? 'pro_candidates' : 'lb_candidates';
-      await dbUpdate(table, r.id, r.type==='pro' ? {stage} : {stage, travelStatus: stage});
-      const db2 = r.type==='pro' ? proDB : lbDB;
-      const idx = db2.findIndex(x => x.id===r.id);
-      if (idx >= 0) { if (r.type==='pro') db2[idx].stage = stage; else db2[idx].travelStatus = stage; }
-    }
-    selectedCandidates.clear();
-    renderCandidates();
-    showToast('Stage updated for '+list.length+' candidate'+(list.length!==1?'s':''), 'success');
-  }
-  window.bulkChangeStage = bulkChangeStage;
-
-  function bulkExportSelected() {
-    const rows = filterCandidates().filter(r => selectedCandidates.has(r.type+'_'+r.id));
-    if (!rows.length) return;
-    const proRows = rows.filter(r=>r.type==='pro');
-    const lbRows  = rows.filter(r=>r.type==='lb');
-    if (proRows.length) { lastProFiltered = proRows; exportCSV('pro'); }
-    if (lbRows.length)  { lastLBFiltered  = lbRows;  exportCSV('lb'); }
-  }
-  window.bulkExportSelected = bulkExportSelected;
-
   function renderCandidates() {
     const el = document.getElementById('candidates-section'); if (!el) return;
-    const isPro = jobTypeTab === 'pro';
-    const lbBaseRows = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    let all = isPro
-      ? (proDB||[]).map(r=>({...r,type:'pro',position:r.position||'',company:r.company||'',country:r.country||'',stage:r.stage||'SUBMITTED',commission:Number(r.commission)||0,paid:Number(r.paid||0),balance:Math.max((Number(r.commission)||0)-(Number(r.paid||0)),0)}))
-      : lbBaseRows.map(r=>{const r1=Number(r.r1Amt||r.r1_amt)||0,r2=Number(r.r2Amt||r.r2_amt)||0,toRef=Number(r.toRefund||r.to_refund)||0;return{...r,type:'lb',position:r.country||'General Job',company:r.company||r.country||'—',country:r.country||'—',stage:r.travelStatus||r.travel_status||r.stage||'DOCS SUBMITTED',commission:toRef,paid:r1+r2,balance:balLB(r)};});
-    const allCandidateRows = allRows();
-    all = isPro
-      ? allCandidateRows.filter(r=>r.type==='pro')
-      : allCandidateRows.filter(r=>r.type==='lb' && (!lbCountryFilter || (r.country||'')===lbCountryFilter));
+    const all = allRows();
     const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
-    const q = candidateSearch.toLowerCase();
-    let list = all.filter(r => {
-      if (candidateStageFilter && r.stage !== candidateStageFilter) return false;
-      if (candidateViewFilter==='follow' && r.balance<=0 && hasDoc(r)) return false;
-      if (candidateViewFilter==='balance' && r.balance<=0) return false;
-      if (q && ![r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q)) return false;
-      return true;
-    });
-    const allSel = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
-    const someSel = selectedCandidates.size > 0;
-    const proStageList2 = proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStageList2  = lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
-    const allStages = isPro ? proStageList2 : lbStageList2;
+    const list = filterCandidates();
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Candidates</h1><p>${isPro?'Professional placements — commissions in KES.':'General Jobs — refunds in USD.'}</p></div>
+          <div><h1>Candidates</h1><p>Unified list across professional and general job placements.</p></div>
           <div class="dv5-head-actions">
-            ${jobTypeTabs()}
-            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add ${isPro?'Professional':'General'}</button>
+            <button class="dv5-btn" onclick="openLBForm()"><i class="ti ti-briefcase"></i>Add General</button>
+            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Professional</button>
           </div>
-        </div>
-        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
-        <div class="dv5-bulk-bar" id="cand-bulk-bar" style="display:${someSel?'flex':'none'}">
-          <span id="cand-bulk-count">${selectedCandidates.size} selected</span>
-          <select class="dv5-select" onchange="bulkChangeStage(this.value);this.value=''">
-            <option value="">Change stage…</option>
-            ${allStages.map(s=>`<option value="${h(s)}">${h(s)}</option>`).join('')}
-          </select>
-          <button class="dv5-btn" onclick="bulkExportSelected()"><i class="ti ti-download"></i>Export selected</button>
-          <button class="dv5-btn" onclick="window.clearSelectedCandidates()"><i class="ti ti-x"></i>Clear</button>
         </div>
         <div class="dv5-toolbar">
           <div class="dv5-toolbar-left">
             <input class="dv5-input" id="cand-search" placeholder="Search name, passport, company…"
               value="${h(candidateSearch)}" oninput="setCandidateSearch(this.value)">
-            <select class="dv5-select" onchange="window.setCandidateStageFilter(this.value)">
+            <select class="dv5-select" onchange="candidateTypeFilter=this.value;renderCandidates()">
+              <option value="">All Jobs</option>
+              <option value="pro" ${candidateTypeFilter==='pro'?'selected':''}>Professional</option>
+              <option value="lb" ${candidateTypeFilter==='lb'?'selected':''}>General</option>
+            </select>
+            <select class="dv5-select" onchange="candidateStageFilter=this.value;renderCandidates()">
               <option value="">All Stages</option>
               ${stageOptions.map(s=>`<option value="${h(s)}" ${candidateStageFilter===s?'selected':''}>${h(s)}</option>`).join('')}
             </select>
           </div>
           <div class="dv5-toolbar-right">
             <div class="dv5-view-tabs">
-              ${[['all','All'],['follow','Needs Action'],['balance','Has Balance']].map(([v,l])=>
+              ${[['all','All'],['my','Mine'],['follow','Follow Ups']].map(([v,l])=>
                 `<button class="dv5-view-tab ${candidateViewFilter===v?'active':''}"
-                  onclick="window.setCandidateViewFilter('${v}')">${l}</button>`
+                  onclick="candidateViewFilter='${v}';renderCandidates()">${l}</button>`
               ).join('')}
             </div>
             <span class="dv5-count">Showing ${list.length} of ${all.length}</span>
-            <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
+            <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export</button>
           </div>
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
             <table class="dv5-table">
               <thead><tr>
-                <th style="width:36px"><input type="checkbox" id="cand-select-all" ${allSel?'checked':''} onchange="toggleSelectAll(this.checked)"></th>
-                <th>Name</th><th>${isPro?'Job Title':'Destination'}</th><th>${isPro?'Company':'Agency'}</th>
-                <th>Stage</th><th>${isPro?'Submitted':'Doc Date'}</th><th></th>
+                <th>Name</th><th>Job Title</th><th>Company</th>
+                <th>Stage</th><th>Submitted</th><th>Next Action</th><th>Owner</th><th></th>
               </tr></thead>
               <tbody>
-                ${list.length ? list.map(r => {
-                  const key = r.type+'_'+r.id;
-                  const sel = selectedCandidates.has(key);
-                  return `
-                  <tr class="${sel?'dv5-row-selected':''}" onclick="openCandidateProfile('${r.type}',${r.id})">
-                    <td onclick="event.stopPropagation()">
-                      <input type="checkbox" ${sel?'checked':''} onchange="toggleCandSelect('${key}',this.checked)">
-                    </td>
+                ${list.length ? list.map(r => `
+                  <tr onclick="openCandidateProfile('${r.type}',${r.id})">
                     <td><div class="dv5-name-cell">
                       ${avatar(r.name)}
                       <div>
@@ -4251,19 +3448,17 @@ function setUserDisplay(display, role) {
                     <td>${h(r.company)}</td>
                     <td>${badge(r.stage)}</td>
                     <td>${h(fmt(r.submitted))}</td>
+                    <td><span class="dv5-next-action">${h(nextAction(r))}</span></td>
+                    <td>${h(r.owner)}</td>
                     <td onclick="event.stopPropagation()">
-                      <button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}" title="Edit">
+                      <button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
                         <i class="ti ti-edit"></i>
                       </button>
-                      <button class="dv5-action-btn" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')" title="Documents">
+                      <button class="dv5-action-btn" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')">
                         <i class="ti ti-paperclip"></i>
                       </button>
-                      <button class="dv5-action-btn primary" onclick="window.advanceStage('${r.type}',${r.id})" title="Advance to next stage" style="background:#5347CE;color:#fff;border-color:#5347CE">
-                        <i class="ti ti-arrow-right"></i>
-                      </button>
                     </td>
-                  </tr>`;
-                }).join('') : '<tr><td colspan="9"><div class="dv5-empty">No candidates found.</div></td></tr>'}
+                  </tr>`).join('') : '<tr><td colspan="8"><div class="dv5-empty">No candidates found.</div></td></tr>'}
               </tbody>
             </table>
           </div>
@@ -4271,28 +3466,6 @@ function setUserDisplay(display, role) {
       </div>`;
   }
   window.renderCandidatesPage = renderCandidates;
-  window.renderCandidates = renderCandidates;
-
-  window.advanceStage = async function(type, id) {
-    const stages = type === 'pro'
-      ? ((proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']))
-      : (lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
-    const db = type === 'pro' ? proDB : lbDB;
-    const rec = db.find(r => r.id == id);
-    if (!rec) return;
-    const cur = (type === 'pro' ? rec.stage : (rec.travelStatus || rec.travel_status) || stages[0]).toUpperCase();
-    const idx = stages.findIndex(s => s.toUpperCase() === cur);
-    if (idx === -1 || idx >= stages.length - 1) { showToast('Already at final stage','info'); return; }
-    const nextStage = stages[idx + 1];
-    if (type === 'pro') rec.stage = nextStage; else rec.travelStatus = nextStage;
-    showToast(`Moved to ${nextStage}`, 'success');
-    renderCandidates();
-    try {
-      const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
-      const updateField = type === 'pro' ? { stage: nextStage } : { stage: nextStage, travelStatus: nextStage };
-      await dbUpdate(table, id, updateField);
-    } catch(e) { console.warn('advanceStage save error', e); }
-  };
 
   // ── 4. TASKS ──────────────────────────────────────────────
   function renderTasks() {
@@ -4308,12 +3481,12 @@ function setUserDisplay(display, role) {
             <button class="dv5-btn primary" onclick="switchTab('candidates')"><i class="ti ti-users"></i>Open Candidates</button>
           </div>
         </div>
-        <div class="dv5-stat-grid">
-          ${statCard('ti-checkbox',      tasks.length,  'Open Tasks',      `Need attention`,                              '#F5F3FF','#7C3AED','#fff')}
-          ${statCard('ti-alert-triangle',high.length,   'High Priority',   `Urgent blockers`,                             '#FEF2F2','#DC2626','#fff')}
-          ${statCard('ti-clock',         med.length,    'Medium',          `Stage follow ups`,                            '#FFFBEB','#D97706','#fff')}
-          ${statCard('ti-folder-x',      allRows().filter(r=>!hasDoc(r)).length,'Missing Docs','Compliance gap',          '#F0FDFA','#0D9488','#fff')}
-          ${statCard('ti-coin',          allRows().filter(r=>r.balance>0).length,'Unpaid',    `Finance follow up`,        '#F0FDF4','#16A34A','#fff')}
+        <div class="dv5-kpi-grid">
+          ${kpi('Open Tasks',   tasks.length, 'Need attention',   'ti-checkbox')}
+          ${kpi('High Priority',high.length,  'Urgent blockers',  'ti-alert-triangle')}
+          ${kpi('Medium',       med.length,   'Stage follow ups', 'ti-clock')}
+          ${kpi('Missing Docs', allRows().filter(r=>!hasDoc(r)).length, 'Compliance', 'ti-folder-x')}
+          ${kpi('Unpaid',       allRows().filter(r=>r.balance>0).length,'Finance follow up','ti-coin')}
         </div>
         <div class="dv5-card">
           <div class="dv5-card-head">
@@ -4329,225 +3502,76 @@ function setUserDisplay(display, role) {
   window.renderTasksPage = renderTasks;
 
   // ── 5. FINANCE ────────────────────────────────────────────
-  let financePositionFilter = '';
-  let financeTab = 'latest'; // 'latest' | 'upcoming'
-  let financeDatePreset = 'all'; // 'all','this_month','last_month','this_quarter','this_year'
-  let financeClientSearch = '';
-  window.setFinancePosition   = v => { financePositionFilter = v; renderFinance(); };
-  window.setFinanceTab        = v => { financeTab = v; renderFinance(); };
-  window.setFinanceDatePreset = v => { financeDatePreset = v; renderFinance(); };
-  window.setFinanceClientSearch = v => { financeClientSearch = v; renderFinance(); };
-
   function renderFinance() {
     const el = document.getElementById('finance-section'); if (!el) return;
-    const isPro = jobTypeTab === 'pro';
-    const allFinRows = allRows();
-    const proRows = allFinRows.filter(r=>r.type==='pro');
-    const lbAllRows = allFinRows.filter(r=>r.type==='lb');
-    const lbRows  = lbCountryFilter ? lbAllRows.filter(r=>(r.country||'')=== lbCountryFilter) : lbAllRows;
-    const activeRows = isPro ? proRows : lbRows;
-    const positions = [...new Set(activeRows.map(r=>r.position).filter(Boolean))].sort();
-    const rows = financePositionFilter
-      ? activeRows.filter(r=>r.position===financePositionFilter)
-      : activeRows;
-    // Pro stats (KES)
-    const proFin = financePositionFilter ? proRows.filter(r=>r.position===financePositionFilter) : proRows;
-    const proTotal = proFin.reduce((s,r)=>s+r.commission,0);
-    const proPaid  = proFin.reduce((s,r)=>s+r.paid,0);
-    const proBal   = proFin.reduce((s,r)=>s+r.balance,0);
-    const proRate  = proTotal ? Math.round(proPaid/proTotal*100) : 0;
-    // LB stats (USD) — only post-travel candidates have real outstanding balances
-    const lbFin = financePositionFilter ? lbRows.filter(r=>r.position===financePositionFilter) : lbRows;
-    const lbTravelled = lbFin.filter(r => LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase()));
-    const lbPreTravel = lbFin.filter(r => !LB_TRAVELLED_STAGES.has(String(r.stage||'').toUpperCase())&&!r.own_passport);
-    const lbTotal   = lbTravelled.reduce((s,r)=>s+r.commission,0); // total refund commitment (post-travel only)
-    const lbPaidAmt = lbFin.reduce((s,r)=>s+r.paid,0);            // all refunds received
-    const lbBal     = lbTravelled.reduce((s,r)=>s+r.balance,0);   // outstanding only for travelled
-    const lbExpected = lbPreTravel.reduce((s,r)=>s+r.commission,0); // pre-travel expected
-    const lbOwnPP   = lbFin.filter(r=>r.own_passport).length;
-    const lbPipeline = lbPreTravel.length; // pre-travel, expected future refunds
+    const rows = allRows();
     const total = rows.reduce((s,r)=>s+r.commission,0);
     const paid  = rows.reduce((s,r)=>s+r.paid,0);
     const bal   = rows.reduce((s,r)=>s+r.balance,0);
-    const rate  = proRate;
-
-    // Monthly breakdown (last 6 months, by r.submitted or created_at)
-    const now = new Date();
-    const months = Array.from({length:6},(_,i)=>{
-      const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
-      return { label: d.toLocaleString('default',{month:'short'})+' '+d.getFullYear().toString().slice(2), y: d.getFullYear(), m: d.getMonth() };
-    });
-    const monthly = months.map(({label,y,m}) => {
-      const mrs = rows.filter(r=>{
-        const d = new Date(r.submitted||r.created_at||'');
-        return !isNaN(d) && d.getFullYear()===y && d.getMonth()===m;
-      });
-      return { label, invoiced: mrs.reduce((s,r)=>s+r.commission,0), paid: mrs.reduce((s,r)=>s+r.paid,0) };
-    });
-
-    // Outstanding by company
-    const byPosition = {};
-    rows.filter(r=>r.balance>0).forEach(r => {
-      const pos = r.position || 'Unknown Position';
-      if (!byPosition[pos]) byPosition[pos] = {name:pos,balance:0,count:0};
-      byPosition[pos].balance += r.balance;
-      byPosition[pos].count++;
-    });
-    const positionDebt = Object.values(byPosition).sort((a,b)=>b.balance-a.balance);
-
-    // Date range preset filter
-    const now2 = new Date();
-    function inPreset(r) {
-      const d = new Date(r.submitted || r.created_at || '');
-      if (isNaN(d) || financeDatePreset === 'all') return true;
-      const y = d.getFullYear(), mo = d.getMonth();
-      if (financeDatePreset === 'this_month') return y === now2.getFullYear() && mo === now2.getMonth();
-      if (financeDatePreset === 'last_month') { const lm = new Date(now2.getFullYear(), now2.getMonth()-1,1); return y === lm.getFullYear() && mo === lm.getMonth(); }
-      if (financeDatePreset === 'this_quarter') { const q = Math.floor(now2.getMonth()/3); return y === now2.getFullYear() && Math.floor(mo/3) === q; }
-      if (financeDatePreset === 'this_year') return y === now2.getFullYear();
-      return true;
-    }
-    const dateRows = rows.filter(inPreset);
-    // Expand to per-payment entries for "latest" tab
-    const paymentEntries = [];
-    dateRows.forEach(r => {
-      if (r.type === 'pro') {
-        if (r.paid1 > 0) paymentEntries.push({ r, label: `${r.name} — 1st Commission`, amt: r.paid1, date: r.interview || r.submitted || r.created_at, isUSD: false });
-        if (r.paid2 > 0) paymentEntries.push({ r, label: `${r.name} — 2nd Commission`, amt: r.paid2, date: r.ol || r.submitted || r.created_at, isUSD: false });
-        if (!r.paid1 && !r.paid2 && r.paid > 0) paymentEntries.push({ r, label: `${r.name} — Commission`, amt: r.paid, date: r.submitted || r.created_at, isUSD: false });
-      } else {
-        const r1 = Number(r.r1Amt)||0, r2 = Number(r.r2Amt)||0;
-        if (r1 > 0) paymentEntries.push({ r, label: `${r.name} — 1st Refund`, amt: r1, date: r.r1Date || r.travelDate || r.submitted || r.created_at, isUSD: true });
-        if (r2 > 0) paymentEntries.push({ r, label: `${r.name} — 2nd Refund`, amt: r2, date: r.r2Date || r.travelDate || r.submitted || r.created_at, isUSD: true });
-        if (!r1 && !r2 && r.paid > 0) paymentEntries.push({ r, label: `${r.name} — Refund`, amt: r.paid, date: r.travelDate || r.submitted || r.created_at, isUSD: true });
-      }
-    });
-    paymentEntries.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
-    const upcomingRows = dateRows.filter(r => r.balance > 0).sort((a,b) => b.balance - a.balance);
-    const searchQ = financeClientSearch.trim().toLowerCase();
-    const filteredPayments = searchQ ? paymentEntries.filter(e => e.label.toLowerCase().includes(searchQ) || (e.r.company||'').toLowerCase().includes(searchQ)) : paymentEntries;
-    const filteredUpcoming = searchQ ? upcomingRows.filter(r => (r.name||'').toLowerCase().includes(searchQ) || (r.company||'').toLowerCase().includes(searchQ)) : upcomingRows;
-    const txRows = financeTab === 'latest' ? filteredPayments : filteredUpcoming;
-    const presets = [
-      ['all','All Time'],['this_month','This Month'],['last_month','Last Month'],
-      ['this_quarter','This Quarter'],['this_year','This Year']
-    ];
-
+    const rate  = total ? Math.round(paid/total*100) : 0;
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Finance</h1><p>${isPro?'Professional commissions — KES.':'General Jobs refunds — USD.'}</p></div>
+          <div><h1>Finance</h1><p>Commissions, payments, outstanding balances, and cash flow from real candidate data.</p></div>
           <div class="dv5-head-actions">
-            ${jobTypeTabs()}
-            <input class="dv5-input" placeholder="Search client…" value="${h(financeClientSearch)}" oninput="window.setFinanceClientSearch(this.value)" style="min-width:150px">
-            <select class="dv5-select" onchange="setFinancePosition(this.value)" style="min-width:130px">
-              <option value="">All Positions</option>
-              ${positions.map(c=>`<option value="${h(c)}" ${financePositionFilter===c?'selected':''}>${h(c)}</option>`).join('')}
-            </select>
-            <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
+            <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export Pro</button>
+            <button class="dv5-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button>
           </div>
         </div>
-        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
-
-        <div class="dv5-stat-grid" style="margin-bottom:20px;margin-top:12px">
-          ${isPro ? `
-            ${statCard('ti-receipt',      money(proTotal), 'Total Commission',  `${proFin.length} candidates`,     '#E0E7FF','#4338CA','#fff')}
-            ${statCard('ti-wallet',       money(proPaid),  'Collected KES',     'Revenue received',                '#DCFCE7','#16A34A','#fff')}
-            ${statCard('ti-alert-circle', money(proBal),   'Outstanding KES',   `${proFin.filter(r=>r.balance>0).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
-            ${statCard('ti-chart-pie',    proRate+'%',     'Collection Rate',   'Paid vs invoiced',                '#FEF9C3','#A16207','#fff')}
-          ` : `
-            ${statCard('ti-wallet',       moneyUSD(lbPaidAmt),   'Refunds Collected',  'Received so far',                                          '#DCFCE7','#16A34A','#fff')}
-            ${statCard('ti-alert-circle', moneyUSD(lbBal),      'Outstanding USD',    `${lbTravelled.filter(r=>r.balance>0).length} post-travel unpaid`, '#FEE2E2','#DC2626','#fff')}
-            ${statCard('ti-receipt',      moneyUSD(lbTotal),    'Collected + Owed',   `${lbTravelled.length} have travelled`,                            '#E0E7FF','#4338CA','#fff')}
-            ${statCard('ti-clock',        moneyUSD(lbExpected), 'Expected (Pipeline)',`${lbPipeline} pre-travel candidates`,                             '#FEF9C3','#A16207','#fff')}
-          `}
+        <div class="dv5-kpi-grid">
+          ${kpi('Total Invoiced',  money(total), 'All candidates',   'ti-receipt')}
+          ${kpi('Total Paid',      money(paid),  'Collected',        'ti-wallet')}
+          ${kpi('Outstanding',     money(bal),   'Follow up needed', 'ti-alert-circle')}
+          ${kpi('Collection Rate', rate+'%',     'Paid / invoiced',  'ti-chart-line')}
+          ${kpi('Open Accounts',   rows.filter(r=>r.balance>0).length, 'Unpaid balances', 'ti-user-dollar')}
         </div>
-
-        <div class="dv5-two-col" style="margin-bottom:16px">
+        <div class="dv5-two-col">
           <div class="dv5-card">
-            <div class="dv5-card-head"><span class="dv5-card-title">Monthly Breakdown</span><span class="dv5-card-sub">Last 6 months</span></div>
-            <div class="dv5-table-wrap">
-              <table class="dv5-table" style="min-width:0">
-                <thead><tr><th>Month</th><th>Invoiced</th><th>Collected</th><th>Outstanding</th></tr></thead>
-                <tbody>
-                  ${monthly.map(m=>`<tr>
-                    <td style="font-weight:700">${m.label}</td>
-                    <td>${isPro?money(m.invoiced):moneyUSD(m.invoiced)}</td>
-                    <td style="color:#16a34a;font-weight:700">${isPro?money(m.paid):moneyUSD(m.paid)}</td>
-                    <td style="color:${m.invoiced-m.paid>0?'#b91c1c':'#6b7280'}">${isPro?money(m.invoiced-m.paid):moneyUSD(m.invoiced-m.paid)}</td>
-                  </tr>`).join('')}
-                </tbody>
-              </table>
-            </div>
+            <div class="dv5-card-head"><span class="dv5-card-title">Cash Flow</span><span class="dv5-card-sub">Last 6 months</span></div>
+            <div class="dv5-bar-chart">${cashFlowBars()}</div>
           </div>
           <div class="dv5-card">
             <div class="dv5-card-head">
-              <span class="dv5-card-title">Outstanding by Position</span>
-              <span class="dv5-card-sub">${isPro?money(bal):moneyUSD(bal)}</span>
+              <span class="dv5-card-title">Outstanding by Candidate</span>
+              <span class="dv5-card-sub">${money(bal)}</span>
             </div>
             <div class="dv5-task-list">
-              ${positionDebt.slice(0,8).map(c=>`
-                <div class="dv5-task-item" onclick="setFinancePosition('${js(c.name)}')">
-                  <div class="dv5-task-icon high"><i class="ti ti-briefcase"></i></div>
+              ${rows.filter(r=>r.balance>0).slice(0,8).map(r => `
+                <div class="dv5-task-item" onclick="openCandidateProfile('${r.type}',${r.id})">
+                  <div class="dv5-task-icon high"><i class="ti ti-coin"></i></div>
                   <div class="dv5-task-body">
-                    <div class="dv5-task-title">${h(c.name)}</div>
-                    <div class="dv5-task-meta">${c.count} candidate${c.count!==1?'s':''}</div>
+                    <div class="dv5-task-title">${h(r.name)}</div>
+                    <div class="dv5-task-meta">${h(r.company)} · ${money(r.balance)}</div>
                   </div>
-                  <span class="dv5-pill red">${isPro?money(c.balance):moneyUSD(c.balance)}</span>
+                  <span class="dv5-pill red">Unpaid</span>
                 </div>`).join('') || '<div class="dv5-empty">No outstanding balances.</div>'}
             </div>
           </div>
         </div>
-
-        <!-- Transactions section -->
-        <div class="dv5-table-card">
-          <div class="dv5-tx-header">
-            <div>
-              <div class="dv5-card-title">Transactions${financePositionFilter?' — '+h(financePositionFilter):''}</div>
-              <div class="dv5-card-sub" style="margin-top:2px">${financeTab==='latest'?filteredPayments.length:filteredUpcoming.length} records${searchQ?' (filtered)':''}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <div class="dv5-date-presets">
-                ${presets.map(([val,label])=>`<button class="dv5-preset-btn${financeDatePreset===val?' active':''}" onclick="window.setFinanceDatePreset('${val}')">${h(label)}</button>`).join('')}
-              </div>
-              <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i></button>
-            </div>
+        <div class="dv5-table-card" style="margin-top:16px">
+          <div class="dv5-card-head" style="padding:12px 16px">
+            <span class="dv5-card-title">All Finance Records</span>
           </div>
-          <div class="dv5-tx-tabs">
-            <button class="dv5-tx-tab${financeTab==='latest'?' active':''}" onclick="window.setFinanceTab('latest')">Latest</button>
-            <button class="dv5-tx-tab${financeTab==='upcoming'?' active':''}" onclick="window.setFinanceTab('upcoming')">Upcoming</button>
-          </div>
-          <div class="dv5-tx-list">
-            ${financeTab === 'latest'
-              ? (filteredPayments.length ? filteredPayments.map(({r, label, amt, date, isUSD}) => {
-                  const d = new Date(date||'');
-                  const dateStr = isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-                  const amtStr = '+' + (isUSD ? moneyUSD(amt) : money(amt));
-                  return `<div class="dv5-tx-row" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
-                    <div class="dv5-tx-date">${dateStr}</div>
-                    <div class="dv5-tx-info">
-                      <div class="dv5-tx-name">${h(label)}</div>
-                      <div class="dv5-tx-status" style="color:#6b7280">${h(r.company||'—')} · ${h(r.type==='pro'?'Professional':'General')}</div>
-                    </div>
-                    <div class="dv5-tx-amt" style="color:#16a34a">${amtStr}</div>
-                    <button class="dv5-tx-arrow" onclick="event.stopPropagation();${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-chevron-right"></i></button>
-                  </div>`;
-                }).join('') : '<div class="dv5-empty" style="padding:32px">No payments recorded.</div>')
-              : (filteredUpcoming.length ? filteredUpcoming.map(r => {
-                  const d = new Date(r.submitted||r.created_at||'');
-                  const dateStr = isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-                  const amtStr = '-' + (r.type==='lb' ? moneyUSD(r.balance) : money(r.balance));
-                  return `<div class="dv5-tx-row" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">
-                    <div class="dv5-tx-date">${dateStr}</div>
-                    <div class="dv5-tx-info">
-                      <div class="dv5-tx-name">${h(r.name)} — Balance Due</div>
-                      <div class="dv5-tx-status" style="color:#6b7280">${h(r.company||'—')} · ${h(r.stage||'—')}</div>
-                    </div>
-                    <div class="dv5-tx-amt" style="color:#dc2626">${amtStr}</div>
-                    <button class="dv5-tx-arrow" onclick="event.stopPropagation();${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-chevron-right"></i></button>
-                  </div>`;
-                }).join('') : '<div class="dv5-empty" style="padding:32px">No outstanding balances.</div>')
-            }
+          <div class="dv5-table-wrap">
+            <table class="dv5-table">
+              <thead><tr><th>Candidate</th><th>Company</th><th>Type</th><th>Invoice</th><th>Paid</th><th>Balance</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                ${rows.length ? rows.map(r=>`
+                  <tr>
+                    <td><div class="dv5-name-cell">${avatar(r.name)}<div>
+                      <div class="dv5-name">${h(r.name)}</div>
+                      <div class="dv5-sub">${h(r.pp||'No passport')}</div>
+                    </div></div></td>
+                    <td>${h(r.company)}</td>
+                    <td>${r.type==='pro'?'Professional':'General'}</td>
+                    <td>${money(r.commission)}</td>
+                    <td>${money(r.paid)}</td>
+                    <td>${r.balance>0?`<strong style="color:var(--red,#B83232)">${money(r.balance)}</strong>`:money(0)}</td>
+                    <td>${r.balance>0?'<span class="dv5-badge red">Unpaid</span>':'<span class="dv5-badge green">Paid</span>'}</td>
+                    <td><button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}">Open</button></td>
+                  </tr>`).join('') : '<tr><td colspan="8"><div class="dv5-empty">No records yet.</div></td></tr>'}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>`;
@@ -4555,99 +3579,42 @@ function setUserDisplay(display, role) {
   window.renderFinancePage = renderFinance;
 
   // ── 6. DOCUMENTS ──────────────────────────────────────────
-  const DOC_CHECKLIST_PRO = ['Passport','Offer Letter','Medical Cert','MOL','Visa','Ticket'];
-  const DOC_CHECKLIST_LB  = ['National ID','Birth Certificate','Parent ID','Photo','Passport Copy'];
-
-  // Doc ticks stored in localStorage keyed as "type_id_docname"
-  let docTicks = JSON.parse(safeLocalGet('dreco_doc_ticks') || '{}');
-  function saveDocTicks() { try { localStorage.setItem('dreco_doc_ticks', JSON.stringify(docTicks)); } catch(e){} }
-  window.toggleDocTick = function(type, id, docName) {
-    const key = `${type}_${id}_${docName}`;
-    docTicks[key] = !docTicks[key];
-    saveDocTicks();
-    renderDocuments();
-  };
-
-  function docChecklist(r) {
-    const items = r.type==='pro' ? DOC_CHECKLIST_PRO : DOC_CHECKLIST_LB;
-    const got = new Set();
-    if (r.type==='pro') {
-      if (r.pp)      got.add('Passport');
-      if (r.ol)      got.add('Offer Letter');
-      if (r.medical) got.add('Medical Cert');
-      if (r.mol)     got.add('MOL');
-      if (r.visa)    got.add('Visa');
-      if (r.travel)  got.add('Ticket');
-    } else {
-      const rid = r.id;
-      if (allDocs?.[`lb_${rid}_id`])         got.add('National ID');
-      if (allDocs?.[`lb_${rid}_birth`])       got.add('Birth Certificate');
-      if (allDocs?.[`lb_${rid}_parent_id`])   got.add('Parent ID');
-      if (allDocs?.[`lb_${rid}_photo`])       got.add('Photo');
-      if (allDocs?.[`lb_${rid}_passport`])    got.add('Passport Copy');
-    }
-    // merge manual ticks
-    items.forEach(doc => { if (docTicks[`${r.type}_${r.id}_${doc}`]) got.add(doc); });
-    const done = items.filter(i=>got.has(i)).length;
-    return { items, got, done, total: items.length, pct: Math.round(done/items.length*100) };
-  }
-
   function renderDocuments() {
     const el = document.getElementById('documents-section'); if (!el) return;
-    const isPro = jobTypeTab === 'pro';
-    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    const rawRows = isPro ? (proDB||[]).map(r=>({...r,type:'pro'})) : lbBase.map(r=>({...r,type:'lb'}));
-    const rows = rawRows;
-    const complete = rows.filter(r=>{ const c=docChecklist(r); return c.done===c.total; }).length;
-    const partial  = rows.filter(r=>{ const c=docChecklist(r); return c.done>0&&c.done<c.total; }).length;
-    const missing  = rows.filter(r=>docChecklist(r).done===0).length;
+    const rows = allRows();
+    const withDocs = rows.filter(hasDoc);
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Documents</h1><p>${isPro?'Professional — passport, offer letter, MOL, visa, travel.':'General Jobs — ID, birth cert, photo, passport copy.'}</p></div>
+          <div><h1>Documents</h1><p>Document links, passport records, visa/ticket dates, and compliance status per candidate.</p></div>
           <div class="dv5-head-actions">
-            ${jobTypeTabs()}
             <button class="dv5-btn primary" onclick="switchTab('candidates')"><i class="ti ti-paperclip"></i>Attach to Candidate</button>
           </div>
         </div>
-        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
-        <div class="dv5-file-grid">
-          ${fileCard('ti-file-description', '#2563EB', '#2563EB', 'Drive Links', Object.values(allDocs||{}).filter(Boolean).length, rows.length, `${Object.values(allDocs||{}).filter(Boolean).length} of ${rows.length} uploaded`, "switchTab('documents')")}
-          ${fileCard('ti-folder-check',     '#059669', '#059669', 'Complete Docs', complete, rows.length, `All documents present`, "switchTab('documents')")}
-          ${fileCard('ti-id',               '#D97706', '#F59E0B', 'Passports', rows.filter(r=>r.pp).length, rows.length, `Passport numbers recorded`, "switchTab('documents')")}
-          ${fileCard('ti-folder-x',         '#DC2626', '#EF4444', 'Missing',  missing, rows.length, `No documents yet`, "switchTab('documents')")}
+        <div class="dv5-kpi-grid">
+          ${kpi('With Documents', withDocs.length,                           'Candidates with links',     'ti-folder-check')}
+          ${kpi('Missing',        rows.length - withDocs.length,             'Needs upload',              'ti-folder-x')}
+          ${kpi('Passports',      rows.filter(r=>r.pp).length,               'Recorded',                  'ti-id')}
+          ${kpi('Visa Dates',     (proDB||[]).filter(r=>r.visa).length,      'Visa dates entered',        'ti-id-badge-2')}
+          ${kpi('Travel Dates',   (proDB||[]).filter(r=>r.travel).length,    'Travel dates entered',      'ti-plane')}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
             <table class="dv5-table">
-              <thead><tr><th>Candidate</th><th>Type</th><th>Company</th><th>Passport</th><th>Checklist</th><th>Progress</th><th>Drive Link</th><th>Action</th></tr></thead>
+              <thead><tr><th>Candidate</th><th>Category</th><th>Company</th><th>Passport</th><th>Status</th><th>Link</th><th>Action</th></tr></thead>
               <tbody>
                 ${rows.map(r => {
-                  const cl = docChecklist(r);
                   const link = docLink(r);
                   const safeLink = safeUrl(link);
-                  const bar = `<div style="display:flex;align-items:center;gap:6px">
-                    <div style="flex:1;height:6px;background:#eef1f6;border-radius:999px;overflow:hidden">
-                      <div style="width:${cl.pct}%;height:100%;background:${cl.pct===100?'#16a34a':cl.pct>0?'#5347CE':'#e5e7eb'};border-radius:999px"></div>
-                    </div>
-                    <span style="font-size:10px;font-weight:700;color:#6b7280;white-space:nowrap">${cl.done}/${cl.total}</span>
-                  </div>`;
-                  const chips = cl.items.map(item=>{
-                    const have = cl.got.has(item);
-                    return `<button onclick="event.stopPropagation();window.toggleDocTick('${r.type}',${JSON.stringify(r.id)},'${js(item)}')"
-                      style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid ${have?'#86efac':'#fca5a5'};background:${have?'#dcfce7':'#fee2e2'};color:${have?'#15803d':'#b91c1c'};cursor:pointer;display:inline-flex;align-items:center;gap:3px">
-                      ${have?'<i class="ti ti-check" style="font-size:8px"></i>':'<i class="ti ti-square" style="font-size:8px"></i>'}${item}</button>`;
-                  }).join('');
                   return `<tr onclick="openCandidateProfile('${r.type}',${r.id})">
                     <td><div class="dv5-name-cell">${avatar(r.name)}<div>
                       <div class="dv5-name">${h(r.name)}</div>
-                      <div class="dv5-sub">${h(r.phone||'—')}</div>
+                      <div class="dv5-sub">${r.type==='pro'?'Professional':'General'}</div>
                     </div></div></td>
-                    <td>${r.type==='pro'?'Professional':'General'}</td>
+                    <td>${h(r.position)}</td>
                     <td>${h(r.company)}</td>
                     <td>${h(r.pp||'—')}</td>
-                    <td><div style="display:flex;flex-wrap:wrap;gap:3px">${chips}</div></td>
-                    <td style="min-width:120px">${bar}</td>
+                    <td>${link?'<span class="dv5-badge green">Uploaded</span>':'<span class="dv5-badge red">Missing</span>'}</td>
                     <td>${safeLink?`<button class="dv5-action-btn" onclick="event.stopPropagation();window.open('${h(safeLink)}','_blank')"><i class="ti ti-external-link"></i>Open</button>`:'—'}</td>
                     <td><button class="dv5-action-btn" onclick="event.stopPropagation();openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')">Manage</button></td>
                   </tr>`;
@@ -4663,68 +3630,35 @@ function setUserDisplay(display, role) {
   // ── 7. REPORTS ────────────────────────────────────────────
   function renderReports() {
     const el = document.getElementById('reports-section'); if (!el) return;
-    const isPro = jobTypeTab === 'pro';
-    const allReportRows = allRows();
-    const lbBase = lbCountryFilter ? allReportRows.filter(r=>r.type==='lb'&&(r.country||'')===lbCountryFilter) : allReportRows.filter(r=>r.type==='lb');
-    const rows = isPro ? allReportRows.filter(r=>r.type==='pro') : lbBase;
-    const fmt2 = v => isPro ? money(v) : moneyUSD(v);
+    const rows = allRows();
     const total = rows.reduce((s,r)=>s+r.commission,0);
     const paid  = rows.reduce((s,r)=>s+r.paid,0);
     const stageCounts = {};
     rows.forEach(r => stageCounts[r.stage] = (stageCounts[r.stage]||0)+1);
+    const topClients = buildClients().slice(0,8);
     const travelled = rows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED');
-
-    // Pro: top jobs by position
+    // top performing jobs
     const jobCounts = {};
-    if (isPro) {
-      rows.forEach(r => {
-        if (r.position) { jobCounts[r.position] = jobCounts[r.position]||{count:0,travelled:0,commission:0}; jobCounts[r.position].count++; if(r.stage==='TRAVELLED') jobCounts[r.position].travelled++; jobCounts[r.position].commission+=Number(r.commission)||0; }
-      });
-    }
+    (proDB||[]).forEach(r => {
+      if (r.position) jobCounts[r.position] = (jobCounts[r.position]||{count:0,travelled:0,commission:0});
+      if (r.position) { jobCounts[r.position].count++; if(r.stage==='TRAVELLED') jobCounts[r.position].travelled++; jobCounts[r.position].commission+=Number(r.commission)||0; }
+    });
     const topJobs = Object.entries(jobCounts).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
-
-    // General: top countries
-    const countryCounts = {};
-    if (!isPro) {
-      lbBase.forEach(r => {
-        const c = r.country||'Unknown';
-        countryCounts[c] = countryCounts[c]||{count:0,travelled:0,toRefund:0};
-        countryCounts[c].count++; if(r.stage==='TRAVELLED') countryCounts[c].travelled++; countryCounts[c].toRefund+=Number(r.commission)||0;
-      });
-    }
-    const topCountries = Object.entries(countryCounts).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
-
-    // Avg processing (Pro: intake→travel; LB: submit→travel)
-    let avgProcessing = '—';
-    if (isPro) {
-      const withDates = (proDB||[]).filter(r => r.stage==='TRAVELLED' && r.travel && (r.intake||r.created||r.createdAt));
-      if (withDates.length) { const avg = Math.round(withDates.reduce((s,r)=>s+Math.max(0,(new Date(r.travel)-new Date(r.intake||r.created||r.createdAt))/86400000),0)/withDates.length); avgProcessing = avg>0?avg+' days':'—'; }
-    } else {
-      const withDates = lbBase.filter(r=>r.stage==='TRAVELLED'&&r.travelDate&&r.created_at);
-      if (withDates.length) { const avg = Math.round(withDates.reduce((s,r)=>s+Math.max(0,(new Date(r.travelDate)-new Date(r.created_at))/86400000),0)/withDates.length); avgProcessing = avg>0?avg+' days':'—'; }
-    }
-
-    // Clients for this type
-    const cMap2 = new Map();
-    rows.forEach(r => { const n=r.company||'Unassigned'; const c=cMap2.get(n)||{name:n,country:r.country||'—',total:0,due:0}; c.total++;c.due+=r.balance;cMap2.set(n,c); });
-    const topClients2 = [...cMap2.values()].sort((a,b)=>b.total-a.total).slice(0,8);
-
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Reports</h1><p>${isPro?'Professional performance — KES commissions.':'General Jobs performance — USD refunds.'}</p></div>
+          <div><h1>Reports</h1><p>Performance overview for candidates, clients, stages, and collections.</p></div>
           <div class="dv5-head-actions">
-            ${jobTypeTabs()}
-            <button class="dv5-btn" onclick="exportCSV('${isPro?'pro':'lb'}')"><i class="ti ti-download"></i>Export</button>
+            <button class="dv5-btn" onclick="exportCSV('pro')"><i class="ti ti-download"></i>Export Pro</button>
+            <button class="dv5-btn" onclick="exportCSV('lb')"><i class="ti ti-download"></i>Export General</button>
           </div>
         </div>
-        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
-        <div class="dv5-stat-grid" style="margin-top:12px">
-          ${statCard('ti-users',     rows.length,       isPro?'Professional':'General Jobs',`Total candidates`,                             '#EFF6FF','#2563EB','#fff')}
-          ${statCard('ti-plane',     travelled.length,  'Travelled',        `Successful placements`,                                       '#F0FDF4','#16A34A','#fff')}
-          ${statCard('ti-target',    rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%','Success Rate','Travelled / total', '#F5F3FF','#7C3AED','#fff')}
-          ${statCard('ti-chart-line',total?Math.round(paid/total*100)+'%':'0%',isPro?'Collection Rate':'Refund Rate',isPro?'Finance health':'Refunds collected','#FFFBEB','#D97706','#fff')}
-          ${statCard('ti-clock',     avgProcessing,     'Avg Processing',   'Submission → travel',                                        '#F0FDFA','#0D9488','#fff')}
+        <div class="dv5-kpi-grid">
+          ${kpi('Total Candidates', rows.length,        'All records',        'ti-users')}
+          ${kpi('Travelled',        travelled.length,   'Successful travel',  'ti-plane')}
+          ${kpi('Success Rate',     rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%', 'Travelled / total','ti-target')}
+          ${kpi('Collection Rate',  total?Math.round(paid/total*100)+'%':'0%', 'Finance health','ti-chart-line')}
+          ${kpi('Avg Processing',   '45 days',          'Estimate',           'ti-clock')}
         </div>
         <div class="dv5-two-col">
           <div class="dv5-card">
@@ -4742,154 +3676,94 @@ function setUserDisplay(display, role) {
             </div>
           </div>
           <div class="dv5-card">
-            <div class="dv5-card-head"><span class="dv5-card-title">Top ${isPro?'Companies':'Countries'}</span></div>
+            <div class="dv5-card-head"><span class="dv5-card-title">Top Companies</span></div>
             <div class="dv5-task-list">
-              ${isPro ? (topClients2.length ? topClients2.map(c=>`
+              ${topClients.length ? topClients.map(c => `
                 <div class="dv5-task-item" onclick="setCandidateSearch('${js(c.name)}');switchTab('candidates')" style="cursor:pointer">
                   <div class="dv5-task-icon med"><i class="ti ti-building"></i></div>
                   <div class="dv5-task-body">
                     <div class="dv5-task-title">${h(c.name)}</div>
-                    <div class="dv5-task-meta">${c.total} candidates · ${fmt2(c.due)} due</div>
+                    <div class="dv5-task-meta">${c.total} candidates · ${money(c.due)} due</div>
                   </div>
                   <span class="dv5-pill">${h(c.country)}</span>
-                </div>`).join('') : '<div class="dv5-empty">No company data yet.</div>')
-              : (topCountries.length ? topCountries.map(([country,d])=>`
-                <div class="dv5-task-item" onclick="window.setLbCountry('${js(country)}')" style="cursor:pointer">
-                  <div class="dv5-task-icon med"><i class="ti ti-globe"></i></div>
-                  <div class="dv5-task-body">
-                    <div class="dv5-task-title">${h(country)}</div>
-                    <div class="dv5-task-meta">${d.count} candidates · ${d.travelled} travelled · ${moneyUSD(d.toRefund)} refund</div>
-                  </div>
-                  <span class="dv5-pill">${Math.round(d.travelled/Math.max(d.count,1)*100)}%</span>
-                </div>`).join('') : '<div class="dv5-empty">No country data yet.</div>')}
+                </div>`).join('') : '<div class="dv5-empty">No company data yet.</div>'}
             </div>
           </div>
         </div>
-        ${isPro ? `<div class="dv5-card" style="margin-top:16px">
+        <div class="dv5-card" style="margin-top:16px">
           <div class="dv5-card-head"><span class="dv5-card-title">Top Performing Jobs</span></div>
           <div class="dv5-table-wrap">
             <table class="dv5-table">
-              <thead><tr><th>#</th><th>Position</th><th>Candidates</th><th>Travelled</th><th>Success Rate</th><th>Commission</th></tr></thead>
+              <thead><tr><th>#</th><th>Position</th><th>Candidates</th><th>Travelled</th><th>Success Rate</th><th>Total Commission</th></tr></thead>
               <tbody>
-                ${topJobs.length ? topJobs.map(([pos,d],i)=>`<tr>
-                  <td>${i+1}</td><td>${h(pos)}</td><td>${d.count}</td><td>${d.travelled}</td>
-                  <td>${d.count?Math.round(d.travelled/d.count*100)+'%':'—'}</td><td>${money(d.commission)}</td>
-                </tr>`).join('') : '<tr><td colspan="6"><div class="dv5-empty">No job data yet.</div></td></tr>'}
+                ${topJobs.length ? topJobs.map(([pos,d],i) => `
+                  <tr>
+                    <td>${i+1}</td>
+                    <td>${h(pos)}</td>
+                    <td>${d.count}</td>
+                    <td>${d.travelled}</td>
+                    <td>${d.count?Math.round(d.travelled/d.count*100)+'%':'—'}</td>
+                    <td>${money(d.commission)}</td>
+                  </tr>`).join('') : '<tr><td colspan="6"><div class="dv5-empty">No job data yet.</div></td></tr>'}
               </tbody>
             </table>
           </div>
-        </div>` : ''}
+        </div>
       </div>`;
   }
   window.renderReportsPage = renderReports;
 
   // ── 8. CLIENTS ────────────────────────────────────────────
-  let expandedClient = null;
-
   function renderClients() {
     const el = document.getElementById('clients-section'); if (!el) return;
-    const isPro = jobTypeTab === 'pro';
-    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    const sourceRows = isPro ? (proDB||[]).map(r=>({...r,type:'pro'})) : lbBase.map(r=>({...r,type:'lb'}));
-    const fmt2 = v => isPro ? money(v) : moneyUSD(v);
-
-    // Build clients from sourceRows only
-    const cMap = new Map();
-    sourceRows.forEach(r => {
-      const name = isPro ? (r.company || 'Unassigned') : (r.country || r.company || 'Unassigned');
-      const stage = String(r.stage||r.travelStatus||r.travel_status||'').toUpperCase();
-      const paid = isPro ? (Number(r.paid)||0) : (Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
-      const bal  = isPro ? (Number(r.balance)||0) : balLB(r);
-      const isFinished = isPro ? stage==='TRAVELLED' : LB_TRAVELLED_STAGES.has(stage);
-      const c = cMap.get(name) || { name, country: r.country||'—', active:0, total:0, due:0, paid:0, manager: currentUser?.display||'Team' };
-      c.total++;
-      if (!isFinished) c.active++;
-      c.due  += bal;
-      c.paid += paid;
-      cMap.set(name, c);
-    });
-    const clients = [...cMap.values()].sort((a,b)=>b.total-a.total);
-
-    function clientCandidates(name) {
-      const cands = sourceRows.filter(r=>(isPro?(r.company||'Unassigned'):(r.country||r.company||'Unassigned'))===name);
-      if (isPro) return cands;
-      return cands.map(r=>({
-        ...r,
-        commission: Number(r.toRefund||r.to_refund)||0,
-        paid: (Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0),
-        balance: balLB(r),
-      }));
-    }
-
+    const clients = buildClients();
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Clients</h1><p>${isPro?'Professional clients — commissions in KES.':'General Jobs clients — refunds in USD.'}</p></div>
+          <div><h1>Clients</h1><p>Employer companies aggregated from candidate placement records.</p></div>
           <div class="dv5-head-actions">
-            ${jobTypeTabs()}
-            <button class="dv5-btn primary" onclick="${isPro?'openProForm()':'openLBForm()'}"><i class="ti ti-plus"></i>Add Candidate</button>
+            <button class="dv5-btn primary" onclick="openProForm()"><i class="ti ti-plus"></i>Add Candidate for Client</button>
           </div>
         </div>
-        ${!isPro ? lbCountryBar(lbDB||[]) : ''}
-        <div class="dv5-stat-grid" style="margin-top:12px">
-          ${statCard('ti-building',  clients.length,                              'Total Clients', `Employer companies`,    '#EFF6FF','#2563EB','#fff')}
-          ${statCard('ti-briefcase', clients.reduce((s,c)=>s+c.active,0),        'Active Jobs',   `In-progress`,           '#F5F3FF','#7C3AED','#fff')}
-          ${statCard('ti-users',     clients.reduce((s,c)=>s+c.total,0),         'Total Hired',   `All-time candidates`,   '#F0FDF4','#16A34A','#fff')}
-          ${statCard('ti-coin',      fmt2(clients.reduce((s,c)=>s+c.due,0)),     'Outstanding',   `Total due`,             '#FEF2F2','#DC2626','#fff')}
-          ${statCard('ti-wallet',    fmt2(clients.reduce((s,c)=>s+c.paid,0)),    'Collected',     `Total paid`,            '#FEF9C3','#A16207','#fff')}
+        <div class="dv5-kpi-grid">
+          ${kpi('Total Clients',  clients.length,                        'Employer companies',     'ti-building')}
+          ${kpi('Active Jobs',    clients.reduce((s,c)=>s+c.active,0),   'In-progress placements', 'ti-briefcase')}
+          ${kpi('Total Hired',    clients.reduce((s,c)=>s+c.total,0),    'All-time candidates',    'ti-users')}
+          ${kpi('Outstanding',    money(clients.reduce((s,c)=>s+c.due,0)),'Total due',              'ti-coin')}
+          ${kpi('Collected',      money(clients.reduce((s,c)=>s+c.paid,0)),'Total paid',            'ti-wallet')}
         </div>
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
             <table class="dv5-table">
-              <thead><tr><th></th><th>Client Name</th><th>Country</th><th>Active</th><th>Total</th><th>Outstanding</th><th>Collected</th><th>Manager</th></tr></thead>
+              <thead><tr><th>Client Name</th><th>Country</th><th>Active Jobs</th><th>Total Hired</th><th>Due Amount</th><th>Collected</th><th>Manager</th><th></th></tr></thead>
               <tbody>
-                ${clients.length ? clients.map(c => {
-                  const isOpen = expandedClient === c.name;
-                  const cands  = isOpen ? clientCandidates(c.name) : [];
-                  return `
-                  <tr class="dv5-client-row${isOpen?' dv5-client-open':''}" onclick="window._toggleClient('${js(c.name)}')" style="cursor:pointer">
-                    <td style="width:28px"><i class="ti ${isOpen?'ti-chevron-down':'ti-chevron-right'}" style="font-size:12px;color:#9ca3af"></i></td>
+                ${clients.length ? clients.map(c => `
+                  <tr>
                     <td><div class="dv5-name-cell">
                       <div class="dv5-avatar" style="background:#EEF2FF;color:#4338CA"><i class="ti ti-building" style="font-size:13px"></i></div>
                       <div>
                         <div class="dv5-name">${h(c.name)}</div>
-                        <div class="dv5-sub">${h(c.country||'—')}</div>
+                        <div class="dv5-sub">Client account</div>
                       </div>
                     </div></td>
-                    <td>${h(c.country||'—')}</td>
+                    <td>${h(c.country)}</td>
                     <td>${c.active}</td>
                     <td>${c.total}</td>
-                    <td>${c.due>0?`<strong style="color:#b91c1c">${fmt2(c.due)}</strong>`:fmt2(0)}</td>
-                    <td>${fmt2(c.paid)}</td>
-                    <td>${h(c.manager||'—')}</td>
-                  </tr>
-                  ${isOpen ? `<tr class="dv5-expand-row"><td colspan="8" style="padding:0 0 8px 40px;background:#f8fafc">
-                    <table class="dv5-table" style="min-width:0;border:0;box-shadow:none">
-                      <thead><tr><th>Name</th><th>${isPro?'Job Title':'Country'}</th><th>Stage</th><th>Submitted</th><th>Invoice</th><th>Balance</th><th></th></tr></thead>
-                      <tbody>
-                        ${cands.map(r=>`<tr>
-                          <td>${h(r.name)}</td>
-                          <td>${h(isPro?r.position:r.country)}</td>
-                          <td>${badge(r.stage||r.travelStatus||r.travel_status)}</td>
-                          <td>${h(fmt(r.submitted_date||r.submitted||r.travelDate||r.travel_date))}</td>
-                          <td>${fmt2(r.commission||0)}</td>
-                          <td>${r.balance>0?`<strong style="color:#b91c1c">${fmt2(r.balance)}</strong>`:fmt2(0)}</td>
-                          <td><button class="dv5-action-btn" onclick="event.stopPropagation();openCandidateProfile('${r.type}',${r.id})">View</button></td>
-                        </tr>`).join('')}
-                      </tbody>
-                    </table>
-                  </td></tr>` : ''}`;
-                }).join('') : '<tr><td colspan="8"><div class="dv5-empty">Clients appear automatically when you add candidates with company names.</div></td></tr>'}
+                    <td>${c.due>0?`<strong style="color:var(--red,#B83232)">${money(c.due)}</strong>`:money(0)}</td>
+                    <td>${money(c.paid)}</td>
+                    <td>${h(c.manager)}</td>
+                    <td>
+                      <button class="dv5-action-btn" onclick="setCandidateSearch('${js(c.name)}');switchTab('candidates')">
+                        View
+                      </button>
+                    </td>
+                  </tr>`).join('') : '<tr><td colspan="8"><div class="dv5-empty">Clients appear automatically when you add candidates with company names.</div></td></tr>'}
               </tbody>
             </table>
           </div>
         </div>
       </div>`;
   }
-  window._toggleClient = function(name) {
-    expandedClient = expandedClient === name ? null : name;
-    renderClients();
-  };
   window.renderClientsPage = renderClients;
 
   // ── 9. SETTINGS (pass-through to existing) ────────────────
@@ -4917,13 +3791,12 @@ function setUserDisplay(display, role) {
     const timeline = (allTimelines?.[`${type}_${id}`]||[]).slice(-5).reverse();
     const link = docLink(r);
     const safeLink = safeUrl(link);
-    const proStageList = (proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']);
-    const lbStageList  = lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
     const stages = type==='pro'
-      ? ['Submitted','Interview','Offer Letter','Medical','MOL','Visa','Travel','Travelled']
-      : ['Docs In','Profile Sent','Selected','Passport','Visa','Travelled','Refund','Done'];
-    const stageListRef = type==='pro' ? proStageList : lbStageList;
-    const stageIdx = stageListRef.indexOf(r.stage);
+      ? ['Submitted','Offer','MOL','Visa','Travel','Travelled']
+      : ['Registered','Documents','Payment','Travelled'];
+    const stageIdx = type==='pro'
+      ? ['—','PENDING OFFER LETTER','PENDING MOL','PENDING VISA','PENDING TRAVEL','TRAVELLED'].indexOf(r.stage)
+      : r.stage==='TRAVELLED'?3:r.paid>0?2:1;
 
     modal.innerHTML = `
       <div class="dv5-profile-panel">
@@ -4959,59 +3832,31 @@ function setUserDisplay(display, role) {
         </div>
         <div class="dv5-profile-grid">
           <div class="dv5-card">
-            <div class="dv5-card-head">
-              <span class="dv5-card-title">Stage Checklist</span>
-              <span class="dv5-card-sub">${pct}%</span>
-            </div>
-            <div style="height:4px;background:#f0f0f0;border-radius:2px;margin:0 0 12px">
-              <div style="height:100%;width:${pct}%;background:${pct===100?'#22A06B':'#5347CE'};border-radius:2px;transition:width .4s"></div>
-            </div>
-            ${cl.map(x => {
-              if (x.done) return `
-                <div class="dv5-check-row done" style="opacity:.7">
-                  <i class="ti ti-circle-check-filled" style="color:#22A06B;font-size:18px;flex-shrink:0"></i>
-                  <span style="text-decoration:line-through;flex:1">${h(x.label)}</span>
-                  ${x.action && x.action!=='edit' ? `<button onclick="window.checklistUntick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid #e4e4e7;background:transparent;color:#9ca3af;cursor:pointer;flex-shrink:0">Undo</button>` : ''}
-                </div>`;
-              if (x.action === 'docs') return `
-                <button class="dv5-check-row clickable" onclick="openDocs('${type}',${JSON.stringify(id)},'${js(r.name)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
-                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
-                  <span>${h(x.label)}</span>
-                  <span class="dv5-check-hint">Upload →</span>
-                </button>`;
-              if (x.action === 'edit') return `
-                <button class="dv5-check-row clickable" onclick="${type==='pro'?`editPro(${id})`:`editLB(${id})`}" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
-                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
-                  <span>${h(x.label)}</span>
-                  <span class="dv5-check-hint">Enter amount →</span>
-                </button>`;
-              return `
-                <button class="dv5-check-row clickable" onclick="window.checklistTick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
-                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
-                  <span>${h(x.label)}</span>
-                  <span class="dv5-check-hint">Mark done ✓</span>
-                </button>`;
-            }).join('')}
+            <div class="dv5-card-head"><span class="dv5-card-title">Stage Checklist</span><span class="dv5-card-sub">${pct}%</span></div>
+            ${cl.map(x=>`
+              <div class="dv5-check-row">
+                <i class="ti ${x.done?'ti-circle-check-filled':'ti-circle'}" style="color:${x.done?'#22A06B':'#ccc'}"></i>
+                <span>${h(x.label)}</span>
+              </div>`).join('')}
           </div>
           <div class="dv5-card">
             <div class="dv5-card-head"><span class="dv5-card-title">Details</span></div>
             <div class="dv5-detail-grid">
-              <span>${type==='pro'?'Submitted':'Doc Date'}</span><strong>${h(fmt(r.submitted||r.travelDate))}</strong>
+              <span>Submitted</span><strong>${h(fmt(r.submitted))}</strong>
               <span>Stage</span><strong>${h(r.stage)}</strong>
-              <span>${type==='pro'?'Company':'Country'}</span><strong>${h(r.company||r.country||'—')}</strong>
-              ${type==='pro' && r.raw?.ol     ? `<span>Offer Letter</span><strong>${h(fmt(r.raw.ol))}</strong>` : ''}
-              ${type==='pro' && r.raw?.medical? `<span>Medical</span><strong>${h(fmt(r.raw.medical))}</strong>` : ''}
-              ${type==='pro' && r.raw?.mol    ? `<span>MOL Date</span><strong>${h(fmt(r.raw.mol))}</strong>` : ''}
-              ${type==='pro' && r.raw?.visa   ? `<span>Visa Date</span><strong>${h(fmt(r.raw.visa))}</strong>` : ''}
+              <span>Owner</span><strong>${h(r.owner)}</strong>
+              <span>Company</span><strong>${h(r.company)}</strong>
+              ${type==='pro' && r.raw?.mol ? `<span>MOL Date</span><strong>${h(fmt(r.raw.mol))}</strong>` : ''}
+              ${type==='pro' && r.raw?.visa ? `<span>Visa Date</span><strong>${h(fmt(r.raw.visa))}</strong>` : ''}
               ${r.travel ? `<span>Travel Date</span><strong>${h(fmt(r.travel))}</strong>` : ''}
             </div>
           </div>
           <div class="dv5-card">
             <div class="dv5-card-head"><span class="dv5-card-title">Finance</span></div>
             <div class="dv5-detail-grid">
-              <span>${type==='pro'?'Commission':'To Refund'}</span><strong>${type==='pro'?money(r.commission):moneyUSD(r.commission)}</strong>
-              <span>Paid</span><strong>${type==='pro'?money(r.paid):moneyUSD(r.paid)}</strong>
-              <span>Balance</span><strong style="color:${r.balance>0?'#B83232':'#22A06B'}">${type==='pro'?money(r.balance):moneyUSD(r.balance)}</strong>
+              <span>Commission</span><strong>${money(r.commission)}</strong>
+              <span>Paid</span><strong>${money(r.paid)}</strong>
+              <span>Balance</span><strong style="color:${r.balance>0?'#B83232':'#22A06B'}">${money(r.balance)}</strong>
               <span>Documents</span><strong>${link?'Uploaded':'Missing'}</strong>
             </div>
             ${safeLink?`<div style="margin-top:12px">
@@ -5041,132 +3886,6 @@ function setUserDisplay(display, role) {
   window.closeProfile = function() {
     const m = document.getElementById('dv5-profile-modal');
     if (m) m.style.display = 'none';
-  };
-
-  // Map checklist label → {field to set today, stage to advance to}
-  const PRO_CHECKLIST_MAP = {
-    'Interview done':       { field:'interview', stage:'INTERVIEW' },
-    'Offer letter received':{ field:'ol',        stage:'OFFER LETTER' },
-    'Medical cleared':      { field:'medical',   stage:'MEDICAL & ATTESTATION' },
-    'MOL submitted':        { field:'mol',       stage:'MOL' },
-    'Visa stamped':         { field:'visa',      stage:'VISA' },
-    'Ticket booked':        { field:'travel',    stage:'PENDING TRAVEL' },
-  };
-  const LB_CHECKLIST_STAGE_MAP = {
-    'Profile Sent':    'PROFILE SENT',
-    'Selected':        'SELECTED',
-    'Passport Applied':'PASSPORT APPLIED',
-    'Visa Processing': 'VISA PROCESSING',
-    'Travelled':       'TRAVELLED',
-  };
-
-  window.checklistTick = async function(type, id, label) {
-    const today = new Date().toISOString().slice(0,10);
-    const db = type === 'pro' ? proDB : lbDB;
-    const rec = db.find(r => String(r.id) === String(id));
-    if (!rec) return;
-
-    let updates = {};
-
-    if (type === 'pro') {
-      const map = PRO_CHECKLIST_MAP[label];
-      if (!map) return;
-      updates[map.field] = today;
-      updates.stage = map.stage;
-      rec[map.field] = today;
-      rec.stage = map.stage;
-    } else {
-      const newStage = LB_CHECKLIST_STAGE_MAP[label];
-      if (newStage) {
-        updates.stage = newStage;
-        rec.stage = newStage;
-        if (newStage === 'TRAVELLED') { updates.travelDate = today; rec.travelDate = today; }
-      } else {
-        // doc tick
-        docTicks[`lb_${id}_${label}`] = true;
-        saveDocTicks();
-        openCandidateProfile(type, id);
-        return;
-      }
-    }
-
-    // Optimistic UI update
-    openCandidateProfile(type, id);
-    showToast(`✓ ${label}`, 'success');
-
-    // Save to Supabase
-    try {
-      const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
-      await dbUpdate(table, id, updates);
-      addTimeline(type, id, `Checked: ${label}`);
-    } catch(e) {
-      console.warn('checklistTick save error', e);
-    }
-
-    // Refresh any open page
-    rerenderPage();
-  };
-
-  window.checklistUntick = async function(type, id, label) {
-    const db = type === 'pro' ? proDB : lbDB;
-    const rec = db.find(r => String(r.id) === String(id));
-    if (!rec) return;
-
-    // LB doc ticks (localStorage only)
-    const tickKey = `lb_${id}_${label}`;
-    if (type === 'lb' && docTicks[tickKey]) {
-      delete docTicks[tickKey];
-      saveDocTicks();
-      showToast(`Reverted: ${label}`, 'info');
-      openCandidateProfile(type, id);
-      return;
-    }
-
-    const PRO_MAP = {
-      'Interview done':       { field:'interview', stage:'INTERVIEW' },
-      'Offer letter received':{ field:'ol',        stage:'OFFER LETTER' },
-      'Medical cleared':      { field:'medical',   stage:'MEDICAL & ATTESTATION' },
-      'MOL submitted':        { field:'mol',       stage:'MOL' },
-      'Visa stamped':         { field:'visa',      stage:'VISA' },
-      'Ticket booked':        { field:'travel',    stage:'PENDING TRAVEL' },
-    };
-    const LB_MAP = {
-      'Profile Sent':    'PROFILE SENT',
-      'Selected':        'SELECTED',
-      'Passport Applied':'PASSPORT APPLIED',
-      'Visa Processing': 'VISA PROCESSING',
-      'Travelled':       'TRAVELLED',
-    };
-
-    if (type === 'pro') {
-      const map = PRO_MAP[label];
-      if (!map) return;
-      const proStageList = (proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']);
-      const idx = proStageList.indexOf(map.stage);
-      const prevStage = idx > 0 ? proStageList[idx - 1] : proStageList[0];
-      rec[map.field] = null;
-      rec.stage = prevStage;
-      showToast(`Reverted: ${label}`, 'info');
-      openCandidateProfile(type, id);
-      try {
-        await dbUpdate('pro_candidates', id, { [map.field]: null, stage: prevStage });
-        addTimeline(type, id, `Reverted: ${label}`);
-      } catch(e) { console.warn('checklistUntick error', e); }
-    } else {
-      const targetStage = LB_MAP[label];
-      if (!targetStage) return;
-      const lbStageList = (lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
-      const idx = lbStageList.indexOf(targetStage);
-      const prevStage = idx > 0 ? lbStageList[idx - 1] : lbStageList[0];
-      rec.stage = prevStage;
-      showToast(`Reverted: ${label}`, 'info');
-      openCandidateProfile(type, id);
-      try {
-        await dbUpdate('lb_candidates', id, { stage: prevStage });
-        addTimeline(type, id, `Reverted: ${label}`);
-      } catch(e) { console.warn('checklistUntick error', e); }
-    }
-    rerenderPage();
   };
 
   // ── LOGIN RATE LIMITER (SEC-12 fix) ──────────────────────
@@ -5238,38 +3957,10 @@ function setUserDisplay(display, role) {
   const DV5_CSS = `
 /* === DV5 Component System === */
 .dv5-section { display: none; }
-/* Override all legacy sidebar-user-card styles for the new card */
-.dv5-suc.sidebar-user-card { background:#fff!important; border:1px solid #E4E4E7!important; border-radius:8px!important; padding:10px 12px!important; margin:0 0 8px!important; min-height:unset!important; }
-.dv5-suc.sidebar-user-card::after { content:none!important; }
-
-/* Shadcn-style sidebar user card */
-.dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 12px!important; border-radius:8px!important; background:#fff!important; border:1px solid #E4E4E7!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .12s!important; margin-bottom:8px!important; box-sizing:border-box!important; }
-.dv5-suc:hover { background:#F4F4F5!important; }
-.dv5-suc-av { width:32px!important; height:32px!important; border-radius:6px!important; background:#18181B!important; color:#fff!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:11px!important; font-weight:800!important; flex-shrink:0!important; letter-spacing:.02em!important; }
-.dv5-suc-body { min-width:0!important; flex:1!important; }
-.dv5-suc-name { font-size:13px!important; font-weight:600!important; color:#09090B!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.35!important; }
-.dv5-suc-email { font-size:11px!important; color:#71717A!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; margin-top:1px!important; }
-
-/* Shadcn-style profile dropdown — slide up from user card */
-.dv5-pd { position:fixed!important; left:16px!important; bottom:70px!important; top:auto!important; right:auto!important; width:268px!important; background:#fff!important; border:1px solid #E4E4E7!important; border-radius:10px!important; box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06)!important; z-index:9000!important; overflow:hidden!important; visibility:hidden!important; opacity:0!important; transform:translateY(8px)!important; transition:opacity .15s ease,transform .15s ease,visibility 0s .15s!important; pointer-events:none!important; }
-.dv5-pd.open { visibility:visible!important; opacity:1!important; transform:translateY(0)!important; transition:opacity .15s ease,transform .15s ease,visibility 0s 0s!important; pointer-events:auto!important; }
-.dv5-pd-head { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #F4F4F5; }
-.dv5-pd-av { width:36px; height:36px; border-radius:7px; background:#18181B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; letter-spacing:.02em; }
-.dv5-pd-name { font-size:13px; font-weight:600; color:#09090B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.35; }
-.dv5-pd-email { font-size:11px; color:#71717A; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dv5-pd-items { padding:4px; }
-.dv5-pd-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:6px; font-size:13px; font-weight:500; color:#09090B; background:none; border:none; width:100%; text-align:left; cursor:pointer; font-family:inherit; transition:background .1s; }
-.dv5-pd-item:hover { background:#F4F4F5; }
-.dv5-pd-item i { font-size:15px; color:#71717A; flex-shrink:0; width:18px; }
-.dv5-pd-sep { height:1px; background:#F4F4F5; margin:3px 6px; }
-.dv5-pd-item.danger { color:#DC2626; }
-.dv5-pd-item.danger i { color:#DC2626; }
-.dv5-pd-item.danger:hover { background:#FEF2F2; }
-
-.dv5-page { padding: 0 0 40px; max-width: none; }
+.dv5-page { padding: 24px 28px 40px; max-width: 1400px; }
 .dv5-page-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; flex-wrap:wrap; }
-.dv5-page-head h1 { font-size:24px; font-weight:900; color:var(--text,#18191B); margin:0 0 4px; letter-spacing:-.5px; }
-.dv5-page-head p { font-size:13px; color:var(--text-3,#999); margin:0; line-height:1.4; }
+.dv5-page-head h1 { font-size:22px; font-weight:800; color:var(--text,#18191B); margin:0 0 4px; }
+.dv5-page-head p { font-size:13px; color:var(--text-3,#999); margin:0; }
 .dv5-head-actions { display:flex; gap:8px; flex-wrap:wrap; }
 
 /* Buttons */
@@ -5283,84 +3974,27 @@ function setUserDisplay(display, role) {
 .dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:700; color:var(--text,#18191B); cursor:pointer; }
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
 
-/* Stat card grid (shadcn hotel-style colored cards) */
-.dv5-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
-.dv5-stat-card { border-radius:14px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.07); transition:transform .15s,box-shadow .15s; }
-.dv5-stat-card:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,.10); }
-.dv5-stat-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; }
-.dv5-stat-val { font-size:28px; font-weight:900; color:#18191B; line-height:1; margin:14px 0 4px; }
-.dv5-stat-label { font-size:13px; font-weight:700; color:#18191B; }
-.dv5-stat-sub { font-size:11px; color:rgba(0,0,0,.5); margin-top:3px; }
-
-/* File manager cards */
-.dv5-file-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
-.dv5-file-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:14px; padding:20px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.06); transition:border-color .15s,box-shadow .15s; }
-.dv5-file-card:hover { border-color:#5347CE30; box-shadow:0 4px 12px rgba(83,71,206,.08); }
-.dv5-file-card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.dv5-file-card-label { font-size:13px; font-weight:700; color:var(--text,#18191B); }
-.dv5-file-count { font-size:34px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:14px; }
-.dv5-file-bar-wrap { height:6px; background:#F1F1F1; border-radius:999px; overflow:hidden; margin-bottom:8px; }
-.dv5-file-bar { height:100%; border-radius:999px; transition:width .5s cubic-bezier(.4,0,.2,1); }
-.dv5-file-foot { display:flex; justify-content:space-between; font-size:11px; color:var(--text-3,#999); font-weight:700; margin-bottom:14px; }
-.dv5-file-link { font-size:12px; font-weight:700; color:var(--text-3,#999); display:flex; align-items:center; gap:4px; padding-top:10px; border-top:1px solid var(--border,#E8E8E8); }
-.dv5-file-card:hover .dv5-file-link { color:#5347CE; }
-
-/* Transactions */
-.dv5-tx-header { display:flex; justify-content:space-between; align-items:flex-start; padding:16px 20px 0; flex-wrap:wrap; gap:12px; }
-.dv5-tx-tabs { display:flex; gap:2px; padding:12px 20px 0; border-bottom:1px solid var(--border,#E8E8E8); }
-.dv5-tx-tab { background:none; border:none; padding:8px 14px; font-size:13px; font-weight:700; color:var(--text-3,#999); border-radius:8px 8px 0 0; cursor:pointer; transition:color .15s; }
-.dv5-tx-tab.active { color:var(--text,#18191B); border-bottom:2px solid #18191B; }
-.dv5-tx-tab:hover { color:var(--text,#18191B); }
-.dv5-tx-list { }
-.dv5-tx-row { display:grid; grid-template-columns:130px 1fr auto 36px; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border,#F1F1F1); cursor:pointer; transition:background .1s; }
-.dv5-tx-row:hover { background:#F9F9F9; }
-.dv5-tx-row:last-child { border-bottom:0; }
-.dv5-tx-date { font-size:12px; font-weight:700; color:var(--text-3,#999); white-space:nowrap; }
-.dv5-tx-name { font-size:13px; font-weight:700; color:var(--text,#18191B); }
-.dv5-tx-status { font-size:11px; color:var(--text-3,#999); margin-top:2px; }
-.dv5-tx-amt { font-size:13px; font-weight:800; white-space:nowrap; text-align:right; }
-.dv5-tx-arrow { width:32px; height:32px; border:1px solid var(--border,#E8E8E8); border-radius:8px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--text-3,#999); transition:background .1s; }
-.dv5-tx-arrow:hover { background:var(--bg,#F5F5F5); }
-
-/* Date presets */
-.dv5-date-presets { display:flex; gap:4px; flex-wrap:wrap; }
-.dv5-preset-btn { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:8px; padding:5px 12px; font-size:12px; font-weight:700; color:var(--text-3,#999); cursor:pointer; transition:all .15s; white-space:nowrap; }
-.dv5-preset-btn:hover { background:var(--bg,#F5F5F5); color:var(--text,#18191B); }
-.dv5-preset-btn.active { background:#18191B; color:#fff; border-color:#18191B; }
-
 /* KPI grid */
-.dv5-kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
-.dv5-kpi { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; cursor:default; transition:border-color .15s; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.dv5-kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
+.dv5-kpi { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:16px; cursor:default; transition:border-color .15s; }
 .dv5-kpi[onclick] { cursor:pointer; }
 .dv5-kpi:hover[onclick] { border-color:#5347CE30; }
 .dv5-kpi-icon { width:36px; height:36px; border-radius:10px; background:#F3F3F3; display:flex; align-items:center; justify-content:center; font-size:16px; color:#5347CE; margin-bottom:10px; }
-.dv5-kpi-icon.purple { background:#EEF2FF; color:#5347CE; }
-.dv5-kpi-icon.green  { background:#ECFDF5; color:#059669; }
-.dv5-kpi-icon.amber  { background:#FFFBEB; color:#D97706; }
-.dv5-kpi-icon.blue   { background:#EFF6FF; color:#2563EB; }
-.dv5-kpi-icon.rose   { background:#FFF1F2; color:#E11D48; }
-.dv5-kpi-icon.teal   { background:#F0FDFA; color:#0D9488; }
-.dv5-kpi-icon.ink    { background:#1E1B4B; color:#EEFA94; }
 .dv5-kpi-val { font-size:22px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
 .dv5-kpi-label { font-size:12px; font-weight:700; color:var(--text,#18191B); }
 .dv5-kpi-note { font-size:11px; color:var(--text-3,#999); margin-top:2px; }
 
 /* Priority grid */
-.dv5-priority-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px; }
-.dv5-priority { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; cursor:pointer; transition:border-color .15s,box-shadow .15s; text-align:left; box-shadow:0 1px 3px rgba(0,0,0,.06); }
-.dv5-priority:hover { border-color:#5347CE50; box-shadow:0 2px 8px rgba(83,71,206,.1); }
+.dv5-priority-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:16px; }
+.dv5-priority { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:16px; cursor:pointer; transition:border-color .15s,box-shadow .15s; text-align:left; }
+.dv5-priority:hover { border-color:#5347CE50; box-shadow:0 4px 16px rgba(83,71,206,.08); }
 .dv5-priority-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#5347CE; margin-bottom:10px; }
 .dv5-priority strong { display:block; font-size:28px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
 .dv5-priority span { display:block; font-size:12px; font-weight:700; color:var(--text,#18191B); }
 .dv5-priority small { display:block; font-size:11px; color:var(--text-3,#999); margin-top:2px; }
 
 /* Cards */
-.dv5-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
-.dv5-card-pipeline { background:linear-gradient(135deg,#1E1B4B 0%,#312E81 60%,#3730A3 100%); border-color:#4338CA; padding:16px 20px; }
-.dv5-card-pipeline .dv5-flow-step strong { color:#fff; }
-.dv5-card-pipeline .dv5-flow-step span { color:rgba(255,255,255,.55); }
-.dv5-card-pipeline .dv5-flow-arrow { color:rgba(255,255,255,.3); }
-.dv5-card-pipeline .dv5-pipeline-flow { padding:4px 0; }
+.dv5-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:16px; margin-bottom:12px; }
 .dv5-card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .dv5-card-title { font-size:13px; font-weight:800; color:var(--text,#18191B); }
 .dv5-card-sub { font-size:11px; color:var(--text-3,#999); }
@@ -5374,7 +4008,7 @@ function setUserDisplay(display, role) {
 .dv5-table tbody tr { border-bottom:1px solid var(--border,#E8E8E8); transition:background .12s; cursor:pointer; }
 .dv5-table tbody tr:last-child { border-bottom:0; }
 .dv5-table tbody tr:hover { background:#FAFAFA; }
-.dv5-table tbody td { padding:0 12px; height:44px; color:var(--text,#18191B); vertical-align:middle; }
+.dv5-table tbody td { padding:10px 12px; color:var(--text,#18191B); vertical-align:middle; }
 
 /* Name cells */
 .dv5-name-cell { display:flex; align-items:center; gap:10px; }
@@ -5411,14 +4045,6 @@ function setUserDisplay(display, role) {
 .dv5-view-tab { padding:0 12px; height:32px; font-size:11px; font-weight:700; border:none; background:#fff; cursor:pointer; color:var(--text-3,#999); }
 .dv5-view-tab.active { background:#5347CE; color:#fff; }
 
-/* Bulk action bar */
-.dv5-bulk-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 12px; background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px; margin-bottom:10px; font-size:12px; font-weight:700; color:#3730A3; }
-.dv5-bulk-bar .dv5-select { height:30px; font-size:11px; }
-.dv5-bulk-bar .dv5-btn { height:30px; font-size:11px; }
-.dv5-row-selected td { background:#F5F3FF !important; }
-.dv5-client-row.dv5-client-open td { background:#F8F6FF; }
-.dv5-expand-row td { padding:0 !important; }
-
 /* Pipeline Kanban */
 .dv5-kanban { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:60vh; }
 .dv5-col { background:#FAFAFA; border:1px solid var(--border,#E8E8E8); border-radius:12px; overflow:hidden; }
@@ -5433,10 +4059,10 @@ function setUserDisplay(display, role) {
 .dv5-pipe-foot { display:flex; justify-content:space-between; font-size:10px; color:var(--text-3,#999); font-weight:700; }
 
 /* Pipeline flow steps */
-.dv5-pipeline-flow { display:flex; align-items:center; gap:0; padding:0; width:100%; }
-.dv5-flow-step { text-align:center; padding:0 8px; }
-.dv5-flow-step strong { display:block; font-size:28px; font-weight:900; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
-.dv5-flow-step span { font-size:10px; color:var(--text-3,#999); font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+.dv5-pipeline-flow { display:flex; align-items:center; gap:0; overflow-x:auto; padding:8px 0; }
+.dv5-flow-step { text-align:center; padding:12px 20px; min-width:80px; }
+.dv5-flow-step strong { display:block; font-size:22px; font-weight:900; color:var(--text,#18191B); }
+.dv5-flow-step span { font-size:11px; color:var(--text-3,#999); font-weight:700; }
 .dv5-flow-arrow { color:var(--text-3,#999); font-size:14px; flex-shrink:0; }
 
 /* Tasks */
@@ -5486,12 +4112,8 @@ function setUserDisplay(display, role) {
 .dv5-step.done span { background:#22A06B; color:#fff; border-color:#22A06B; }
 .dv5-step.active span { background:#5347CE; color:#fff; border-color:#5347CE; }
 .dv5-profile-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
-.dv5-check-row { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid var(--border,#E8E8E8); font-size:13px; font-weight:600; color:#374151; border-radius:6px; margin:1px 0; }
+.dv5-check-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border,#E8E8E8); font-size:12px; font-weight:700; color:#4B5567; }
 .dv5-check-row:last-child { border:none; }
-.dv5-check-row.clickable:hover { background:#f5f3ff; color:#5347CE; }
-.dv5-check-row.clickable:hover i { color:#5347CE !important; }
-.dv5-check-hint { margin-left:auto; font-size:11px; font-weight:500; color:#9ca3af; white-space:nowrap; opacity:0; transition:opacity .15s; }
-.dv5-check-row.clickable:hover .dv5-check-hint { opacity:1; color:#5347CE; }
 .dv5-detail-grid { display:grid; grid-template-columns:1fr auto; gap:8px; }
 .dv5-detail-grid span { font-size:12px; color:#7B8496; }
 .dv5-detail-grid strong { font-size:12px; color:var(--text,#18191B); text-align:right; }
@@ -5503,49 +4125,16 @@ function setUserDisplay(display, role) {
   .dv5-progress-steps { grid-template-columns:repeat(3,1fr); }
 }
 @media (max-width:760px) {
-  .dv5-page { padding:12px 12px 80px; }
-  .dv5-page-head { margin-bottom:14px; gap:10px; }
-  .dv5-page-head h1 { font-size:20px; }
+  .dv5-page { padding:16px 12px 80px; }
   .dv5-kanban { grid-template-columns:1fr 1fr; }
-  .dv5-priority-grid,.dv5-kpi-grid,.dv5-stat-grid,.dv5-file-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
-  .dv5-tx-row { grid-template-columns:90px 1fr auto 32px; gap:8px; padding:12px 14px; }
-  .dv5-date-presets { gap:3px; }
-  /* Last odd card spans full width */
-  .dv5-priority-grid > *:last-child:nth-child(odd),
-  .dv5-kpi-grid > *:last-child:nth-child(odd) { grid-column: 1 / -1; flex-direction:row; align-items:center; gap:14px; }
-  .dv5-priority-grid > *:last-child:nth-child(odd) .dv5-priority-icon,
-  .dv5-kpi-grid > *:last-child:nth-child(odd) .dv5-kpi-icon { margin-bottom:0; }
-  .dv5-priority-grid > *:last-child:nth-child(odd) strong { margin-bottom:0; }
+  .dv5-priority-grid,.dv5-kpi-grid { grid-template-columns:repeat(2,1fr); }
   .dv5-profile-hero { grid-template-columns:1fr; }
   .dv5-profile-stage { align-items:flex-start; text-align:left; }
   .dv5-toolbar { flex-direction:column; align-items:stretch; }
   .dv5-toolbar-left,.dv5-toolbar-right { flex-wrap:wrap; }
   .dv5-input,.dv5-select { width:100%; }
-  .dv5-two-col { grid-template-columns:1fr; }
-  .dv5-head-actions { flex-wrap:wrap; width:100%; }
-  .dv5-head-actions .dv5-btn { flex:1; justify-content:center; min-width:120px; }
-  /* Cards: tighter on mobile */
-  .dv5-card { padding:14px; }
-  .dv5-kpi { padding:14px; }
-  .dv5-priority { padding:14px; }
-  /* Table: horizontal scroll */
-  .dv5-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .dv5-table { min-width:480px; }
-  /* Pipeline flow: horizontal scroll on mobile */
-  .dv5-pipeline-flow { overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; }
-  .dv5-flow-step { min-width:64px; flex-shrink:0; }
-  /* Kanban: single column on small */
-  .dv5-kanban { grid-template-columns:1fr; }
-}
-@media (max-width:480px) {
-  .dv5-page { padding:10px 10px 80px; }
-  .dv5-priority-grid,.dv5-kpi-grid { gap:8px; }
-  .dv5-card-pipeline { padding:14px 12px; }
 }
   `;
-
-  // Expose allRows for the command palette (different IIFE scope)
-  window._drecoAllRows = allRows;
 
 })();
 
@@ -5643,6 +4232,9 @@ function setUserDisplay(display, role) {
     try { renderDocChecklist(type,id); } catch {}
     const active = sessionStorage.getItem('dreco_active_tab') || '';
     try { if(typeof renderDocumentsV4 === 'function') renderDocumentsV4(); } catch {}
+    try { if(typeof renderCandidatesV4 === 'function' && active === 'candidates') renderCandidatesV4(); } catch {}
+    try { if(typeof renderPipelineV4 === 'function' && active === 'pipeline') renderPipelineV4(); } catch {}
+    try { if(typeof renderTasks === 'function' && active === 'tasks') renderTasks(); } catch {}
   }
   function closeOverlays(exceptId){
     $$('.modal-bg.open,.modal.open,.v4-modal.open').forEach(el => { if(el.id !== exceptId) el.classList.remove('open'); });
@@ -5654,8 +4246,6 @@ function setUserDisplay(display, role) {
     try { docsTarget = window.docsTarget; } catch {}
     const modal = $('#docs-modal');
     if(!modal) return;
-    // Always appear above any open profile/DV5 overlay (z-index:9999)
-    modal.style.setProperty('z-index','19999','important');
     const title = $('#docs-modal-title');
     if(title) title.textContent = `Documents - ${name || 'Candidate'}`;
     const panel = modal.querySelector('.modal');
@@ -5882,7 +4472,7 @@ function setUserDisplay(display, role) {
     window.switchTab.__mobileWrapped = true;
   }
 
-  ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderClients'].forEach(name=>{
+  ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderTasks','renderClients'].forEach(name=>{
     const fn=window[name];
     if(typeof fn === 'function' && !fn.__mobileWrapped){
       window[name]=function(){ const out=fn.apply(this,arguments); setTimeout(tuneMobile,40); return out; };
@@ -6125,7 +4715,7 @@ function setUserDisplay(display, role) {
   }
 
   function installRenderGuards(){
-    const names = ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderClients','renderPro','renderLB','renderCommissions','renderRepayments','renderExpenses','renderTravel'];
+    const names = ['renderDash','renderCandidates','renderPipeline','renderFinance','renderReports','renderDocuments','renderTasks','renderClients','renderPro','renderLB','renderKanban','renderCommissions','renderRepayments','renderExpenses','renderTravel'];
     names.forEach(name => {
       const fn = window[name];
       if (typeof fn !== 'function' || fn.__drecoGuarded) return;
@@ -6242,100 +4832,5 @@ function setUserDisplay(display, role) {
   window.addEventListener('unhandledrejection', event => {
     console.error('Dreco async error:', event.reason);
     showHealthMessage('Sync/action issue caught', 'An action failed safely. Check the console for details.');
-  });
-
-  // ══════════════════════════════════════════════════════════
-  // ⌘K COMMAND PALETTE
-  // ══════════════════════════════════════════════════════════
-  const CMD_TABS = [
-    { label:'Dashboard',   icon:'ti-home',           tab:'dash' },
-    { label:'Candidates',  icon:'ti-users',          tab:'candidates' },
-    { label:'Pipeline',    icon:'ti-git-branch',     tab:'pipeline' },
-    { label:'Finance',     icon:'ti-coin',           tab:'finance' },
-    { label:'Documents',   icon:'ti-folder',         tab:'documents' },
-    { label:'Clients',     icon:'ti-building',       tab:'clients' },
-    { label:'Reports',     icon:'ti-chart-bar',      tab:'reports' },
-  ];
-  let cmdSelectedIdx = 0;
-
-  window.openCmd = function() {
-    const overlay = document.getElementById('cmd-overlay');
-    if (!overlay) return;
-    overlay.classList.add('open');
-    const inp = document.getElementById('cmd-input');
-    if (inp) { inp.value = ''; inp.focus(); }
-    cmdSearch();
-  };
-
-  window.closeCmd = function() {
-    const overlay = document.getElementById('cmd-overlay');
-    if (overlay) overlay.classList.remove('open');
-  };
-
-  function cmdEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-  window.cmdSearch = function() {
-    const q = (document.getElementById('cmd-input')?.value || '').toLowerCase().trim();
-    const results = document.getElementById('cmd-results');
-    if (!results) return;
-    cmdSelectedIdx = 0;
-
-    const tabs = CMD_TABS.filter(t => !q || t.label.toLowerCase().includes(q));
-    const candidates = q.length >= 2
-      ? (typeof window._drecoAllRows === 'function' ? window._drecoAllRows() : []).filter(r =>
-          (r.name||'').toLowerCase().includes(q) ||
-          (r.pp||'').toLowerCase().includes(q) ||
-          (r.company||'').toLowerCase().includes(q)
-        ).slice(0, 8)
-      : [];
-
-    let html = '';
-    if (tabs.length) {
-      html += `<div class="cmd-section-label">Navigation</div>`;
-      html += tabs.map((t,i) => `
-        <div class="cmd-item${i===0&&!candidates.length?'':''}" data-cmd-idx="${i}" onclick="closeCmd();switchTab('${t.tab}')">
-          <div class="cmd-item-icon"><i class="ti ${t.icon}"></i></div>
-          <div class="cmd-item-main"><div class="cmd-item-name">${t.label}</div></div>
-          <span class="cmd-item-badge">Tab</span>
-        </div>`).join('');
-    }
-    if (candidates.length) {
-      html += `<div class="cmd-section-label">Candidates</div>`;
-      html += candidates.map((r,i) => `
-        <div class="cmd-item" data-cmd-idx="${tabs.length+i}" onclick="closeCmd();editPro(${r.id})">
-          <div class="cmd-item-icon"><i class="ti ti-user"></i></div>
-          <div class="cmd-item-main">
-            <div class="cmd-item-name">${cmdEsc(r.name)}</div>
-            <div class="cmd-item-sub">${cmdEsc(r.stage||'')} · ${cmdEsc(r.company||'')}</div>
-          </div>
-        </div>`).join('');
-    }
-    if (!html) html = `<div id="cmd-empty">No results for "<strong>${q}</strong>"</div>`;
-    results.innerHTML = html;
-    highlightCmd();
-  };
-
-  window.cmdKey = function(e) {
-    const items = document.querySelectorAll('.cmd-item');
-    if (e.key === 'ArrowDown') { e.preventDefault(); cmdSelectedIdx = Math.min(cmdSelectedIdx+1, items.length-1); highlightCmd(); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); cmdSelectedIdx = Math.max(cmdSelectedIdx-1, 0); highlightCmd(); }
-    else if (e.key === 'Enter') { e.preventDefault(); items[cmdSelectedIdx]?.click(); }
-    else if (e.key === 'Escape') { closeCmd(); }
-  };
-
-  function highlightCmd() {
-    document.querySelectorAll('.cmd-item').forEach((el,i) => {
-      el.classList.toggle('selected', i === cmdSelectedIdx);
-    });
-  }
-
-  document.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      const overlay = document.getElementById('cmd-overlay');
-      if (overlay?.classList.contains('open')) closeCmd();
-      else openCmd();
-    }
-    if (e.key === 'Escape') closeCmd();
   });
 })();
