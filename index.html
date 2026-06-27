@@ -4,19 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dreco</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#3C3489">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dreco">
     <link rel="preconnect" href="https://rsms.me/">
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* Font fallback */
     /* Uses a Proton-inspired system font stack for fast, consistent rendering. */
-    html{font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif}
+    html{font-family:'Geist','Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif;font-synthesis:none}
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       /* Product font stack */
-      --font-heading: 'Inter', 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-      --font-body: 'Inter', 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --font-heading: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --font-body: 'Geist', 'Inter', 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
       --font-mono:  ui-monospace, 'Cascadia Code', 'Fira Code', monospace;      
       /* Palette */
       --accent:#EEFA94;--accent-dark:#C8D620;--accent-deeper:#9EAB10;
@@ -44,7 +52,7 @@
       --sidebar-w:224px;--sidebar-w-collapsed:64px;
     }
     body{
-      font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif;
+      font-family:'Geist','Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif;
       background:var(--bg);color:var(--text);
       font-size:13px;line-height:1.5;min-height:100vh;
       /* tabular figures prevent layout shift on updating numbers */
@@ -227,13 +235,13 @@
     .sidebar-divider{height:1px;background:rgba(255,255,255,.06);margin:4px 14px 8px}
     .nav-section-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.12em;text-transform:uppercase;padding:0 18px;margin-bottom:4px;white-space:nowrap;overflow:hidden;transition:opacity .2s}
     .sidebar.collapsed .nav-section-label{opacity:0}
-    .nav-item{display:flex;align-items:center;gap:11px;padding:9px 14px;margin:2px 8px;border-radius:10px;cursor:pointer;transition:all .18s;text-decoration:none;color:rgba(255,255,255,.38);white-space:nowrap;position:relative;overflow:hidden}
+    .nav-item{display:flex;align-items:center;gap:11px;padding:9px 14px;margin:2px 8px;border-radius:10px;cursor:pointer;transition:background .18s,color .18s;text-decoration:none;color:rgba(255,255,255,.38);white-space:nowrap;position:relative;overflow:hidden;border:none;background:transparent;font:inherit;-webkit-appearance:none;appearance:none;text-align:left;width:100%}
     .nav-item i{font-size:19px;flex-shrink:0;transition:color .18s}
     .nav-item-label{font-size:13px;font-weight:600;transition:opacity .2s;overflow:hidden}
     .sidebar.collapsed .nav-item-label{opacity:0;width:0}
     .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.75)}
-    .nav-item.active{background:var(--accent);color:var(--ink)}
-    .nav-item.active i{color:var(--ink)}
+    .nav-item.active{background:#5347CE;color:#fff;box-shadow:0 2px 8px rgba(83,71,206,.25)}
+    .nav-item.active i{color:rgba(255,255,255,.9)}
     /* tooltip for collapsed state */
     .sidebar.collapsed .nav-item:hover::after{content:attr(data-title);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;z-index:200;box-shadow:var(--shadow)}
     .nav-spacer{flex:1}
@@ -599,6 +607,12 @@
     .pd-msg{font-size:11px;padding:2px 14px 4px;font-weight:500}
     .pd-msg.ok{color:var(--green)}.pd-msg.err{color:var(--red)}
 
+    /* Screen-reader only utility */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    /* Button loading state */
+    .btn-loading{opacity:0.7;cursor:not-allowed;pointer-events:none}
+
     /* "-"- TOAST "-"- */
     .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px}
     .toast i{font-size:14px}
@@ -731,50 +745,32 @@
       .cal-header-cell{font-size:8px;padding:7px 0}
 
       /* profile dropdown: full width */
-      .profile-dropdown{width:calc(100vw - 28px);right:-10px}
+      .profile-dropdown{width:calc(100vw - 28px);right:0}
 
       /* pagination: compact */
       .pagination{flex-direction:column;gap:6px;align-items:flex-start;padding:8px 12px}
     }
 
-    /* "-"- BOTTOM NAV BAR (mobile only, shown after login via JS) "-"- */
-    .bottom-nav{
-      display:none; /* hidden by default - JS adds .visible after login */
-      position:fixed;bottom:0;left:0;right:0;
-      height:60px;background:var(--ink);
-      border-top:1px solid rgba(255,255,255,.08);
-      z-index:100;
-      align-items:stretch;
-      padding:0 4px;
-      padding-bottom:env(safe-area-inset-bottom);
-    }
-    @media(max-width:640px){
-      .bottom-nav.visible{display:flex}
-    }
-    .bottom-nav-item{
-      flex:1;display:flex;flex-direction:column;align-items:center;
-      justify-content:center;gap:3px;
-      color:rgba(255,255,255,.35);
-      cursor:pointer;border:none;background:none;
-      font-family:inherit;font-size:9px;font-weight:700;
-      letter-spacing:.04em;text-transform:uppercase;
-      transition:color .15s;padding:6px 2px;
-      border-radius:0;
+    /* "-"- BOTTOM NAV — permanently off "-"- */
+    .bottom-nav{ display:none !important; }
+
+    /* Hamburger — hidden on desktop, shown on mobile */
+    .topbar-hamburger{
+      display:none;align-items:center;justify-content:center;
+      width:38px;height:38px;border:none;background:none;cursor:pointer;
+      color:var(--text);border-radius:8px;flex-shrink:0;flex:0 0 auto;
       -webkit-tap-highlight-color:transparent;
     }
-    .bottom-nav-item i{font-size:20px;line-height:1}
-    .bottom-nav-item.active{color:var(--accent)}
-    .bottom-nav-item span{font-size:9px;line-height:1}
+    .topbar-hamburger:active{background:var(--gray-light);}
+    .topbar-hamburger i{font-size:22px;line-height:1;}
 
-    /* "-"- Login screen mobile "-"- */
-    @media(max-width:640px){
-      #login-screen{padding:0;background:#fff}
-      .lp-window{border-radius:0;height:100dvh;height:100vh;box-shadow:none;border:none}
-      .lp-media{display:none}
-      .lp-form-panel{padding:36px 24px 28px}
-      .lp-header h1{font-size:22px}
-      .lp-chips{flex-direction:column;gap:8px}
-    }
+    /* Sidebar backdrop and swipe target — hidden by default */
+    .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;-webkit-tap-highlight-color:transparent;}
+    .sidebar-backdrop.visible{display:block;}
+    .swipe-edge-hint{display:none;position:fixed;top:0;left:0;bottom:0;width:22px;z-index:298;}
+
+    /* Login screen mobile — overrides are near the end of the stylesheet
+       (after the 900px and 760px blocks) to avoid cascade conflicts */
     /* "-"- KANBAN "-"- */
     .kanban-col{flex:0 0 240px;background:var(--gray-light);border-radius:var(--radius-xl);padding:12px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--border)}
     .kanban-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;padding:0 2px}
@@ -937,7 +933,7 @@ body{background:radial-gradient(circle at top left,rgba(201,240,60,.20),transpar
   --sidebar-w-collapsed:76px;
 }
 body{
-      font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top left,rgba(221,244,92,.18),transparent 30%),#EFEDE2;color:var(--ink-soft)}
+      font-family:'Geist','Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top left,rgba(221,244,92,.18),transparent 30%),#EFEDE2;color:var(--ink-soft)}
 body,button,input,select,textarea{font-family:var(--font-body)}
 
 /* Sidebar restored: expanded + collapsible */
@@ -1454,7 +1450,7 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   .topbar-avatar{width:32px!important;height:32px!important;border-radius:11px!important}
   .profile-dropdown{position:fixed!important;top:62px!important;right:10px!important;left:10px!important;width:auto!important;max-width:none!important;max-height:calc(100dvh - 84px)!important;overflow:auto!important}
   .content-area{padding:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;background:#F8FAFC!important}
-  .content-area>div{padding:14px 12px 94px!important}
+  .content-area>div{padding:14px 12px 24px!important}
   .welcome-banner{border-radius:14px!important;padding:14px!important;margin-bottom:12px!important}
   .wb-left h2{font-size:18px!important}
   .wb-right{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;width:100%!important;overflow:visible!important}
@@ -1489,8 +1485,6 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   tbody tr td:first-child{display:table-cell!important}
   .name-cell{min-width:180px!important}
   .click-hint{font-size:10px!important;padding:8px 10px!important}
-  #kanban-board{min-height:260px!important;gap:10px!important;padding-bottom:12px!important}
-  .kanban-col{flex:0 0 230px!important}
   .cal-day{min-height:54px!important;padding:4px!important}
   .cal-event{font-size:8px!important;max-width:100%!important}
   .modal-bg{padding:8px!important;align-items:flex-start!important}
@@ -1502,12 +1496,50 @@ tbody tr td:first-child,tbody tr td:last-child{border-radius:0!important}
   .modal-footer .btn{width:100%!important}
   .form-grid,.settings-grid,.settings-kpi-row,.candidate-summary,.action-grid{grid-template-columns:1fr!important}
   .candidate-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .bottom-nav{height:64px!important;padding:0 4px env(safe-area-inset-bottom)!important;background:#fff!important;border-top:1px solid var(--nexus-line)!important;box-shadow:0 -10px 28px rgba(58,72,92,.08)!important}
-  .bottom-nav.visible{display:flex!important}
-  .bottom-nav-item{min-width:0!important;gap:2px!important;color:#7D8797!important;letter-spacing:0!important;text-transform:none!important}
-  .bottom-nav-item i{font-size:20px!important}
-  .bottom-nav-item span{font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
-  .bottom-nav-item.active{background:#EFEEFF!important;color:var(--nexus-purple)!important;border-radius:14px!important}
+}
+
+/* "-"- MOBILE LOGIN: fix keyboard-resize dancing "-"- */
+/* Must come after the 900px block (which sets min-height:100dvh on lp-window) */
+@media(max-width:640px){
+  #login-screen{position:fixed!important;inset:0!important;padding:0!important;background:#fff!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;align-items:flex-start!important;}
+  .lp-window{min-height:0!important;height:auto!important;overflow:visible!important;}
+  .lp-media{display:none!important;}
+  .lp-form-panel{min-height:100svh!important;min-height:100vh!important;padding:44px 24px 40px!important;justify-content:center!important;gap:20px!important;}
+  .lp-header h1{font-size:22px!important;}
+  .lp-chips{flex-direction:column!important;gap:8px!important;}
+}
+
+/* "-"- MOBILE SIDEBAR DRAWER "-"- */
+/* Comes after the max-width:760px block which sets sidebar display:none.
+   The drawer is hidden via display:none (not transform) so it never leaks
+   through position:fixed stacking even when #app is display:none. */
+@media(max-width:640px){
+  /* Show hamburger */
+  .topbar-hamburger{ display:flex !important; }
+  .swipe-edge-hint{ display:block !important; }
+
+  /* Sidebar: hidden by default, shown only when .mobile-open */
+  .sidebar{
+    display:none !important;
+  }
+  .sidebar.mobile-open{
+    display:flex !important;
+    flex-direction:column !important;
+    position:fixed !important;
+    top:0 !important; left:0 !important; bottom:0 !important;
+    width:min(280px,85vw) !important;
+    height:100% !important;
+    z-index:300 !important;
+    overflow-y:auto !important;
+    border-radius:0 !important;
+    box-shadow:6px 0 32px rgba(0,0,0,.45) !important;
+    animation:drawerSlideIn .22s cubic-bezier(.4,0,.2,1) both;
+  }
+  .sidebar .sidebar-toggle{ display:none !important; }
+}
+@keyframes drawerSlideIn{
+  from{transform:translateX(-100%)}
+  to{transform:translateX(0)}
 }
 
 @media(max-width:420px){
@@ -2330,7 +2362,7 @@ td,th,.badge,.btn,.toolbar-select,.pill-tab,.country-tab,.field input,.field sel
 .nav-item{
   color:#485066!important;
   border-radius:10px!important;
-  transition:background .16s,color .16s,transform .16s!important;
+  transition:background .16s,color .16s!important;
 }
 .nav-item i{
   color:#8B95AA!important;
@@ -2791,13 +2823,13 @@ tbody tr:hover td{
 
 /* Reference match correction: keep Dreco logo, cleaner typography, tighter proportions */
 body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
-  font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+  font-family:'Inter','InterVariable',ui-sans-serif,system-ui,-apple-system,sans-serif!important;
   font-feature-settings:'cv02' 1,'cv03' 1,'cv04' 1,'cv11' 1!important;
   -webkit-font-smoothing:antialiased!important;
   text-rendering:geometricPrecision!important;
 }
 #app{padding:3px!important;background:#EEF3F9!important}.app-layout{border-radius:8px!important}
-.sidebar{width:230px!important;padding:22px 16px 16px!important;overflow:hidden!important}.sidebar-top{padding:0 0 30px!important}.sidebar-logo-mark{width:36px!important;height:36px!important;border-radius:10px!important;background:linear-gradient(135deg,#6B5BFF,#4D3FD9)!important;box-shadow:0 10px 22px rgba(90,73,248,.18)!important;clip-path:none!important}.sidebar-logo-mark::before{display:none!important}.sidebar-logo-mark svg{display:block!important;width:24px!important;height:24px!important}.sidebar-logo-mark svg path{fill:#fff!important;opacity:1!important}.sidebar-logo-text{font-size:20px!important;font-weight:760!important;letter-spacing:-.035em!important;color:#070B1D!important}.nav-section-label{margin:17px 0 10px!important;padding:0 10px!important;font-size:9.5px!important;font-weight:760!important;color:#A3ACC0!important;letter-spacing:.11em!important}.nav-item{height:40px!important;border-radius:9px!important;padding:0 12px!important;margin:2px 0 5px!important;color:#243756!important;font-size:13px!important;font-weight:560!important;letter-spacing:-.005em!important}.nav-item i{font-size:17px!important;color:#31486C!important;stroke-width:1.8!important}.nav-item.active{background:#F0ECFF!important;color:#4D3FD9!important;font-weight:660!important;box-shadow:inset 4px 0 0 #5A49F8!important}.nav-item.active i{color:#5A49F8!important}.sidebar::after{content:'JF\A John Fred\A Destiny Recruit Consults';white-space:pre;display:block;margin-top:auto;border-top:1px solid #E4E9F2;padding:18px 0 0 50px;color:#5B6880;font-size:11px;line-height:1.48;background:radial-gradient(circle at 20px 30px,#5A49F8 0 18px,transparent 19px);font-weight:560}.sidebar::before{content:'';position:absolute;left:31px;bottom:54px;width:2px;height:0}
+.sidebar{width:230px!important;padding:22px 16px 16px!important;overflow:hidden!important}.sidebar-top{padding:0 0 30px!important}.sidebar-logo-mark{width:36px!important;height:36px!important;border-radius:10px!important;background:linear-gradient(135deg,#6B5BFF,#4D3FD9)!important;box-shadow:0 10px 22px rgba(90,73,248,.18)!important;clip-path:none!important}.sidebar-logo-mark::before{display:none!important}.sidebar-logo-mark svg{display:block!important;width:24px!important;height:24px!important}.sidebar-logo-mark svg path{fill:#fff!important;opacity:1!important}.sidebar-logo-text{font-size:20px!important;font-weight:760!important;letter-spacing:-.035em!important;color:#070B1D!important;font-family:'Manrope',ui-sans-serif,system-ui,sans-serif!important;}.nav-section-label{margin:17px 0 10px!important;padding:0 10px!important;font-size:9.5px!important;font-weight:760!important;color:#A3ACC0!important;letter-spacing:.11em!important}.nav-item{height:40px!important;border-radius:9px!important;padding:0 12px!important;margin:2px 0 5px!important;color:#243756!important;font-size:13px!important;font-weight:560!important;letter-spacing:-.005em!important}.nav-item i{font-size:17px!important;color:#31486C!important;stroke-width:1.8!important}.nav-item.active{background:#5347CE!important;color:#fff!important;font-weight:700!important;box-shadow:0 2px 8px rgba(83,71,206,.28)!important}.nav-item.active i{color:rgba(255,255,255,.9)!important}.sidebar::after{content:'JF\A John Fred\A Destiny Recruit Consults';white-space:pre;display:block;margin-top:auto;border-top:1px solid #E4E9F2;padding:18px 0 0 50px;color:#5B6880;font-size:11px;line-height:1.48;background:radial-gradient(circle at 20px 30px,#5A49F8 0 18px,transparent 19px);font-weight:560}.sidebar::before{content:'';position:absolute;left:31px;bottom:54px;width:2px;height:0}
 .topbar{height:68px!important;padding:0 24px 0 26px!important;gap:16px!important}.topbar-title{order:0!important;flex:0 0 520px!important;font-size:20px!important;font-weight:760!important;letter-spacing:-.035em!important;color:#070B1D!important}.topbar-search{order:1!important;margin-left:auto!important;flex:0 1 354px!important;max-width:354px!important}.topbar-search input{height:34px!important;border-radius:9px!important;font-size:12px!important;font-weight:430!important;color:#42516B!important;border-color:#D8E0EC!important;padding-left:36px!important}.topbar-search i{font-size:16px!important;color:#6B768B!important;stroke-width:1.8!important}.topbar-search::after{top:6px!important;right:8px!important;height:20px;display:flex;align-items:center;font-size:10.5px!important;color:#8A96AA!important}.save-dot{order:2!important;width:7px!important;height:7px!important;background:#FF5263!important;margin:0 4px 0 8px!important}.topbar::before{content:'\eb7d';font-family:'tabler-icons';order:2;width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#334663;font-size:18px;margin-left:0}.topbar::after{order:3;width:20px!important;height:20px!important;font-size:12px!important;border-color:#8A9AB3!important;color:#334663!important}.topbar-workspace{order:4!important;margin-left:8px!important;height:34px!important;padding:0 14px!important;border-radius:9px!important;background:#F0ECFF!important;color:#10182E!important;font-size:12px!important;font-weight:660!important;letter-spacing:-.01em!important}.topbar-workspace i{font-size:15px!important;stroke-width:1.8!important}.profile-wrap{order:5!important}.topbar-avatar{width:36px!important;height:36px!important;font-size:13px!important;font-weight:700!important}.topbar-profile-btn{width:36px!important;height:36px!important}.content-area>div{padding:28px 26px 24px!important}.ref-dashboard-head{margin-bottom:28px!important}.ref-dashboard-head h1{font-size:20px!important;font-weight:760!important;letter-spacing:-.03em!important;color:#0B1024!important}.ref-dashboard-head p{font-size:13px!important;font-weight:430!important;color:#657188!important}.ref-date-btn{height:38px!important;border-radius:9px!important;font-size:12px!important;font-weight:560!important;padding:0 16px!important;color:#40506A!important}.ref-board-grid{grid-template-columns:minmax(0,1fr) 266px!important;gap:20px!important}.ref-kpi-row{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px!important;margin-bottom:18px!important}.ref-kpi{height:106px!important;border-radius:10px!important;padding:18px!important;gap:18px!important}.ref-kpi-icon{width:40px!important;height:40px!important;border-radius:12px!important}.ref-kpi span{font-size:11px!important;font-weight:650!important;color:#536179!important}.ref-kpi strong{font-size:24px!important;font-weight:760!important;letter-spacing:-.035em!important}.ref-kpi em{font-size:11px!important;font-weight:650!important}.ref-card,.ref-fin-card{border-radius:10px!important}.ref-card-title{font-size:14px!important;font-weight:760!important;letter-spacing:-.02em!important;color:#0B1024!important}.ref-pipeline-overview{padding:20px!important;margin-bottom:18px!important}.ref-stage-row{gap:10px!important}.ref-stage-box{height:64px!important;border-radius:10px!important;padding:0 14px!important}.ref-stage-icon{width:34px!important;height:34px!important;border-radius:10px!important}.ref-stage-label{font-size:10px!important;font-weight:650!important;color:#647089!important}.ref-stage-value{font-size:22px!important;font-weight:760!important;letter-spacing:-.035em!important}.ref-stage-percent{font-size:12px!important;font-weight:650!important}.ref-trend-card,.ref-breakdown-card{height:278px!important;padding:18px!important}.ref-fin-card{height:380px!important;padding:20px!important}.ref-fin-head{font-size:11px!important;font-weight:760!important}.ref-fin-block h2{font-size:24px!important;font-weight:760!important;letter-spacing:-.035em!important}.ref-fin-block div,.ref-fin-block p,.ref-fin-report{font-size:12px!important}.ref-upcoming{height:224px!important}.ref-quick{height:200px!important}.ref-chat-btn{width:44px!important;height:44px!important;right:22px!important;bottom:20px!important}
 @media(max-width:1360px){.topbar-title{flex-basis:440px!important}.topbar-search{max-width:320px!important;flex-basis:320px!important}.ref-board-grid{grid-template-columns:minmax(0,1fr) 266px!important}.ref-kpi-row{gap:16px!important}.ref-kpi strong{font-size:23px!important}}
 @media(max-width:1180px){.topbar-title{flex:1 1 auto!important}.ref-board-grid{grid-template-columns:1fr!important}.ref-side-column{display:grid!important;grid-template-columns:repeat(3,minmax(250px,1fr));overflow-x:auto}.ref-fin-card,.ref-upcoming,.ref-quick{height:auto!important}.ref-kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
@@ -2811,7 +2843,7 @@ body,#app,.app-layout,.sidebar,.topbar,.content-area,.ref-dashboard{
 .ref-total-link{display:block;width:100%;border:0;background:transparent;cursor:pointer;font-family:inherit}.topbar-icon-btn + .save-dot{margin-left:2px!important}
 
 /* Full workflow sections and responsive cleanup */
-.sidebar-user-card.sidebar-account-trigger{border:0;width:100%;text-align:left;cursor:pointer}.sidebar-user-card.sidebar-account-trigger:hover{background:#F7F5FF!important;border-color:#DCD8FF!important}.topbar-avatar-static{cursor:default!important;pointer-events:none!important}.profile-dropdown{position:fixed!important;right:auto!important;left:18px!important;top:86px!important;bottom:auto!important}.profile-wrap .profile-dropdown{left:18px!important;right:auto!important;top:86px!important;bottom:auto!important}.section-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.section-page-head h2{margin:0;color:#0B1024;font-size:22px;font-weight:780;letter-spacing:-.035em}.section-page-head p{margin:6px 0 0;color:#657188;font-size:13px}.ref-table{width:100%;min-width:900px}.ref-table th,.ref-table td{white-space:nowrap}.team-grid,.settings-page-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.team-card,.settings-page-card{background:#fff;border:1px solid #E6EAF2;border-radius:12px;box-shadow:0 12px 28px rgba(30,41,59,.04);padding:18px}.team-card-head{display:flex;align-items:center;gap:12px}.team-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6A5AF9,#4D3FD9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:780}.team-name{font-weight:760;color:#0B1024}.team-role{font-size:12px;color:#657188;margin-top:3px}.team-perms{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.team-perms span,.settings-pill{font-size:11px;border-radius:999px;background:#F0ECFF;color:#4D3FD9;padding:6px 9px;font-weight:650}.settings-page-card h3{margin:0 0 8px;color:#0B1024;font-size:15px}.settings-page-card p{margin:0 0 14px;color:#657188;font-size:12px;line-height:1.5}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #EEF2F7}.setting-row:first-of-type{border-top:0}.setting-row span{font-size:12px;color:#27364F}.setting-row button,.setting-row select{height:32px;border-radius:8px;border:1px solid #DDE4F0;background:#fff;color:#27364F;padding:0 10px;font-size:12px}.mini-empty{padding:18px;color:#657188;font-size:13px}.action-link{border:0;background:transparent;color:#4D3FD9;font-weight:700;cursor:pointer}.finance-period-menu{position:relative;display:inline-flex}.finance-period-menu select{height:30px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;font-size:11px;padding:0 8px}.finance-period-menu option{color:#111827}.trend-hit{position:absolute;inset:0;cursor:crosshair}.ref-tooltip.dynamic{display:none}.ref-line-chart:hover .ref-tooltip.dynamic{display:block}@media(max-width:900px){.section-page-head{flex-direction:column}.section-page-head .btn{width:100%}.profile-dropdown{left:10px!important;right:10px!important;bottom:74px!important;width:auto!important}.ref-table{min-width:820px}.team-grid,.settings-page-grid{grid-template-columns:1fr}.topbar-avatar-static{display:flex!important}}
+.sidebar-user-card.sidebar-account-trigger{border:0;width:100%;text-align:left;cursor:pointer}.sidebar-user-card.sidebar-account-trigger:hover{background:#F7F5FF!important;border-color:#DCD8FF!important}.topbar-avatar-static{cursor:default!important;pointer-events:none!important}.profile-dropdown{position:fixed!important;right:auto!important;left:228px!important;top:auto!important;bottom:auto!important}.profile-wrap .profile-dropdown{left:228px!important;right:auto!important;top:auto!important;bottom:auto!important}.section-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.section-page-head h2{margin:0;color:#0B1024;font-size:22px;font-weight:780;letter-spacing:-.035em}.section-page-head p{margin:6px 0 0;color:#657188;font-size:13px}.ref-table{width:100%;min-width:900px}.ref-table th,.ref-table td{white-space:nowrap}.team-grid,.settings-page-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.team-card,.settings-page-card{background:#fff;border:1px solid #E6EAF2;border-radius:12px;box-shadow:0 12px 28px rgba(30,41,59,.04);padding:18px}.team-card-head{display:flex;align-items:center;gap:12px}.team-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6A5AF9,#4D3FD9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:780}.team-name{font-weight:760;color:#0B1024}.team-role{font-size:12px;color:#657188;margin-top:3px}.team-perms{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.team-perms span,.settings-pill{font-size:11px;border-radius:999px;background:#F0ECFF;color:#4D3FD9;padding:6px 9px;font-weight:650}.settings-page-card h3{margin:0 0 8px;color:#0B1024;font-size:15px}.settings-page-card p{margin:0 0 14px;color:#657188;font-size:12px;line-height:1.5}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #EEF2F7}.setting-row:first-of-type{border-top:0}.setting-row span{font-size:12px;color:#27364F}.setting-row button,.setting-row select{height:32px;border-radius:8px;border:1px solid #DDE4F0;background:#fff;color:#27364F;padding:0 10px;font-size:12px}.mini-empty{padding:18px;color:#657188;font-size:13px}.action-link{border:0;background:transparent;color:#4D3FD9;font-weight:700;cursor:pointer}.finance-period-menu{position:relative;display:inline-flex}.finance-period-menu select{height:30px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.08);color:#fff;font-size:11px;padding:0 8px}.finance-period-menu option{color:#111827}.trend-hit{position:absolute;inset:0;cursor:crosshair}.ref-tooltip.dynamic{display:none}.ref-line-chart:hover .ref-tooltip.dynamic{display:block}@media(max-width:900px){.section-page-head{flex-direction:column}.section-page-head .btn{width:100%}.profile-dropdown{left:10px!important;right:10px!important;bottom:74px!important;width:auto!important}.ref-table{min-width:820px}.team-grid,.settings-page-grid{grid-template-columns:1fr}.topbar-avatar-static{display:flex!important}}
 
 /* Dreco functional responsiveness pass */
 .profile-dropdown{z-index:80!important}
@@ -2933,53 +2965,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 .save-dot.saving{background:var(--amber)!important;animation:pulse .8s infinite alternate}
 @keyframes pulse{to{opacity:.5}}
 
-/* Mobile navigation parity: every desktop section is reachable on phones. */
-@media(max-width:760px){
-  .bottom-nav{
-    display:none;
-    height:72px!important;
-    padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;
-    gap:6px!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    justify-content:flex-start!important;
-    align-items:center!important;
-    scroll-snap-type:x proximity;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-    background:rgba(255,255,255,.96)!important;
-    border-top:1px solid #DDE4F8!important;
-    box-shadow:0 -10px 30px rgba(31,42,73,.08)!important;
-    z-index:70!important;
-  }
-  .bottom-nav.visible{display:flex!important;}
-  .bottom-nav::-webkit-scrollbar{display:none;}
-  .bottom-nav-item{
-    flex:0 0 74px!important;
-    min-width:74px!important;
-    height:56px!important;
-    border:0!important;
-    border-radius:14px!important;
-    background:transparent!important;
-    color:#7B8496!important;
-    scroll-snap-align:center;
-  }
-  .bottom-nav-item i{font-size:19px!important;}
-  .bottom-nav-item span{
-    font-size:9px!important;
-    line-height:1.1!important;
-    white-space:nowrap!important;
-    max-width:68px!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  .bottom-nav-item.active{
-    background:#F0EEFF!important;
-    color:var(--dreco-purple,#5347CE)!important;
-  }
-  .bottom-nav-item.active i{color:var(--dreco-purple,#5347CE)!important;}
-  .content-area>div{padding-bottom:104px!important;}
-}
+/* Bottom nav removed — navigation is now via left sidebar drawer on mobile. */
 
 
 /* =========================================================
@@ -3002,9 +2988,9 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 #app .suc-info{min-width:0!important;text-align:left!important}.suc-name{color:#111827!important;font-size:12px!important;font-weight:750!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.suc-org{font-size:10px!important;color:#7b8496!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 #app .sidebar.collapsed .sidebar-user-card{width:44px!important;margin:0 auto 10px!important;padding:5px!important;justify-content:center!important}.sidebar.collapsed .suc-info{display:none!important}
 #app .nav-section-label{display:block!important;color:#a2abbb!important;padding:8px 18px 5px!important;font-size:9px!important;font-weight:800!important;letter-spacing:.12em!important;text-transform:uppercase!important}.sidebar.collapsed .nav-section-label,.sidebar.collapsed .sidebar-divider{display:none!important}
-#app .nav-item{height:40px!important;width:auto!important;padding:0 13px!important;margin:3px 12px!important;border-radius:11px!important;color:#4b5567!important;background:transparent!important;display:flex!important;align-items:center!important;gap:11px!important;text-decoration:none!important;cursor:pointer!important;transition:.16s ease!important;transform:none!important}
+#app .nav-item{height:40px!important;width:auto!important;padding:0 13px!important;margin:3px 12px!important;border-radius:11px!important;color:#4b5567!important;background:transparent!important;display:flex!important;align-items:center!important;gap:11px!important;text-decoration:none!important;cursor:pointer!important;transition:background .16s ease,color .16s ease!important;transform:none!important;border:none!important;font:inherit!important;-webkit-appearance:none!important;appearance:none!important;text-align:left!important}
 #app .nav-item i{font-size:19px!important;color:#8b95a7!important;transition:.16s ease!important}#app .nav-item-label{display:inline!important;font-size:12px!important;font-weight:650!important;color:inherit!important;opacity:1!important;width:auto!important;white-space:nowrap!important}
-#app .nav-item:hover{background:#f2f0ff!important;color:#5347CE!important;transform:translateX(2px)!important}#app .nav-item:hover i{color:#5347CE!important}
+#app .nav-item:hover{background:#f2f0ff!important;color:#5347CE!important}#app .nav-item:hover i{color:#5347CE!important}
 #app .nav-item.active{background:linear-gradient(135deg,#f1efff,#eef5ff)!important;color:#5347CE!important;box-shadow:inset 3px 0 0 #5347CE!important}#app .nav-item.active i{color:#5347CE!important}
 #app .sidebar.collapsed .nav-item{width:44px!important;height:44px!important;margin:5px auto!important;padding:0!important;justify-content:center!important;border-radius:14px!important}.sidebar.collapsed .nav-item-label{display:none!important}.sidebar.collapsed .nav-item:hover::after{display:none!important}
 #app .main-area{background:#f6f8fc!important;min-width:0!important}.topbar{height:64px!important;background:rgba(255,255,255,.92)!important;backdrop-filter:blur(14px)!important;border-bottom:1px solid #e6eaf2!important;padding:0 24px!important;gap:14px!important}.topbar-title{font-size:18px!important;color:#111827!important;font-weight:800!important;letter-spacing:-.03em!important;flex:0 0 auto!important;min-width:150px!important}.topbar-workspace{height:36px!important;border:1px solid #e6eaf2!important;background:#fff!important;border-radius:12px!important;color:#4b5567!important;padding:0 12px!important;display:flex!important;align-items:center!important;gap:8px!important;font-size:12px!important;font-weight:650!important}.topbar-search{max-width:380px!important;flex:1!important}.topbar-search input{height:38px!important;background:#f8fafc!important;border:1px solid #e6eaf2!important;border-radius:12px!important;color:#111827!important;font-size:12px!important}.topbar-search input:focus{border-color:#5347CE!important;box-shadow:0 0 0 4px rgba(83,71,206,.10)!important;background:#fff!important}.topbar-icon-btn{width:38px!important;height:38px!important;border:1px solid #e6eaf2!important;background:#fff!important;border-radius:12px!important;color:#6b7280!important;display:flex!important;align-items:center!important;justify-content:center!important}.save-label{font-size:11px!important;color:#7b8496!important}.save-dot{background:#16a34a!important}.content-area{background:#f6f8fc!important;padding:0!important;overflow-y:auto!important}.content-area>div{padding:24px!important}.dreco-page{max-width:1500px;margin:0 auto}.dreco-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}.dreco-page-head h1{margin:0 0 5px!important;font-size:25px!important;line-height:1.1!important;color:#111827!important;font-weight:820!important;letter-spacing:-.04em!important}.dreco-page-head p{margin:0!important;color:#7b8496!important;font-size:13px!important;font-weight:500!important}.dreco-head-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.dreco-btn{height:38px;border:1px solid #e3e7f0;background:#fff;color:#374151;border-radius:12px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:750;cursor:pointer;box-shadow:0 8px 20px rgba(15,23,42,.04)}.dreco-btn.primary{background:#5347CE;color:#fff;border-color:#5347CE;box-shadow:0 14px 26px rgba(83,71,206,.22)}.dreco-btn:hover{transform:translateY(-1px)}.dreco-grid{display:grid;gap:14px}.dreco-kpis{grid-template-columns:repeat(5,minmax(140px,1fr));margin-bottom:20px}.dreco-card{background:#fff;border:1px solid #e6eaf2;border-radius:18px;box-shadow:0 18px 45px rgba(15,23,42,.045);overflow:hidden}.dreco-card.pad{padding:18px}.dreco-card-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:13px;font-weight:820;color:#111827}.dreco-card-title span{color:#8b95a7;font-size:11px;font-weight:650}.dreco-kpi{padding:16px;border-radius:16px;background:#fff;border:1px solid #e6eaf2;box-shadow:0 12px 32px rgba(15,23,42,.04);cursor:pointer}.dreco-kpi-icon{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;color:#5347CE;background:#f1efff}.dreco-kpi-label{font-size:11px;font-weight:750;color:#6b7280;margin-bottom:3px}.dreco-kpi-value{font-size:22px;line-height:1;font-weight:850;color:#111827;letter-spacing:-.04em}.dreco-kpi-note{font-size:11px;color:#16a34a;margin-top:7px;font-weight:700}.priority-grid{grid-template-columns:repeat(5,1fr);margin-bottom:20px}.priority-card{padding:16px;border-radius:16px;border:1px solid #e6eaf2;background:#fff;box-shadow:0 12px 32px rgba(15,23,42,.04);cursor:pointer}.priority-card strong{display:block;font-size:22px;line-height:1;color:#111827;margin-bottom:7px}.priority-card span{display:block;font-size:12px;font-weight:760;color:#111827}.priority-card small{display:block;font-size:10px;color:#ef4444;margin-top:5px;font-weight:750}.priority-icon{width:30px;height:30px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}.pipeline-flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.flow-step{background:#fff;border:1px solid #e6eaf2;border-radius:14px;padding:13px 14px;text-align:center;position:relative}.flow-step span{display:block;font-size:11px;color:#6b7280;font-weight:750}.flow-step strong{display:block;font-size:18px;color:#111827;margin-top:5px}.dash-two{grid-template-columns:1.15fr .85fr;margin-top:14px}.activity-list,.task-list{display:flex;flex-direction:column;gap:9px}.activity-item,.task-item,.doc-row,.client-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid #eef1f6;border-radius:14px;background:#fbfcff}.activity-icon,.task-icon{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#f1efff;color:#5347CE}.item-title{font-size:12px;font-weight:800;color:#111827}.item-meta{font-size:11px;color:#7b8496;margin-top:2px}.item-pill{border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;background:#eef2ff;color:#5347CE;white-space:nowrap}.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}.toolbar-left,.toolbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.dreco-input,.dreco-select{height:38px;border:1px solid #e3e7f0;border-radius:12px;background:#fff;color:#111827;font-size:12px;font-weight:600;padding:0 12px;outline:0}.dreco-input{min-width:270px}.dreco-input:focus,.dreco-select:focus{border-color:#5347CE;box-shadow:0 0 0 4px rgba(83,71,206,.09)}.table-card{background:#fff;border:1px solid #e6eaf2;border-radius:18px;box-shadow:0 18px 45px rgba(15,23,42,.045);overflow:hidden}.dreco-table-wrap{overflow:auto}.dreco-table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}.dreco-table th{background:#fbfcff!important;color:#7b8496!important;text-transform:none!important;letter-spacing:0!important;font-size:11px!important;font-weight:800!important;border-bottom:1px solid #eef1f6!important;padding:13px 14px!important;text-align:left}.dreco-table td{padding:13px 14px!important;border-bottom:1px solid #f1f3f8!important;font-size:12px!important;color:#374151!important;background:#fff!important;vertical-align:middle}.dreco-table tr:hover td{background:#fbfcff!important}.name-cell{display:flex;align-items:center;gap:10px}.avatar-mini{width:30px;height:30px;border-radius:11px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:850;flex:0 0 auto}.stage-badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:820;background:#eef2ff;color:#5347CE}.stage-badge.green{background:#e8f8ee;color:#16803d}.stage-badge.orange{background:#fff4de;color:#a16207}.stage-badge.red{background:#feecef;color:#be123c}.stage-badge.blue{background:#e9f3ff;color:#1d4ed8}.action-mini{border:1px solid #e6eaf2;background:#fff;border-radius:10px;height:30px;padding:0 9px;display:inline-flex;align-items:center;gap:6px;color:#4b5567;font-size:11px;font-weight:760;cursor:pointer}.pipeline-board{display:grid;grid-template-columns:repeat(6,minmax(180px,1fr));gap:12px;overflow:auto;padding-bottom:6px}.pipe-col{min-height:520px;background:#f9fafc;border:1px solid #e6eaf2;border-radius:18px;padding:12px}.pipe-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.pipe-col-head strong{font-size:12px;color:#111827}.pipe-count{background:#fff;border:1px solid #e6eaf2;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:850;color:#5347CE}.pipe-card{background:#fff;border:1px solid #e6eaf2;border-radius:15px;padding:12px;margin-bottom:10px;box-shadow:0 10px 24px rgba(15,23,42,.04);cursor:pointer}.pipe-card:hover{border-color:#c9c3ff;box-shadow:0 16px 30px rgba(83,71,206,.08)}.pipe-card-name{font-size:12px;font-weight:850;color:#111827;margin-bottom:5px}.pipe-card-meta{font-size:11px;color:#7b8496;line-height:1.35}.pipe-card-foot{display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-size:10px;color:#6b7280}.finance-grid{grid-template-columns:repeat(4,1fr);margin-bottom:14px}.finance-chart{height:210px;display:flex;align-items:end;gap:10px;padding:20px 10px 8px;border-radius:14px;background:linear-gradient(180deg,#fbfcff,#fff)}.bar{flex:1;border-radius:999px 999px 4px 4px;background:#5347CE;min-height:20px}.bar:nth-child(even){background:#4896FE}.bar:nth-child(3n){background:#22A06B}.settings-clean .settings-grid{display:grid;grid-template-columns:260px 1fr;gap:16px}.settings-clean .settings-side{background:#fff;border:1px solid #e6eaf2;border-radius:18px;padding:10px}.settings-clean .settings-side button{width:100%;height:38px;border:0;background:transparent;border-radius:11px;text-align:left;padding:0 12px;color:#4b5567;font-size:12px;font-weight:750}.settings-clean .settings-side button.active{background:#f1efff;color:#5347CE}.empty-state{padding:26px;text-align:center;color:#7b8496;font-size:12px}.bottom-nav{border-top:1px solid #e6eaf2!important;background:#fff!important}.bottom-nav-item.active{background:#f1efff!important;color:#5347CE!important;border-radius:14px!important}
@@ -3032,18 +3018,292 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 #app .suc-info{min-width:0!important;text-align:left!important}.suc-name{color:#111827!important;font-size:12px!important;font-weight:750!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.suc-org{font-size:10px!important;color:#7b8496!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 #app .sidebar.collapsed .sidebar-user-card{width:44px!important;margin:0 auto 10px!important;padding:5px!important;justify-content:center!important}.sidebar.collapsed .suc-info{display:none!important}
 #app .nav-section-label{display:block!important;color:#a2abbb!important;padding:8px 18px 5px!important;font-size:9px!important;font-weight:800!important;letter-spacing:.12em!important;text-transform:uppercase!important}.sidebar.collapsed .nav-section-label,.sidebar.collapsed .sidebar-divider{display:none!important}
-#app .nav-item{height:40px!important;width:auto!important;padding:0 13px!important;margin:3px 12px!important;border-radius:11px!important;color:#4b5567!important;background:transparent!important;display:flex!important;align-items:center!important;gap:11px!important;text-decoration:none!important;cursor:pointer!important;transition:.16s ease!important;transform:none!important}
+#app .nav-item{height:40px!important;width:auto!important;padding:0 13px!important;margin:3px 12px!important;border-radius:11px!important;color:#4b5567!important;background:transparent!important;display:flex!important;align-items:center!important;gap:11px!important;text-decoration:none!important;cursor:pointer!important;transition:background .16s ease,color .16s ease!important;transform:none!important;border:none!important;font:inherit!important;-webkit-appearance:none!important;appearance:none!important;text-align:left!important}
 #app .nav-item i{font-size:19px!important;color:#8b95a7!important;transition:.16s ease!important}#app .nav-item-label{display:inline!important;font-size:12px!important;font-weight:650!important;color:inherit!important;opacity:1!important;width:auto!important;white-space:nowrap!important}
-#app .nav-item:hover{background:#f2f0ff!important;color:#5347CE!important;transform:translateX(2px)!important}#app .nav-item:hover i{color:#5347CE!important}
+#app .nav-item:hover{background:#f2f0ff!important;color:#5347CE!important}#app .nav-item:hover i{color:#5347CE!important}
 #app .nav-item.active{background:linear-gradient(135deg,#f1efff,#eef5ff)!important;color:#5347CE!important;box-shadow:inset 3px 0 0 #5347CE!important}#app .nav-item.active i{color:#5347CE!important}
 #app .sidebar.collapsed .nav-item{width:44px!important;height:44px!important;margin:5px auto!important;padding:0!important;justify-content:center!important;border-radius:14px!important}.sidebar.collapsed .nav-item-label{display:none!important}.sidebar.collapsed .nav-item:hover::after{display:none!important}
 #app .main-area{background:#f6f8fc!important;min-width:0!important}.topbar{height:64px!important;background:rgba(255,255,255,.92)!important;backdrop-filter:blur(14px)!important;border-bottom:1px solid #e6eaf2!important;padding:0 24px!important;gap:14px!important}.topbar-title{font-size:18px!important;color:#111827!important;font-weight:800!important;letter-spacing:-.03em!important;flex:0 0 auto!important;min-width:150px!important}.topbar-workspace{height:36px!important;border:1px solid #e6eaf2!important;background:#fff!important;border-radius:12px!important;color:#4b5567!important;padding:0 12px!important;display:flex!important;align-items:center!important;gap:8px!important;font-size:12px!important;font-weight:650!important}.topbar-search{max-width:420px!important;flex:1!important}.topbar-search input{height:38px!important;background:#f8fafc!important;border:1px solid #e6eaf2!important;border-radius:12px!important;color:#111827!important;font-size:12px!important}.topbar-search input:focus{border-color:#5347CE!important;box-shadow:0 0 0 4px rgba(83,71,206,.10)!important;background:#fff!important}.topbar-icon-btn{width:38px!important;height:38px!important;border:1px solid #e6eaf2!important;background:#fff!important;border-radius:12px!important;color:#6b7280!important;display:flex!important;align-items:center!important;justify-content:center!important}.save-label{font-size:11px!important;color:#7b8496!important}.save-dot{background:#16a34a!important}.content-area{background:#f6f8fc!important;padding:0!important;overflow-y:auto!important}.content-area>div{padding:24px!important}.dreco-page{max-width:1500px;margin:0 auto}.dreco-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}.dreco-page-head h1{margin:0 0 5px!important;font-size:25px!important;line-height:1.1!important;color:#111827!important;font-weight:820!important;letter-spacing:-.04em!important}.dreco-page-head p{margin:0!important;color:#7b8496!important;font-size:13px!important;font-weight:500!important}.dreco-head-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.dreco-btn{height:38px;border:1px solid #e3e7f0;background:#fff;color:#374151;border-radius:12px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:750;cursor:pointer;box-shadow:0 8px 20px rgba(15,23,42,.04)}.dreco-btn.primary{background:#5347CE;color:#fff;border-color:#5347CE;box-shadow:0 14px 26px rgba(83,71,206,.22)}.dreco-btn:hover{transform:translateY(-1px)}.inline-link{border:0;background:transparent;color:#5347CE;font-size:12px;font-weight:800;cursor:pointer}.muted{color:#7b8496;font-size:12px}.dreco-grid{display:grid;gap:14px}.dreco-kpis{grid-template-columns:repeat(5,minmax(140px,1fr));margin-bottom:20px}.dreco-card{background:#fff;border:1px solid #e6eaf2;border-radius:18px;box-shadow:0 18px 45px rgba(15,23,42,.045);overflow:hidden}.dreco-card.pad{padding:18px}.dreco-card-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:13px;font-weight:820;color:#111827}.dreco-card-title span{color:#8b95a7;font-size:11px;font-weight:650}.dreco-kpi{padding:16px;border-radius:16px;background:#fff;border:1px solid #e6eaf2;box-shadow:0 12px 32px rgba(15,23,42,.04);cursor:pointer}.dreco-kpi-icon{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;color:#5347CE;background:#f1efff}.dreco-kpi-label{font-size:11px;font-weight:750;color:#6b7280;margin-bottom:3px}.dreco-kpi-value{font-size:22px;line-height:1;font-weight:850;color:#111827;letter-spacing:-.04em}.dreco-kpi-note{font-size:11px;color:#16a34a;margin-top:7px;font-weight:700}.priority-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}.priority-card{padding:16px;border-radius:16px;border:1px solid #e6eaf2;background:#fff;box-shadow:0 12px 32px rgba(15,23,42,.04);cursor:pointer}.priority-card strong{display:block;font-size:22px;line-height:1;color:#111827;margin-bottom:7px}.priority-card span{display:block;font-size:12px;font-weight:760;color:#111827}.priority-card small{display:block;font-size:10px;color:#ef4444;margin-top:5px;font-weight:750}.priority-icon{width:30px;height:30px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}.priority-icon.orange{background:#fff7ed;color:#f97316}.priority-icon.blue{background:#eff6ff;color:#2563eb}.priority-icon.green{background:#ecfdf5;color:#16a34a}.priority-icon.purple{background:#f1efff;color:#5347CE}.priority-icon.red{background:#fef2f2;color:#ef4444}.pipeline-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.flow-step{background:#fff;border:1px solid #e6eaf2;border-radius:14px;padding:13px 14px;text-align:center;position:relative;cursor:pointer}.flow-step span{display:block;font-size:11px;color:#6b7280;font-weight:750}.flow-step strong{display:block;font-size:18px;color:#111827;margin-top:5px}.dash-two{grid-template-columns:1.15fr .85fr;margin-top:14px}.activity-list,.task-list{display:flex;flex-direction:column;gap:9px}.activity-item,.task-item,.doc-row,.client-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid #eef1f6;border-radius:14px;background:#fbfcff;cursor:pointer}.activity-icon,.task-icon{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#f1efff;color:#5347CE}.item-title{font-size:12px;font-weight:800;color:#111827}.item-meta{font-size:11px;color:#7b8496;margin-top:2px}.item-pill{border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;background:#eef2ff;color:#5347CE;white-space:nowrap}.item-pill.danger{background:#fef2f2;color:#ef4444}.danger-text{color:#ef4444!important}.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}.toolbar-left,.toolbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.dreco-input,.dreco-select{height:38px;border:1px solid #e3e7f0;background:#fff;border-radius:12px;padding:0 12px;color:#111827;font-size:12px;font-weight:650;min-width:220px}.table-card{background:#fff;border:1px solid #e6eaf2;border-radius:18px;box-shadow:0 18px 45px rgba(15,23,42,.045);overflow:hidden}.dreco-table-wrap{overflow:auto}.dreco-table{width:100%;border-collapse:separate;border-spacing:0}.dreco-table th{height:44px;background:#fbfcff;border-bottom:1px solid #eef1f6;color:#6b7280;text-align:left;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;padding:0 14px;white-space:nowrap}.dreco-table td{height:56px;border-bottom:1px solid #f0f2f7;color:#374151;font-size:12px;font-weight:600;padding:8px 14px;vertical-align:middle;white-space:nowrap}.dreco-table tr{cursor:pointer}.dreco-table tr:hover td{background:#fbfcff}.name-cell{display:flex;align-items:center;gap:10px}.stage-badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:#eef2ff;color:#5347CE;font-size:10px;font-weight:850;white-space:nowrap}.stage-badge.green{background:#ecfdf5;color:#16a34a}.stage-badge.blue{background:#eff6ff;color:#2563eb}.stage-badge.orange{background:#fff7ed;color:#f97316}.stage-badge.red{background:#fef2f2;color:#ef4444}.stage-badge.purple{background:#f1efff;color:#5347CE}.action-mini{height:30px;border:1px solid #e3e7f0;background:#fff;border-radius:10px;padding:0 10px;font-size:11px;font-weight:800;color:#4b5567;display:inline-flex;align-items:center;gap:6px;cursor:pointer}.empty-state{padding:24px;text-align:center;color:#8b95a7;font-size:12px;font-weight:650}.empty-state.small{padding:16px}.pipeline-board.v2{display:grid;grid-template-columns:repeat(5,minmax(210px,1fr));gap:14px;align-items:start}.pipe-col{background:#fff;border:1px solid #e6eaf2;border-radius:18px;box-shadow:0 16px 40px rgba(15,23,42,.04);overflow:hidden}.pipe-head{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fbfcff;border-bottom:1px solid #eef1f6}.pipe-head span{font-size:12px;font-weight:850;color:#111827}.pipe-head strong{font-size:12px;color:#5347CE;background:#f1efff;border-radius:999px;padding:4px 8px}.pipe-list{padding:12px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 230px);overflow:auto}.pipe-card{border:1px solid #eef1f6;border-radius:14px;background:#fff;padding:12px;display:grid;grid-template-columns:auto 1fr;gap:10px;cursor:pointer;box-shadow:0 8px 18px rgba(15,23,42,.03)}.pipe-card:hover{border-color:#d8d3ff;box-shadow:0 14px 26px rgba(83,71,206,.08)}.pipe-actions{display:flex;gap:6px;margin-top:8px}.pipe-actions button{height:26px;border:1px solid #e3e7f0;border-radius:8px;background:#fff;font-size:10px;font-weight:800;color:#5347CE;padding:0 8px;cursor:pointer}.finance-chart{height:210px;display:flex;align-items:end;gap:12px;padding:20px 10px 4px}.finance-chart .bar{flex:1;border-radius:999px 999px 4px 4px;background:linear-gradient(180deg,#5347CE,#9b8cff);min-height:20px}.candidate-profile-modal,.command-modal{position:fixed;inset:0;background:rgba(15,23,42,.48);z-index:9998;display:none;align-items:center;justify-content:center;padding:28px}.candidate-profile-modal.open,.command-modal.open{display:flex}.cp-panel{width:min(1180px,96vw);max-height:92vh;overflow:auto;background:#f8fafc;border-radius:24px;border:1px solid rgba(255,255,255,.6);box-shadow:0 30px 90px rgba(15,23,42,.30);padding:18px}.cp-head{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:16px}.cp-id{font-size:12px;color:#7b8496;font-weight:800;margin-right:auto}.cp-actions{display:flex;gap:8px}.cp-profile{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;background:#fff;border:1px solid #e6eaf2;border-radius:18px;padding:18px;margin-bottom:14px}.cp-avatar{width:66px;height:66px;border-radius:22px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900}.cp-profile h2{font-size:20px;line-height:1.1;margin:0 0 5px;color:#111827}.cp-profile p{margin:0 0 9px;color:#6b7280;font-size:13px;font-weight:650}.cp-meta{display:flex;gap:14px;flex-wrap:wrap;color:#6b7280;font-size:12px;font-weight:650}.cp-meta span{display:inline-flex;gap:6px;align-items:center}.cp-stage{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}.cp-stage small{color:#7b8496;font-size:11px;font-weight:700}.cp-steps{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:14px}.cp-step{display:flex;flex-direction:column;align-items:center;gap:5px;color:#9ca3af;font-size:10px;font-weight:800}.cp-step span{width:26px;height:26px;border-radius:999px;border:1px solid #dbe1eb;background:#fff;display:flex;align-items:center;justify-content:center}.cp-step.done span{background:#16a34a;color:#fff;border-color:#16a34a}.cp-step.active span{background:#5347CE;color:#fff;border-color:#5347CE}.cp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}.check-row,.detail-grid{display:grid;gap:10px}.check-row{grid-template-columns:auto 1fr;align-items:center;padding:8px 0;color:#4b5567;font-size:12px;font-weight:700}.check-row i{color:#16a34a}.detail-grid{grid-template-columns:1fr auto}.detail-grid span{color:#7b8496;font-size:12px}.detail-grid strong{font-size:12px;color:#111827;text-align:right}.command-box{width:min(760px,94vw);background:#fff;border-radius:20px;border:1px solid #e6eaf2;box-shadow:0 30px 90px rgba(15,23,42,.28);overflow:hidden}.command-search{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid #eef1f6}.command-search input{border:0;outline:0;height:34px;font-size:14px;font-weight:650}.command-search button{border:0;background:#f8fafc;border-radius:10px;width:34px;height:34px;cursor:pointer}.command-results{max-height:520px;overflow:auto;padding:10px}.command-result{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px;border-radius:14px;cursor:pointer}.command-result:hover{background:#f8fafc}.command-result strong{font-size:13px;color:#111827}.command-result span{display:block;font-size:11px;color:#7b8496;margin-top:3px}.bottom-nav{background:#fff!important;border-top:1px solid #e6eaf2!important}.bottom-nav-item{color:#7b8496!important}.bottom-nav-item.active{color:#5347CE!important}.bottom-nav-item.active i{color:#5347CE!important}
 @media(max-width:1180px){.dreco-kpis,.priority-grid{grid-template-columns:repeat(2,1fr)}.pipeline-board.v2{grid-template-columns:repeat(2,minmax(220px,1fr))}.cp-grid{grid-template-columns:1fr}.cp-steps{grid-template-columns:repeat(4,1fr)}.dash-two{grid-template-columns:1fr}}
 @media(max-width:760px){#app .sidebar{display:none!important}.topbar{height:auto!important;min-height:60px!important;flex-wrap:wrap!important;padding:10px 14px!important}.topbar-title{width:100%!important}.topbar-search{max-width:none!important;flex:1 1 100%!important}.content-area>div{padding:16px 12px 96px!important}.dreco-page-head{flex-direction:column}.dreco-kpis,.priority-grid,.pipeline-flow,.pipeline-board.v2{grid-template-columns:1fr!important}.dreco-input,.dreco-select{width:100%;min-width:0}.cp-profile{grid-template-columns:1fr;text-align:left}.cp-stage{text-align:left;align-items:flex-start}.candidate-profile-modal,.command-modal{padding:10px}.cp-steps{grid-template-columns:repeat(2,1fr)}}
 
+    /* High-contrast mode: ensure focus is visible even without box-shadow */
+    @media (forced-colors: active) {
+      input:focus, button:focus, select:focus, textarea:focus { outline: 2px solid ButtonText; }
+    }
+
+/* Manrope heading font — applied after override blocks to win cascade */
+h1,h2,h3,h4,h5,h6,
+.lp-brand-name,.lp-header h1,.wb-left h2,
+.topbar-title,.panel-title,.modal-header h3,
+.metric-val,.p-card-count,.spotlight-amount,
+.wb-stat-val,.rev-cell-val,.kanban-col-title,
+.kanban-card-name,.report-card-title,
+.sidebar-logo-text,.pd-name,.ref-kpi strong,
+.suc-name,.nav-section-label,
+.lp-media-copy h2,.lp-metric strong,.lp-progress-count {
+  font-family:'Manrope',ui-sans-serif,system-ui,sans-serif!important;
+}
+
+/* Proportion and whitespace fixes */
+
+/* Topbar: tighten the wasted space between title and search */
+.topbar { gap: 12px !important; }
+
+/* Login page heading: tighter, heavier for Manrope */
+.lp-header h1 { font-size: 26px !important; font-weight: 900 !important; letter-spacing: -.045em !important; }
+.lp-media-copy h2 { font-size: 32px !important; font-weight: 900 !important; letter-spacing: -.04em !important; }
+
+/* Dashboard welcome banner: use Manrope weight */
+.wb-left h2 { font-weight: 900 !important; letter-spacing: -.04em !important; }
+
+/* KPI numbers: bigger, tighter for Manrope */
+.metric-val { font-size: 28px !important; font-weight: 900 !important; letter-spacing: -.04em !important; }
+.wb-stat-val { font-size: 20px !important; font-weight: 900 !important; }
+
+/* Panel titles: slightly heavier */
+.panel-title { font-size: 13px !important; font-weight: 800 !important; letter-spacing: -.025em !important; }
+
+/* Nav items: use Inter for readability (override Manrope inheritance) */
+.nav-item, .nav-item-label { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important; }
+
+/* Table: more consistent row spacing */
+td { padding: 11px 14px !important; }
+th { padding: 9px 14px !important; }
+
+/* Section eyebrow labels: tighten tracking */
+.section-eyebrow { letter-spacing: .08em !important; font-weight: 800 !important; }
+
+/* Badges: use Inter for readability */
+.badge { font-family: 'Inter', ui-sans-serif, sans-serif !important; font-weight: 700 !important; }
+
+/* ref-kpi overrides: Manrope for numbers */
+.ref-kpi strong { font-size: 26px !important; font-weight: 900 !important; letter-spacing: -.04em !important; }
+.ref-kpi span { font-size: 10px !important; font-weight: 700 !important; letter-spacing: .06em !important; }
+
+/* Sidebar logo text: Manrope */
+.sidebar-logo-text { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 900 !important; }
+
+/* Topbar title: Manrope heading style */
+.topbar-title { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 800 !important; letter-spacing: -.035em !important; }
+
+/* Kanban col titles */
+.kanban-col-title { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 800 !important; }
+
+/* Improve pill tab readability */
+.pill-tab { font-size: 11px !important; font-weight: 600 !important; padding: 5px 13px !important; }
+
+/* Candidate profile name */
+.pd-name { font-family: 'Manrope', ui-sans-serif, sans-serif !important; font-weight: 900 !important; }
+
+/* ═══════════════════════════════════════════
+   MOBILE RESPONSIVENESS — comprehensive fix
+   ═══════════════════════════════════════════ */
+
+/* Topbar: single-row layout on mobile — title inline with hamburger */
+@media(max-width:900px) {
+  .topbar {
+    height: 56px !important;
+    min-height: 56px !important;
+    flex-wrap: nowrap !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  .topbar-title {
+    width: auto !important;
+    flex: 1 !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  /* Hide workspace button text on mobile — keep only avatar */
+  .topbar-workspace {
+    display: none !important;
+  }
+  /* Compact topbar-search hidden — cmd palette triggered by avatar */
+  .topbar-search {
+    display: none !important;
+  }
+  /* Show avatar button on mobile */
+  .topbar-avatar-static {
+    display: flex !important;
+  }
+  /* Content area: remove excessive top spacing */
+  .content-area > div {
+    padding: 14px 12px 72px !important;
+  }
+  /* Profile dropdown on mobile */
+  .dv5-pd { left:10px!important; right:10px!important; bottom:74px!important; top:auto!important; width:auto!important; }
+}
+
+/* Dashboard page header: tighter on mobile */
+@media(max-width:640px) {
+  /* KPI / priority / stat grids: last odd card spans full width */
+  .dv5-priority-grid > *:last-child:nth-child(odd),
+  .dv5-kpi-grid > *:last-child:nth-child(odd),
+  .dv5-stat-grid > *:last-child:nth-child(odd),
+  .dv5-file-grid > *:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+  }
+  /* Candidates / reports / tasks table: enforce horizontal scroll */
+  .dv5-table-wrap, .panel-body table, .content-area table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+  }
+  /* Page header actions: wrap neatly */
+  .dv5-head-actions {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .dv5-head-actions .dv5-btn {
+    flex: 1 !important;
+    min-width: 110px !important;
+    justify-content: center !important;
+  }
+  /* Charts two-col: stack */
+  .dv5-two-col {
+    grid-template-columns: 1fr !important;
+  }
+  /* Pipeline kanban: horizontal scroll rather than grid */
+  .dv5-kanban {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 10px !important;
+    padding-bottom: 8px !important;
+  }
+  .dv5-col {
+    min-width: 240px !important;
+    flex-shrink: 0 !important;
+  }
+  /* Pipeline overview flow: scrollable */
+  .dv5-pipeline-flow {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex-wrap: nowrap !important;
+  }
+  .dv5-flow-step {
+    min-width: 60px !important;
+    flex-shrink: 0 !important;
+  }
+  /* Toolbar: stack and stretch */
+  .dv5-toolbar {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .dv5-toolbar-left, .dv5-toolbar-right {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+  .dv5-input, .dv5-select {
+    width: 100% !important;
+  }
+  /* View tabs: full width */
+  .dv5-view-tabs { width: 100% !important; }
+  .dv5-view-tab { flex: 1 !important; }
+  /* Bottom padding for content */
+  .dv5-page { padding-bottom: 72px !important; }
+}
+
+/* Final nav-item active override — must come last to beat all competing rules */
+#app .nav-item.active,
+.sidebar .nav-item.active {
+  background: #5347CE !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(83,71,206,.28) !important;
+}
+#app .nav-item.active i,
+.sidebar .nav-item.active i {
+  color: rgba(255,255,255,.9) !important;
+}
+
+/* Tighter sidebar — shadcn-inspired 36px nav items */
+#app .nav-item,
+.sidebar .nav-item {
+  height: 36px !important;
+  margin: 2px 0 !important;
+  border-radius: 10px !important;
+  font-size: 12.5px !important;
+}
+
+/* ⌘K Command Palette */
+#cmd-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.52); z-index: 99999;
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 80px 16px; backdrop-filter: blur(2px);
+}
+#cmd-overlay.open { display: flex; }
+#cmd-modal {
+  width: min(620px, 96vw); background: #fff; border-radius: 16px;
+  border: 1px solid var(--border,#E8E8E8); box-shadow: 0 24px 64px rgba(0,0,0,.18);
+  overflow: hidden;
+}
+#cmd-input-wrap {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border,#E8E8E8);
+}
+#cmd-input-wrap i { font-size: 18px; color: var(--text-3,#999); }
+#cmd-input {
+  flex: 1; border: none; outline: none; font-size: 15px;
+  font-family: inherit; color: var(--text,#18191B);
+}
+#cmd-input::placeholder { color: var(--text-3,#999); }
+#cmd-esc {
+  font-size: 10px; font-weight: 700; color: var(--text-3,#999);
+  background: var(--bg,#F3F3F3); border: 1px solid var(--border,#E8E8E8);
+  border-radius: 5px; padding: 2px 6px;
+}
+#cmd-results { max-height: 380px; overflow-y: auto; padding: 8px; }
+.cmd-section-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-3,#999); padding: 8px 10px 4px;
+}
+.cmd-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 10px;
+  border-radius: 10px; cursor: pointer; transition: background .1s;
+}
+.cmd-item:hover, .cmd-item.selected { background: #F5F3FF; }
+.cmd-item-icon {
+  width: 32px; height: 32px; border-radius: 8px; background: #EEF2FF;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  color: #5347CE; flex-shrink: 0;
+}
+.cmd-item-main { flex: 1; min-width: 0; }
+.cmd-item-name { font-size: 13px; font-weight: 700; color: var(--text,#18191B); }
+.cmd-item-sub { font-size: 11px; color: var(--text-3,#999); }
+.cmd-item-badge { font-size: 10px; font-weight: 700; color: #5347CE; background: #EEF2FF; border-radius: 6px; padding: 2px 6px; }
+#cmd-empty { padding: 32px; text-align: center; font-size: 13px; color: var(--text-3,#999); }
+/* Fix stray text cursor on non-input elements */
+body, #app, .sidebar, .content-area, .dv5-page, .dv5-card, .dv5-kpi, .dv5-priority {
+  cursor: default;
+}
+a, button, [onclick], .nav-item, .dv5-btn, .dv5-link, .dv5-action-btn, .dv5-table tbody tr, .dv5-priority, .dv5-pipe-card, .dv5-task-item, .cmd-item {
+  cursor: pointer;
+}
+input, textarea, select, [contenteditable] {
+  cursor: text;
+}
 </style>
 </head>
 <body>
+
+<!-- ⌘K COMMAND PALETTE -->
+<div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
+  <div id="cmd-modal">
+    <div id="cmd-input-wrap">
+      <i class="ti ti-search"></i>
+      <input id="cmd-input" placeholder="Search candidates, tabs…" autocomplete="off" oninput="cmdSearch()" onkeydown="cmdKey(event)">
+      <span id="cmd-esc">ESC</span>
+    </div>
+    <div id="cmd-results"></div>
+  </div>
+</div>
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
@@ -3094,7 +3354,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               <div class="lp-input-wrap">
                 <i class="ti ti-lock lp-input-icon"></i>
                 <input type="password" id="pw-input" placeholder="Enter your password" required autocomplete="current-password">
-                <button class="lp-pw-toggle" type="button" id="pw-toggle" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
+                <button class="lp-pw-toggle" type="button" id="pw-toggle" aria-label="Show password" onclick="togglePassword()"><i class="ti ti-eye"></i></button>
               </div>
               <div class="lp-field-hint" id="caps-lock-hint" aria-live="polite">Caps Lock is on</div>
             </div>
@@ -3140,22 +3400,22 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               <label for="signup-password">Password</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-lock lp-input-icon"></i>
-                <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password">
+                <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password" aria-describedby="signup-password-hint">
               </div>
-              <span class="auth-helper">Minimum 6 characters. Use something your team will not guess.</span>
+              <span class="auth-helper" id="signup-password-hint">Minimum 6 characters. Use something your team will not guess.</span>
             </div>
             <button type="submit" class="lp-submit">Create workspace</button>
           </form>
-          <div class="login-error" id="signup-error" style="display:none"></div>
+          <div class="login-error" id="signup-error" role="alert" style="display:none"></div>
           <span class="lp-forgot auth-back-link" onclick="hideSignup()"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
 
         <div id="forgot-section" style="display:none">
           <div class="lp-header">
-            <h1>Forgot Password?</h1>
-            <p>Contact your workspace admin to reset your password. If you are the admin, please reach out to Dreco support.</p>
+            <h1>Reset Password</h1>
+            <p>Password resets are handled by your workspace admin. Ask them to reset your password from the Team settings page.</p>
           </div>
-          <span class="lp-forgot auth-back-link" onclick="hideForgotPassword()" style="margin-top:24px;display:inline-flex;align-items:center;gap:6px;cursor:pointer"><i class="ti ti-arrow-left"></i>Back to login</span>
+          <span class="lp-forgot auth-back-link" onclick="hideForgotPassword()" style="margin-top:16px;display:inline-block"><i class="ti ti-arrow-left"></i>Back to login</span>
         </div>
       </div>
 
@@ -3229,7 +3489,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           </div>
           <span class="sidebar-logo-text">Dreco</span>
         </a>
-        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
+        <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">
           <i class="ti ti-layout-sidebar-left-collapse"></i>
         </button>
       </div>
@@ -3246,51 +3506,51 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
       <div class="sidebar-divider"></div>
 
                         <div class="nav-section-label">General</div>
-      <a class="nav-item active" id="nav-dash" data-title="Dashboard" onclick="switchTab('dash')">
+      <button type="button" class="nav-item active" id="nav-dash" data-title="Dashboard" aria-label="Dashboard" onclick="switchTab('dash')">
         <i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span>
-      </a>
+      </button>
 
       <div class="nav-section-label">Workflows</div>
-      <a class="nav-item" id="nav-pro" data-title="Professional Jobs" onclick="switchTab('pro')">
+      <button type="button" class="nav-item" id="nav-pro" data-title="Professional Jobs" aria-label="Professional Jobs" onclick="switchTab('pro')">
         <i class="ti ti-users"></i><span class="nav-item-label">Professional Jobs</span>
-      </a>
-      <a class="nav-item" id="nav-lb" data-title="General Jobs" onclick="switchTab('lb')">
+      </button>
+      <button type="button" class="nav-item" id="nav-lb" data-title="General Jobs" aria-label="General Jobs" onclick="switchTab('lb')">
         <i class="ti ti-briefcase"></i><span class="nav-item-label">General Jobs</span>
-      </a>
-      <a class="nav-item" id="nav-kanban" data-title="Pipeline Board" onclick="switchTab('kanban')">
+      </button>
+      <button type="button" class="nav-item" id="nav-kanban" data-title="Pipeline Board" aria-label="Pipeline Board" onclick="switchTab('kanban')">
         <i class="ti ti-route"></i><span class="nav-item-label">Pipeline Board</span>
-      </a>
-      <a class="nav-item" id="nav-travel" data-title="Travel" onclick="switchTab('travel')">
+      </button>
+      <button type="button" class="nav-item" id="nav-travel" data-title="Travel" aria-label="Travel" onclick="switchTab('travel')">
         <i class="ti ti-plane-departure"></i><span class="nav-item-label">Travel</span>
-      </a>
-      <a class="nav-item" id="nav-calendar" data-title="Calendar" onclick="switchTab('calendar')">
+      </button>
+      <button type="button" class="nav-item" id="nav-calendar" data-title="Calendar" aria-label="Calendar" onclick="switchTab('calendar')">
         <i class="ti ti-calendar-check"></i><span class="nav-item-label">Calendar</span>
-      </a>
+      </button>
 
       <div class="nav-section-label">Finance</div>
-      <a class="nav-item" id="nav-commissions" data-title="Commissions" onclick="switchTab('commissions')">
+      <button type="button" class="nav-item" id="nav-commissions" data-title="Commissions" aria-label="Commissions" onclick="switchTab('commissions')">
         <i class="ti ti-coin"></i><span class="nav-item-label">Commissions</span>
-      </a>
-      <a class="nav-item" id="nav-repayments" data-title="Repayments" onclick="switchTab('repayments')">
+      </button>
+      <button type="button" class="nav-item" id="nav-repayments" data-title="Repayments" aria-label="Repayments" onclick="switchTab('repayments')">
         <i class="ti ti-receipt-refund"></i><span class="nav-item-label">Repayments</span>
-      </a>
-      <a class="nav-item" id="nav-expenses" data-title="Expenses" onclick="switchTab('expenses')">
+      </button>
+      <button type="button" class="nav-item" id="nav-expenses" data-title="Expenses" aria-label="Expenses" onclick="switchTab('expenses')">
         <i class="ti ti-wallet"></i><span class="nav-item-label">Expenses</span>
-      </a>
-      <a class="nav-item" id="nav-reports" data-title="Reports" onclick="switchTab('reports')">
+      </button>
+      <button type="button" class="nav-item" id="nav-reports" data-title="Reports" aria-label="Reports" onclick="switchTab('reports')">
         <i class="ti ti-chart-bar"></i><span class="nav-item-label">Reports</span>
-      </a>
+      </button>
 
       <div class="nav-section-label">Team & Settings</div>
-      <a class="nav-item" id="nav-team" data-title="Team" onclick="switchTab('team')">
+      <button type="button" class="nav-item" id="nav-team" data-title="Team" aria-label="Team" onclick="switchTab('team')">
         <i class="ti ti-users-group"></i><span class="nav-item-label">Team</span>
-      </a>
-      <a class="nav-item" id="nav-settings" data-title="Settings" onclick="switchTab('settings')">
+      </button>
+      <button type="button" class="nav-item" id="nav-settings" data-title="Settings" aria-label="Settings" onclick="switchTab('settings')">
         <i class="ti ti-settings"></i><span class="nav-item-label">Settings</span>
-      </a>
-      <a class="nav-item" id="nav-help" data-title="Help & Support" onclick="openHelp()">
+      </button>
+      <button type="button" class="nav-item" id="nav-help" data-title="Help & Support" aria-label="Help & Support" onclick="openHelp()">
         <i class="ti ti-help-circle"></i><span class="nav-item-label">Help & Support</span>
-      </a>
+      </button>
 
       <div class="nav-spacer"></div>
 </aside>
@@ -3300,46 +3560,56 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 
       <!-- TOPBAR -->
       <div class="topbar">
+        <button class="topbar-hamburger" id="topbar-hamburger" type="button" aria-label="Open menu" onclick="openMobileSidebar()">
+          <i class="ti ti-menu-2"></i>
+        </button>
         <span class="topbar-title" id="topbar-title">Dashboard</span>
         <button class="topbar-workspace" type="button" onclick="switchTab('settings')" title="Workspace settings">
           <i class="ti ti-building-skyscraper"></i>
           <span id="topbar-workspace-name">Destiny Recruitment Consults</span>
           <i class="ti ti-chevron-down"></i>
         </button>
-        <div class="topbar-search">
-          <i class="ti ti-search"></i>
-          <input type="text" placeholder="Search candidates, jobs, clients..." id="global-search" oninput="onGlobalSearch()">
+        <div class="topbar-search" onclick="openCmd()" style="cursor:pointer" title="Search or press ⌘K">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <label for="global-search" class="sr-only">Search candidates, jobs, clients</label>
+          <div id="global-search" class="topbar-search-fake" style="flex:1;color:var(--text-3,#999);font-size:12px;font-weight:500;user-select:none">Search candidates, tabs… <kbd style="font-size:10px;font-weight:700;background:var(--bg,#F3F3F3);border:1px solid var(--border,#E8E8E8);border-radius:4px;padding:1px 5px;color:var(--text-3,#999);font-family:inherit">⌘K</kbd></div>
         </div>
         <button class="topbar-icon-btn" type="button" onclick="openHelp()" title="Help & Support"><i class="ti ti-help-circle"></i></button>
         <div class="save-dot" id="save-dot"></div>
         <span class="save-label" id="save-label">Saved</span>
         <div class="profile-wrap">
           <!-- Icon-only profile button -->
-          <div class="topbar-profile-btn topbar-avatar-static" id="topbar-profile-btn" title="Account">
+          <button type="button" class="topbar-profile-btn topbar-avatar-static" id="topbar-profile-btn" aria-label="Account menu" title="Account" onclick="toggleProfileDropdown(event)" style="display:none">
             <div class="topbar-avatar" id="topbar-avatar">-</div>
-          </div>
+          </button>
 
-          <!-- Rich profile dropdown -->
-          <div class="profile-dropdown" id="profile-dropdown">
-            <!-- Header: avatar + name + role -->
-            <div class="pd-header">
-              <div class="pd-avatar" id="pd-avatar">-</div>
-              <div style="flex:1;min-width:0">
-                <div class="pd-name" id="pd-name">-</div>
-                <div class="pd-role-badge" id="pd-role-badge"><i class="ti ti-shield-check"></i><span id="pd-role-text">Staff</span></div>
+          <!-- Shadcn-style profile dropdown -->
+          <div class="dv5-pd" id="profile-dropdown">
+            <!-- User identity header -->
+            <div class="dv5-pd-head">
+              <div class="dv5-pd-av" id="pd-avatar">-</div>
+              <div style="min-width:0;flex:1">
+                <div class="dv5-pd-name" id="pd-name">-</div>
+                <div class="dv5-pd-email"><span id="pd-role-text">-</span></div>
               </div>
             </div>
-
-            <!-- Account actions -->
-            <div class="pd-menu-section">Account</div>
-            <button class="pd-menu-item" onclick="openProfileEdit()">
-              <i class="ti ti-user-edit"></i><span>Edit Profile</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
-            </button>
-            <button class="pd-menu-item" onclick="openChangePassword()">
-              <i class="ti ti-lock"></i><span>Change Password</span><i class="ti ti-chevron-right pd-menu-arrow"></i>
-            </button>
-
-            <!-- Edit profile panel (hidden by default) -->
+            <!-- Menu items -->
+            <div class="dv5-pd-items">
+              <button class="dv5-pd-item" onclick="openProfileEdit()">
+                <i class="ti ti-user-circle"></i>Account
+              </button>
+              <button class="dv5-pd-item" onclick="openChangePassword()">
+                <i class="ti ti-lock"></i>Change Password
+              </button>
+              <button class="dv5-pd-item" onclick="switchTab('settings');document.getElementById('profile-dropdown').classList.remove('open')">
+                <i class="ti ti-settings"></i>Settings
+              </button>
+              <div class="dv5-pd-sep"></div>
+              <button class="dv5-pd-item danger" onclick="doLogout()">
+                <i class="ti ti-logout"></i>Log out
+              </button>
+            </div>
+            <!-- Hidden edit sub-panel (keep for functionality) -->
             <div class="pd-edit-panel" id="pd-edit-panel" style="display:none">
               <div class="pd-edit-header">
                 <button class="pd-back-btn" onclick="closeProfileEdit()"><i class="ti ti-arrow-left"></i> Back</button>
@@ -3347,25 +3617,25 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               </div>
               <div class="pd-section">Display name</div>
               <div class="pd-field">
-                <label>Name shown in Dreco</label>
+                <label for="pd-display-name">Name shown in Dreco</label>
                 <input type="text" id="pd-display-name" placeholder="e.g. Fred">
               </div>
               <div class="pd-section">Change username</div>
               <div class="pd-field">
-                <label>New username</label>
+                <label for="pd-new-username">New username</label>
                 <input type="text" id="pd-new-username" placeholder="e.g. fred_admin" autocomplete="off">
               </div>
               <div class="pd-section">Change password</div>
               <div class="pd-field">
-                <label>Current password</label>
+                <label for="pd-current-pw">Current password</label>
                 <input type="password" id="pd-current-pw" placeholder="Current password">
               </div>
               <div class="pd-field">
-                <label>New password</label>
+                <label for="pd-new-pw">New password</label>
                 <input type="password" id="pd-new-pw" placeholder="New password">
               </div>
               <div class="pd-field">
-                <label>Confirm new password</label>
+                <label for="pd-confirm-pw">Confirm new password</label>
                 <input type="password" id="pd-confirm-pw" placeholder="Repeat new password">
               </div>
               <div class="pd-msg" id="pd-msg"></div>
@@ -3373,12 +3643,6 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
                 <button class="pd-save" onclick="saveProfileChanges()">Save changes</button>
               </div>
             </div>
-
-            <!-- Divider + sign out -->
-            <div style="height:1px;background:var(--border);margin:4px 0"></div>
-            <button class="pd-menu-item pd-menu-signout" onclick="doLogout()">
-              <i class="ti ti-logout"></i><span>Sign out</span>
-            </button>
           </div>
         </div>
       </div>
@@ -3425,7 +3689,8 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               <div class="panel-actions">
                 <div class="pill-tabs" id="pro-stage-pills"></div>
                 <div class="search-wrap">
-                  <i class="ti ti-search"></i>
+                  <i class="ti ti-search" aria-hidden="true"></i>
+                  <label for="pro-search" class="sr-only">Search professional candidates</label>
                   <input type="text" id="pro-search" placeholder="Search..." oninput="renderPro()">
                 </div>
                 <select class="toolbar-select" id="pro-company-f" onchange="renderPro()"><option value="">All companies</option></select>
@@ -3436,6 +3701,10 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
                   <option value="outstanding">Outstanding balance</option>
                   <option value="no-docs">Missing docs link</option>
                 </select>
+                <span style="font-size:11px;color:var(--text-3);white-space:nowrap">Submitted:</span>
+                <input type="date" id="pro-date-from" class="toolbar-select" style="width:130px" title="From date" onchange="renderPro()">
+                <input type="date" id="pro-date-to" class="toolbar-select" style="width:130px" title="To date" onchange="renderPro()">
+                <button class="btn" onclick="clearProDates()" title="Clear date filter"><i class="ti ti-x"></i></button>
                 <button class="btn export" onclick="exportCSV('pro')"><i class="ti ti-download"></i> Export</button>
                 <button class="btn" onclick="addCustomStage('pro')" title="Add stage"><i class="ti ti-settings"></i></button>
                 <button class="btn primary" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
@@ -3483,7 +3752,8 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
               </div>
               <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
                 <div class="search-wrap">
-                  <i class="ti ti-search"></i>
+                  <i class="ti ti-search" aria-hidden="true"></i>
+                  <label for="lb-search" class="sr-only">Search general candidates</label>
                   <input type="text" id="lb-search" placeholder="Search..." oninput="renderLB()">
                 </div>
                 <select class="toolbar-select" id="lb-refund-f" onchange="renderLB()">
@@ -3499,19 +3769,24 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
                   <option value="incomplete-refund">Incomplete refund</option>
                   <option value="no-docs">Missing docs link</option>
                 </select>
+                <span style="font-size:11px;color:var(--text-3);white-space:nowrap">Travel date:</span>
+                <input type="date" id="lb-date-from" class="toolbar-select" style="width:130px" title="From date" onchange="renderLB()">
+                <input type="date" id="lb-date-to" class="toolbar-select" style="width:130px" title="To date" onchange="renderLB()">
+                <button class="btn" onclick="clearLBDates()" title="Clear date filter"><i class="ti ti-x"></i></button>
                 <button class="btn export" onclick="exportCSV('lb')"><i class="ti ti-download"></i> Export</button>
                 <button class="btn" onclick="addCustomStage('lb')" title="Add status"><i class="ti ti-settings"></i></button>
+                <button id="lb-batch-send-btn" class="btn primary" style="display:none;background:#7c3aed" onclick="batchSendProfiles()"><i class="ti ti-send"></i> Send Profiles</button>
                 <button class="btn primary" onclick="openLBForm()"><i class="ti ti-plus"></i> Add</button>
               </div>
             </div>
             <div class="table-scroll">
               <table>
                 <thead><tr>
-                  <th>#</th><th>Full name</th><th>Phone</th><th>Passport</th>
-                  <th>Travel status</th><th>Travel date</th><th>To refund</th>
+                  <th style="width:28px"></th><th>#</th><th>Full name</th><th>Phone</th><th>Passport</th>
+                  <th>Stage</th><th>Travel date</th><th>To refund</th>
                   <th>Refunded</th><th>Balance</th><th>Refund status</th><th>Docs</th><th></th>
                 </tr></thead>
-                <tbody id="lb-tbody"><tr><td colspan="12"><div class="empty">Loading...</div></td></tr></tbody>
+                <tbody id="lb-tbody"><tr><td colspan="13"><div class="empty">Loading...</div></td></tr></tbody>
               </table>
             </div>
             <div class="click-hint"><i class="ti ti-hand-click"></i> Click any row to edit that candidate</div>
@@ -3519,23 +3794,6 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           </div>
         </div>
 
-        <!-- "-"- KANBAN BOARD "-"- -->
-        <div id="kanban-section" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-            <div>
-              <div id="kanban-title" style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em">Professional Pipeline Board</div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div class="pill-tabs" id="kanban-source-tabs">
-                <button class="pill-tab active" onclick="setKanbanSource('pro',this)">Professional</button>
-                <button class="pill-tab" onclick="setKanbanSource('lb',this)">General Jobs</button>
-              </div>
-              <button class="btn" onclick="switchTab('pro')"><i class="ti ti-table"></i> Table View</button>
-              <button class="btn primary" id="kanban-add-btn" onclick="openProForm()"><i class="ti ti-plus"></i> Add</button>
-            </div>
-          </div>
-          <div id="kanban-board" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;min-height:300px"></div>
-        </div>
 
         <!-- "-"- CALENDAR "-"- -->
         <div id="calendar-section" style="display:none">
@@ -3570,23 +3828,6 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <div class="panel"><div class="panel-header"><span class="panel-title">Travel register</span><div class="panel-actions"><select class="toolbar-select" id="travel-filter" onchange="renderTravel()"><option value="all">All travel</option><option value="travelled">Travelled</option><option value="pending">Pending travel</option></select></div></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Name</th><th>Workflow</th><th>Company / Country</th><th>Position / Status</th><th>Travel Date</th><th>Airline</th><th>Time</th><th>Notes</th></tr></thead><tbody id="travel-tbody"></tbody></table></div></div>
         </div>
 
-        <div id="commissions-section" style="display:none">
-          <div class="section-page-head"><div><h2>Commissions</h2><p>Commission billed, received, balances, and latest payment updates.</p></div><button class="btn primary" onclick="openRecordPaymentPrompt('commission')"><i class="ti ti-plus"></i> Record commission</button></div>
-          <div class="metrics-strip" id="commission-metrics"></div>
-          <div class="finance-page-grid"><div class="panel"><div class="panel-header"><span class="panel-title">Commission ledger</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Candidate</th><th>Company</th><th>Position</th><th>Billed</th><th>Received</th><th>Balance</th><th>Latest Update</th><th>Action</th></tr></thead><tbody id="commissions-tbody"></tbody></table></div></div><div class="panel transaction-panel"><div class="panel-header"><span class="panel-title">Recent commission transactions</span></div><div id="commission-history"></div></div></div>
-        </div>
-
-        <div id="repayments-section" style="display:none">
-          <div class="section-page-head"><div><h2>Repayments</h2><p>Client repayments/refunds with installment status and outstanding balances.</p></div><button class="btn primary" onclick="openRecordPaymentPrompt('repayment')"><i class="ti ti-plus"></i> Record repayment</button></div>
-          <div class="metrics-strip" id="repayment-metrics"></div>
-          <div class="finance-page-grid"><div class="panel"><div class="panel-header"><span class="panel-title">Repayment tracker</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Candidate</th><th>Passport</th><th>Travel</th><th>To Repay</th><th>Paid</th><th>Balance</th><th>Installments</th><th>Action</th></tr></thead><tbody id="repayments-tbody"></tbody></table></div></div><div class="panel transaction-panel"><div class="panel-header"><span class="panel-title">Recent repayment transactions</span></div><div id="repayment-history"></div></div></div>
-        </div>
-
-        <div id="expenses-section" style="display:none">
-          <div class="section-page-head"><div><h2>Expenses</h2><p>Money spent on clients, documents, transport, processing, and follow-ups.</p></div><button class="btn primary" onclick="openExpensePrompt()"><i class="ti ti-plus"></i> Add expense</button></div>
-          <div class="metrics-strip" id="expense-metrics"></div>
-          <div class="panel"><div class="panel-header"><span class="panel-title">Expense register</span></div><div class="table-scroll"><table class="ref-table"><thead><tr><th>Date</th><th>Client</th><th>Category</th><th>Amount</th><th>Notes</th><th>Action</th></tr></thead><tbody id="expenses-tbody"></tbody></table></div></div>
-        </div>
 
         <div id="team-section" style="display:none">
           <div class="section-page-head"><div><h2>Team</h2><p>Company users, roles, permissions, and account access.</p></div><button class="btn primary" onclick="createStaffAccount()"><i class="ti ti-user-plus"></i> Add user</button></div>
@@ -3610,7 +3851,6 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
         <!-- DV5 New Sections - managed by dreco_v5 IIFE -->
         <div id="pipeline-section" class="dv5-section" style="display:none"></div>
         <div id="candidates-section" class="dv5-section" style="display:none"></div>
-        <div id="tasks-section" class="dv5-section" style="display:none"></div>
         <div id="finance-section" class="dv5-section" style="display:none"></div>
         <div id="documents-section" class="dv5-section" style="display:none"></div>
         <div id="clients-section" class="dv5-section" style="display:none"></div>
@@ -3638,11 +3878,11 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
   <div class="modal quick-modal">
     <div class="modal-header"><h3>Add user</h3><button class="modal-close" onclick="closeModal('quick-user-modal')">x</button></div>
     <div class="modal-body"><div class="form-grid">
-      <div class="field form-full"><label>Display name *</label><input id="quick-user-display" type="text" placeholder="e.g. Mary Wanjiku"></div>
-      <div class="field"><label>Username *</label><input id="quick-user-username" type="text" placeholder="e.g. mary" autocomplete="off"></div>
-      <div class="field"><label>Role</label><select id="quick-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
-      <div class="field form-full"><label>Temporary password *</label><input id="quick-user-password" type="password" placeholder="At least 6 characters"></div>
-    </div><div class="login-error" id="quick-user-error" style="display:none"></div></div>
+      <div class="field form-full"><label for="quick-user-display">Display name *</label><input id="quick-user-display" type="text" placeholder="e.g. Mary Wanjiku"></div>
+      <div class="field"><label for="quick-user-username">Username *</label><input id="quick-user-username" type="text" placeholder="e.g. mary" autocomplete="off"></div>
+      <div class="field"><label for="quick-user-role">Role</label><select id="quick-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+      <div class="field form-full"><label for="quick-user-password">Temporary password *</label><input id="quick-user-password" type="password" placeholder="At least 6 characters" aria-describedby="quick-user-pw-hint"><small id="quick-user-pw-hint" class="sr-only">At least 6 characters required</small></div>
+    </div><div class="login-error" id="quick-user-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-user-modal')">Cancel</button><button class="btn primary" onclick="submitQuickUser()">Add user</button></div>
   </div>
 </div>
@@ -3651,12 +3891,12 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
   <div class="modal quick-modal">
     <div class="modal-header"><h3>Add expense</h3><button class="modal-close" onclick="closeModal('quick-expense-modal')">x</button></div>
     <div class="modal-body"><div class="form-grid">
-      <div class="field"><label>Date</label><input id="quick-expense-date" type="date"></div>
-      <div class="field"><label>Amount (KES) *</label><input id="quick-expense-amount" type="number" min="0" placeholder="e.g. 2500"></div>
-      <div class="field"><label>Category</label><select id="quick-expense-category"><option>Documents</option><option>Transport</option><option>Processing</option><option>Communication</option><option>Other</option></select></div>
-      <div class="field"><label>Client / candidate *</label><input id="quick-expense-client" type="text" placeholder="Name" list="expense-candidate-options"><datalist id="expense-candidate-options"></datalist></div>
-      <div class="field form-full"><label>Notes</label><textarea id="quick-expense-notes" rows="3" placeholder="What was this expense for?"></textarea></div>
-    </div><div class="login-error" id="quick-expense-error" style="display:none"></div></div>
+      <div class="field"><label for="quick-expense-date">Date</label><input id="quick-expense-date" type="date"></div>
+      <div class="field"><label for="quick-expense-amount">Amount (KES) *</label><input id="quick-expense-amount" type="number" min="0" placeholder="e.g. 2500"></div>
+      <div class="field"><label for="quick-expense-category">Category</label><select id="quick-expense-category"><option>Documents</option><option>Transport</option><option>Processing</option><option>Communication</option><option>Other</option></select></div>
+      <div class="field"><label for="quick-expense-client">Client / candidate *</label><input id="quick-expense-client" type="text" placeholder="Name" list="expense-candidate-options"><datalist id="expense-candidate-options"></datalist></div>
+      <div class="field form-full"><label for="quick-expense-notes">Notes</label><textarea id="quick-expense-notes" rows="3" placeholder="What was this expense for?"></textarea></div>
+    </div><div class="login-error" id="quick-expense-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-expense-modal')">Cancel</button><button class="btn primary" onclick="submitQuickExpense()">Save expense</button></div>
   </div>
 </div>
@@ -3665,10 +3905,10 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
   <div class="modal quick-modal">
     <div class="modal-header"><h3 id="quick-event-heading">Record calendar event</h3><button class="modal-close" onclick="closeModal('quick-event-modal')">x</button></div>
     <div class="modal-body"><div class="form-grid">
-      <div class="field"><label>Date *</label><input id="quick-event-date" type="date"></div>
-      <div class="field"><label>Title *</label><input id="quick-event-title" type="text" placeholder="e.g. Embassy appointment"></div>
-      <div class="field form-full"><label>Notes</label><textarea id="quick-event-notes" rows="3" placeholder="Optional details"></textarea></div>
-    </div><div class="login-error" id="quick-event-error" style="display:none"></div></div>
+      <div class="field"><label for="quick-event-date">Date *</label><input id="quick-event-date" type="date"></div>
+      <div class="field"><label for="quick-event-title">Title *</label><input id="quick-event-title" type="text" placeholder="e.g. Embassy appointment"></div>
+      <div class="field form-full"><label for="quick-event-notes">Notes</label><textarea id="quick-event-notes" rows="3" placeholder="Optional details"></textarea></div>
+    </div><div class="login-error" id="quick-event-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" id="quick-event-delete" onclick="deleteCalendarEvent()" style="display:none">Delete</button><button class="btn" onclick="closeModal('quick-event-modal')">Cancel</button><button class="btn primary" onclick="submitCalendarEvent()">Save event</button></div>
   </div>
 </div>
@@ -3676,7 +3916,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 <div class="modal-bg" id="quick-country-modal">
   <div class="modal quick-modal">
     <div class="modal-header"><h3>Add destination country</h3><button class="modal-close" onclick="closeModal('quick-country-modal')">x</button></div>
-    <div class="modal-body"><div class="field"><label>Country name *</label><input id="quick-country-name" type="text" placeholder="e.g. Qatar"></div><div class="login-error" id="quick-country-error" style="display:none"></div></div>
+    <div class="modal-body"><div class="field"><label for="quick-country-name">Country name *</label><input id="quick-country-name" type="text" placeholder="e.g. Qatar"></div><div class="login-error" id="quick-country-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-country-modal')">Cancel</button><button class="btn primary" onclick="submitQuickCountry()">Add country</button></div>
   </div>
 </div>
@@ -3684,10 +3924,97 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 <div class="modal-bg" id="quick-stage-modal">
   <div class="modal quick-modal">
     <div class="modal-header"><h3 id="quick-stage-heading">Add stage</h3><button class="modal-close" onclick="closeModal('quick-stage-modal')">x</button></div>
-    <div class="modal-body"><div class="field"><label>Name *</label><input id="quick-stage-name" type="text" placeholder="e.g. Medical"></div><div class="login-error" id="quick-stage-error" style="display:none"></div></div>
+    <div class="modal-body"><div class="field"><label for="quick-stage-name">Name *</label><input id="quick-stage-name" type="text" placeholder="e.g. Medical"></div><div class="login-error" id="quick-stage-error" role="alert" style="display:none"></div></div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('quick-stage-modal')">Cancel</button><button class="btn primary" onclick="submitQuickStage()">Add</button></div>
   </div>
 </div>
+<!-- ADD PAYMENT MODAL -->
+<div class="modal-bg" id="ap-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3>Add payment</h3><button class="modal-close" onclick="closeModal('ap-modal')">×</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:14px" id="ap-name"></div>
+        <div style="font-size:12px;color:var(--text-2,#71717a);margin-top:2px" id="ap-balance"></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label for="ap-amount">Amount (KES) *</label><input id="ap-amount" type="number" min="1" placeholder="e.g. 15000" autofocus></div>
+        <div class="field"><label for="ap-date">Date</label><input id="ap-date" type="date"></div>
+      </div>
+      <div class="login-error" id="ap-error" role="alert" style="display:none"></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('ap-modal')">Cancel</button><button class="btn primary" onclick="submitAddPayment()">Save payment</button></div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-bg" id="quick-payment-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3>Record payment</h3><button class="modal-close" onclick="closeModal('quick-payment-modal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field">
+          <label for="qp-type">Payment type</label>
+          <select id="qp-type" onchange="refreshPaymentCandidates()">
+            <option value="commission">Commission (Professional)</option>
+            <option value="repayment">Repayment (General Jobs)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="qp-date">Payment date</label>
+          <input id="qp-date" type="date">
+        </div>
+        <div class="field form-full">
+          <label for="qp-candidate">Candidate</label>
+          <select id="qp-candidate" onchange="refreshPaymentInfo()"><option value="">— select —</option></select>
+        </div>
+        <div class="field form-full" id="qp-info" style="display:none">
+          <div id="qp-info-content" style="background:var(--bg-2,#f4f4f5);border-radius:6px;padding:10px 12px;font-size:13px;line-height:1.7"></div>
+        </div>
+        <div class="field form-full">
+          <label for="qp-amount">Amount</label>
+          <input id="qp-amount" type="number" min="0" placeholder="e.g. 5000">
+        </div>
+      </div>
+      <div class="login-error" id="qp-error" role="alert" style="display:none"></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('quick-payment-modal')">Cancel</button><button class="btn primary" onclick="submitRecordPayment()">Save payment</button></div>
+  </div>
+</div>
+
+<!-- TRAVEL MODAL -->
+<div class="modal-bg" id="quick-travel-modal">
+  <div class="modal quick-modal">
+    <div class="modal-header"><h3>Record travel details</h3><button class="modal-close" onclick="closeModal('quick-travel-modal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field form-full">
+          <label for="qt-candidate">Candidate</label>
+          <select id="qt-candidate"><option value="">— select —</option></select>
+        </div>
+        <div class="field">
+          <label for="qt-date">Travel date</label>
+          <input id="qt-date" type="date">
+        </div>
+        <div class="field">
+          <label for="qt-airline">Airline</label>
+          <input id="qt-airline" type="text" placeholder="e.g. Kenya Airways">
+        </div>
+        <div class="field">
+          <label for="qt-time">Flight time</label>
+          <input id="qt-time" type="text" placeholder="e.g. 14:30">
+        </div>
+        <div class="field form-full">
+          <label for="qt-notes">Notes</label>
+          <textarea id="qt-notes" rows="2" placeholder="Optional notes"></textarea>
+        </div>
+      </div>
+      <div class="login-error" id="qt-error" role="alert" style="display:none"></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('quick-travel-modal')">Cancel</button><button class="btn primary" onclick="submitTravelEvent()">Save</button></div>
+  </div>
+</div>
+
 <!-- PRO MODAL -->
 <div class="modal-bg" id="pro-modal">
   <div class="modal">
@@ -3705,29 +4032,33 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
     <div class="modal-body">
       <div id="pro-tab-details">
         <div class="form-grid">
-          <div class="field form-full"><label>Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
-          <div class="field"><label>Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
-          <div class="field"><label>Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
-          <div class="field"><label>Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
-          <div class="field"><label>Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
-          <div class="field"><label>Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
-          <div class="field"><label>Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
-          <div class="field"><label>Date submitted</label><input type="date" id="pf-submitted"></div>
+          <div class="field form-full"><label for="pf-name">Full name *</label><input type="text" id="pf-name" placeholder="e.g. John Kamau Mwangi"></div>
+          <div class="field"><label for="pf-pp">Passport no.</label><input type="text" id="pf-pp" placeholder="e.g. BK1234567"></div>
+          <div class="field"><label for="pf-phone">Phone number</label><input type="text" id="pf-phone" placeholder="e.g. 0712345678"></div>
+          <div class="field"><label for="pf-position">Position</label><input type="text" id="pf-position" placeholder="e.g. Security Guard"></div>
+          <div class="field"><label for="pf-company">Company</label><input type="text" id="pf-company" placeholder="e.g. HPBS"></div>
+          <div class="field"><label for="pf-country">Destination country</label><input type="text" id="pf-country" placeholder="e.g. UAE"></div>
+          <div class="field"><label for="pf-stage">Current stage *</label><select id="pf-stage" onchange="handleStageSelectChange('pro',this)"></select></div>
+          <div class="field"><label for="pf-submitted">Date submitted</label><input type="date" id="pf-submitted"></div>
         </div>
       </div>
       <div id="pro-tab-pipeline" style="display:none">
         <div class="form-grid">
-          <div class="field"><label>Interview / selection date</label><input type="date" id="pf-interview"></div>
-          <div class="field"><label>Offer letter date</label><input type="date" id="pf-ol"></div>
-          <div class="field"><label>MOL date</label><input type="date" id="pf-mol"></div>
-          <div class="field"><label>Visa date</label><input type="date" id="pf-visa"></div>
-          <div class="field form-full"><label>Travel date</label><input type="date" id="pf-travel"></div>
+          <div class="field"><label for="pf-interview">Interview / selection date</label><input type="date" id="pf-interview"></div>
+          <div class="field"><label for="pf-ol">Offer letter date</label><input type="date" id="pf-ol"></div>
+          <div class="field"><label for="pf-medical">Medical &amp; Attestation date</label><input type="date" id="pf-medical"></div>
+          <div class="field"><label for="pf-mol">MOL date</label><input type="date" id="pf-mol"></div>
+          <div class="field"><label for="pf-visa">Visa date</label><input type="date" id="pf-visa"></div>
+          <div class="field form-full"><label for="pf-travel">Travel date</label><input type="date" id="pf-travel"></div>
+          <div class="field form-full"><label for="pf-followup">Follow-up date</label><input type="date" id="pf-followup"></div>
         </div>
       </div>
       <div id="pro-tab-commission" style="display:none">
         <div class="form-grid">
-          <div class="field"><label>Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
-          <div class="field"><label>Amount paid (KES)</label><input type="number" id="pf-paid" placeholder="e.g. 120000"></div>
+          <div class="field form-full"><label for="pf-comm">Total Commission (KES)</label><input type="number" id="pf-comm" placeholder="e.g. 130000"></div>
+          <div class="field"><label for="pf-paid1">Paid at Offer Letter (KES)</label><input type="number" id="pf-paid1" placeholder="e.g. 65000"></div>
+          <div class="field"><label for="pf-paid2">Paid at Visa (KES)</label><input type="number" id="pf-paid2" placeholder="e.g. 65000"></div>
+          <input type="hidden" id="pf-paid">
         </div>
       </div>
       <div id="pro-tab-timeline" style="display:none">
@@ -3757,28 +4088,44 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
     <div class="modal-body">
       <div id="lb-tab-details">
         <div class="form-grid">
-          <div class="field form-full"><label>Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
-          <div class="field"><label>Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
-          <div class="field"><label>Passport status *</label>
+          <div class="field form-full"><label for="lf-name">Full name *</label><input type="text" id="lf-name" placeholder="e.g. Mary Wanjiku Kamau"></div>
+          <div class="field"><label for="lf-phone">Phone number</label><input type="text" id="lf-phone" placeholder="e.g. 0712345678"></div>
+          <div class="field"><label for="lf-stage">Stage *</label><select id="lf-stage" onchange="handleStageSelectChange('lb',this)"></select></div>
+          <div class="field"><label for="lf-pp">Passport status</label>
             <select id="lf-pp">
               <option value="APPLIED">Applied</option>
-              <option value="HAD PP">Had PP</option>
+              <option value="HAD PP">Had PP (own passport)</option>
               <option value="NOT APPLIED">Not applied</option>
               <option value="PUSHED">Pushed</option>
             </select>
           </div>
-          <div class="field"><label>Travel status</label><select id="lf-travel" onchange="handleStageSelectChange('lb',this)"></select></div>
-          <div class="field"><label>Travel date</label><input type="date" id="lf-tdate"></div>
-          <div class="field"><label>Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+          <div class="field" style="display:flex;align-items:center;gap:8px;padding-top:20px">
+            <input type="checkbox" id="lf-own-passport" onchange="toggleLBOwnPassport(this.checked)" style="width:16px;height:16px;cursor:pointer">
+            <label for="lf-own-passport" style="cursor:pointer;margin:0">Own passport (no refund)</label>
+          </div>
+          <div class="field"><label for="lf-submitted-date">Docs submitted date</label><input type="date" id="lf-submitted-date"></div>
+          <div class="field"><label for="lf-selected-date">Selected date</label><input type="date" id="lf-selected-date"></div>
+          <div class="field"><label for="lf-passport-date">Passport applied date</label><input type="date" id="lf-passport-date"></div>
+          <div class="field"><label for="lf-visa-date">Visa date</label><input type="date" id="lf-visa-date"></div>
+          <div class="field"><label for="lf-tdate">Travel date</label><input type="date" id="lf-tdate"></div>
+          <div class="field"><label for="lf-notes">Notes</label><input type="text" id="lf-notes" placeholder="Write RETURNED if applicable"></div>
+          <div class="field"><label for="lf-followup">Follow-up date</label><input type="date" id="lf-followup"></div>
+          <!-- keep hidden lf-travel for backward-compat with rebuildStageSelects -->
+          <select id="lf-travel" style="display:none" onchange="handleStageSelectChange('lb',this)"></select>
         </div>
       </div>
       <div id="lb-tab-refunds" style="display:none">
-        <div class="form-grid">
-          <div class="field form-full"><label>Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
-          <div class="field"><label>1st payment date</label><input type="date" id="lf-r1date"></div>
-          <div class="field"><label>1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
-          <div class="field"><label>2nd payment date</label><input type="date" id="lf-r2date"></div>
-          <div class="field"><label>2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+        <div id="lb-refund-section">
+          <div class="form-grid">
+            <div class="field form-full"><label for="lf-torefund">Amount to refund (USD)</label><input type="number" id="lf-torefund" placeholder="e.g. 200"></div>
+            <div class="field"><label for="lf-r1date">1st payment date</label><input type="date" id="lf-r1date"></div>
+            <div class="field"><label for="lf-r1amt">1st amount (USD)</label><input type="number" id="lf-r1amt" placeholder="e.g. 100"></div>
+            <div class="field"><label for="lf-r2date">2nd payment date</label><input type="date" id="lf-r2date"></div>
+            <div class="field"><label for="lf-r2amt">2nd amount (USD)</label><input type="number" id="lf-r2amt" placeholder="e.g. 100"></div>
+          </div>
+        </div>
+        <div id="lb-no-refund-notice" style="display:none;padding:16px;background:#f0fdf4;border-radius:8px;color:#16a34a;font-size:13px;font-weight:600">
+          Own passport — no refund required for this candidate.
         </div>
       </div>
       <div id="lb-tab-timeline" style="display:none">
@@ -3806,7 +4153,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
       </p>
       <div id="docs-checklist" class="doc-checklist"></div>
       <div class="field">
-        <label>Documents folder link</label>
+        <label for="docs-link-input">Documents folder link</label>
         <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link..." oninput="onDocsLinkInput()">
       </div>
     </div>
@@ -3835,7 +4182,7 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <strong>Workspace</strong>
           <span>Set the company name shown across this Dreco workspace.</span>
           <div class="form-grid" style="margin-top:12px">
-            <div class="field"><label>Company name</label><input type="text" id="settings-company-name"></div>
+            <div class="field"><label for="settings-company-name">Company name</label><input type="text" id="settings-company-name"></div>
           </div>
           <button class="btn primary" style="margin-top:10px" onclick="saveWorkspaceSettings()"><i class="ti ti-device-floppy"></i> Save workspace</button>
         </div>
@@ -3847,9 +4194,9 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <span>Manage the destination country tabs used in General Jobs for this company.</span>
           <div id="settings-countries-list" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"></div>
           <div class="form-grid" style="margin-top:12px">
-            <div class="field"><label>Add country</label><input type="text" id="settings-new-country" placeholder="e.g. Qatar"></div>
+            <div class="field"><label for="settings-new-country">Add country</label><input type="text" id="settings-new-country" placeholder="e.g. Qatar"></div>
           </div>
-          <div class="login-error" id="settings-country-error" style="display:none;text-align:left"></div>
+          <div class="login-error" id="settings-country-error" role="alert" style="display:none;text-align:left"></div>
           <button class="btn primary" style="margin-top:10px" onclick="addSettingsCountry()"><i class="ti ti-plus"></i> Add country</button>
         </div>
       </div>
@@ -3860,12 +4207,12 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
           <span>Admins can add users for this company workspace. New users sign in with the username and temporary password set here.</span>
           <div id="settings-users-list" style="display:grid;gap:8px;margin-top:12px"></div>
           <div class="form-grid" style="margin-top:12px">
-            <div class="field"><label>Display name</label><input type="text" id="new-user-display" placeholder="e.g. Jane Doe"></div>
-            <div class="field"><label>Username</label><input type="text" id="new-user-username" placeholder="e.g. jane" autocomplete="off"></div>
-            <div class="field"><label>Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
-            <div class="field"><label>Temporary password</label><input type="password" id="new-user-password" placeholder="At least 6 characters" autocomplete="new-password"></div>
+            <div class="field"><label for="new-user-display">Display name</label><input type="text" id="new-user-display" placeholder="e.g. Jane Doe"></div>
+            <div class="field"><label for="new-user-username">Username</label><input type="text" id="new-user-username" placeholder="e.g. jane" autocomplete="off"></div>
+            <div class="field"><label for="new-user-role">Role</label><select id="new-user-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+            <div class="field"><label for="new-user-password">Temporary password</label><input type="password" id="new-user-password" placeholder="At least 6 characters" autocomplete="new-password" aria-describedby="new-user-pw-hint"><small id="new-user-pw-hint" class="sr-only">At least 6 characters required</small></div>
           </div>
-          <div class="login-error" id="new-user-error" style="display:none;text-align:left"></div>
+          <div class="login-error" id="new-user-error" role="alert" style="display:none;text-align:left"></div>
           <button class="btn primary" style="margin-top:10px" onclick="createCompanyUser()"><i class="ti ti-user-plus"></i> Add user</button>
         </div>
       </div>
@@ -3930,53 +4277,49 @@ html,body{font-size:12.5px!important}.app-layout{max-width:100%!important}.sideb
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bottom-nav" id="bottom-nav" aria-label="Mobile navigation">
-  <button class="bottom-nav-item active" id="bnav-dash" onclick="switchTab('dash')" aria-label="Dashboard">
+  <button class="bottom-nav-item active" id="bnav-dash" onclick="switchTab('dash')" aria-label="Home">
     <i class="ti ti-layout-dashboard"></i><span>Home</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-pro" onclick="switchTab('pro')" aria-label="Professional Jobs">
-    <i class="ti ti-users"></i><span>Pro Jobs</span>
+  <button class="bottom-nav-item" id="bnav-pipeline" onclick="switchTab('pipeline')" aria-label="Pipeline">
+    <i class="ti ti-layout-columns"></i><span>Pipeline</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-lb" onclick="switchTab('lb')" aria-label="General Jobs">
-    <i class="ti ti-briefcase"></i><span>General</span>
+  <button class="bottom-nav-item" id="bnav-candidates" onclick="switchTab('candidates')" aria-label="Candidates">
+    <i class="ti ti-users"></i><span>Candidates</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-kanban" onclick="switchTab('kanban')" aria-label="Pipeline Board">
-    <i class="ti ti-layout-columns"></i><span>Board</span>
+  <button class="bottom-nav-item" id="bnav-finance" onclick="switchTab('finance')" aria-label="Finance">
+    <i class="ti ti-coin"></i><span>Finance</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-travel" onclick="switchTab('travel')" aria-label="Travel">
-    <i class="ti ti-plane-departure"></i><span>Travel</span>
-  </button>
-  <button class="bottom-nav-item" id="bnav-calendar" onclick="switchTab('calendar')" aria-label="Calendar">
-    <i class="ti ti-calendar"></i><span>Calendar</span>
-  </button>
-  <button class="bottom-nav-item" id="bnav-commissions" onclick="switchTab('commissions')" aria-label="Commissions">
-    <i class="ti ti-coin"></i><span>Comms</span>
-  </button>
-  <button class="bottom-nav-item" id="bnav-repayments" onclick="switchTab('repayments')" aria-label="Repayments">
-    <i class="ti ti-receipt-refund"></i><span>Repay</span>
-  </button>
-  <button class="bottom-nav-item" id="bnav-expenses" onclick="switchTab('expenses')" aria-label="Expenses">
-    <i class="ti ti-wallet"></i><span>Expenses</span>
+  <button class="bottom-nav-item" id="bnav-documents" onclick="switchTab('documents')" aria-label="Documents">
+    <i class="ti ti-folder"></i><span>Docs</span>
   </button>
   <button class="bottom-nav-item" id="bnav-reports" onclick="switchTab('reports')" aria-label="Reports">
     <i class="ti ti-chart-bar"></i><span>Reports</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-team" onclick="switchTab('team')" aria-label="Team">
-    <i class="ti ti-users-group"></i><span>Team</span>
+  <button class="bottom-nav-item" id="bnav-clients" onclick="switchTab('clients')" aria-label="Clients">
+    <i class="ti ti-building"></i><span>Clients</span>
   </button>
   <button class="bottom-nav-item" id="bnav-settings" onclick="switchTab('settings')" aria-label="Settings">
     <i class="ti ti-settings"></i><span>Settings</span>
   </button>
-  <button class="bottom-nav-item" id="bnav-help" onclick="switchTab('help')" aria-label="Help and Support">
-    <i class="ti ti-help-circle"></i><span>Help</span>
-  </button>
 </nav>
 
+<!-- MOBILE SIDEBAR BACKDROP & SWIPE EDGE -->
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+<div class="swipe-edge-hint" id="swipe-edge-hint"></div>
+
 <!-- TOAST -->
-<div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toast-msg">Saved</span></div>
+<div class="toast" id="toast" role="alert" aria-live="polite"><i class="ti ti-circle-check"></i><span id="toast-msg">Saved</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.warn('SW registration failed:', err));
+    });
+  }
+</script>
 </body>
 </html>
 
