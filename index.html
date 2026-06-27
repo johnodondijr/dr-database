@@ -3657,6 +3657,11 @@ tr:last-child td{border-bottom:none!important}
   .sidebar-workspace-badge{display:none!important}
   .sidebar-search-bar{display:none!important}
 }
+/* User card dots indicator */
+#app .sidebar-user-card .suc-dots,
+#app .dv5-suc .suc-dots{opacity:.45;transition:opacity .12s}
+#app .sidebar-user-card:hover .suc-dots,
+#app .dv5-suc:hover .suc-dots{opacity:1}
 </style>
 </head>
 <body>
@@ -3870,6 +3875,7 @@ tr:last-child td{border-bottom:none!important}
           <div class="suc-name" id="suc-name">-</div>
           <div class="suc-org">Workspace</div>
         </div>
+        <i class="ti ti-dots-vertical suc-dots" style="color:#9CA3AF;font-size:16px;margin-left:auto;flex-shrink:0"></i>
       </button>
       <div class="sidebar-divider"></div>
 

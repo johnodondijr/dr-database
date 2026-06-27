@@ -4111,6 +4111,7 @@ function setUserDisplay(display, role) {
           <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
           <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
         </div>
+        <i class="ti ti-dots-vertical suc-dots" style="color:#9CA3AF;font-size:16px;margin-left:auto;flex-shrink:0"></i>
       </button>`;
     sidebarBuilt = true;
     bindAccountMenuTriggers(side);
