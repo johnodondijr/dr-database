@@ -4696,73 +4696,7 @@ tr:last-child td{border-bottom:none!important}
 <!-- TOAST -->
 <div class="toast" id="toast" role="alert" aria-live="polite"><i class="ti ti-circle-check"></i><span id="toast-msg">Saved</span></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="data.js"></script>
-<script>
-  (function () {
-    if (window.__drecoAccountMenuCaptureBound) return;
-    window.__drecoAccountMenuCaptureBound = true;
-
-    function setMenuVisible(menu, visible) {
-      menu.classList.toggle('open', visible);
-      menu.style.setProperty('display', visible ? 'block' : 'none', 'important');
-      menu.style.setProperty('visibility', visible ? 'visible' : 'hidden', 'important');
-      menu.style.setProperty('opacity', visible ? '1' : '0', 'important');
-      menu.style.setProperty('pointer-events', visible ? 'auto' : 'none', 'important');
-    }
-
-    function positionAccountMenu(menu, trigger) {
-      const rect = trigger.getBoundingClientRect();
-      const width = Math.min(292, window.innerWidth - 20);
-      const isSidebar = trigger.classList.contains('sidebar-account-trigger');
-      const left = isSidebar
-        ? Math.max(10, Math.min(rect.left, window.innerWidth - width - 10))
-        : Math.max(10, Math.min(rect.right - width, window.innerWidth - width - 10));
-
-      menu.style.setProperty('position', 'fixed', 'important');
-      menu.style.setProperty('left', left + 'px', 'important');
-      menu.style.setProperty('right', 'auto', 'important');
-      menu.style.setProperty('width', width + 'px', 'important');
-      menu.style.setProperty('z-index', '9000', 'important');
-
-      if (isSidebar) {
-        menu.style.setProperty('top', 'auto', 'important');
-        menu.style.setProperty('bottom', Math.max(10, window.innerHeight - rect.top + 8) + 'px', 'important');
-        menu.style.setProperty('max-height', Math.max(180, rect.top - 24) + 'px', 'important');
-      } else {
-        menu.style.setProperty('top', Math.min(rect.bottom + 10, window.innerHeight - 260) + 'px', 'important');
-        menu.style.setProperty('bottom', 'auto', 'important');
-        menu.style.removeProperty('max-height');
-      }
-    }
-
-    window.toggleProfileDropdown = window.toggleProfileDropdown || function (event) {
-      if (event && event.stopPropagation) event.stopPropagation();
-      const menu = document.getElementById('profile-dropdown');
-      if (!menu) return;
-      const trigger = event?.target?.closest?.('.sidebar-account-trigger,.topbar-profile-btn')
-        || event?.currentTarget?.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
-      const open = !menu.classList.contains('open');
-      if (open && trigger) positionAccountMenu(menu, trigger);
-      setMenuVisible(menu, open);
-    };
-
-    document.addEventListener('click', function (event) {
-      const trigger = event.target.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
-      const menu = document.getElementById('profile-dropdown');
-      if (trigger && menu) {
-        event.preventDefault();
-        event.stopPropagation();
-        const open = !menu.classList.contains('open');
-        if (open) positionAccountMenu(menu, trigger);
-        setMenuVisible(menu, open);
-        return;
-      }
-      if (menu && !event.target.closest?.('#profile-dropdown')) setMenuVisible(menu, false);
-    }, true);
-  })();
-</script>
-<script src="app.js?v=20260627-account-menu"></script>
+<script type="module" src="/src/main.ts"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
