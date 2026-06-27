@@ -3289,6 +3289,87 @@ a, button, [onclick], .nav-item, .dv5-btn, .dv5-link, .dv5-action-btn, .dv5-tabl
 input, textarea, select, [contenteditable] {
   cursor: text;
 }
+/* Final topbar and account card polish */
+#app .topbar-search{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  min-width:260px!important;
+  height:38px!important;
+  padding:0 10px 0 38px!important;
+  border:1px solid #e6eaf2!important;
+  border-radius:12px!important;
+  background:#f8fafc!important;
+  color:#7b8496!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
+}
+#app .topbar-search:hover{background:#fff!important;border-color:#d8d3ff!important}
+#app .topbar-search i{
+  position:absolute!important;
+  left:13px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  color:#8b95a7!important;
+  font-size:16px!important;
+  pointer-events:none!important;
+}
+#app .topbar-search::after{content:none!important}
+#app .topbar-search-fake{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  width:100%!important;
+  min-width:0!important;
+  color:#8b95a7!important;
+  font-size:12px!important;
+  font-weight:600!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#app .topbar-search-fake kbd{
+  flex:0 0 auto!important;
+  margin-left:auto!important;
+  padding:2px 7px!important;
+  border:1px solid #dce3ef!important;
+  border-radius:6px!important;
+  background:#eef2f7!important;
+  color:#7b8496!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+}
+#app .sidebar-user-card.sidebar-account-trigger{
+  position:relative!important;
+  width:calc(100% - 20px)!important;
+  margin:0 10px 12px!important;
+  min-height:58px!important;
+  padding:10px 34px 10px 10px!important;
+  border-radius:14px!important;
+  border:1px solid #e3e7f0!important;
+  background:#fff!important;
+  box-shadow:0 8px 24px rgba(15,23,42,.04)!important;
+}
+#app .sidebar-user-card.sidebar-account-trigger:hover{
+  border-color:#d8d3ff!important;
+  box-shadow:0 12px 28px rgba(83,71,206,.08)!important;
+}
+#app .sidebar-user-card.sidebar-account-trigger::after{
+  content:'\ec42'!important;
+  font-family:'tabler-icons'!important;
+  position:absolute!important;
+  right:10px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  color:#9aa4b7!important;
+  font-size:18px!important;
+  line-height:1!important;
+}
+#app .sidebar-user-card .suc-info{flex:1 1 auto!important;min-width:0!important}
+#app .sidebar-user-card .suc-name{font-size:13px!important;line-height:1.25!important}
+#app .sidebar-user-card .suc-org{font-size:11px!important;line-height:1.25!important;max-width:100%!important}
 </style>
 </head>
 <body>
@@ -3596,13 +3677,10 @@ input, textarea, select, [contenteditable] {
             <!-- Menu items -->
             <div class="dv5-pd-items">
               <button class="dv5-pd-item" onclick="openProfileEdit()">
-                <i class="ti ti-user-circle"></i>Account
+                <i class="ti ti-user-circle"></i>Edit Profile
               </button>
               <button class="dv5-pd-item" onclick="openChangePassword()">
                 <i class="ti ti-lock"></i>Change Password
-              </button>
-              <button class="dv5-pd-item" onclick="switchTab('settings');document.getElementById('profile-dropdown').classList.remove('open')">
-                <i class="ti ti-settings"></i>Settings
               </button>
               <div class="dv5-pd-sep"></div>
               <button class="dv5-pd-item danger" onclick="doLogout()">
