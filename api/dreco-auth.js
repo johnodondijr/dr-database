@@ -1,6 +1,15 @@
 const AUTH_EMAIL_DOMAIN = 'dreco.local';
-const DEFAULT_COMPANY_ID = 'destiny-recruitment-consults';
-const DEFAULT_COMPANY_NAME = 'Destiny Recruit Consults';
+
+function getDefaultCompany() {
+  return {
+    id: process.env.DRECO_DEFAULT_COMPANY_ID || 'dreco-workspace',
+    name: process.env.DRECO_DEFAULT_COMPANY_NAME || 'Dreco Workspace',
+    generalJobsCountries: String(process.env.DRECO_GENERAL_JOBS_COUNTRIES || 'General')
+      .split(',')
+      .map(country => country.trim())
+      .filter(Boolean),
+  };
+}
 
 function slugify(value) {
   return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 64);
@@ -54,6 +63,7 @@ async function getCallerUser(req) {
 
 function accountFromUser(user) {
   const meta = user.app_metadata || {};
+  const defaults = getDefaultCompany();
   return {
     authUserId: user.id,
     role: meta.role === 'admin' ? 'admin' : 'staff',
@@ -62,7 +72,7 @@ function accountFromUser(user) {
     companyName: meta.company_name,
     generalJobsCountries: Array.isArray(meta.general_jobs_countries) && meta.general_jobs_countries.length
       ? meta.general_jobs_countries
-      : ['Lebanon', 'Oman', 'Saudi Arabia'],
+      : defaults.generalJobsCountries,
   };
 }
 
@@ -91,22 +101,25 @@ async function createAuthUser({ username, password, display, role, companyId, co
 }
 
 module.exports = async function handler(req, res) {
-  const allowedOrigin = process.env.ALLOWED_ORIGIN || '';
-  const requestOrigin = req.headers.origin || '';
-  if (allowedOrigin && requestOrigin === allowedOrigin) {
-    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  } else if (!allowedOrigin) {
-    // No restriction configured — allow same-origin requests only (no ACAO header)
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'content-type, authorization');
+  res.setHeader('access-control-allow-methods', 'POST, OPTIONS');
+  res.setHeader('access-control-allow-headers', 'content-type, authorization');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const action = body.action;
+
+    if (action === 'recovery_request') {
+      const recoveryCode = process.env.DRECO_RECOVERY_CODE;
+      if (!recoveryCode) throw new Error('Recovery is not configured.');
+      if (String(body.code || '').trim() !== recoveryCode) throw new Error('Incorrect recovery code.');
+      return res.status(200).json({
+        ok: true,
+        message: 'For security, staff passwords are not displayed in the browser. Ask an administrator to reset the account from the profile/settings workflow.',
+      });
+    }
+
     const username = cleanUsername(body.username);
     const password = String(body.password || '');
     const display = String(body.display || '').trim();
@@ -119,7 +132,8 @@ module.exports = async function handler(req, res) {
       let companyName = String(body.companyName || '').trim();
       if (!companyName) throw new Error('Company name is required.');
       const companyId = slugify(companyName);
-      if (companyId === DEFAULT_COMPANY_ID) companyName = DEFAULT_COMPANY_NAME;
+      const defaults = getDefaultCompany();
+      if (companyId === defaults.id) companyName = defaults.name;
       const account = await createAuthUser({
         username,
         password,
@@ -127,7 +141,7 @@ module.exports = async function handler(req, res) {
         role: 'admin',
         companyId,
         companyName,
-        generalJobsCountries: ['Lebanon', 'Oman', 'Saudi Arabia'],
+        generalJobsCountries: defaults.generalJobsCountries,
       });
       return res.status(200).json({ account });
     }
@@ -144,7 +158,7 @@ module.exports = async function handler(req, res) {
         role,
         companyId: meta.company_id,
         companyName: meta.company_name,
-        generalJobsCountries: Array.isArray(meta.general_jobs_countries) ? meta.general_jobs_countries : ['Lebanon', 'Oman', 'Saudi Arabia'],
+        generalJobsCountries: Array.isArray(meta.general_jobs_countries) ? meta.general_jobs_countries : getDefaultCompany().generalJobsCountries,
       });
       return res.status(200).json({ account });
     }

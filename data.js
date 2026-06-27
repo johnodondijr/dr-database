@@ -1,4 +1,4 @@
-// Seed data - loaded once if localStorage is empty
+// Seed data — loaded once if localStorage is empty
 const PRO_SEED = [
   {id:1,name:'RASHID ROCHA ALI',pp:'AK0887406',phone:'',position:'STEEL FIXER',company:'NAYA ISHA',country:'',stage:'PENDING OFFER LETTER',submitted:46085,interview:'CV SELECTION',ol:'',mol:'',visa:'',travel:'',commission:'',paid:''},
   {id:2,name:'EDWIN KIPCHUBA LIMO',pp:'BK1190770',phone:'',position:'CONSTRUCTION HELPER',company:'NAYA ISHA',country:'',stage:'PENDING OFFER LETTER',submitted:46085,interview:'CV SELECTION',ol:'',mol:'',visa:'',travel:'',commission:'',paid:''},
@@ -139,6 +139,3 @@ const LB_SEED = [
   {id:97,name:'MARY NJAMBI KARIUKI',phone:'',ppStatus:'HAD PP',travelStatus:'TRAVELLED',travelDate:'',toRefund:0,r1Date:'',r1Amt:0,r2Date:'',r2Amt:0,notes:''},
   {id:98,name:'DORINE ABONGO OMONDI',phone:'',ppStatus:'HAD PP',travelStatus:'TRAVELLED',travelDate:'',toRefund:0,r1Date:'',r1Amt:0,r2Date:'',r2Amt:0,notes:''}
 ];
-
-
-

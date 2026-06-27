@@ -1,51 +1,53 @@
-# DR Database — Supabase Setup Guide
+# Dreco Supabase + Vercel Setup Guide
 
-## What Supabase does
-Supabase is a free cloud database. Once connected, ALL staff will see the SAME data in real time — add a candidate on your phone, Fred sees it on his laptop immediately.
+## What Supabase Does
 
----
+Supabase stores Dreco data in the cloud so every authorized user in the same company workspace sees the same candidates, payments, timelines, documents, and settings.
 
-## Step 1 — Create your Supabase project
+## Step 1 - Create Your Supabase Project
 
-1. Go to **https://supabase.com** and click **Start your project**
-2. Sign up with your GitHub account (the one you already created)
-3. Click **New project**
-4. Fill in:
-   - **Name**: `dr-database`
-   - **Database password**: make a strong password and save it somewhere safe
-   - **Region**: choose **East Africa (Cape Town)** or nearest
-5. Click **Create new project** — wait about 2 minutes
+1. Go to `https://supabase.com` and create a new project.
+2. Save the database password somewhere secure.
+3. Choose the nearest region for your team.
+4. Wait for the project to finish provisioning.
 
----
+## Step 2 - Add Vercel Environment Variables
 
-## Step 2 — Get your API keys
+Do not paste Supabase keys into `app.js`, `index.html`, or `data.js`.
 
-1. In your Supabase dashboard, click **Settings** (gear icon, left sidebar)
-2. Click **API**
-3. Copy two things:
-   - **Project URL** — looks like `https://abcxyz.supabase.co`
-   - **anon public key** — long string starting with `eyJ...`
-4. Open `app.js` and paste them at the top:
-   ```
-   const SUPABASE_URL      = 'https://abcxyz.supabase.co';   ← your URL
-   const SUPABASE_ANON_KEY = 'eyJ...';                        ← your anon key
-   ```
+In Vercel, open the Dreco project, then go to **Settings -> Environment Variables** and add:
 
----
+```text
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-public-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-## Step 3 — Create the database tables
+DRECO_DEFAULT_COMPANY_ID=destiny-recruitment-consults
+DRECO_DEFAULT_COMPANY_NAME=Destiny Recruit Consults
+DRECO_DEFAULT_ADMIN_USERNAME=johnfred
+DRECO_GENERAL_JOBS_COUNTRIES=Lebanon,Oman,Saudi Arabia
+DRECO_RECOVERY_CODE=choose-a-private-recovery-code
+DRECO_RETIRED_USERNAMES=fred,robert,doreen,maxwell,consolata
+DRECO_BLOCKED_ADMIN_ALIASES=john_fred,john-fred,john.fred
+```
 
-1. In Supabase, click **SQL Editor** (left sidebar)
-2. Click **New query**
-3. Paste the SQL below and click **Run**:
+For another recruitment company, change the `DRECO_*` values to that company's workspace name, first admin username, and destination countries.
+
+Security notes:
+
+- `SUPABASE_ANON_KEY` is browser-safe, but Dreco now serves it through `/api/dreco-config` instead of hardcoding it.
+- `SUPABASE_SERVICE_ROLE_KEY` must stay private in Vercel only.
+- `DRECO_RECOVERY_CODE` must stay private in Vercel only.
+
+After adding or changing env vars, redeploy the Vercel project.
+
+## Step 3 - Create the Database Tables
+
+In Supabase, open **SQL Editor**, create a new query, paste this SQL, and run it:
 
 ```sql
--- Professional candidates table
--- NOTE: date columns are TEXT, not DATE, because some entries contain
--- text labels like "CV SELECTION" or "INTERVIEW" instead of actual dates.
 CREATE TABLE pro_candidates (
   id          BIGSERIAL PRIMARY KEY,
-  company_id  TEXT NOT NULL,
   name        TEXT NOT NULL,
   pp          TEXT,
   phone       TEXT,
@@ -61,51 +63,43 @@ CREATE TABLE pro_candidates (
   travel      TEXT,
   commission  NUMERIC,
   paid        NUMERIC,
+  company_id  TEXT,
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
--- LB candidates table
 CREATE TABLE lb_candidates (
-  id            BIGSERIAL PRIMARY KEY,
-  company_id    TEXT NOT NULL,
-  name          TEXT NOT NULL,
-  phone         TEXT,
-  "ppStatus"    TEXT DEFAULT 'APPLIED',
+  id             BIGSERIAL PRIMARY KEY,
+  name           TEXT NOT NULL,
+  phone          TEXT,
+  "ppStatus"     TEXT DEFAULT 'APPLIED',
   "travelStatus" TEXT DEFAULT 'NOT YET',
-  "travelDate"  TEXT,
-  "toRefund"    NUMERIC DEFAULT 0,
-  "r1Date"      TEXT,
-  "r1Amt"       NUMERIC DEFAULT 0,
-  "r2Date"      TEXT,
-  "r2Amt"       NUMERIC DEFAULT 0,
-  notes         TEXT,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
+  "travelDate"   TEXT,
+  "toRefund"     NUMERIC DEFAULT 0,
+  "r1Date"       TEXT,
+  "r1Amt"        NUMERIC DEFAULT 0,
+  "r2Date"       TEXT,
+  "r2Amt"        NUMERIC DEFAULT 0,
+  notes          TEXT,
+  company_id     TEXT,
+  country        TEXT DEFAULT 'General',
+  created_at     TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Documents storage (Google Drive links)
--- key format: "<company_id>:<doc_key>"
 CREATE TABLE documents (
   key   TEXT PRIMARY KEY,
   data  JSONB
 );
 
--- Activity timelines
--- key format: "<company_id>:<timeline_key>"
 CREATE TABLE timelines (
-  key     TEXT PRIMARY KEY,
-  entries JSONB
+  key      TEXT PRIMARY KEY,
+  entries  JSONB
 );
 
--- App settings (custom stages etc.)
--- key format: "<company_id>:<setting_key>"
 CREATE TABLE app_settings (
-  key   TEXT PRIMARY KEY,
-  value JSONB
+  key    TEXT PRIMARY KEY,
+  value  JSONB
 );
 
--- RLS is enabled; the app enforces company_id isolation at the query level.
--- JWT-based RLS is not used because the app authenticates with its own system
--- and talks to Supabase using the publishable/anon key directly.
 ALTER TABLE pro_candidates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lb_candidates  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents      ENABLE ROW LEVEL SECURITY;
@@ -117,53 +111,92 @@ CREATE POLICY "Allow all" ON lb_candidates  FOR ALL USING (true) WITH CHECK (tru
 CREATE POLICY "Allow all" ON documents      FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON timelines      FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON app_settings   FOR ALL USING (true) WITH CHECK (true);
-
--- If you have existing data without company_id, run this after creating the column:
--- UPDATE pro_candidates SET company_id = 'destiny-recruitment-consults' WHERE company_id IS NULL;
--- UPDATE lb_candidates  SET company_id = 'destiny-recruitment-consults' WHERE company_id IS NULL;
 ```
 
-4. You should see **"Success. No rows returned"** — that means it worked.
+You should see **Success. No rows returned**.
 
----
+## Step 4 - Existing Database Migration
 
-## Step 4 — Deploy updated files to GitHub/Vercel
+If the tables already exist, run this once instead of recreating them:
 
-1. Go to your GitHub repository (`dr-database`)
-2. Upload/replace these 3 files:
-   - `index.html` (new version)
-   - `app.js` (new version — with your Supabase URL and key already filled in)
-   - `data.js` (same as before — no changes)
-3. Vercel will auto-redeploy in ~60 seconds
+```sql
+ALTER TABLE pro_candidates
+  ADD COLUMN IF NOT EXISTS company_id TEXT;
 
----
+ALTER TABLE lb_candidates
+  ADD COLUMN IF NOT EXISTS company_id TEXT;
 
-## Step 5 — First login seeds the data
+ALTER TABLE lb_candidates
+  ADD COLUMN IF NOT EXISTS country TEXT DEFAULT 'General';
 
-When you log in for the first time after connecting Supabase:
-- The app checks if the database is empty
-- If empty, it automatically imports all 37 professional + 98 LB candidates
-- From then on, all changes are saved to Supabase in real time
+CREATE INDEX IF NOT EXISTS pro_candidates_company_id_idx
+  ON pro_candidates(company_id);
 
----
+CREATE INDEX IF NOT EXISTS lb_candidates_company_id_idx
+  ON lb_candidates(company_id);
 
-## Staff passwords (for reference)
-| Name       | Username   | Password      |
-|------------|------------|---------------|
-| Fred       | fred       | Destiny@2025  |
-| Robert     | robert     | Robert@2025   |
-| Doreen     | doreen     | Doreen@2025   |
-| Maxwell    | maxwell    | Maxwell@2025  |
-| Consolata  | consolata  | Consol@2025   |
+CREATE INDEX IF NOT EXISTS lb_candidates_company_country_idx
+  ON lb_candidates(company_id, country);
+```
 
-**Forgot password:** Ask a workspace admin to reset the password from the Team page.
+For the current Destiny workspace, records should use:
 
----
+```sql
+UPDATE pro_candidates
+SET company_id = 'destiny-recruitment-consults'
+WHERE company_id IS NULL;
+
+UPDATE lb_candidates
+SET company_id = 'destiny-recruitment-consults'
+WHERE company_id IS NULL;
+```
+
+## Step 5 - Deploy Updated Files
+
+Upload or replace these files in GitHub:
+
+```text
+index.html
+app.js
+data.js
+api/dreco-auth.js
+api/dreco-config.js
+```
+
+Vercel should redeploy automatically.
+
+## Step 6 - Activate the Default Admin
+
+After deployment:
+
+1. Open Dreco.
+2. Click **Create company workspace**.
+3. Enter the company name, admin name, admin username, and admin password.
+4. Sign out.
+5. Sign back in using the admin username and password.
+
+For Destiny, use the env values shown above so the default admin is `johnfred` and the company name is `Destiny Recruit Consults`.
+
+## Staff Access
+
+Each company workspace starts with an admin. The admin can add other users from **Settings -> Company users**. Those users are linked to the same company workspace as the admin who created them.
+
+Admins can manage General Jobs destination countries from **Settings -> General Jobs countries**. The country tabs inside General Jobs use the same saved company configuration.
+
+Old usernames can be retired with `DRECO_RETIRED_USERNAMES`, and blocked login aliases can be set with `DRECO_BLOCKED_ADMIN_ALIASES`.
+
+## Recovery
+
+The recovery screen checks `DRECO_RECOVERY_CODE` through `/api/dreco-auth`. It does not display passwords in the browser.
+
+An administrator should reset staff credentials from the account workflow.
 
 ## Troubleshooting
 
-**App shows "Loading…" forever** → Your Supabase URL or key is wrong in app.js. Double-check Step 2.
+**App stays in local mode**: confirm `SUPABASE_URL` and `SUPABASE_ANON_KEY` exist in Vercel, then redeploy.
 
-**"Save failed" toast** → Check your internet connection, or the RLS policies in Supabase (Step 3).
+**Create workspace fails**: confirm `SUPABASE_SERVICE_ROLE_KEY` exists in Vercel.
 
-**Data not showing after first login** → Click the Dashboard tab manually, or refresh the page.
+**Data not showing**: confirm candidate rows have the correct `company_id`.
+
+**Old username still logs in**: add it to `DRECO_RETIRED_USERNAMES` or `DRECO_BLOCKED_ADMIN_ALIASES`, redeploy, then sign in again.
