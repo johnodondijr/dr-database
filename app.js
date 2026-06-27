@@ -3351,54 +3351,45 @@ function showToast(msg,type=''){
 // PROFILE DROPDOWN
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function toggleProfileDropdown(e) {
-  if (e?.stopPropagation) e.stopPropagation();
-  const dd = document.getElementById('profile-dropdown');
-  if (!dd) return;
-  const trigger = e?.currentTarget?.closest?.('.sidebar-account-trigger,.topbar-profile-btn')
-    || e?.target?.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
-  const open = dd.classList.toggle('open');
-  if (open && trigger) {
-    const rect = trigger.getBoundingClientRect();
-    const width = Math.min(292, window.innerWidth - 20);
-    const isSidebar = trigger.classList.contains('sidebar-account-trigger');
-    const left = isSidebar
-      ? Math.max(10, Math.min(rect.left, window.innerWidth - width - 10))
-      : Math.max(10, Math.min(rect.right - width, window.innerWidth - width - 10));
-    dd.style.setProperty('left', `${left}px`, 'important');
-    dd.style.setProperty('right', 'auto', 'important');
-    dd.style.setProperty('width', `${width}px`, 'important');
-    if (isSidebar) {
-      dd.style.setProperty('top', 'auto', 'important');
-      dd.style.setProperty('bottom', `${Math.max(10, window.innerHeight - rect.top + 8)}px`, 'important');
-      dd.style.setProperty('max-height', `${Math.max(180, rect.top - 24)}px`, 'important');
+  e?.stopPropagation?.();
+  const menu = document.getElementById('acct-menu');
+  if (!menu) return;
+  if (menu.style.display === 'block') { menu.style.display = 'none'; return; }
+
+  const trigger = (e?.currentTarget || e?.target)?.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
+  if (trigger) {
+    const r = trigger.getBoundingClientRect();
+    const w = Math.min(268, window.innerWidth - 20);
+    menu.style.width = w + 'px';
+    menu.style.left = Math.max(10, Math.min(r.left, window.innerWidth - w - 10)) + 'px';
+    menu.style.right = 'auto';
+    if (trigger.classList.contains('sidebar-account-trigger')) {
+      menu.style.bottom = Math.max(10, window.innerHeight - r.top + 6) + 'px';
+      menu.style.top = 'auto';
     } else {
-      dd.style.setProperty('top', `${Math.min(rect.bottom + 10, window.innerHeight - 260)}px`, 'important');
-      dd.style.setProperty('bottom', 'auto', 'important');
-      dd.style.removeProperty('max-height');
+      menu.style.top = (r.bottom + 8) + 'px';
+      menu.style.bottom = 'auto';
     }
   }
-  // clear messages when opening
-  if (open) {
-    const msg = document.getElementById('pd-msg');
-    if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
-    ['pd-display-name','pd-new-username','pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
-      const el = document.getElementById(id); if (el) el.value = '';
-    });
-    // pre-fill username field with current
-    const uEl = document.getElementById('pd-new-username');
-    if (uEl && currentUser) uEl.placeholder = currentUser.username;
-    const nameEl = document.getElementById('pd-display-name');
-    if (nameEl && currentUser) nameEl.value = currentUser.display || '';
-  }
-  // rotate caret
-  const caret = document.getElementById('profile-caret');
-  if (caret) caret.style.transform = open ? 'rotate(180deg)' : '';
+
+  // Reset sub-panel and clear fields
+  const panel = document.getElementById('pd-edit-panel');
+  if (panel) panel.style.display = 'none';
+  const msg = document.getElementById('pd-msg');
+  if (msg) { msg.textContent = ''; msg.className = 'pd-msg'; }
+  ['pd-current-pw','pd-new-pw','pd-confirm-pw'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const nameEl = document.getElementById('pd-display-name');
+  if (nameEl && currentUser) nameEl.value = currentUser.display || '';
+  const uEl = document.getElementById('pd-new-username');
+  if (uEl && currentUser) uEl.placeholder = currentUser.username || '';
+
+  menu.style.display = 'block';
 }
 function closeProfileDropdown() {
-  const dd = document.getElementById('profile-dropdown');
-  if (dd) dd.classList.remove('open');
-  const caret = document.getElementById('profile-caret');
-  if (caret) caret.style.transform = '';
+  const menu = document.getElementById('acct-menu');
+  if (menu) menu.style.display = 'none';
 }
 function openProfileEdit() {
   const panel=document.getElementById('pd-edit-panel');
@@ -3436,11 +3427,8 @@ function bindAccountMenuTriggers(root = document) {
 // Open account menu from either the static sidebar card or the dynamic v5 shell.
 document.addEventListener('click', e => {
   const trigger = e.target.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
-  if (trigger) {
-    toggleProfileDropdown(e);
-    return;
-  }
-  closeProfileDropdown();
+  if (trigger) { toggleProfileDropdown(e); return; }
+  if (!e.target.closest?.('#acct-menu')) closeProfileDropdown();
 });
 
 window.toggleProfileDropdown = toggleProfileDropdown;

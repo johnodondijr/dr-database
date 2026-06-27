@@ -3662,6 +3662,13 @@ tr:last-child td{border-bottom:none!important}
 #app .dv5-suc .suc-dots{opacity:.45;transition:opacity .12s}
 #app .sidebar-user-card:hover .suc-dots,
 #app .dv5-suc:hover .suc-dots{opacity:1}
+/* Account menu items */
+.am-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:500;color:#09090B;background:none;border:none;width:100%;text-align:left;cursor:pointer;font-family:inherit;line-height:1.4}
+.am-item:hover{background:#F4F4F5}
+.am-item i{font-size:15px;color:#71717A;flex-shrink:0;width:18px}
+.am-danger{color:#DC2626}
+.am-danger i{color:#DC2626}
+.am-danger:hover{background:#FEF2F2}
 </style>
 </head>
 <body>
@@ -3974,31 +3981,22 @@ tr:last-child td{border-bottom:none!important}
             <div class="topbar-avatar" id="topbar-avatar">-</div>
           </button>
 
-          <!-- Shadcn-style profile dropdown -->
-          <div class="dv5-pd" id="profile-dropdown">
-            <!-- User identity header -->
-            <div class="dv5-pd-head">
-              <div class="dv5-pd-av" id="pd-avatar">-</div>
+          <!-- Account menu — JS-only display:none/block, position:fixed, no CSS class conflicts -->
+          <div id="acct-menu" style="display:none;position:fixed;z-index:9999;background:#fff;border:1px solid #E4E4E7;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.06);width:268px;overflow:hidden;max-height:calc(100vh - 80px);overflow-y:auto">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #F4F4F5">
+              <div id="pd-avatar" style="width:36px;height:36px;border-radius:7px;background:#18181B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;letter-spacing:.02em">-</div>
               <div style="min-width:0;flex:1">
-                <div class="dv5-pd-name" id="pd-name">-</div>
-                <div class="dv5-pd-email"><span id="pd-role-text">-</span></div>
+                <div id="pd-name" style="font-size:13px;font-weight:600;color:#09090B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35">-</div>
+                <div style="font-size:11px;color:#71717A;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span id="pd-role-text">-</span></div>
               </div>
             </div>
-            <!-- Menu items -->
-            <div class="dv5-pd-items">
-              <button class="dv5-pd-item" onclick="openProfileEdit()">
-                <i class="ti ti-user-circle"></i>Edit Profile
-              </button>
-              <button class="dv5-pd-item" onclick="openChangePassword()">
-                <i class="ti ti-lock"></i>Change Password
-              </button>
-              <div class="dv5-pd-sep"></div>
-              <button class="dv5-pd-item danger" onclick="doLogout()">
-                <i class="ti ti-logout"></i>Log out
-              </button>
+            <div id="acct-menu-items" style="padding:4px">
+              <button class="am-item" onclick="openProfileEdit()"><i class="ti ti-user-circle"></i>Edit Profile</button>
+              <button class="am-item" onclick="openChangePassword()"><i class="ti ti-lock"></i>Change Password</button>
+              <div style="height:1px;background:#F4F4F5;margin:3px 6px"></div>
+              <button class="am-item am-danger" onclick="doLogout()"><i class="ti ti-logout"></i>Log out</button>
             </div>
-            <!-- Hidden edit sub-panel (keep for functionality) -->
-            <div class="pd-edit-panel" id="pd-edit-panel" style="display:none">
+            <div id="pd-edit-panel" style="display:none">
               <div class="pd-edit-header">
                 <button class="pd-back-btn" onclick="closeProfileEdit()"><i class="ti ti-arrow-left"></i> Back</button>
                 <span>Edit Profile</span>
