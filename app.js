@@ -1324,6 +1324,10 @@ function xlToISO(n){ if(!n||isNaN(n)) return ''; return new Date(EXCEL_EPOCH.get
 function escHTML(v){
   return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
+function rowAvatar(name){
+  const ini=String(name||'').replace(/[^a-zA-Z ]/g,'').trim().split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';
+  return `<div class="row-avatar">${ini}</div>`;
+}
 function escJSString(v){
   return String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/[\r\n]+/g,' ');
 }
@@ -2828,7 +2832,7 @@ function renderPro(){
       const country=r.country ? escHTML(r.country) : '&mdash;';
       return `<tr onclick="editPro(${r.id})">
         <td>${(proPage-1)*PER_PAGE+i+1}</td>
-        <td><div class="name-cell">${name}</div><div class="pp-cell">${pp}</div></td>
+        <td><div class="name-wrap">${rowAvatar(r.name)}<div class="name-stack"><div class="name-cell">${name}</div><div class="pp-cell">${pp}</div></div></div></td>
         <td style="color:var(--text-2)">${position}</td>
         <td style="color:var(--text-2)">${company}</td>
         <td style="color:var(--text-2)">${country}</td>
@@ -3018,7 +3022,7 @@ function renderLB(){
       return `<tr onclick="editLB(${r.id})" class="${sel?'row-selected':''}">
         <td onclick="event.stopPropagation()"><input type="checkbox" ${sel?'checked':''} onchange="toggleLBSelect(${r.id},this.checked)" style="cursor:pointer"></td>
         <td>${(lbPage-1)*PER_PAGE+i+1}</td>
-        <td class="name-cell">${name}</td>
+        <td><div class="name-wrap">${rowAvatar(r.name)}<div class="name-cell">${name}</div></div></td>
         <td>${phone}</td>
         <td>${ppBadge(ps)}</td>
         <td>${travelBadge(ts)}</td>

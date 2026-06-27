@@ -3370,6 +3370,170 @@ input, textarea, select, [contenteditable] {
 #app .sidebar-user-card .suc-info{flex:1 1 auto!important;min-width:0!important}
 #app .sidebar-user-card .suc-name{font-size:13px!important;line-height:1.25!important}
 #app .sidebar-user-card .suc-org{font-size:11px!important;line-height:1.25!important;max-width:100%!important}
+
+/* ══════════════════════════════════════════════════════════════
+   HRISELINK-INSPIRED THEME — clean minimal enterprise UI
+   ══════════════════════════════════════════════════════════════ */
+
+/* App shell */
+#app,.app-layout,.main-area{background:#F4F5F7!important}
+.content-area{background:#F4F5F7!important}
+
+/* Sidebar */
+.sidebar{background:#ffffff!important;border-right:1px solid #E8EAED!important;box-shadow:none!important}
+.sidebar-logo-mark{background:#111827!important;border-radius:10px!important;box-shadow:none!important}
+.sidebar-logo-mark svg path{fill:#ffffff!important;opacity:1!important}
+.sidebar-logo-mark svg path:nth-child(2){opacity:.65!important}
+.sidebar-logo-mark svg path:nth-child(3){opacity:.35!important}
+.sidebar-logo-mark svg path:nth-child(4){opacity:.45!important}
+.sidebar-logo-text{color:#111827!important;font-weight:800!important;letter-spacing:-.03em!important}
+.sidebar-logo-text span{color:#111827!important}
+.sidebar-divider{background:#F1F3F5!important;margin:6px 12px!important}
+.nav-section-label{color:#9CA3AF!important;font-size:10px!important;font-weight:700!important;letter-spacing:.08em!important;padding:10px 14px 4px!important;text-transform:uppercase!important}
+
+/* Nav items */
+#app .nav-item,.sidebar .nav-item{color:#6B7280!important;border-radius:0 8px 8px 0!important;height:36px!important;margin:1px 0 1px 0!important;padding:0 10px 0 12px!important;background:transparent!important;box-shadow:none!important;transform:none!important;border-left:2px solid transparent!important;transition:background .14s,color .14s!important}
+#app .nav-item i,.sidebar .nav-item i{color:#9CA3AF!important;font-size:17px!important}
+#app .nav-item:hover,.sidebar .nav-item:hover{background:#F9FAFB!important;color:#111827!important;transform:none!important;border-left-color:transparent!important}
+#app .nav-item:hover i,.sidebar .nav-item:hover i{color:#374151!important}
+
+/* Active nav — left border bar */
+#app .nav-item.active,.sidebar .nav-item.active{background:#F3F4F6!important;color:#111827!important;font-weight:600!important;box-shadow:none!important;border-left:2px solid #111827!important}
+#app .nav-item.active i,.sidebar .nav-item.active i{color:#111827!important}
+
+/* Sidebar user card */
+#app .sidebar-user-card{background:#F9FAFB!important;border:1px solid #E8EAED!important;box-shadow:none!important}
+#app .sidebar-user-card:hover{background:#F3F4F6!important;border-color:#D1D5DB!important;box-shadow:none!important}
+.suc-avatar,.topbar-avatar{background:#111827!important;color:#ffffff!important;box-shadow:none!important;border:none!important}
+.suc-name{color:#111827!important}
+.suc-org{color:#6B7280!important}
+
+/* Topbar */
+.topbar{background:#ffffff!important;border-bottom:1px solid #E8EAED!important;box-shadow:none!important;height:60px!important;padding:0 24px!important;gap:12px!important}
+.topbar-title{color:#111827!important;font-size:18px!important;font-weight:700!important;letter-spacing:-.02em!important}
+.topbar-icon-btn{color:#6B7280!important}
+.save-dot{background:#111827!important}
+.save-label{color:#9CA3AF!important}
+#app .topbar-search{background:#F9FAFB!important;border:1px solid #E8EAED!important;border-radius:10px!important;box-shadow:none!important}
+#app .topbar-search:hover{border-color:#D1D5DB!important;background:#fff!important}
+
+/* Metric cards — pure white, flat */
+.metric-card{background:#ffffff!important;border:1px solid #E8EAED!important;box-shadow:0 1px 2px rgba(0,0,0,.04)!important;border-radius:12px!important;transition:box-shadow .14s!important}
+.metric-card:hover{transform:none!important;box-shadow:0 4px 12px rgba(0,0,0,.07)!important}
+.metric-card::before{display:none!important}
+.metric-card.mc-amber,.metric-card.mc-green,.metric-card.mc-red,.metric-card.mc-ink,.metric-card.mc-sage{background:#ffffff!important;border-color:#E8EAED!important}
+.metric-card.mc-ink .metric-label,.metric-card.mc-ink .metric-val{color:#111827!important}
+.metric-label{color:#6B7280!important;font-size:12px!important;font-weight:500!important;text-transform:none!important;letter-spacing:0!important;margin-bottom:6px!important}
+.metric-val{font-size:28px!important;font-weight:700!important;color:#111827!important;letter-spacing:-.025em!important}
+.metric-val.green{color:#16A34A!important}
+.metric-val.amber{color:#D97706!important}
+.metric-val.red{color:#DC2626!important}
+.metric-val.blue{color:#2563EB!important}
+.metric-val.sm{font-size:18px!important}
+
+/* Status badges — outline-only */
+.badge{background:transparent!important;border:1.5px solid currentColor!important;border-radius:999px!important;font-size:11px!important;font-weight:600!important;padding:3px 10px!important;letter-spacing:0!important;text-transform:none!important}
+.b-pol,.b-applied,.b-notyet{color:#2563EB!important;background:transparent!important}
+.b-mol,.b-incomplete{color:#D97706!important;background:transparent!important}
+.b-visa{color:#DB2777!important;background:transparent!important}
+.b-travel{color:#7C3AED!important;background:transparent!important}
+.b-travelled,.b-complete,.b-hadpp{color:#16A34A!important;background:transparent!important}
+.b-nottravelled,.b-returned,.b-notapplied{color:#DC2626!important;background:transparent!important}
+.b-na{color:#9CA3AF!important;background:transparent!important}
+.b-pushed{color:#D97706!important;background:transparent!important}
+
+/* Buttons */
+.btn{background:#ffffff!important;border:1px solid #D1D5DB!important;color:#374151!important;box-shadow:none!important;border-radius:8px!important;font-weight:600!important;transition:background .14s,border-color .14s,color .14s!important}
+.btn:hover{background:#F9FAFB!important;border-color:#9CA3AF!important;color:#111827!important;transform:none!important;box-shadow:none!important}
+.btn.primary{background:#111827!important;color:#ffffff!important;border-color:#111827!important;box-shadow:none!important}
+.btn.primary:hover{background:#1F2937!important;border-color:#1F2937!important;transform:none!important;box-shadow:0 4px 12px rgba(0,0,0,.15)!important}
+.btn.primary i,.btn.primary span{color:#ffffff!important}
+.btn.export{background:#ffffff!important;border-color:#D1D5DB!important;color:#374151!important;box-shadow:none!important}
+.btn.export:hover{background:#F9FAFB!important;border-color:#9CA3AF!important;transform:none!important;box-shadow:none!important}
+.btn.export i{color:#374151!important}
+
+/* Pill tabs */
+.pill-tab.active{background:#111827!important;color:#ffffff!important;box-shadow:none!important;border:none!important}
+.pill-tab:not(.active){background:transparent!important;color:#6B7280!important;box-shadow:none!important;border:none!important}
+.pill-tab:hover:not(.active){background:#F3F4F6!important;color:#111827!important}
+
+/* Table — flat standard rows */
+table{border-collapse:collapse!important;border-spacing:0!important;padding:0!important}
+th{background:#F9FAFB!important;border-bottom:1px solid #E8EAED!important;color:#6B7280!important;font-size:11px!important;font-weight:600!important;letter-spacing:.02em!important;padding:10px 16px!important;text-transform:none!important}
+td{background:#ffffff!important;border-bottom:1px solid #F3F4F6!important;border-radius:0!important;color:#111827!important;padding:13px 16px!important}
+tbody tr td:first-child{border-radius:0!important;border-left:none!important}
+tbody tr td:last-child{border-radius:0!important}
+tbody tr:hover td{background:#F9FAFB!important}
+tbody tr:hover td:first-child{border-left-color:transparent!important}
+tr:last-child td{border-bottom:none!important}
+.name-cell{font-weight:600!important;color:#111827!important;font-size:13px!important}
+.pp-cell{color:#6B7280!important;font-size:11px!important;margin-top:1px!important}
+
+/* Row avatar circles */
+.row-avatar{width:32px;height:32px;min-width:32px;border-radius:50%;background:#F3F4F6;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.name-wrap{display:flex;align-items:center;gap:10px}
+.name-wrap .name-stack{display:flex;flex-direction:column}
+
+/* Panels */
+.panel,.dash-card,.activity-panel{border:1px solid #E8EAED!important;border-radius:12px!important;background:#ffffff!important;box-shadow:0 1px 2px rgba(0,0,0,.04)!important}
+.panel-header{background:#ffffff!important;border-bottom:1px solid #F1F3F5!important;padding:14px 18px!important}
+.panel-title{color:#111827!important;font-size:14px!important;font-weight:700!important;letter-spacing:0!important}
+
+/* Pipeline summary cards */
+.p-card{background:#ffffff!important;border:1px solid #E8EAED!important;box-shadow:0 1px 2px rgba(0,0,0,.04)!important;border-radius:12px!important;color:#111827!important;padding:18px!important}
+.p-card.card-gold,.p-card.card-dark,.p-card.card-slate{background:#ffffff!important;border-color:#E8EAED!important;color:#111827!important}
+.p-card::before,.p-card::after{display:none!important}
+.p-card:hover{transform:none!important;box-shadow:0 4px 12px rgba(0,0,0,.07)!important}
+.p-card-label{color:#6B7280!important;text-transform:none!important;letter-spacing:0!important}
+.p-card-count{color:#111827!important}
+.p-card-icon{color:#E5E7EB!important;bottom:-10px!important;right:-6px!important;left:auto!important;top:auto!important;font-size:58px!important;opacity:.15!important}
+.p-card-sub{color:#9CA3AF!important}
+
+/* Welcome banner */
+.welcome-banner{background:#ffffff!important;border:1px solid #E8EAED!important;border-radius:12px!important;box-shadow:0 1px 2px rgba(0,0,0,.04)!important}
+.welcome-banner::before,.welcome-banner::after{display:none!important}
+.wb-left h2{color:#111827!important;letter-spacing:-.02em!important}
+.wb-left p{color:#6B7280!important}
+.wb-stat{background:#F9FAFB!important;border:1px solid #E8EAED!important;border-radius:10px!important}
+.wb-stat-val{color:#111827!important}
+.wb-stat-label{color:#6B7280!important}
+
+/* Due panel & timeline */
+.due-panel{background:#ffffff!important;border:1px solid #E8EAED!important;border-radius:12px!important}
+.due-header{border-bottom-color:#F1F3F5!important;background:#F9FAFB!important}
+.due-header i{color:#6B7280!important}
+.due-header span{color:#111827!important}
+.due-item{border-bottom-color:#F1F3F5!important;background:transparent!important}
+.due-item:nth-child(3n),.due-item:nth-child(3n+1),.due-item:nth-child(3n+2){background:transparent!important}
+.due-name{color:#111827!important}
+.due-stage{color:#6B7280!important}
+.due-date{background:#111827!important;color:#ffffff!important;border-radius:6px!important;font-size:10px!important}
+.tl-dot{background:#111827!important;box-shadow:none!important}
+.tl-item{border-bottom-color:#F1F3F5!important;background:transparent!important}
+
+/* Spotlight */
+.spotlight{background:#111827!important;border-color:#1F2937!important;color:#fff!important}
+.spotlight-label,.spotlight-section,.spotlight-sub,.spotlight-row-label{color:rgba(255,255,255,.45)!important}
+.spotlight-amount{color:#ffffff!important}
+
+/* Pagination */
+.pagination{background:#F9FAFB!important;border-top:1px solid #E8EAED!important}
+.page-btn{background:#ffffff!important;border-color:#E8EAED!important;color:#374151!important}
+.page-btn.active{background:#111827!important;border-color:#111827!important;color:#ffffff!important}
+.page-btn:hover:not(.active){background:#F3F4F6!important}
+
+/* Search & selects */
+.search-wrap input,.toolbar-select{background:#F9FAFB!important;border-color:#E8EAED!important;color:#111827!important}
+.search-wrap input:focus,.toolbar-select:focus{border-color:#374151!important;box-shadow:0 0 0 3px rgba(55,65,81,.08)!important;background:#ffffff!important}
+
+/* Modal */
+.modal{background:#ffffff!important;border-color:#E8EAED!important;box-shadow:0 24px 64px rgba(0,0,0,.12)!important}
+.modal-header{border-bottom-color:#F1F3F5!important}
+.modal-header h3{color:#111827!important}
+.modal-tab.active{color:#111827!important;border-bottom-color:#111827!important}
+.modal-footer{background:#F9FAFB!important;border-top-color:#E8EAED!important}
+.field input,.field select,.field textarea{background:#F9FAFB!important;border-color:#E8EAED!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#374151!important;box-shadow:0 0 0 3px rgba(55,65,81,.08)!important;background:#ffffff!important}
 </style>
 </head>
 <body>
