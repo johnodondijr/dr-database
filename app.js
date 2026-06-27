@@ -3350,16 +3350,20 @@ function toggleProfileDropdown(e) {
     const width = Math.min(292, window.innerWidth - 20);
     const isSidebar = trigger.classList.contains('sidebar-account-trigger');
     const left = isSidebar
-      ? Math.min(rect.right + 10, window.innerWidth - width - 10)
+      ? Math.max(10, Math.min(rect.left, window.innerWidth - width - 10))
       : Math.max(10, Math.min(rect.right - width, window.innerWidth - width - 10));
-    const top = isSidebar
-      ? Math.max(10, Math.min(rect.top, window.innerHeight - 260))
-      : Math.min(rect.bottom + 10, window.innerHeight - 260);
     dd.style.setProperty('left', `${left}px`, 'important');
-    dd.style.setProperty('top', `${top}px`, 'important');
     dd.style.setProperty('right', 'auto', 'important');
-    dd.style.setProperty('bottom', 'auto', 'important');
     dd.style.setProperty('width', `${width}px`, 'important');
+    if (isSidebar) {
+      dd.style.setProperty('top', 'auto', 'important');
+      dd.style.setProperty('bottom', `${Math.max(10, window.innerHeight - rect.top + 8)}px`, 'important');
+      dd.style.setProperty('max-height', `${Math.max(180, rect.top - 24)}px`, 'important');
+    } else {
+      dd.style.setProperty('top', `${Math.min(rect.bottom + 10, window.innerHeight - 260)}px`, 'important');
+      dd.style.setProperty('bottom', 'auto', 'important');
+      dd.style.removeProperty('max-height');
+    }
   }
   // clear messages when opening
   if (open) {
@@ -4069,7 +4073,6 @@ function setUserDisplay(display, role) {
           <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
           <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
         </div>
-        <i class="ti ti-dots-vertical" style="font-size:15px;color:#A1A1AA;margin-left:auto;flex-shrink:0"></i>
       </button>`;
     sidebarBuilt = true;
   }
