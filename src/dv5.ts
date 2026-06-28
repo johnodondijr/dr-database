@@ -556,7 +556,7 @@ export function injectDepsToD5(deps) {
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Operations</div>
       ${['finance','documents','reports','clients'].map(navItem).join('')}
       <div class="nav-spacer"></div>
-      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" type="button">
+      <button class="sidebar-user-card sidebar-account-trigger dv5-suc" type="button" onclick="toggleProfileDropdown(event)">
         <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
         <div class="dv5-suc-body suc-info">
           <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>

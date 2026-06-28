@@ -3445,6 +3445,7 @@ document.addEventListener('click', e => {
 window.toggleProfileDropdown = toggleProfileDropdown;
 window.closeProfileDropdown = closeProfileDropdown;
 window.openProfileEdit = openProfileEdit;
+window.closeProfileEdit = closeProfileEdit;
 window.openChangePassword = openChangePassword;
 
 async function saveProfileChanges() {
