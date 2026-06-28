@@ -527,7 +527,6 @@ export function injectDepsToD5(deps) {
       <i class="ti ${h(ICONS[t])}" style="font-size:15px;width:16px;flex-shrink:0"></i>
       <span class="nav-item-label" style="font-size:12.5px;font-weight:500;letter-spacing:0">${h(TITLES[t])}</span>
     </a>`;
-    const wsInitials = (getCompanyName()||'DR').split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'DR';
     side.innerHTML = `
       <div class="sidebar-top">
         <a class="sidebar-logo" onclick="switchTab('dash')" aria-label="Dreco home">
@@ -552,17 +551,7 @@ export function injectDepsToD5(deps) {
       ${['dash','pipeline','candidates'].map(navItem).join('')}
       <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Operations</div>
       ${['finance','documents','reports','clients'].map(navItem).join('')}
-      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">System</div>
-      ${navItem('settings')}
       <div class="nav-spacer"></div>
-      <div class="sidebar-workspace-badge" onclick="switchTab('settings')" role="button" tabindex="0" style="margin-bottom:6px">
-        <div class="sidebar-ws-av" id="sidebar-ws-av">${wsInitials}</div>
-        <div class="sidebar-ws-info">
-          <div class="sidebar-ws-name" id="sidebar-ws-name">${h(getCompanyName()||'Workspace')}</div>
-          <div class="sidebar-ws-sub">Settings</div>
-        </div>
-        <i class="ti ti-settings" style="font-size:15px;color:#9CA3AF;margin-left:auto;flex-shrink:0"></i>
-      </div>
       <button class="sidebar-user-card sidebar-account-trigger dv5-suc" type="button">
         <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
         <div class="dv5-suc-body suc-info">
