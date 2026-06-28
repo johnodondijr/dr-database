@@ -565,7 +565,6 @@ export function injectDepsToD5(deps) {
         <i class="ti ti-dots-vertical suc-dots" style="color:#9CA3AF;font-size:16px;margin-left:auto;flex-shrink:0"></i>
       </button>`;
     sidebarBuilt = true;
-    bindAccountMenuTriggers(side);
   }
 
   function markActive(t) {
