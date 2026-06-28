@@ -1453,6 +1453,7 @@ export function injectDepsToD5(deps) {
   // ── 7. REPORTS ────────────────────────────────────────────
   function renderReports() {
     const el = document.getElementById('reports-section'); if (!el) return;
+    const now = new Date();
     const isPro = jobTypeTab === 'pro';
     const allReportRows = allRows();
     const lbBase = lbCountryFilter ? allReportRows.filter(r=>r.type==='lb'&&(r.country||'')===lbCountryFilter) : allReportRows.filter(r=>r.type==='lb');
