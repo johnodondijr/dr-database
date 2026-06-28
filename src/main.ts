@@ -1,5 +1,12 @@
 // @ts-nocheck
 import '@tabler/icons-webfont/dist/tabler-icons.min.css';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/geist';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
+import '@fontsource/manrope/700.css';
+import '@fontsource/manrope/800.css';
 import { createClient } from '@supabase/supabase-js';
 import { PRO_SEED, LB_SEED } from './data';
 import {
@@ -1787,7 +1794,7 @@ async function saveWorkspaceSettings(){
   renderDash(); renderLB(); renderReports();
   showToast('Workspace updated','success');
 }
-function openHelp(){ closeProfileDropdown(); switchTab('help'); }
+function openHelp(){ closeProfileDropdown(); document.getElementById('help-modal')?.classList.add('open'); }
 function downloadBackup(){
   // Strip credential fields before export – hashes must never leave the browser
   // in a downloadable file that could end up in unintended hands.
