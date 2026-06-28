@@ -1030,6 +1030,7 @@ async function doLogin() {
   enterApp({ username, role: account.role, display: account.display, companyId: account.companyId, companyName: account.companyName, generalJobsCountries: account.generalJobsCountries });
 }
 function doLogout() {
+  closeProfileDropdown();
   if (db?.auth) db.auth.signOut().catch(err => console.warn('Supabase sign out failed:', err));
   safeSessionRemove('dr_user'); setCurrentUser(null);
   document.getElementById('app').style.display='none';
