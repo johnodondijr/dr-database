@@ -14,6 +14,26 @@ let DEFAULT_COMPANY = { name: 'Dreco', id: 'dreco-default', generalJobsCountries
 let proBalance, proStageValue, lbStageValue, proStageMatches;
 let lbRefundPrincipal, lbRefundPaidAmount, lbOwnPassport, lbRefundReturned, lbRefundOutstanding;
 let showToast, bindAccountMenuTriggers, fmtDate, getCompanyName;
+// Supabase client — named _supabaseDb to avoid shadowing local 'db' variables inside IIFE
+let _supabaseDb = null;
+
+// Storage helpers — duplicated from main.ts; dv5.ts cannot import them without
+// a circular dependency, and they need no external deps so duplication is safe.
+function safeLocalGet(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function safeLocalSet(key, value) {
+  try { localStorage.setItem(key, value); } catch { /* storage may be blocked */ }
+}
+function safeSessionGet(key) {
+  try { return sessionStorage.getItem(key); } catch { return null; }
+}
+function safeSessionSet(key, value) {
+  try { sessionStorage.setItem(key, value); } catch { /* storage may be blocked */ }
+}
+function safeSessionRemove(key) {
+  try { sessionStorage.removeItem(key); } catch { /* storage may be blocked */ }
+}
 
 /** Called by main.ts immediately after its own function declarations to wire deps. */
 export function injectDepsToD5(deps) {
@@ -23,6 +43,7 @@ export function injectDepsToD5(deps) {
     showToast, bindAccountMenuTriggers, fmtDate, getCompanyName,
   } = deps);
   if (deps.DEFAULT_COMPANY) DEFAULT_COMPANY = deps.DEFAULT_COMPANY;
+  if (deps.db) _supabaseDb = deps.db;
 }
 
 (function () {
@@ -2504,8 +2525,8 @@ export function injectDepsToD5(deps) {
     return new Promise((resolve,reject)=>{ const r = new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file); });
   }
   async function uploadToSupabase(path,file){
-    if(!window.db && typeof db === 'undefined') return null;
-    const client = window.db || db;
+    if(!_supabaseDb) return null;
+    const client = _supabaseDb;
     if(!client?.storage) return null;
     const { error } = await client.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type || 'application/octet-stream' });
     if(error) throw error;
@@ -2551,7 +2572,7 @@ export function injectDepsToD5(deps) {
     if(!d) return;
     if(!confirm(`Delete ${d.label || docType}?`)) return;
     try{
-      const client = window.db || (typeof db !== 'undefined' ? db : null);
+      const client = _supabaseDb;
       if(client?.storage && d.storage === 'supabase' && d.path){
         await client.storage.from(BUCKET).remove([d.path]).catch(()=>{});
       }
@@ -2941,14 +2962,14 @@ export function injectDepsToD5(deps) {
   async function checkStorageReadiness(){
     const status = {
       mode: typeof getStorageLabel === 'function' ? getStorageLabel() : 'Unknown',
-      supabaseClient: !!db,
+      supabaseClient: !!_supabaseDb,
       storageBucket: 'candidate-documents',
       bucketReachable: false,
       error: ''
     };
-    if (!db?.storage) return status;
+    if (!_supabaseDb?.storage) return status;
     try {
-      const { data, error } = await db.storage.from('candidate-documents').list('', { limit:1 });
+      const { data, error } = await _supabaseDb.storage.from('candidate-documents').list('', { limit:1 });
       if (error) throw error;
       status.bucketReachable = Array.isArray(data);
     } catch (err) {

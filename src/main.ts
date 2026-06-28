@@ -1,4 +1,5 @@
 // @ts-nocheck
+import '@tabler/icons-webfont/dist/tabler-icons.min.css';
 import { createClient } from '@supabase/supabase-js';
 import { PRO_SEED, LB_SEED } from './data';
 import {
@@ -3554,7 +3555,7 @@ function setUserDisplay(display, role) {
 injectDepsToD5({
   proBalance, proStageValue, lbStageValue, proStageMatches,
   lbRefundPrincipal, lbRefundPaidAmount, lbOwnPassport, lbRefundReturned, lbRefundOutstanding,
-  showToast, bindAccountMenuTriggers, fmtDate, getCompanyName, DEFAULT_COMPANY,
+  showToast, bindAccountMenuTriggers, fmtDate, getCompanyName, DEFAULT_COMPANY, db,
 });
 
 // ─── Expose module-scope functions on window ──────────────────────────────────
