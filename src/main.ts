@@ -3365,6 +3365,8 @@ function toggleProfileDropdown(e) {
   e?.stopPropagation?.();
   const menu = document.getElementById('acct-menu');
   if (!menu) return;
+  // Move to body to escape backdrop-filter containing block on topbar
+  if (menu.parentElement !== document.body) document.body.appendChild(menu);
   if (menu.style.display === 'block') { menu.style.display = 'none'; return; }
 
   const trigger = (e?.currentTarget || e?.target)?.closest?.('.sidebar-account-trigger,.topbar-profile-btn');
