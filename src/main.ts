@@ -3563,6 +3563,8 @@ injectDepsToD5({
   proBalance, proStageValue, lbStageValue, proStageMatches,
   lbRefundPrincipal, lbRefundPaidAmount, lbOwnPassport, lbRefundReturned, lbRefundOutstanding,
   showToast, bindAccountMenuTriggers, fmtDate, getCompanyName, DEFAULT_COMPANY, db,
+  proPaidAmount, proPipelineStageValue, lbPipelineStageValue,
+  addTimeline, auditAction, saveLocalStore, getStorageLabel, getCompanyId,
 });
 
 // ─── Expose module-scope functions on window ──────────────────────────────────
