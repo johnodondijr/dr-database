@@ -1092,6 +1092,10 @@ export function injectDepsToD5(deps) {
 
   function renderFinance() {
     const el = document.getElementById('finance-section'); if (!el) return;
+    const expenses = (window.drecoExpenses || []);
+    const expTotal = expenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const expMonth = expenses.filter(e=>(e.date||'').slice(0,7)===new Date().toISOString().slice(0,7));
+    const expMonthTotal = expMonth.reduce((s,e)=>s+(Number(e.amount)||0),0);
     const isPro = jobTypeTab === 'pro';
     const allFinRows = allRows();
     const proRows = allFinRows.filter(r=>r.type==='pro');
@@ -1207,6 +1211,7 @@ export function injectDepsToD5(deps) {
             ${statCard('ti-wallet',       money(proPaid),  'Collected KES',     'Revenue received',                '#DCFCE7','#16A34A','#fff')}
             ${statCard('ti-alert-circle', money(proBal),   'Outstanding KES',   `${proFin.filter(r=>r.balance>0).length} open accounts`, '#FEE2E2','#DC2626','#fff')}
             ${statCard('ti-chart-pie',    proRate+'%',     'Collection Rate',   'Paid vs invoiced',                '#FEF9C3','#A16207','#fff')}
+            ${statCard('ti-cash',         money(expTotal), 'Expenses',          `${expenses.length} entries · ${money(expMonthTotal)} this month`, '#FFF7ED','#C2410C','#fff', "window.setFinanceTab('expenses');window.renderFinancePage()")}
           ` : `
             ${statCard('ti-wallet',       moneyUSD(lbPaidAmt),   'Refunds Collected',  'Received so far',                                          '#DCFCE7','#16A34A','#fff')}
             ${statCard('ti-alert-circle', moneyUSD(lbBal),      'Outstanding USD',    `${lbTravelled.filter(r=>r.balance>0).length} post-travel unpaid`, '#FEE2E2','#DC2626','#fff')}
@@ -1268,7 +1273,31 @@ export function injectDepsToD5(deps) {
           <div class="dv5-tx-tabs">
             <button class="dv5-tx-tab${financeTab==='latest'?' active':''}" onclick="window.setFinanceTab('latest')">Latest</button>
             <button class="dv5-tx-tab${financeTab==='upcoming'?' active':''}" onclick="window.setFinanceTab('upcoming')">Upcoming</button>
+            <button class="dv5-tx-tab${financeTab==='expenses'?' active':''}" onclick="window.setFinanceTab('expenses')">Expenses</button>
           </div>
+          ${financeTab === 'expenses' ? `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 4px;border-bottom:1px solid var(--border,#E8E8E8)">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#374151">${money(expTotal)}</span>
+              <span style="font-size:12px;color:#9ca3af;margin-left:8px">total · ${money(expMonthTotal)} this month</span>
+            </div>
+            <button class="dv5-btn primary" onclick="openExpensePrompt()"><i class="ti ti-plus"></i>Add Expense</button>
+          </div>
+          <div class="dv5-tx-list">
+            ${expenses.length ? expenses.map(e => {
+              const d = new Date(e.date||'');
+              const dateStr = isNaN(d) ? '—' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+              return `<div class="dv5-tx-row">
+                <div class="dv5-tx-date">${dateStr}</div>
+                <div class="dv5-tx-info">
+                  <div class="dv5-tx-name">${h(e.client||'—')}</div>
+                  <div class="dv5-tx-status" style="color:#6b7280">${h(e.category||'—')}${e.notes?' · '+h(e.notes):''}</div>
+                </div>
+                <div class="dv5-tx-amt" style="color:#dc2626">-${money(e.amount)}</div>
+                <button class="dv5-tx-arrow" onclick="deleteExpense('${e.id}')" title="Delete"><i class="ti ti-trash" style="color:#dc2626"></i></button>
+              </div>`;
+            }).join('') : '<div class="dv5-empty" style="padding:32px">No expenses recorded yet.</div>'}
+          </div>` : `
           <div class="dv5-tx-list">
             ${financeTab === 'latest'
               ? (filteredPayments.length ? filteredPayments.map(({r, label, amt, date, isUSD}) => {
@@ -1300,7 +1329,7 @@ export function injectDepsToD5(deps) {
                   </div>`;
                 }).join('') : '<div class="dv5-empty" style="padding:32px">No outstanding balances.</div>')
             }
-          </div>
+          </div>`}
         </div>
       </div>`;
   }

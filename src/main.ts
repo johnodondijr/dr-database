@@ -337,6 +337,7 @@ let currentCompany = { ...DEFAULT_COMPANY };
 const PRO_PIPELINE_STAGES = ['PENDING OFFER LETTER','OFFER LETTER','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
 const LB_PIPELINE_STAGES = ['SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
 let drecoExpenses = JSON.parse(safeLocalGet('dreco_expenses') || '[]');
+window.drecoExpenses = drecoExpenses;
 let drecoEvents   = JSON.parse(safeLocalGet('dreco_events') || '[]');
 let drecoAudit    = JSON.parse(safeLocalGet('dreco_audit') || '[]');
 let editingEventId = null;
@@ -2321,7 +2322,7 @@ function updateTrendTooltip(event){
   tip.style.display='block';
 }
 function resetTrendTooltip(){ const tip=document.getElementById('trend-tooltip'); if(tip) tip.style.display=''; }
-function persistExpenses(){ safeLocalSet('dreco_expenses', JSON.stringify(drecoExpenses)); }
+function persistExpenses(){ safeLocalSet('dreco_expenses', JSON.stringify(drecoExpenses)); window.drecoExpenses = drecoExpenses; }
 function persistEvents(){ safeLocalSet('dreco_events', JSON.stringify(drecoEvents)); }
 function persistAudit(){ safeLocalSet('dreco_audit', JSON.stringify(drecoAudit)); }
 function auditAction(area, action, detail=''){
@@ -2670,9 +2671,9 @@ function submitQuickExpense(){
   if(!amount || amount<0) return fail('Enter a valid amount.');
   drecoExpenses.unshift({id:String(Date.now()),date,client,amount,category,notes});
   auditAction('Expenses','Expense added',`${client} - ${moneyKES(amount)}`);
-  persistExpenses(); closeModal('quick-expense-modal'); renderExpenses(); showToast('Expense recorded','success');
+  persistExpenses(); closeModal('quick-expense-modal'); renderExpenses(); window.setFinanceTab?.('expenses'); window.renderFinancePage?.(); showToast('Expense recorded','success');
 }
-function deleteExpense(id){ if(!requireFinanceAction('Deleting expenses')) return; const item=drecoExpenses.find(e=>e.id===id); drecoExpenses=drecoExpenses.filter(e=>e.id!==id); auditAction('Expenses','Expense deleted',item?.client||''); persistExpenses(); renderExpenses(); }
+function deleteExpense(id){ if(!requireFinanceAction('Deleting expenses')) return; const item=drecoExpenses.find(e=>e.id===id); drecoExpenses=drecoExpenses.filter(e=>e.id!==id); auditAction('Expenses','Expense deleted',item?.client||''); persistExpenses(); renderExpenses(); window.renderFinancePage?.(); }
 function openCalendarEventPrompt(){
   editingEventId=null;
   const modal=document.getElementById('quick-event-modal');
