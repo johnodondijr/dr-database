@@ -4084,15 +4084,18 @@ tr:last-child td{border-bottom:none!important}
 #login-screen .lp-dash-user{
   width:32px!important;
   height:32px!important;
-  border-radius:11px!important;
-  background:#111827!important;
-  color:#fff!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-size:10.5px!important;
-  font-weight:700!important;
+  border-radius:50%!important;
+  overflow:hidden!important;
+  border:2px solid #fff!important;
+  background:#E6EAF2!important;
   box-shadow:0 10px 18px rgba(15,23,42,.18)!important;
+  flex:0 0 auto!important;
+}
+#login-screen .lp-dash-user img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
 }
 #login-screen .lp-dash-priority{
   display:grid!important;
@@ -4569,7 +4572,7 @@ tr:last-child td{border-bottom:none!important}
               <span>Dashboard</span>
               <strong>Good morning, Admin</strong>
             </div>
-            <div class="lp-dash-user">AD</div>
+            <div class="lp-dash-user"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&amp;fit=crop&amp;w=96&amp;h=96&amp;q=80" alt="Admin profile"></div>
           </div>
           <div class="lp-dash-priority">
             <div class="lp-dash-priority-card">
