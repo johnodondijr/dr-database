@@ -76,6 +76,8 @@ export function injectDepsToD5(deps) {
   // ── Global job-type tab (Pro / General) ──────────────────
   let jobTypeTab = 'pro';
   let lbCountryFilter = '';
+  let profileViewType = null;
+  let profileViewId   = null;
   function rerenderPage() {
     const renderers = {
       dash: window.renderDash, pipeline: window.renderPipelinePage,
@@ -887,6 +889,7 @@ export function injectDepsToD5(deps) {
 
   function renderCandidates() {
     const el = document.getElementById('candidates-section'); if (!el) return;
+    if (profileViewType && profileViewId) { renderCandidateProfilePage(el, profileViewType, profileViewId); return; }
     const isPro = jobTypeTab === 'pro';
     const lbBaseRows = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
     let all = isPro
@@ -1764,151 +1767,215 @@ export function injectDepsToD5(deps) {
     if (typeof renderSettingsPage === 'function') renderSettingsPage();
   }
 
-  // ── CANDIDATE PROFILE MODAL ───────────────────────────────
-  function ensureProfileModal() {
-    if (document.getElementById('dv5-profile-modal')) return;
-    const div = document.createElement('div');
-    div.id = 'dv5-profile-modal';
-    div.className = 'dv5-modal-overlay';
-    div.onclick = e => { if (e.target===div) closeProfile(); };
-    document.body.appendChild(div);
-  }
-
+  // ── CANDIDATE PROFILE PAGE ────────────────────────────────
   window.openCandidateProfile = function(type, id) {
-    ensureProfileModal();
-    const modal = document.getElementById('dv5-profile-modal');
+    profileViewType = type;
+    profileViewId   = String(id);
+    renderCandidates();
+    // Scroll to top of section
+    const el = document.getElementById('candidates-section');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  };
+
+  window.closeCandidateProfile = function() {
+    profileViewType = null;
+    profileViewId   = null;
+    renderCandidates();
+  };
+
+  window.closeProfile = window.closeCandidateProfile;
+
+  function renderCandidateProfilePage(el, type, id) {
     const r = allRows().find(x => x.type===type && String(x.id)===String(id));
-    if (!r) return;
-    const cl = buildChecklist(r);
-    const pct = checklistPct(r);
-    const timeline = (allTimelines?.[`${type}_${id}`]||[]).slice(-5).reverse();
-    const link = docLink(r);
-    const safeLink = safeUrl(link);
-    const proStageList = (proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']);
-    const lbStageList  = lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
-    const stages = type==='pro'
+    if (!r) { el.innerHTML = '<div class="dv5-page"><div class="dv5-empty">Candidate not found.</div></div>'; return; }
+
+    const cl    = buildChecklist(r);
+    const pct   = checklistPct(r);
+    const timeline = (allTimelines?.[`${type}_${id}`]||[]).slice(0,6).reverse();
+    const proStageList = proStages?.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
+    const lbStageList  = lbStages?.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+    const stageLabels  = type==='pro'
       ? ['Submitted','Interview','Offer Letter','Medical','MOL','Visa','Travel','Travelled']
       : ['Docs In','Profile Sent','Selected','Passport','Visa','Travelled','Refund','Done'];
     const stageListRef = type==='pro' ? proStageList : lbStageList;
-    const stageIdx = stageListRef.indexOf(r.stage);
+    const stageIdx     = stageListRef.findIndex(s => s.toUpperCase() === (r.stage||'').toUpperCase());
 
-    modal.innerHTML = `
-      <div class="dv5-profile-panel">
-        <div class="dv5-profile-head">
-          <div class="dv5-profile-id">${r.type==='pro'?'Professional':'General'} Candidate</div>
-          <div class="dv5-profile-actions">
-            <button class="dv5-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-edit"></i>Edit</button>
-            <button class="dv5-btn primary" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')"><i class="ti ti-paperclip"></i>Documents</button>
-            <button class="dv5-btn-icon" onclick="closeProfile()" title="Close"><i class="ti ti-x"></i></button>
-          </div>
-        </div>
-        <div class="dv5-profile-hero">
-          <div class="dv5-profile-avatar">${h(ini(r.name))}</div>
-          <div class="dv5-profile-info">
-            <h2>${h(r.name)}</h2>
-            <p>${h(r.position)} · ${h(r.company)}</p>
-            <div class="dv5-profile-meta">
-              <span><i class="ti ti-map-pin"></i>${h(r.country||'—')}</span>
-              <span><i class="ti ti-id"></i>${h(r.pp||'No passport')}</span>
-              <span><i class="ti ti-phone"></i>${h(r.phone||'No phone')}</span>
+    // Docs — from Document Upload IIFE (exposed on window)
+    const defs  = (window.drecoDocDefs?.(type)) || [];
+    const items = (window.drecoCandidateDocs?.(type, id)) || {};
+    const compl = (window.drecoDocCompletion?.(type, id)) || {done:0,total:defs.length,pct:0};
+
+    const fmt2  = type==='pro' ? money : moneyUSD;
+
+    el.innerHTML = `
+    <div class="dv5-page" style="padding-bottom:40px">
+
+      <!-- Breadcrumb -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:13px">
+        <button onclick="window.closeCandidateProfile()" style="display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:#5347CE;font-size:13px;font-weight:700;cursor:pointer;padding:0">
+          <i class="ti ti-arrow-left"></i>Candidates
+        </button>
+        <i class="ti ti-chevron-right" style="font-size:12px;color:#9ca3af"></i>
+        <span style="color:#18191B;font-weight:600">${h(r.name)}</span>
+        <span style="margin-left:auto">${badge(r.stage)}</span>
+      </div>
+
+      <!-- Hero card -->
+      <div class="dv5-card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#5347CE,#9B8CFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0">${h(ini(r.name))}</div>
+          <div style="flex:1;min-width:0">
+            <h2 style="font-size:20px;font-weight:800;color:#18191B;margin:0 0 3px">${h(r.name)}</h2>
+            <div style="font-size:13px;color:#6b7280;margin-bottom:10px">${h(r.position||'—')} · ${h(r.company||r.country||'—')}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:#374151;font-weight:600">
+              <span><i class="ti ti-map-pin" style="color:#9ca3af;margin-right:3px"></i>${h(r.country||'—')}</span>
+              <span><i class="ti ti-id" style="color:#9ca3af;margin-right:3px"></i>${h(r.pp||'No passport')}</span>
+              <span><i class="ti ti-phone" style="color:#9ca3af;margin-right:3px"></i>${h(r.phone||'No phone')}</span>
+              ${r.owner?`<span><i class="ti ti-user" style="color:#9ca3af;margin-right:3px"></i>${h(r.owner)}</span>`:''}
             </div>
           </div>
-          <div class="dv5-profile-stage">
-            ${badge(r.stage)}
-            <small>Next: ${h(nextAction(r))}</small>
+          <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;align-items:flex-start">
+            <button class="dv5-btn" onclick="${type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}"><i class="ti ti-edit"></i>Edit</button>
+            <button class="dv5-btn primary" onclick="openDocs('${type}',${JSON.stringify(r.id)},'${js(r.name)}')"><i class="ti ti-upload"></i>Upload Docs</button>
           </div>
         </div>
+      </div>
+
+      <!-- Vitals row -->
+      <div class="dv5-profile-vitals">
+        <div class="dv5-vital-card" style="background:#fff;border-color:#E8E8E8">
+          <div class="dv5-vital-label">Stage</div>
+          ${badge(r.stage)}
+          <div class="dv5-vital-hint">${h(nextAction(r))}</div>
+        </div>
+        <div class="dv5-vital-card" style="background:#EFF6FF;border-color:#DBEAFE">
+          <div class="dv5-vital-label" style="color:#2563EB">${type==='pro'?'Commission':'To Refund'}</div>
+          <div class="dv5-vital-value" style="color:#1e40af">${fmt2(r.commission)}</div>
+          <div class="dv5-vital-hint" style="color:#3b82f6">Total agreed</div>
+        </div>
+        <div class="dv5-vital-card" style="background:#F0FDF4;border-color:#BBF7D0">
+          <div class="dv5-vital-label" style="color:#16a34a">Paid</div>
+          <div class="dv5-vital-value" style="color:#15803d">${fmt2(r.paid)}</div>
+          <div class="dv5-vital-hint" style="color:#22c55e">${r.commission?Math.round(r.paid/r.commission*100)+'% collected':'No commission set'}</div>
+        </div>
+        <div class="dv5-vital-card" style="background:${r.balance>0?'#FEF2F2':'#F0FDF4'};border-color:${r.balance>0?'#FECACA':'#BBF7D0'}">
+          <div class="dv5-vital-label" style="color:${r.balance>0?'#DC2626':'#16a34a'}">Balance</div>
+          <div class="dv5-vital-value" style="color:${r.balance>0?'#b91c1c':'#15803d'}">${fmt2(r.balance)}</div>
+          <div class="dv5-vital-hint" style="color:${r.balance>0?'#ef4444':'#22c55e'}">${r.balance>0?'Outstanding':'Fully settled'}</div>
+        </div>
+      </div>
+
+      <!-- Pipeline progress -->
+      <div class="dv5-card" style="margin-bottom:16px">
+        <div class="dv5-card-head" style="margin-bottom:14px">
+          <span class="dv5-card-title">Pipeline Progress</span>
+          <span class="dv5-card-sub">${h(stageLabels[Math.max(0,stageIdx)] || r.stage || '—')}</span>
+        </div>
         <div class="dv5-progress-steps">
-          ${stages.map((s,i) => `
+          ${stageLabels.map((s,i) => `
             <div class="dv5-step ${i<stageIdx?'done':i===stageIdx?'active':''}">
               <span>${i+1}</span><small>${h(s)}</small>
             </div>`).join('')}
         </div>
-        <div class="dv5-profile-grid">
-          <div class="dv5-card">
-            <div class="dv5-card-head">
-              <span class="dv5-card-title">Stage Checklist</span>
-              <span class="dv5-card-sub">${pct}%</span>
-            </div>
-            <div style="height:4px;background:#f0f0f0;border-radius:2px;margin:0 0 12px">
-              <div style="height:100%;width:${pct}%;background:${pct===100?'#22A06B':'#5347CE'};border-radius:2px;transition:width .4s"></div>
-            </div>
-            ${cl.map(x => {
-              if (x.done) return `
-                <div class="dv5-check-row done" style="opacity:.7">
-                  <i class="ti ti-circle-check-filled" style="color:#22A06B;font-size:18px;flex-shrink:0"></i>
-                  <span style="text-decoration:line-through;flex:1">${h(x.label)}</span>
-                  ${x.action && x.action!=='edit' ? `<button onclick="window.checklistUntick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid #e4e4e7;background:transparent;color:#9ca3af;cursor:pointer;flex-shrink:0">Undo</button>` : ''}
-                </div>`;
-              if (x.action === 'docs') return `
-                <button class="dv5-check-row clickable" onclick="openDocs('${type}',${JSON.stringify(id)},'${js(r.name)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
-                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
-                  <span>${h(x.label)}</span>
-                  <span class="dv5-check-hint">Upload →</span>
-                </button>`;
-              if (x.action === 'edit') return `
-                <button class="dv5-check-row clickable" onclick="${type==='pro'?`editPro(${id})`:`editLB(${id})`}" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
-                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
-                  <span>${h(x.label)}</span>
-                  <span class="dv5-check-hint">Enter amount →</span>
-                </button>`;
-              return `
-                <button class="dv5-check-row clickable" onclick="window.checklistTick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
-                  <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
-                  <span>${h(x.label)}</span>
-                  <span class="dv5-check-hint">Mark done ✓</span>
-                </button>`;
-            }).join('')}
-          </div>
-          <div class="dv5-card">
-            <div class="dv5-card-head"><span class="dv5-card-title">Details</span></div>
-            <div class="dv5-detail-grid">
-              <span>${type==='pro'?'Submitted':'Doc Date'}</span><strong>${h(fmt(r.submitted||r.travelDate))}</strong>
-              <span>Stage</span><strong>${h(r.stage)}</strong>
-              <span>${type==='pro'?'Company':'Country'}</span><strong>${h(r.company||r.country||'—')}</strong>
-              ${type==='pro' && r.raw?.ol     ? `<span>Offer Letter</span><strong>${h(fmt(r.raw.ol))}</strong>` : ''}
-              ${type==='pro' && r.raw?.medical? `<span>Medical</span><strong>${h(fmt(r.raw.medical))}</strong>` : ''}
-              ${type==='pro' && r.raw?.mol    ? `<span>MOL Date</span><strong>${h(fmt(r.raw.mol))}</strong>` : ''}
-              ${type==='pro' && r.raw?.visa   ? `<span>Visa Date</span><strong>${h(fmt(r.raw.visa))}</strong>` : ''}
-              ${r.travel ? `<span>Travel Date</span><strong>${h(fmt(r.travel))}</strong>` : ''}
-            </div>
-          </div>
-          <div class="dv5-card">
-            <div class="dv5-card-head"><span class="dv5-card-title">Finance</span></div>
-            <div class="dv5-detail-grid">
-              <span>${type==='pro'?'Commission':'To Refund'}</span><strong>${type==='pro'?money(r.commission):moneyUSD(r.commission)}</strong>
-              <span>Paid</span><strong>${type==='pro'?money(r.paid):moneyUSD(r.paid)}</strong>
-              <span>Balance</span><strong style="color:${r.balance>0?'#B83232':'#22A06B'}">${type==='pro'?money(r.balance):moneyUSD(r.balance)}</strong>
-              <span>Documents</span><strong>${link?'Uploaded':'Missing'}</strong>
-            </div>
-            ${safeLink?`<div style="margin-top:12px">
-              <button class="dv5-btn" onclick="window.open('${h(safeLink)}','_blank')">
-                <i class="ti ti-external-link"></i>Open Document
-              </button>
-            </div>`:''}
-          </div>
-        </div>
-        <div class="dv5-card" style="margin-top:0">
-          <div class="dv5-card-head"><span class="dv5-card-title">Recent Activity</span></div>
-          <div class="dv5-activity-list">
-            ${timeline.length ? timeline.map(t=>`
-              <div class="dv5-activity-item">
-                <div class="dv5-activity-icon"><i class="ti ti-clock"></i></div>
-                <div>
-                  <div class="dv5-activity-title">${h(t.action||t.text||'Updated')}</div>
-                  <div class="dv5-activity-meta">${h(t.user||'Dreco')} · ${h(fmt(t.ts||t.at||''))}</div>
-                </div>
-              </div>`).join('') : '<div class="dv5-empty">No activity recorded yet.</div>'}
-          </div>
-        </div>
-      </div>`;
-    modal.style.display = 'flex';
-  };
+      </div>
 
-  window.closeProfile = function() {
-    const m = document.getElementById('dv5-profile-modal');
-    if (m) m.style.display = 'none';
-  };
+      <!-- Checklist + Details -->
+      <div class="dv5-two-col" style="margin-bottom:16px">
+        <div class="dv5-card">
+          <div class="dv5-card-head">
+            <span class="dv5-card-title">Stage Checklist</span>
+            <span class="dv5-card-sub">${pct}%</span>
+          </div>
+          <div style="height:4px;background:#f0f0f0;border-radius:2px;margin:0 0 12px">
+            <div style="height:100%;width:${pct}%;background:${pct===100?'#22A06B':'#5347CE'};border-radius:2px;transition:width .4s"></div>
+          </div>
+          ${cl.map(x => {
+            if (x.done) return `
+              <div class="dv5-check-row done" style="opacity:.7">
+                <i class="ti ti-circle-check-filled" style="color:#22A06B;font-size:18px;flex-shrink:0"></i>
+                <span style="text-decoration:line-through;flex:1">${h(x.label)}</span>
+                ${x.action && x.action!=='edit' ? `<button onclick="window.checklistUntick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid #e4e4e7;background:transparent;color:#9ca3af;cursor:pointer;flex-shrink:0">Undo</button>` : ''}
+              </div>`;
+            if (x.action === 'docs') return `
+              <button class="dv5-check-row clickable" onclick="openDocs('${type}',${JSON.stringify(id)},'${js(r.name)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
+                <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
+                <span>${h(x.label)}</span><span class="dv5-check-hint">Upload →</span>
+              </button>`;
+            if (x.action === 'edit') return `
+              <button class="dv5-check-row clickable" onclick="${type==='pro'?`editPro(${id})`:`editLB(${id})`}" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
+                <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
+                <span>${h(x.label)}</span><span class="dv5-check-hint">Enter amount →</span>
+              </button>`;
+            return `
+              <button class="dv5-check-row clickable" onclick="window.checklistTick('${type}',${JSON.stringify(id)},'${js(x.label)}')" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
+                <i class="ti ti-circle" style="color:#d1d5db;font-size:18px;flex-shrink:0"></i>
+                <span>${h(x.label)}</span><span class="dv5-check-hint">Mark done ✓</span>
+              </button>`;
+          }).join('')}
+        </div>
+
+        <div class="dv5-card">
+          <div class="dv5-card-head"><span class="dv5-card-title">Details</span></div>
+          <div class="dv5-detail-grid">
+            <span>${type==='pro'?'Submitted':'Doc Date'}</span><strong>${h(fmt(r.submitted||r.travelDate))}</strong>
+            <span>Stage</span><strong>${h(r.stage)}</strong>
+            <span>${type==='pro'?'Company':'Country'}</span><strong>${h(r.company||r.country||'—')}</strong>
+            ${type==='pro' && r.raw?.ol      ? `<span>Offer Letter</span><strong>${h(fmt(r.raw.ol))}</strong>` : ''}
+            ${type==='pro' && r.raw?.medical ? `<span>Medical</span><strong>${h(fmt(r.raw.medical))}</strong>` : ''}
+            ${type==='pro' && r.raw?.mol     ? `<span>MOL Date</span><strong>${h(fmt(r.raw.mol))}</strong>` : ''}
+            ${type==='pro' && r.raw?.visa    ? `<span>Visa Date</span><strong>${h(fmt(r.raw.visa))}</strong>` : ''}
+            ${r.travel ? `<span>Travel Date</span><strong>${h(fmt(r.travel))}</strong>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents table -->
+      <div class="dv5-card" style="margin-bottom:16px">
+        <div class="dv5-card-head">
+          <span class="dv5-card-title">Documents</span>
+          <span class="dv5-card-sub">${compl.done} / ${compl.total} uploaded</span>
+          <button class="dv5-btn primary" onclick="openDocs('${type}',${JSON.stringify(r.id)},'${js(r.name)}')" style="flex-shrink:0"><i class="ti ti-upload"></i>Upload</button>
+        </div>
+        <div class="dv5-table-wrap">
+          <table class="dv5-table">
+            <thead><tr><th>Document</th><th>Status</th><th>File</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${defs.length ? defs.map(([key, label]) => {
+                const item = items[key];
+                return `<tr>
+                  <td style="font-weight:600">${h(label)}</td>
+                  <td>${item
+                    ? `<span style="display:inline-flex;align-items:center;gap:4px;color:#16a34a;font-size:12px;font-weight:700"><i class="ti ti-circle-check-filled"></i>Uploaded</span>`
+                    : `<span style="display:inline-flex;align-items:center;gap:4px;color:#9ca3af;font-size:12px;font-weight:600"><i class="ti ti-circle"></i>Missing</span>`}
+                  </td>
+                  <td style="color:#6b7280;font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item ? h(item.fileName||'Document') : '—'}</td>
+                  <td style="display:flex;gap:6px;flex-wrap:wrap">
+                    ${item?.url ? `<button class="dv5-action-btn" onclick="window.safeOpenUrl('${js(item.url)}')"><i class="ti ti-external-link"></i>View</button>` : ''}
+                    <button class="dv5-action-btn" onclick="openDocs('${type}',${JSON.stringify(r.id)},'${js(r.name)}')"><i class="ti ti-upload"></i>${item?'Replace':'Upload'}</button>
+                  </td>
+                </tr>`;
+              }).join('') : `<tr><td colspan="4" style="text-align:center;padding:24px;color:#9ca3af">No document types configured.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="dv5-card">
+        <div class="dv5-card-head"><span class="dv5-card-title">Recent Activity</span></div>
+        <div class="dv5-activity-list">
+          ${timeline.length ? timeline.map(t=>`
+            <div class="dv5-activity-item">
+              <div class="dv5-activity-icon"><i class="ti ti-clock"></i></div>
+              <div>
+                <div class="dv5-activity-title">${h(t.action||t.text||'Updated')}</div>
+                <div class="dv5-activity-meta">${h(t.user||'Dreco')} · ${h(fmt(t.ts||t.at||''))}</div>
+              </div>
+            </div>`).join('') : '<div class="dv5-empty">No activity recorded yet.</div>'}
+        </div>
+      </div>
+    </div>`;
+  }
 
   // Map checklist label → {field to set today, stage to advance to}
   const PRO_CHECKLIST_MAP = {
@@ -2306,6 +2373,15 @@ export function injectDepsToD5(deps) {
 .dv5-step.done span { background:#22A06B; color:#fff; border-color:#22A06B; }
 .dv5-step.active span { background:#5347CE; color:#fff; border-color:#5347CE; }
 .dv5-profile-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
+.dv5-breadcrumb { display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:13px; font-weight:700; color:#7B8496; }
+.dv5-breadcrumb a,.dv5-breadcrumb button { color:#5347CE; background:none; border:none; cursor:pointer; font-size:13px; font-weight:700; padding:0; text-decoration:none; }
+.dv5-breadcrumb a:hover,.dv5-breadcrumb button:hover { text-decoration:underline; }
+.dv5-breadcrumb span { color:#7B8496; }
+.dv5-profile-vitals { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+.dv5-vital-card { border:1px solid; border-radius:12px; padding:16px; }
+.dv5-vital-label { font-size:11px; font-weight:700; margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+.dv5-vital-value { font-size:20px; font-weight:800; }
+.dv5-vital-hint { font-size:11px; margin-top:4px; }
 .dv5-check-row { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid var(--border,#E8E8E8); font-size:13px; font-weight:600; color:#374151; border-radius:6px; margin:1px 0; }
 .dv5-check-row:last-child { border:none; }
 .dv5-check-row.clickable:hover { background:#f5f3ff; color:#5347CE; }
@@ -2342,6 +2418,7 @@ export function injectDepsToD5(deps) {
   .dv5-priority-grid > *:last-child:nth-child(odd) strong { margin-bottom:0; }
   .dv5-profile-hero { grid-template-columns:1fr; }
   .dv5-profile-stage { align-items:flex-start; text-align:left; }
+  .dv5-profile-vitals { grid-template-columns:repeat(2,1fr); }
   .dv5-toolbar { flex-direction:column; align-items:stretch; }
   .dv5-toolbar-left,.dv5-toolbar-right { flex-wrap:wrap; }
   .dv5-input,.dv5-select { width:100%; }
@@ -2457,6 +2534,7 @@ export function injectDepsToD5(deps) {
   };
   window.drecoDocCompletion = function(type,id){ return completion(type,id); };
   window.drecoCandidateDocs = function(type,id){ return docItems(type,id); };
+  window.drecoDocDefs = function(type){ return getDefs(type); };
 
   async function persistDocs(type,id,store){
     setDocStore(type,id,store);
