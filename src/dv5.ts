@@ -2155,14 +2155,18 @@ export function injectDepsToD5(deps) {
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
 .dv5-action-queue { margin-bottom:12px; }
 .dv5-action-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
-.dv5-action-card { border:1px solid var(--border,#E8E8E8); background:#fff; border-radius:12px; padding:10px 12px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; text-align:left; cursor:pointer; }
-.dv5-action-card:hover { border-color:#D8D3FF; box-shadow:0 6px 18px rgba(83,71,206,.08); }
-.dv5-action-card.risk { background:#FFF7F7; border-color:#FECACA; }
-.dv5-action-card.watch { background:#FFFBEB; border-color:#FDE68A; }
+.dv5-action-card { border:1px solid #DDD9FF; background:linear-gradient(135deg,#F5F3FF 0%,#EEF2FF 100%); border-radius:12px; padding:10px 12px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; text-align:left; cursor:pointer; transition:box-shadow .15s,border-color .15s; }
+.dv5-action-card:hover { border-color:#C4B5FD; box-shadow:0 6px 18px rgba(83,71,206,.10); }
+.dv5-action-card.risk { background:linear-gradient(135deg,#FFF5F5 0%,#FEE2E2 100%); border-color:#FECACA; }
+.dv5-action-card.risk:hover { border-color:#FCA5A5; box-shadow:0 6px 18px rgba(220,38,38,.08); }
+.dv5-action-card.watch { background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%); border-color:#FCD34D; }
+.dv5-action-card.watch:hover { border-color:#F59E0B; box-shadow:0 6px 18px rgba(217,119,6,.08); }
 .dv5-action-card span { min-width:0; }
-.dv5-action-card strong { display:block; font-size:12px; color:#18191B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-action-card strong { display:block; font-size:12px; color:#1E1B4B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv5-action-card em { display:block; font-style:normal; font-size:11px; color:#6B7280; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dv5-action-card b { color:#5347CE; font-size:12px; }
+.dv5-action-card b { color:#5347CE; font-size:12px; font-weight:562; }
+.dv5-action-card.risk b { color:#DC2626; }
+.dv5-action-card.watch b { color:#D97706; }
 .dv5-next-action { display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; background:#F1EFFF; color:#5347CE; font-size:10px; font-weight:500; white-space:nowrap; }
 .dv5-workflow-mini { min-width:112px; }
 .dv5-workflow-top { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:4px; }
