@@ -344,7 +344,6 @@ let proPage       = 1;
 let lbPage        = 1;
 let editingProId  = null;
 let editingLbId   = null;
-let docsTarget    = null;
 const PER_PAGE    = 20;
 const EXCEL_EPOCH = new Date(1899, 11, 30);
 
@@ -3256,43 +3255,6 @@ async function batchSendProfiles(){
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // DOCUMENTS
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
-function hasDocs(type,id){ const v=allDocs[`${type}_${id}`]; return typeof v==='string'&&v.trim().length>0; }
-function openDocs(type,id,name){
-  docsTarget={type,id,name};
-  document.getElementById('docs-modal-title').textContent=`Documents - ${name}`;
-  let existing=allDocs[`${type}_${id}`]; if(typeof existing!=='string') existing='';
-  const input=document.getElementById('docs-link-input');
-  const openBtn=document.getElementById('docs-open-btn');
-  input.value=existing; openBtn.disabled=!existing.trim(); renderDocChecklist(type,id);
-  const dm=document.getElementById('docs-modal');
-  // Elevate z-index above any open profile/lb modal (z-index:200) so docs always appears on top
-  dm.style.setProperty('z-index','19999','important');
-  dm.classList.add('open');
-}
-function onDocsLinkInput(){ document.getElementById('docs-open-btn').disabled=!document.getElementById('docs-link-input').value.trim(); }
-function openCurrentDocLink(){ const v=document.getElementById('docs-link-input').value.trim(); if(v) window.open(v,'_blank'); }
-function renderDocChecklist(type,id){
-  const el=document.getElementById('docs-checklist'); if(!el) return;
-  const record=(type==='pro'?proDB:lbDB).find(r=>String(r.id)===String(id))||{};
-  const hasFolder=!!String(allDocs[`${type}_${id}`]||'').trim();
-  const items=type==='pro'
-    ? [{label:'Passport',done:!!record.pp},{label:'Offer letter',done:!!record.ol},{label:'MOL',done:!!record.mol},{label:'Visa',done:!!record.visa},{label:'Travel ticket',done:!!record.travel},{label:'Drive folder',done:hasFolder}]
-    : [{label:'Passport',done:String(record.ppStatus||record.pp_status||'')==='HAD PP'},{label:'Travel details',done:!!(record.travelDate||record.travel_date)},{label:'Repayment record',done:!!(record.r1Amt||record.r1_amt||record.r2Amt||record.r2_amt)},{label:'Drive folder',done:hasFolder}];
-  el.innerHTML=`<div class="doc-checklist-title">Document checklist</div><div class="doc-checklist-grid">${items.map(item=>`<span class="doc-check ${item.done?'done':'missing'}"><i class="ti ${item.done?'ti-circle-check':'ti-alert-circle'}"></i>${item.label}</span>`).join('')}</div>`;
-}
-async function saveDocs(){
-  if(!docsTarget) return;
-  const {type,id}=docsTarget;
-  const link=document.getElementById('docs-link-input').value.trim();
-  const dbKey=`${type}_${id}`;
-  allDocs[dbKey]=link;
-  addTimeline(type,id,link?'Documents link updated':'Documents link removed');
-  auditAction('Documents',link?'Documents link updated':'Documents link removed',docsTarget.name||'Candidate');
-  docsTarget = null;
-  closeModal('docs-modal'); showToast('Documents saved','success');
-  if(type==='pro') renderPro(); else renderLB();
-  await saveDocsToDB(dbKey,link);
-}
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // EXPORT CSV
@@ -3585,7 +3547,6 @@ Object.assign(window, {
   openLBForm, editLB, saveLB, deleteLB, renderLB,
   toggleLBSelect, toggleLBOwnPassport, batchSendProfiles,
   // Documents
-  openDocs, saveDocs, onDocsLinkInput, openCurrentDocLink,
   openFirstDocumentUpload, openPendingTravelView,
   // Finance
   exportCSV, exportReportPDF,

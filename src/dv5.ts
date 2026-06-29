@@ -130,17 +130,7 @@ export function injectDepsToD5(deps) {
   const co  = () => (typeof getCompanyName === 'function' ? getCompanyName() : DEFAULT_COMPANY.name);
   const fname = () => String(currentUser?.display || 'John').split(' ')[0] || 'John';
   const avatar = name => `<div class="dv5-avatar">${h(ini(name))}</div>`;
-  const docKey  = r => `${r.type}_${r.id}`;
-  const docLink = r => allDocs?.[docKey(r)] || '';
-  const hasDoc  = r => {
-    if (!!String(docLink(r)||'').trim()) return true;
-    if (r.type === 'lb') {
-      const id = r.id;
-      return !!(allDocs?.[`lb_${id}_id`]||allDocs?.[`lb_${id}_birth`]||allDocs?.[`lb_${id}_photo`]||allDocs?.[`lb_${id}_passport`]||docTicks?.[`lb_${id}_National ID`]||docTicks?.[`lb_${id}_Photo`]);
-    }
-    return false;
-  };
-  const safeUrl = u => /^https?:\/\//i.test(String(u||'')) ? u : '';
+  const hasDoc  = r => typeof window.hasDocs === 'function' ? window.hasDocs(r.type, r.id) : false;
   const balPro  = r => (typeof proBalance === 'function') ? proBalance(r) : Math.max((Number(r.commission)||0)-(Number(r.paid)||0),0);
   const LB_TRAVELLED_STAGES = new Set(['TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
   const lbHasTravelled = r => LB_TRAVELLED_STAGES.has(String(r.stage||r.travelStatus||r.travel_status||'').toUpperCase());
@@ -298,12 +288,12 @@ export function injectDepsToD5(deps) {
     const s = String(r.stage||'').toUpperCase();
     if (r.type === 'lb') {
       const id = r.id;
+      const upl = (typeof window.drecoCandidateDocs === 'function') ? window.drecoCandidateDocs('lb', id) : {};
       return [
-        {label:'National ID',       done: !!(allDocs?.[`lb_${id}_id`]       || docTicks?.[`lb_${id}_National ID`]),  action:'tick'},
-        {label:'Birth Certificate', done: !!(allDocs?.[`lb_${id}_birth`]     || docTicks?.[`lb_${id}_Birth Certificate`]), action:'tick'},
-        {label:'Parent ID',         done: !!(allDocs?.[`lb_${id}_parent_id`] || docTicks?.[`lb_${id}_Parent ID`]),   action:'tick'},
-        {label:'Photo',             done: !!(allDocs?.[`lb_${id}_photo`]     || docTicks?.[`lb_${id}_Photo`]),       action:'tick'},
-        {label:'Passport Copy',     done: !!(allDocs?.[`lb_${id}_passport`]  || docTicks?.[`lb_${id}_Passport Copy`]), action:'tick'},
+        {label:'Passport',          done: !!upl.passport,      action:'docs'},
+        {label:'Photo',             done: !!upl.photo,         action:'docs'},
+        {label:'CV',                done: !!upl.cv,            action:'docs'},
+        {label:'Good Conduct',      done: !!upl.good_conduct,  action:'docs'},
         {label:'Profile Sent',      done: ['PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
         {label:'Selected',          done: ['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
         {label:'Passport Applied',  done: ['PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
@@ -1339,145 +1329,97 @@ export function injectDepsToD5(deps) {
   window.renderFinancePage = renderFinance;
 
   // ── 6. DOCUMENTS ──────────────────────────────────────────
-  const DOC_CHECKLIST_PRO = ['Passport','Offer Letter','Medical Cert','MOL','Visa','Ticket'];
-  const DOC_CHECKLIST_LB  = ['National ID','Birth Certificate','Parent ID','Photo','Passport Copy'];
-
-  // Doc ticks stored in localStorage keyed as "type_id_docname"
-  let docTicks = JSON.parse(safeLocalGet('dreco_doc_ticks') || '{}');
-  function saveDocTicks() { try { localStorage.setItem('dreco_doc_ticks', JSON.stringify(docTicks)); } catch(e){} }
-  window.toggleDocTick = function(type, id, docName) {
-    const key = `${type}_${id}_${docName}`;
-    docTicks[key] = !docTicks[key];
-    saveDocTicks();
-    renderDocuments();
-  };
-
-  function docChecklist(r) {
-    const items = r.type==='pro' ? DOC_CHECKLIST_PRO : DOC_CHECKLIST_LB;
-    const got = new Set();
-    if (r.type==='pro') {
-      if (r.pp)      got.add('Passport');
-      if (r.ol)      got.add('Offer Letter');
-      if (r.medical) got.add('Medical Cert');
-      if (r.mol)     got.add('MOL');
-      if (r.visa)    got.add('Visa');
-      if (r.travel)  got.add('Ticket');
-    } else {
-      const rid = r.id;
-      if (allDocs?.[`lb_${rid}_id`])         got.add('National ID');
-      if (allDocs?.[`lb_${rid}_birth`])       got.add('Birth Certificate');
-      if (allDocs?.[`lb_${rid}_parent_id`])   got.add('Parent ID');
-      if (allDocs?.[`lb_${rid}_photo`])       got.add('Photo');
-      if (allDocs?.[`lb_${rid}_passport`])    got.add('Passport Copy');
-    }
-    // merge manual ticks
-    items.forEach(doc => { if (docTicks[`${r.type}_${r.id}_${doc}`]) got.add(doc); });
-    const done = items.filter(i=>got.has(i)).length;
-    return { items, got, done, total: items.length, pct: Math.round(done/items.length*100) };
-  }
-
-  let docsView = 'list'; // 'list' | 'gaps'
-  window.setDocsView = v => { docsView = v; renderDocuments(); };
 
   function renderDocuments() {
     const el = document.getElementById('documents-section'); if (!el) return;
     const isPro = jobTypeTab === 'pro';
-    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')=== lbCountryFilter) : (lbDB||[]);
-    const rawRows = isPro ? (proDB||[]).map(r=>({...r,type:'pro'})) : lbBase.map(r=>({...r,type:'lb'}));
-    const rows = rawRows;
-    const complete = rows.filter(r=>{ const c=docChecklist(r); return c.done===c.total; }).length;
-    const partial  = rows.filter(r=>{ const c=docChecklist(r); return c.done>0&&c.done<c.total; }).length;
-    const missing  = rows.filter(r=>docChecklist(r).done===0).length;
-    // Build gap data: for each doc type, which candidates are missing it
-    const docTypes = isPro
-      ? ['Passport','Offer Letter','Medical','MOL','Visa','Travel Ticket']
-      : ['National ID','Birth Certificate','Parent ID','Photo','Passport Copy'];
-    const gapData = docTypes.map(type => {
-      const missing = rows.filter(r => {
-        const cl = docChecklist(r);
-        return !cl.got.has(type);
-      });
-      return {type, missing, total: rows.length};
+    const type  = isPro ? 'pro' : 'lb';
+    const lbBase = lbCountryFilter ? (lbDB||[]).filter(r=>(r.country||'')===lbCountryFilter) : (lbDB||[]);
+    const rows = isPro ? (proDB||[]).map(r=>({...r,type:'pro'})) : lbBase.map(r=>({...r,type:'lb'}));
+
+    const getCandidateDocs = (t, id) => (typeof window.drecoCandidateDocs === 'function') ? (window.drecoCandidateDocs(t, id) || {}) : {};
+    const defs = (typeof window.drecoDocDefs === 'function') ? window.drecoDocDefs(type) : [];
+    const fmtBytes = n => { n=Number(n||0); if(!n) return ''; if(n<1024) return n+'B'; if(n<1048576) return (n/1024).toFixed(1)+'KB'; return (n/1048576).toFixed(1)+'MB'; };
+    const fmtDate  = v => { if(!v) return ''; const d=new Date(v); return isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); };
+
+    // Per-category: which candidates have each doc type
+    const categories = defs.map(([key, label]) => {
+      const holders = rows.map(r => {
+        const items = getCandidateDocs(r.type, r.id);
+        return items[key] ? { ...r, docMeta: items[key] } : null;
+      }).filter(Boolean);
+      return { key, label, holders };
     });
 
-    const viewToggle = `<div style="display:flex;gap:6px">
-      <button class="dv5-btn${docsView==='list'?' active':''}" onclick="setDocsView('list')"><i class="ti ti-list"></i>List</button>
-      <button class="dv5-btn${docsView==='gaps'?' active':''}" onclick="setDocsView('gaps')"><i class="ti ti-alert-triangle"></i>Gaps</button>
-    </div>`;
+    // Summary counts
+    const withAny   = rows.filter(r => typeof window.hasDocs === 'function' && window.hasDocs(r.type, r.id));
+    const withNone  = rows.filter(r => !(typeof window.hasDocs === 'function' && window.hasDocs(r.type, r.id)));
+    const totalFiles = rows.reduce((sum, r) => {
+      const c = typeof window.drecoDocCompletion === 'function' ? window.drecoDocCompletion(r.type, r.id) : {done:0};
+      return sum + c.done;
+    }, 0);
 
-    const gapHTML = `<div class="dv5-card">
-      <div class="dv5-card-head"><span class="dv5-card-title">Missing Documents by Type</span><span class="dv5-card-sub">${rows.length} candidates</span></div>
-      ${gapData.map(g => {
-        const pct = rows.length ? Math.round((g.missing.length/rows.length)*100) : 0;
-        return `<div style="padding:10px 16px;border-bottom:1px solid var(--border,#f0f1f3)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <span style="font-size:13px;font-weight:700">${h(g.type)}</span>
-            <span class="dv5-pill ${g.missing.length?'red':'green'}">${g.missing.length} missing</span>
-          </div>
-          <div style="height:5px;background:#f3f4f6;border-radius:999px;overflow:hidden;margin-bottom:6px">
-            <div style="width:${pct}%;height:100%;background:${pct>50?'#EF4444':pct>0?'#F59E0B':'#22c55e'};border-radius:999px"></div>
-          </div>
-          ${g.missing.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px">${g.missing.map(r=>`<button class="dv5-action-btn" onclick="openCandidateProfile('${r.type}',${r.id})" style="font-size:11px">${h(r.name)}</button>`).join('')}</div>` : `<div style="font-size:11px;color:#16a34a">All candidates have this document</div>`}
-        </div>`;
-      }).join('')}
-    </div>`;
+    const categoryHTML = categories.map(({ key, label, holders }) => `
+      <div class="dv5-doc-category">
+        <div class="dv5-card-head">
+          <span class="dv5-card-title"><i class="ti ti-file" style="font-size:14px;margin-right:6px;color:#5347CE"></i>${h(label)}</span>
+          <span class="dv5-card-sub">${holders.length} of ${rows.length} candidate${rows.length===1?'':'s'}</span>
+        </div>
+        ${holders.length === 0
+          ? `<div class="dv5-doc-empty">No uploads yet</div>`
+          : `<div class="dv5-doc-holders">${holders.map(r => `
+              <div class="dv5-doc-holder-row" onclick="openCandidateProfile('${r.type}',${r.id})">
+                ${avatar(r.name)}
+                <div class="dv5-doc-holder-info">
+                  <div class="dv5-name">${h(r.name)}</div>
+                  <div class="dv5-sub">${h(r.docMeta.fileName||'')}${r.docMeta.size ? ' · '+fmtBytes(r.docMeta.size) : ''}</div>
+                </div>
+                <div class="dv5-doc-holder-meta">
+                  <div>${h(r.docMeta.uploadedBy||'')}</div>
+                  <div>${fmtDate(r.docMeta.uploadedAt)}</div>
+                </div>
+                <button class="dv5-action-btn" onclick="event.stopPropagation();window.drecoViewDoc('${r.type}','${r.id}','${key}')"><i class="ti ti-eye"></i> View</button>
+                <button class="dv5-action-btn" onclick="event.stopPropagation();window.openDocs('${r.type}',${r.id},'${js(r.name)}')"><i class="ti ti-upload"></i> Manage</button>
+              </div>`).join('')}
+            </div>`
+        }
+      </div>`).join('');
+
+    const noneHTML = withNone.length ? `
+      <div class="dv5-doc-category">
+        <div class="dv5-card-head">
+          <span class="dv5-card-title" style="color:#9ca3af"><i class="ti ti-folder-off" style="font-size:14px;margin-right:6px"></i>No uploads yet</span>
+          <span class="dv5-card-sub">${withNone.length} candidate${withNone.length===1?'':'s'}</span>
+        </div>
+        <div class="dv5-doc-holders">${withNone.map(r => `
+          <div class="dv5-doc-holder-row" onclick="openCandidateProfile('${r.type}',${r.id})">
+            ${avatar(r.name)}
+            <div class="dv5-doc-holder-info">
+              <div class="dv5-name">${h(r.name)}</div>
+              <div class="dv5-sub">${h(r.company||r.country||'')}</div>
+            </div>
+            <div class="dv5-doc-holder-meta"></div>
+            <button class="dv5-action-btn" onclick="event.stopPropagation();window.openDocs('${r.type}',${r.id},'${js(r.name)}')"><i class="ti ti-upload"></i> Upload</button>
+          </div>`).join('')}
+        </div>
+      </div>` : '';
 
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
-          <div><h1>Documents</h1><p>${isPro?'Professional — passport, offer letter, MOL, visa, travel.':'General Jobs — ID, birth cert, photo, passport copy.'}</p></div>
-          <div class="dv5-head-actions">
-            ${jobTypeTabs()}
-            ${viewToggle}
-            <button class="dv5-btn primary" onclick="switchTab('candidates')"><i class="ti ti-paperclip"></i>Attach to Candidate</button>
-          </div>
+          <div><h1>Documents</h1><p>${isPro ? 'Professional candidates' : 'General Jobs candidates'}</p></div>
+          <div class="dv5-head-actions">${jobTypeTabs()}</div>
         </div>
         ${!isPro ? lbCountryBar(lbDB||[]) : ''}
         <div class="dv5-file-grid">
-          ${fileCard('ti-file-description', '#2563EB', '#2563EB', 'Drive Links', Object.values(allDocs||{}).filter(Boolean).length, rows.length, `${Object.values(allDocs||{}).filter(Boolean).length} of ${rows.length} uploaded`, "switchTab('documents')")}
-          ${fileCard('ti-folder-check',     '#059669', '#059669', 'Complete Docs', complete, rows.length, `All documents present`, "switchTab('documents')")}
-          ${fileCard('ti-id',               '#D97706', '#F59E0B', 'Passports', rows.filter(r=>r.pp).length, rows.length, `Passport numbers recorded`, "switchTab('documents')")}
-          ${fileCard('ti-folder-x',         '#DC2626', '#EF4444', 'Missing',  missing, rows.length, `No documents yet`, "switchTab('documents')")}
+          ${fileCard('ti-files',        '#5347CE', '#5347CE', 'Files Uploaded', totalFiles,    defs.length*Math.max(rows.length,1), `Across all candidates`,          '')}
+          ${fileCard('ti-folder-check', '#059669', '#22c55e', 'With Documents', withAny.length,  rows.length,                        `${withAny.length} have uploads`, '')}
+          ${fileCard('ti-folder-off',   '#78716C', '#a8a29e', 'Awaiting Upload', withNone.length, rows.length,                       `No uploads yet`,                 '')}
         </div>
-        ${docsView==='gaps' ? gapHTML : `<div class="dv5-table-card">
-          <div class="dv5-table-wrap">
-            <table class="dv5-table">
-              <thead><tr><th>Candidate</th><th>Type</th><th>Company</th><th>Passport</th><th>Checklist</th><th>Progress</th><th>Drive Link</th><th>Action</th></tr></thead>
-              <tbody>
-                ${rows.map(r => {
-                  const cl = docChecklist(r);
-                  const link = docLink(r);
-                  const safeLink = safeUrl(link);
-                  const bar = `<div style="display:flex;align-items:center;gap:6px">
-                    <div style="flex:1;height:6px;background:#eef1f6;border-radius:999px;overflow:hidden">
-                      <div style="width:${cl.pct}%;height:100%;background:${cl.pct===100?'#16a34a':cl.pct>0?'#5347CE':'#e5e7eb'};border-radius:999px"></div>
-                    </div>
-                    <span style="font-size:10px;font-weight:700;color:#6b7280;white-space:nowrap">${cl.done}/${cl.total}</span>
-                  </div>`;
-                  const chips = cl.items.map(item=>{
-                    const have = cl.got.has(item);
-                    return `<button onclick="event.stopPropagation();window.toggleDocTick('${r.type}',${JSON.stringify(r.id)},'${js(item)}')"
-                      style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid ${have?'#86efac':'#fca5a5'};background:${have?'#dcfce7':'#fee2e2'};color:${have?'#15803d':'#b91c1c'};cursor:pointer;display:inline-flex;align-items:center;gap:3px">
-                      ${have?'<i class="ti ti-check" style="font-size:8px"></i>':'<i class="ti ti-square" style="font-size:8px"></i>'}${item}</button>`;
-                  }).join('');
-                  return `<tr onclick="openCandidateProfile('${r.type}',${r.id})">
-                    <td><div class="dv5-name-cell">${avatar(r.name)}<div>
-                      <div class="dv5-name">${h(r.name)}</div>
-                      <div class="dv5-sub">${h(r.phone||'—')}</div>
-                    </div></div></td>
-                    <td>${r.type==='pro'?'Professional':'General'}</td>
-                    <td>${h(r.company)}</td>
-                    <td>${h(r.pp||'—')}</td>
-                    <td><div style="display:flex;flex-wrap:wrap;gap:3px">${chips}</div></td>
-                    <td style="min-width:120px">${bar}</td>
-                    <td>${safeLink?`<button class="dv5-action-btn" onclick="event.stopPropagation();window.open('${h(safeLink)}','_blank')"><i class="ti ti-external-link"></i>Open</button>`:'—'}</td>
-                    <td><button class="dv5-action-btn" onclick="event.stopPropagation();openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')">Manage</button></td>
-                  </tr>`;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>`}
+        <div class="dv5-doc-library">
+          ${categoryHTML}
+          ${noneHTML}
+        </div>
       </div>`;
   }
   window.renderDocumentsPage = renderDocuments;

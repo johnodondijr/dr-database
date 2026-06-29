@@ -4152,6 +4152,19 @@ tr:last-child td{border-bottom:none!important}
   #login-screen .lp-header h1{font-size:28px!important}
   #login-screen .lp-social-row{grid-template-columns:1fr!important}
 }
+/* ── Document Library ── */
+.dv5-doc-library{display:flex;flex-direction:column;gap:14px}
+.dv5-doc-category{background:#fff;border:1px solid #e6eaf2;border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.04)}
+.dv5-doc-category .dv5-card-head{padding:14px 18px;border-bottom:1px solid #eef1f6;display:flex;align-items:center;justify-content:space-between}
+.dv5-doc-empty{padding:14px 18px;font-size:12px;color:#9ca3af;font-weight:500}
+.dv5-doc-holders{display:flex;flex-direction:column}
+.dv5-doc-holder-row{display:grid;grid-template-columns:32px 1fr auto auto auto;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s}
+.dv5-doc-holder-row:last-child{border-bottom:0}
+.dv5-doc-holder-row:hover{background:#f8fafc}
+.dv5-doc-holder-info{min-width:0}
+.dv5-doc-holder-info .dv5-name{font-size:12px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv5-doc-holder-info .dv5-sub{font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv5-doc-holder-meta{text-align:right;font-size:10px;color:#9ca3af;line-height:1.5;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -4990,24 +5003,8 @@ tr:last-child td{border-bottom:none!important}
       <h3 id="docs-modal-title">Documents</h3>
       <button class="modal-close" onclick="closeModal('docs-modal')">x</button>
     </div>
-    <div class="modal-body">
-      <p style="font-size:12px;color:var(--text-3);margin-bottom:14px">
-        Upload all of this candidate's documents into one Google Drive folder, then paste the share link below.
-        <a href="https://support.google.com/drive/answer/2494822" target="_blank" style="color:var(--blue)">How to get a share link</a>
-      </p>
-      <div id="docs-checklist" class="doc-checklist"></div>
-      <div class="field">
-        <label for="docs-link-input">Documents folder link</label>
-        <input class="doc-link-input" type="text" id="docs-link-input" placeholder="Paste Google Drive folder link..." oninput="onDocsLinkInput()">
-      </div>
-    </div>
-    <div class="modal-footer" style="justify-content:space-between">
-      <button class="doc-open-btn" id="docs-open-btn" disabled onclick="openCurrentDocLink()"><i class="ti ti-folder-open"></i> View documents</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn" onclick="closeModal('docs-modal')">Close</button>
-        <button class="btn primary" onclick="saveDocs()"><i class="ti ti-device-floppy"></i> Save</button>
-      </div>
-    </div>
+    <div class="modal-body"></div>
+    <div class="modal-footer" style="justify-content:space-between"></div>
   </div>
 </div>
 
