@@ -463,10 +463,10 @@ export function injectDepsToD5(deps) {
   }
 
   // ── Priority card helper ──────────────────────────────────
-  function priority(icon, num, label, note, color, action='') {
+  function priority(icon, num, label, note, cardBg, iconBg, action='') {
     const click = action ? `onclick="${action}"` : '';
-    return `<div class="dv5-priority" ${click}>
-      <div class="dv5-priority-icon" style="background:${color}"><i class="ti ${h(icon)}"></i></div>
+    return `<div class="dv5-priority" style="background:${cardBg}" ${click}>
+      <div class="dv5-priority-icon" style="background:${iconBg}"><i class="ti ${h(icon)}"></i></div>
       <strong>${h(String(num))}</strong>
       <span>${h(label)}</span>
       <small>${h(note)}</small>
@@ -684,17 +684,17 @@ export function injectDepsToD5(deps) {
 
         <div class="dv5-priority-grid">
           ${isPro ? `
-            ${priority('ti-file-description', awaitMol,  'Awaiting MOL',       'Submit to ministry',   '#FFF4DE', "switchTab('pipeline')")}
-            ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',        'Ready to travel',      '#E9F3FF', "switchTab('pipeline')")}
-            ${priority('ti-coin',             unpaidPro, 'Unpaid Commissions', 'Requires follow up',   '#E8F8EE', "switchTab('finance')")}
-            ${priority('ti-plane-departure',  tickets,   'Tickets Pending',    'Awaiting issue',       '#F1EFFF', "switchTab('pipeline')")}
-            ${priority('ti-users',            normRows.length, 'Total Candidates', 'In pipeline',        '#FEECEF', "switchTab('candidates')")}
+            ${priority('ti-file-description', awaitMol,  'Awaiting MOL',       'Submit to ministry',   '#FEF9C3','#A16207', "switchTab('pipeline')")}
+            ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',        'Ready to travel',      '#DCFCE7','#16A34A', "switchTab('pipeline')")}
+            ${priority('ti-coin',             unpaidPro, 'Unpaid Commissions', 'Requires follow up',   '#FCE7F3','#9D174D', "switchTab('finance')")}
+            ${priority('ti-plane-departure',  tickets,   'Tickets Pending',    'Awaiting issue',       '#E0F2FE','#0369A1', "switchTab('pipeline')")}
+            ${priority('ti-users',            normRows.length, 'Total Candidates', 'In pipeline',      '#F5F3FF','#7C3AED', "switchTab('candidates')")}
           ` : `
-            ${priority('ti-users',            lbSelected,      'Selected',           'Awaiting passport',    '#E9F3FF', "switchTab('pipeline')")}
-            ${priority('ti-credit-card',      lbRefundPending, 'Refund Pending',     'Refunds to process',   '#FFF4DE', "switchTab('finance')")}
-            ${priority('ti-coin',             unpaidLB,        'Outstanding USD',    'Refunds not started',  '#E8F8EE', "switchTab('finance')")}
-            ${priority('ti-passport',         lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length, 'Passport Applied', 'Awaiting passport', '#F1EFFF', "switchTab('pipeline')")}
-            ${priority('ti-users',            normRows.length, 'Total Candidates',   'In pipeline',          '#FEECEF', "switchTab('candidates')")}
+            ${priority('ti-users',            lbSelected,      'Selected',           'Awaiting passport',    '#E0F2FE','#0369A1', "switchTab('pipeline')")}
+            ${priority('ti-credit-card',      lbRefundPending, 'Refund Pending',     'Refunds to process',   '#FEF9C3','#A16207', "switchTab('finance')")}
+            ${priority('ti-coin',             unpaidLB,        'Outstanding USD',    'Refunds not started',  '#FCE7F3','#9D174D', "switchTab('finance')")}
+            ${priority('ti-passport',         lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length, 'Passport Applied', 'Awaiting passport', '#DCFCE7','#16A34A', "switchTab('pipeline')")}
+            ${priority('ti-users',            normRows.length, 'Total Candidates',   'In pipeline',          '#F5F3FF','#7C3AED', "switchTab('candidates')")}
           `}
         </div>
 
@@ -779,19 +779,6 @@ export function injectDepsToD5(deps) {
           </div>
         </div>
 
-        <div class="dv5-stat-grid" style="margin-top:0">
-          ${isPro ? `
-            ${statCard('ti-users',      proNorm.length,                                         'Professional',    `Total candidates`,      '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
-            ${statCard('ti-plane',      travelled,                                              'Placements',      `Completed`,             '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-users-group',proNorm.filter(r=>r.stage!=='TRAVELLED').length,        'Active Pipeline', `In progress`,           '#FCE7F3','#9D174D','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-wallet',     money(totalPaidPro),                                   'Revenue (KES)',   `Commission collected`,   '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
-          ` : `
-            ${statCard('ti-users',      lbNorm.length,                                          'General Jobs',    `Total candidates`,      '#E0F2FE','#0369A1','#fff', "switchTab('candidates')")}
-            ${statCard('ti-plane',      travelled,                                              'Travelled',       `Successfully placed`,   '#DCFCE7','#16A34A','#fff', "switchTab('pipeline')")}
-            ${statCard('ti-passport',   lbNorm.filter(r=>r.own_passport).length,               'Own Passport',    `No refund required`,    '#F0FDF4','#059669','#fff', "switchTab('candidates')")}
-            ${statCard('ti-wallet',     moneyUSD(totalPaidLB),                                 'Refunds (USD)',   `Refunds collected`,      '#FEF9C3','#A16207','#fff', "switchTab('finance')")}
-          `}
-        </div>
       </div>`;
   }
   window.renderDash = renderDash;
