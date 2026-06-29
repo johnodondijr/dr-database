@@ -1527,7 +1527,6 @@ function renderReports(){
   const refundOpen=lbDB.filter(r=>getRefundStatus(r)==='incomplete').length;
   const proActionCount=proDB.filter(proNeedsAction).length;
   const lbActionCount=lbDB.filter(lbNeedsAction).length;
-  const missingDocs=proDB.filter(r=>!hasDocs('pro',r.id)).length+lbDB.filter(r=>!hasDocs('lb',r.id)).length;
   const stalledStages=proStages.map(stage=>({stage,count:proDB.filter(r=>r.stage===stage).length})).sort((a,b)=>b.count-a.count)[0];
   const money=n=>'KES '+Number(n||0).toLocaleString();
   const short=s=>{
@@ -1593,9 +1592,8 @@ function renderReports(){
   }).join(''):`<tr><td colspan="7"><div class="empty">No position data yet</div></td></tr>`;
 
   wrap.innerHTML=`<div class="action-grid">
-    <div class="action-card warn"><i class="ti ti-alert-triangle"></i><div><strong>${proActionCount}</strong><span>Professional records need attention: missing docs, pending travel, or outstanding balance.</span></div></div>
+    <div class="action-card warn"><i class="ti ti-alert-triangle"></i><div><strong>${proActionCount}</strong><span>Professional records need attention: pending travel or outstanding balance.</span></div></div>
     <div class="action-card danger"><i class="ti ti-receipt-refund"></i><div><strong>${lbActionCount}</strong><span>General Jobs records need attention, including ${refundOpen} open balances.</span></div></div>
-    <div class="action-card good"><i class="ti ti-file-check"></i><div><strong>${missingDocs}</strong><span>Candidate records are missing document links across both pipelines.</span></div></div>
   </div>
   <div class="reports-grid">
     <div class="report-card">
@@ -1905,10 +1903,10 @@ function proBalance(r){
 }
 function proNeedsAction(r){
   const stage=r.stage||'';
-  return !hasDocs('pro',r.id) || (stage!=='TRAVELLED'&&!toInput(r.travel)) || proBalance(r)>0;
+  return (stage!=='TRAVELLED'&&!toInput(r.travel)) || proBalance(r)>0;
 }
 function lbNeedsAction(r){
-  return !hasDocs('lb',r.id) || getRefundStatus(r)==='incomplete' || ((r.travelStatus||r.travel_status)==='NOT YET');
+  return getRefundStatus(r)==='incomplete' || ((r.travelStatus||r.travel_status)==='NOT YET');
 }
 function validateProRecord(rec) {
   if(!rec.name) return 'Full name is required.';
@@ -2794,8 +2792,7 @@ function getFilteredPro(){
     const outstanding=proBalance(r)>0;
     const actionMatch=!action ||
       (action==='needs-action'&&proNeedsAction(r)) ||
-      (action==='outstanding'&&outstanding) ||
-      (action==='no-docs'&&!hasDocs('pro',r.id));
+      (action==='outstanding'&&outstanding);
     let dateMatch=true;
     if(dateFrom||dateTo){
       const sub=toInput(r.submitted);
@@ -2844,7 +2841,6 @@ function renderPro(){
       const paid=r.paid?'KES '+Number(r.paid).toLocaleString():'&mdash;';
       const bal=(r.commission&&r.paid)?Number(r.commission)-Number(r.paid):null;
       const balTxt=bal!==null?'KES '+bal.toLocaleString():'&mdash;';
-      const hd=hasDocs('pro',r.id);
       const name=escHTML(r.name);
       const pp=escHTML(r.pp||'');
       const position=r.position ? escHTML(r.position) : '&mdash;';
@@ -2859,7 +2855,7 @@ function renderPro(){
         <td>${stageBadge(r.stage)}</td>
         <td>${comm}</td><td>${paid}</td>
         <td class="${bal&&bal>0?'balance-owed':''}">${balTxt}</td>
-        <td onclick="event.stopPropagation()"><button class="action-btn docs dreco-open-docs" data-type="pro" data-id="${r.id}" data-name="${escHTML(r.name)}"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
+        <td onclick="event.stopPropagation()"><button class="action-btn docs dreco-open-docs" data-type="pro" data-id="${r.id}" data-name="${escHTML(r.name)}"><i class="ti ti-paperclip"></i></button></td>
         <td onclick="event.stopPropagation()"><button class="action-btn del" onclick="deletePro(${r.id})"><i class="ti ti-trash"></i></button></td>
       </tr>`;
     }).join('');
@@ -2973,8 +2969,7 @@ function getFilteredLB(){
     const rcountry=r.country||DEFAULT_COMPANY.generalJobsCountries[0]||'General';
     const actionMatch=!action ||
       (action==='needs-action'&&lbNeedsAction(r)) ||
-      (action==='incomplete-refund'&&rs==='incomplete') ||
-      (action==='no-docs'&&!hasDocs('lb',r.id));
+      (action==='incomplete-refund'&&rs==='incomplete');
     let dateMatch=true;
     if(dateFrom||dateTo){
       const td=toInput(r.travelDate||r.travel_date);
@@ -3035,7 +3030,6 @@ function renderLB(){
       const paid=(Number(r.r1Amt||r.r1_amt)||0)+(Number(r.r2Amt||r.r2_amt)||0);
       const bal=(rs==='N/A'||rs==='RETURNED')?'&mdash;':moneyUSD(toR-paid);
       const td=r.travelDate||r.travel_date;
-      const hd=hasDocs('lb',r.id);
       const name=escHTML(r.name);
       const phone=r.phone ? escHTML(r.phone) : '&mdash;';
       const sel=window.lbSelected&&window.lbSelected.has(r.id);
@@ -3051,7 +3045,7 @@ function renderLB(){
         <td>${rs==='N/A'?'&mdash;':moneyUSD(paid)}</td>
         <td class="${rs==='incomplete'?'balance-owed':''}">${bal}</td>
         <td>${refundBadge(rs)}</td>
-        <td onclick="event.stopPropagation()"><button class="action-btn docs dreco-open-docs" data-type="lb" data-id="${r.id}" data-name="${escHTML(r.name)}"><i class="ti ti-paperclip"></i>${hd?' <i class="ti ti-check" style="color:var(--green);font-size:10px"></i>':''}</button></td>
+        <td onclick="event.stopPropagation()"><button class="action-btn docs dreco-open-docs" data-type="lb" data-id="${r.id}" data-name="${escHTML(r.name)}"><i class="ti ti-paperclip"></i></button></td>
         ${rs==='incomplete'?`<td onclick="event.stopPropagation()"><button class="action-btn" onclick="openLBRefundPayment(${r.id})" title="Record refund payment" style="background:#f0fdf4;color:#16a34a;border-color:#86efac"><i class="ti ti-coin"></i></button></td>`:'<td></td>'}
         <td onclick="event.stopPropagation()"><button class="action-btn del" onclick="deleteLB(${r.id})"><i class="ti ti-trash"></i></button></td>
       </tr>`;

@@ -253,7 +253,6 @@ export function injectDepsToD5(deps) {
       const balStr = r.currency==='USD' ? moneyUSD(r.balance) : money(r.balance);
       const meta = `${r.company||r.country||'—'}`;
       auto.push(...[
-        !hasDoc(r)                    && {key:`doc_${r.type}_${r.id}`,    priority:'High',   label:'High', title:`Upload documents — ${r.name}`,     meta, action:docs, icon:'ti-folder-x'},
         r.balance>0                   && {key:`bal_${r.type}_${r.id}`,    priority:'High',   label:'High', title:r.type==='pro'?`Collect commission — ${r.name}`:`Process refund — ${r.name}`, meta:`Balance ${balStr}`, action:edit, icon:'ti-coin'},
         r.type==='pro'&&String(r.stage).toUpperCase()==='MOL'             && {key:`mol_${r.id}`,  priority:'Medium', label:'Med', title:`MOL submission — ${r.name}`, meta, action:edit, icon:'ti-file-check'},
         r.type==='pro'&&String(r.stage).toUpperCase()==='VISA'            && {key:`visa_${r.id}`, priority:'Medium', label:'Med', title:`Visa follow-up — ${r.name}`, meta, action:edit, icon:'ti-id-badge-2'},
@@ -273,7 +272,6 @@ export function injectDepsToD5(deps) {
   // ── Next-action label per candidate ───────────────────────
   function nextAction(r) {
     const s = String(r.stage||'').toUpperCase();
-    if (!hasDoc(r)) return 'Upload documents';
     if (r.type === 'pro' && r.balance > 0) return 'Collect commission';
     if (r.type === 'lb' && r.balance > 0) return 'Process refund';
     if (r.followUp) {
@@ -302,15 +300,13 @@ export function injectDepsToD5(deps) {
 
   // ── Checklist per candidate profile ───────────────────────
   function workflowStatus(r) {
-    const missingDocs = !hasDoc(r);
     const openBalance = Number(r.balance) > 0;
     const action = nextAction(r);
     const pct = checklistPct(r);
     let level = 'ok';
-    if (missingDocs || openBalance || action.includes('today')) level = 'risk';
+    if (openBalance || action.includes('today')) level = 'risk';
     else if (pct < 65 || !['TRAVELLED','REFUND COMPLETE'].includes(String(r.stage||'').toUpperCase())) level = 'watch';
     const reasons = [
-      missingDocs && 'missing docs',
       openBalance && (r.type === 'pro' ? 'unpaid commission' : 'refund balance'),
       pct < 65 && `${pct}% complete`,
     ].filter(Boolean);
@@ -640,7 +636,6 @@ export function injectDepsToD5(deps) {
     const lbSelected      = lbNorm.filter(r=>r.stage==='SELECTED').length;
     const unpaidLB        = lbNorm.filter(r=>r.balance>0&&!r.own_passport).length;
 
-    const missDocs  = normRows.filter(r=>!hasDoc(r)).length;
     const travelled = normRows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
     const totalPaidPro = proNorm.reduce((s,r)=>s+r.paid,0);
     const totalPaidLB  = lbNorm.reduce((s,r)=>s+r.paid,0);
@@ -693,13 +688,13 @@ export function injectDepsToD5(deps) {
             ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',        'Ready to travel',      '#E9F3FF', "switchTab('pipeline')")}
             ${priority('ti-coin',             unpaidPro, 'Unpaid Commissions', 'Requires follow up',   '#E8F8EE', "switchTab('finance')")}
             ${priority('ti-plane-departure',  tickets,   'Tickets Pending',    'Awaiting issue',       '#F1EFFF', "switchTab('pipeline')")}
-            ${priority('ti-alert-circle',     missDocs,  'Missing Documents',  'Compliance gap',       '#FEECEF', "switchTab('documents')")}
+            ${priority('ti-users',            normRows.length, 'Total Candidates', 'In pipeline',        '#FEECEF', "switchTab('candidates')")}
           ` : `
             ${priority('ti-users',            lbSelected,      'Selected',           'Awaiting passport',    '#E9F3FF', "switchTab('pipeline')")}
             ${priority('ti-credit-card',      lbRefundPending, 'Refund Pending',     'Refunds to process',   '#FFF4DE', "switchTab('finance')")}
             ${priority('ti-coin',             unpaidLB,        'Outstanding USD',    'Refunds not started',  '#E8F8EE', "switchTab('finance')")}
             ${priority('ti-passport',         lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length, 'Passport Applied', 'Awaiting passport', '#F1EFFF', "switchTab('pipeline')")}
-            ${priority('ti-alert-circle',     missDocs,        'Missing Documents',  'Compliance gap',       '#FEECEF', "switchTab('documents')")}
+            ${priority('ti-users',            normRows.length, 'Total Candidates',   'In pipeline',          '#FEECEF', "switchTab('candidates')")}
           `}
         </div>
 
@@ -1116,7 +1111,6 @@ export function injectDepsToD5(deps) {
           ${statCard('ti-checkbox',      tasks.length,  'Open Tasks',      `Need attention`,                              '#F5F3FF','#7C3AED','#fff')}
           ${statCard('ti-alert-triangle',high.length,   'High Priority',   `Urgent blockers`,                             '#FEF2F2','#DC2626','#fff')}
           ${statCard('ti-clock',         med.length,    'Medium',          `Stage follow ups`,                            '#FFFBEB','#D97706','#fff')}
-          ${statCard('ti-folder-x',      allRows().filter(r=>!hasDoc(r)).length,'Missing Docs','Compliance gap',          '#F0FDFA','#0D9488','#fff')}
           ${statCard('ti-coin',          allRows().filter(r=>r.balance>0).length,'Unpaid',    `Finance follow up`,        '#F0FDF4','#16A34A','#fff')}
         </div>
         <div class="dv5-card" style="margin-bottom:12px">
