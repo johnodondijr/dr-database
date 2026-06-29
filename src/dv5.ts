@@ -587,12 +587,12 @@ export function injectDepsToD5(deps) {
       ${['finance','documents','reports','clients'].map(navItem).join('')}
       <div class="nav-spacer"></div>
       <button class="sidebar-user-card sidebar-account-trigger dv5-suc" type="button" onclick="toggleProfileDropdown(event)">
-        <div class="dv5-suc-av" id="suc-avatar">${h(ini(currentUser?.display))}</div>
-        <div class="dv5-suc-body suc-info">
-          <div class="dv5-suc-name suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
-          <div class="dv5-suc-email suc-org" id="suc-email">${h(currentUser?.username ? currentUser.username+'@dreco.app' : co())}</div>
+        <div class="suc-avatar-wrap">
+          <div class="suc-avatar" id="suc-avatar">${h(ini(currentUser?.display))}</div>
         </div>
-        <i class="ti ti-dots-vertical suc-dots" style="color:#9CA3AF;font-size:16px;margin-left:auto;flex-shrink:0"></i>
+        <div class="suc-name" id="suc-name">${h(currentUser?.display||'User')}</div>
+        <div class="suc-org">${currentUser?.role === 'admin' ? 'Admin' : 'Staff'}</div>
+        <i class="ti ti-dots-horizontal suc-dots" style="color:#c0c4cc;font-size:13px;margin-top:2px"></i>
       </button>`;
     sidebarBuilt = true;
   }
@@ -2130,17 +2130,9 @@ export function injectDepsToD5(deps) {
   const DV5_CSS = `
 /* === DV5 Component System === */
 .dv5-section { display: none; min-width:0; overflow-x:hidden; }
-/* Override all legacy sidebar-user-card styles for the new card */
-.dv5-suc.sidebar-user-card { background:#fff!important; border:1px solid #E4E4E7!important; border-radius:8px!important; padding:10px 12px!important; margin:0 0 8px!important; min-height:unset!important; }
+/* DV5 sidebar user card — layout deferred to index.html profile card styles */
 .dv5-suc.sidebar-user-card::after { content:none!important; }
-
-/* Shadcn-style sidebar user card */
-.dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 12px!important; border-radius:8px!important; background:#fff!important; border:1px solid #E4E4E7!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .12s!important; margin-bottom:8px!important; box-sizing:border-box!important; }
-.dv5-suc:hover { background:#F4F4F5!important; }
-.dv5-suc-av { width:32px!important; height:32px!important; border-radius:6px!important; background:#18181B!important; color:#fff!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:11px!important; font-weight:500!important; flex-shrink:0!important; letter-spacing:.02em!important; }
-.dv5-suc-body { min-width:0!important; flex:1!important; }
-.dv5-suc-name { font-size:13px!important; font-weight:375!important; color:#09090B!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.35!important; }
-.dv5-suc-email { font-size:11px!important; color:#71717A!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; margin-top:1px!important; }
+.dv5-suc { box-sizing:border-box!important; position:relative!important; }
 
 /* Shadcn-style profile dropdown — slide up from user card */
 .dv5-pd { position:fixed!important; left:16px!important; bottom:70px!important; top:auto!important; right:auto!important; width:268px!important; background:#fff!important; border:1px solid #E4E4E7!important; border-radius:10px!important; box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06)!important; z-index:9000!important; overflow:hidden!important; visibility:hidden!important; opacity:0!important; transform:translateY(8px)!important; transition:opacity .15s ease,transform .15s ease,visibility 0s .15s!important; pointer-events:none!important; }
