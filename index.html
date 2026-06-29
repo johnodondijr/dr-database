@@ -4152,6 +4152,48 @@ tr:last-child td{border-bottom:none!important}
   #login-screen .lp-header h1{font-size:28px!important}
   #login-screen .lp-social-row{grid-template-columns:1fr!important}
 }
+
+/* Keep the security note locked to one shared position on every auth page. */
+#login-screen .lp-form-panel{
+  position:relative!important;
+}
+#login-screen .lp-footer-note,
+#login-screen.auth-mode-signup .lp-footer-note,
+#login-screen.auth-mode-recovery .lp-footer-note,
+#login-screen .lp-form-panel:has(#signup-section[style*="block"]) .lp-footer-note,
+#login-screen .lp-form-panel:has(#forgot-section[style*="block"]) .lp-footer-note{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:88px!important;
+  width:min(400px, calc(100% - 48px))!important;
+  max-width:400px!important;
+  margin:0 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:12px!important;
+  text-align:center!important;
+  line-height:1.35!important;
+}
+@media(max-height:900px) and (min-width:1181px){
+  #login-screen .lp-footer-note,
+  #login-screen.auth-mode-signup .lp-footer-note,
+  #login-screen.auth-mode-recovery .lp-footer-note,
+  #login-screen .lp-form-panel:has(#signup-section[style*="block"]) .lp-footer-note,
+  #login-screen .lp-form-panel:has(#forgot-section[style*="block"]) .lp-footer-note{
+    bottom:44px!important;
+  }
+}
+@media(max-width:560px){
+  #login-screen .lp-footer-note,
+  #login-screen.auth-mode-signup .lp-footer-note,
+  #login-screen.auth-mode-recovery .lp-footer-note,
+  #login-screen .lp-form-panel:has(#signup-section[style*="block"]) .lp-footer-note,
+  #login-screen .lp-form-panel:has(#forgot-section[style*="block"]) .lp-footer-note{
+    bottom:34px!important;
+  }
+}
 </style>
 </head>
 <body>
