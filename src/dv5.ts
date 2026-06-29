@@ -2153,7 +2153,7 @@ export function injectDepsToD5(deps) {
 .dv5-link { background:none; border:none; color:#5347CE; font-size:12px; font-weight:438; cursor:pointer; padding:0; flex-shrink:0; white-space:nowrap; }
 .dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:438; color:var(--text,#18191B); cursor:pointer; }
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
-.dv5-action-queue { margin-bottom:12px; }
+.dv5-action-queue { margin-bottom:12px; background:linear-gradient(160deg,#F8F6FF 0%,#EEF2FF 100%); border-color:#DDD9FF; }
 .dv5-action-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
 .dv5-action-card { border:1px solid #DDD9FF; background:linear-gradient(135deg,#F5F3FF 0%,#EEF2FF 100%); border-radius:12px; padding:10px 12px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; text-align:left; cursor:pointer; transition:box-shadow .15s,border-color .15s; }
 .dv5-action-card:hover { border-color:#C4B5FD; box-shadow:0 6px 18px rgba(83,71,206,.10); }
