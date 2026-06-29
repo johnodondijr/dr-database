@@ -3663,6 +3663,20 @@ tr:last-child td{border-bottom:none!important}
 .am-danger{color:#DC2626}
 .am-danger i{color:#DC2626}
 .am-danger:hover{background:#FEF2F2}
+/* ── Login redesign 2 ── */
+#login-screen .lp-auth-tabs{display:none!important}
+#login-screen .lp-content-area{margin-top:80px!important}
+#login-screen .lp-header{margin-bottom:36px!important;text-align:center!important}
+#login-screen .lp-header h1{font-size:36px!important;text-align:center!important}
+#login-screen .lp-header p{font-size:17px!important;text-align:center!important}
+.lp-remember-row{display:flex!important;align-items:center!important;justify-content:space-between!important;margin:14px 0 26px!important}
+.lp-remember-row .lp-remember{margin:0!important}
+.lp-social-btn i{font-size:20px!important}
+.lp-google-icon{background:linear-gradient(135deg,#4285F4,#34A853,#FBBC05,#EA4335);-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important}
+#login-screen .lp-media{background:linear-gradient(148deg,#3D2FDB 0%,#4B3DE4 45%,#3929BC 100%)!important}
+#login-screen .lp-product-preview{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;height:auto!important;margin-top:auto!important;padding-top:0!important;flex:1!important;min-height:0!important;display:flex!important;align-items:flex-end!important;width:100%!important}
+#login-screen .lp-preview-card{border-radius:14px 14px 0 0!important}
+#login-screen .lp-preview-sidebar{border-radius:17px 0 0 0!important}
 </style>
 </head>
 <body>
@@ -3703,28 +3717,20 @@ tr:last-child td{border-bottom:none!important}
       <div class="lp-content-area">
         <div id="login-main">
           <div class="lp-header">
-            <h1>Welcome back</h1>
-            <p>Sign in to your Dreco workspace</p>
-          </div>
-
-          <div class="lp-auth-tabs" role="tablist" aria-label="Authentication options">
-            <button class="lp-auth-tab active" type="button">Log in</button>
-            <button class="lp-auth-tab" type="button" onclick="showSignup()">Sign up</button>
+            <h1>Welcome Back</h1>
+            <p>Sign in to access your Dreco workspace.</p>
           </div>
 
           <form onsubmit="event.preventDefault(); doLogin();">
             <div class="lp-input-group">
-              <label for="username-input">Username</label>
+              <label for="username-input">Email</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-mail lp-input-icon"></i>
-                <input type="text" id="username-input" placeholder="Enter your username" required autocomplete="username" autocapitalize="none" spellcheck="false">
+                <input type="text" id="username-input" placeholder="Enter your email" required autocomplete="username" autocapitalize="none" spellcheck="false">
               </div>
             </div>
-            <div class="lp-input-group">
-              <div class="lp-label-row">
-                <label for="pw-input">Password</label>
-                <span class="lp-forgot" onclick="showForgotPassword()">Forgot password?</span>
-              </div>
+            <div class="lp-input-group" style="margin-bottom:0">
+              <label for="pw-input">Password</label>
               <div class="lp-input-wrap">
                 <i class="ti ti-lock lp-input-icon"></i>
                 <input type="password" id="pw-input" placeholder="Enter your password" required autocomplete="current-password">
@@ -3732,11 +3738,20 @@ tr:last-child td{border-bottom:none!important}
               </div>
               <div class="lp-field-hint" id="caps-lock-hint" aria-live="polite">Caps Lock is on</div>
             </div>
-            <label class="lp-remember"><input type="checkbox"><span>Remember me</span></label>
+            <div class="lp-remember-row">
+              <label class="lp-remember"><input type="checkbox"><span>Remember me</span></label>
+              <span class="lp-forgot" onclick="showForgotPassword()">Forgot password?</span>
+            </div>
             <button type="submit" class="lp-submit" id="login-submit"><span class="lp-submit-label">Log in</span><span class="lp-submit-dots" aria-hidden="true"><i></i><i></i><i></i></span></button>
           </form>
 
           <div class="login-error" id="login-error" role="alert" aria-live="polite">Incorrect username or password.</div>
+
+          <div class="lp-divider">or continue with</div>
+          <div class="lp-social-row">
+            <button class="lp-social-btn" type="button"><i class="ti ti-brand-google lp-google-icon"></i><span>Google</span></button>
+            <button class="lp-social-btn" type="button"><i class="ti ti-brand-apple"></i><span>Apple</span></button>
+          </div>
 
           <button type="button" class="lp-signup-cta" onclick="showSignup()"><span>New to Dreco?</span><strong>Sign up</strong></button>
         </div>
@@ -3804,14 +3819,6 @@ tr:last-child td{border-bottom:none!important}
       <div class="lp-media-copy">
         <h2>Run Your Recruitment<br>Business. <span>End to End.</span></h2>
         <p>Dreco brings your candidate pipeline, visa workflows, payments, compliance, and team activity together in one secure workspace.</p>
-      </div>
-
-      <div class="lp-feature-grid">
-        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-users-group"></i></div><div><strong>Candidate Pipeline</strong><span>Track every candidate from Offer to Travelled.</span></div></div>
-        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-file-description"></i></div><div><strong>Visa &amp; Document Workflow</strong><span>Streamline MOL, visa, and travel document processes.</span></div></div>
-        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-coin"></i></div><div><strong>Commission &amp; Payments</strong><span>Manage commissions, payments, deductions, and reconciliations.</span></div></div>
-        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-shield-check"></i></div><div><strong>Compliance &amp; Reporting</strong><span>Stay audit-ready with built-in reports and compliance tools.</span></div></div>
-        <div class="lp-feature"><div class="lp-feature-icon"><i class="ti ti-users"></i></div><div><strong>Team &amp; Access Control</strong><span>Role-based access for admins, managers, and staff.</span></div></div>
       </div>
 
       <div class="lp-product-preview">
