@@ -368,7 +368,9 @@ export function injectDepsToD5(deps) {
     }
     rows.forEach(r => {
       if (String(r.stage).toUpperCase() !== 'TRAVELLED') return;
-      const d = r.date ? new Date(r.date) : null; if (!d || isNaN(d)) return;
+      // use travel date (normalized field); fall back to submitted date
+      const rawDate = r.travel || r.travelDate || r.submitted;
+      const d = rawDate ? new Date(rawDate) : null; if (!d || isNaN(d.getTime())) return;
       const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
       const m = months.find(x => x.key === key); if (m) m.count++;
     });
@@ -634,7 +636,10 @@ export function injectDepsToD5(deps) {
     const unpaidPro = proNorm.filter(r=>r.balance>0).length;
     // LB-specific
     const lbRefundPending = lbNorm.filter(r=>r.stage==='REFUND PENDING').length;
-    const lbSelected      = lbNorm.filter(r=>r.stage==='SELECTED').length;
+    // Selected = everyone from SELECTED stage onwards (cumulative)
+    const LB_SELECTED_AND_BEYOND = ['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+    const lbSelected      = lbNorm.filter(r=>LB_SELECTED_AND_BEYOND.includes(r.stage)).length;
+    const lbPassportApplied = lbNorm.filter(r=>r.stage==='PASSPORT APPLIED').length;
     const unpaidLB        = lbNorm.filter(r=>r.balance>0&&!r.own_passport).length;
 
     const travelled = normRows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
@@ -691,31 +696,12 @@ export function injectDepsToD5(deps) {
             ${priority('ti-plane-departure',  tickets,   'Tickets Pending',    'Awaiting issue',       '#E0F2FE','#0369A1', "switchTab('pipeline')")}
             ${priority('ti-users',            normRows.length, 'Total Candidates', 'In pipeline',      '#F5F3FF','#7C3AED', "switchTab('candidates')")}
           ` : `
-            ${priority('ti-users',            lbSelected,      'Selected',           'Awaiting passport',    '#E0F2FE','#0369A1', "switchTab('pipeline')")}
-            ${priority('ti-credit-card',      lbRefundPending, 'Refund Pending',     'Refunds to process',   '#FEF9C3','#A16207', "switchTab('finance')")}
-            ${priority('ti-coin',             unpaidLB,        'Outstanding USD',    'Refunds not started',  '#FCE7F3','#9D174D', "switchTab('finance')")}
-            ${priority('ti-passport',         lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length, 'Passport Applied', 'Awaiting passport', '#DCFCE7','#16A34A', "switchTab('pipeline')")}
-            ${priority('ti-users',            normRows.length, 'Total Candidates',   'In pipeline',          '#F5F3FF','#7C3AED', "switchTab('candidates')")}
+            ${priority('ti-users',            lbSelected,       'Selected',          'Cumulative selected',  '#E0F2FE','#0369A1', "switchTab('pipeline')")}
+            ${priority('ti-credit-card',      lbRefundPending,  'Refund Pending',    'Refunds to process',   '#FEF9C3','#A16207', "switchTab('finance')")}
+            ${priority('ti-coin',             unpaidLB,         'Outstanding USD',   'Refunds not started',  '#FCE7F3','#9D174D', "switchTab('finance')")}
+            ${priority('ti-passport',         lbPassportApplied,'Passport Applied',  'Awaiting passport',    '#DCFCE7','#16A34A', "switchTab('pipeline')")}
+            ${priority('ti-users',            normRows.length,  'Total Candidates',  'In pipeline',          '#F5F3FF','#7C3AED', "switchTab('candidates')")}
           `}
-        </div>
-
-        <div class="dv5-card dv5-action-queue">
-          <div class="dv5-card-head">
-            <div>
-              <span class="dv5-card-title" style="color:#BE123C">Next Actions</span>
-              <div class="dv5-card-sub" style="color:rgba(190,18,60,.55)">Candidates needing follow-up, documents, or finance attention</div>
-            </div>
-            <button class="dv5-link" style="color:rgba(190,18,60,.7)" onclick="switchTab('candidates')">Open candidates</button>
-          </div>
-          <div class="dv5-action-grid">
-            ${actionRows.length ? actionRows.map(r => `
-              <button class="dv5-action-card ${r.workflow.level}" onclick="openCandidateProfile('${r.type}',${r.id})">
-                ${avatar(r.name)}
-                <span><strong>${h(r.name)}</strong><em>${h(r.workflow.action)}</em></span>
-                <b>${r.workflow.pct}%</b>
-              </button>
-            `).join('') : '<div class="dv5-empty">No urgent action items for this view.</div>'}
-          </div>
         </div>
 
         <div class="dv5-card dv5-card-pipeline">
@@ -740,22 +726,42 @@ export function injectDepsToD5(deps) {
           </div>
         </div>
 
-        <div class="dv5-two-col">
-          <div class="dv5-card">
+        <div class="dv5-three-col">
+          <div class="dv5-card dv5-action-queue" style="margin-bottom:0">
+            <div class="dv5-card-head">
+              <div>
+                <span class="dv5-card-title" style="color:#BE123C">Next Actions</span>
+                <div class="dv5-card-sub" style="color:rgba(190,18,60,.55)">Needs attention</div>
+              </div>
+              <button class="dv5-link" style="color:rgba(190,18,60,.7)" onclick="switchTab('candidates')">All →</button>
+            </div>
+            <div class="dv5-action-grid">
+              ${actionRows.length ? actionRows.map(r => `
+                <button class="dv5-action-card ${r.workflow.level}" onclick="openCandidateProfile('${r.type}',${r.id})">
+                  ${avatar(r.name)}
+                  <span><strong>${h(r.name)}</strong><em>${h(r.workflow.action)}</em></span>
+                  <b>${r.workflow.pct}%</b>
+                </button>
+              `).join('') : '<div class="dv5-empty">No urgent items.</div>'}
+            </div>
+          </div>
+
+          <div class="dv5-card" style="margin-bottom:0">
+            <div class="dv5-card-head">
+              <span class="dv5-card-title">Upcoming Reminders</span>
+              <button class="dv5-link" onclick="switchTab('pipeline')">All →</button>
+            </div>
+            <div class="dv5-task-list">
+              ${tasks.length ? tasks.map(taskRow).join('') : '<div class="dv5-empty">No urgent tasks.</div>'}
+            </div>
+          </div>
+
+          <div class="dv5-card" style="margin-bottom:0">
             <div class="dv5-card-head">
               <span class="dv5-card-title">Recent Activity</span>
               <span class="dv5-card-sub">Latest changes</span>
             </div>
-            <div class="dv5-activity-list">${recentActivity(6)}</div>
-          </div>
-          <div class="dv5-card">
-            <div class="dv5-card-head">
-              <span class="dv5-card-title">Upcoming Reminders</span>
-              <button class="dv5-link" onclick="switchTab('pipeline')">View all →</button>
-            </div>
-            <div class="dv5-task-list">
-              ${tasks.length ? tasks.map(taskRow).join('') : '<div class="dv5-empty">No urgent tasks. Workspace is clear.</div>'}
-            </div>
+            <div class="dv5-activity-list">${recentActivity(5)}</div>
           </div>
         </div>
 
@@ -767,7 +773,7 @@ export function injectDepsToD5(deps) {
                 <div class="dv5-card-sub">${isPro?'Professional':'General'} — last 6 months</div>
               </div>
             </div>
-            ${buildBarChart(rows)}
+            ${buildBarChart(normRows)}
           </div>
           <div class="dv5-card" style="margin-bottom:0">
             <div class="dv5-card-head">
@@ -2257,6 +2263,7 @@ export function injectDepsToD5(deps) {
 .dv5-card-title { font-size:13px; font-weight:500; color:var(--text,#18191B); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dv5-card-sub { font-size:11px; color:var(--text-3,#999); flex-shrink:0; white-space:nowrap; }
 .dv5-two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; min-width:0; }
+.dv5-three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; min-width:0; align-items:start; }
 .dv5-table-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; overflow:hidden; margin-bottom:12px; }
 
 /* Tables */
@@ -2400,7 +2407,7 @@ export function injectDepsToD5(deps) {
 /* Responsive */
 @media (max-width:1100px) {
   .dv5-kanban { grid-template-columns:repeat(3,1fr); }
-  .dv5-profile-grid,.dv5-two-col { grid-template-columns:1fr!important; }
+  .dv5-profile-grid,.dv5-two-col,.dv5-three-col { grid-template-columns:1fr!important; }
   .dv5-progress-steps { grid-template-columns:repeat(3,1fr); }
 }
 @media (max-width:760px) {
@@ -2427,7 +2434,7 @@ export function injectDepsToD5(deps) {
   .dv5-toolbar { flex-direction:column; align-items:stretch; }
   .dv5-toolbar-left,.dv5-toolbar-right { flex-wrap:wrap; }
   .dv5-input,.dv5-select { width:100%; }
-  .dv5-two-col { grid-template-columns:1fr!important; }
+  .dv5-two-col,.dv5-three-col { grid-template-columns:1fr!important; }
   .dv5-head-actions { flex-wrap:wrap; width:100%; }
   .dv5-head-actions .dv5-btn { flex:1; justify-content:center; min-width:120px; }
   /* Cards: tighter on mobile, no horizontal overflow */
