@@ -4876,6 +4876,19 @@ tr:last-child td{border-bottom:none!important}
                 <button class="pd-back-btn" onclick="closeProfileEdit()"><i class="ti ti-arrow-left"></i> Back</button>
                 <span>Edit Profile</span>
               </div>
+              <div class="pd-section">Profile photo</div>
+              <div class="pd-field" style="flex-direction:row;align-items:center;gap:14px">
+                <div style="position:relative;cursor:pointer;flex-shrink:0" onclick="document.getElementById('pd-avatar-upload').click()">
+                  <div id="pd-avatar-large" style="width:56px;height:56px;border-radius:50%;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:438;overflow:hidden;font-family:inherit">-</div>
+                  <div style="position:absolute;bottom:0;right:0;width:20px;height:20px;border-radius:50%;background:#5347CE;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid #fff"><i class="ti ti-camera" style="font-size:10px"></i></div>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:438;color:#111827">Upload photo</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:2px">JPG, PNG or GIF · max 2MB</div>
+                  <button type="button" id="pd-avatar-remove" onclick="removeUserAvatar()" style="display:none;margin-top:6px;font-size:11px;color:#ef4444;background:none;border:none;cursor:pointer;padding:0;font-family:inherit">Remove photo</button>
+                </div>
+                <input type="file" id="pd-avatar-upload" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
+              </div>
               <div class="pd-section">Display name</div>
               <div class="pd-field">
                 <label for="pd-display-name">Name shown in Dreco</label>
