@@ -719,8 +719,8 @@ export function injectDepsToD5(deps) {
 
         <div class="dv5-card dv5-card-pipeline">
           <div class="dv5-card-head" style="margin-bottom:16px">
-            <span class="dv5-card-title" style="color:#fff;font-size:14px">${isPro?'Professional':'General Jobs'} Pipeline</span>
-            <button class="dv5-link" style="color:rgba(255,255,255,.6);font-size:11px" onclick="switchTab('pipeline')">View all →</button>
+            <span class="dv5-card-title" style="color:#1E1B4B;font-size:14px;font-weight:500">${isPro?'Professional':'General Jobs'} Pipeline</span>
+            <button class="dv5-link" style="color:#5347CE;font-size:11px;opacity:.8" onclick="switchTab('pipeline')">View all →</button>
           </div>
           <div class="dv5-pipeline-flow" style="justify-content:space-between">
             ${flowSteps.map(([label,val], i) => {
@@ -731,8 +731,8 @@ export function injectDepsToD5(deps) {
               <div class="dv5-flow-step" style="flex:1;position:relative;padding:0 8px">
                 <strong style="font-size:28px">${h(String(val))}</strong>
                 <span style="font-size:10px;letter-spacing:.04em;text-transform:uppercase">${h(label)}</span>
-                <div style="margin-top:8px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden">
-                  <div style="height:100%;width:${pct}%;background:${isLast?'#EEFA94':'rgba(255,255,255,.45)'};border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+                <div style="margin-top:8px;height:3px;border-radius:2px;background:rgba(99,91,210,.12);overflow:hidden">
+                  <div style="height:100%;width:${pct}%;background:${isLast?'#16A34A':'#5347CE'};border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
                 </div>
               </div>${!isLast ? '<div class="dv5-flow-arrow" style="flex-shrink:0;padding:0 2px;padding-bottom:18px"><i class="ti ti-chevron-right"></i></div>' : ''}`;
             }).join('')}
@@ -2247,10 +2247,10 @@ export function injectDepsToD5(deps) {
 
 /* Cards */
 .dv5-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
-.dv5-card-pipeline { background:linear-gradient(135deg,#1E1B4B 0%,#312E81 60%,#3730A3 100%); border-color:#4338CA; padding:16px 20px; }
-.dv5-card-pipeline .dv5-flow-step strong { color:#fff; }
-.dv5-card-pipeline .dv5-flow-step span { color:rgba(255,255,255,.55); }
-.dv5-card-pipeline .dv5-flow-arrow { color:rgba(255,255,255,.3); }
+.dv5-card-pipeline { background:linear-gradient(135deg,#EEF2FF 0%,#EDE9FE 55%,#F5F3FF 100%); border-color:#DDD9FF; padding:16px 20px; }
+.dv5-card-pipeline .dv5-flow-step strong { color:#1E1B4B; }
+.dv5-card-pipeline .dv5-flow-step span { color:#6B7280; }
+.dv5-card-pipeline .dv5-flow-arrow { color:#C4B5FD; }
 .dv5-card-pipeline .dv5-pipeline-flow { padding:4px 0; }
 .dv5-card-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; min-width:0; }
 .dv5-card-title { font-size:13px; font-weight:500; color:var(--text,#18191B); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
