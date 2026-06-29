@@ -272,18 +272,60 @@ export function injectDepsToD5(deps) {
 
   // ── Next-action label per candidate ───────────────────────
   function nextAction(r) {
-    if (!hasDoc(r))                               return 'Upload documents';
-    if (r.balance > 0)                             return 'Collect commission';
     const s = String(r.stage||'').toUpperCase();
-    if (s.includes('OFFER'))  return 'Submit offer letter';
-    if (s.includes('MOL'))    return 'MOL submission';
-    if (s.includes('VISA'))   return 'Visa stamping';
-    if (s.includes('TRAVEL')) return 'Book ticket';
+    if (!hasDoc(r)) return 'Upload documents';
+    if (r.type === 'pro' && r.balance > 0) return 'Collect commission';
+    if (r.type === 'lb' && r.balance > 0) return 'Process refund';
+    if (r.followUp) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const due = new Date(r.followUp); due.setHours(0,0,0,0);
+      if (!isNaN(due) && due <= today) return 'Follow up today';
+    }
+    if (r.type === 'pro') {
+      if (s === 'PENDING OFFER LETTER') return 'Send offer letter';
+      if (s === 'OFFER LETTER') return 'Submit for MOL';
+      if (s === 'MOL') return 'Follow MOL approval';
+      if (s === 'VISA') return 'Book ticket';
+      if (s === 'PENDING TRAVEL') return 'Confirm travel';
+    } else {
+      if (s === 'SUBMITTED') return 'Send profile';
+      if (s === 'PROFILE SENT') return 'Await selection';
+      if (s === 'SELECTED') return 'Apply passport';
+      if (s === 'PASSPORT APPLIED') return 'Follow passport';
+      if (s === 'VISA PROCESSING') return 'Follow visa';
+      if (s === 'REFUND PENDING') return 'Complete refund';
+    }
     if (s === 'TRAVELLED')    return 'Post-arrival follow up';
+    if (s === 'REFUND COMPLETE') return 'Closed';
     return '—';
   }
 
   // ── Checklist per candidate profile ───────────────────────
+  function workflowStatus(r) {
+    const missingDocs = !hasDoc(r);
+    const openBalance = Number(r.balance) > 0;
+    const action = nextAction(r);
+    const pct = checklistPct(r);
+    let level = 'ok';
+    if (missingDocs || openBalance || action.includes('today')) level = 'risk';
+    else if (pct < 65 || !['TRAVELLED','REFUND COMPLETE'].includes(String(r.stage||'').toUpperCase())) level = 'watch';
+    const reasons = [
+      missingDocs && 'missing docs',
+      openBalance && (r.type === 'pro' ? 'unpaid commission' : 'refund balance'),
+      pct < 65 && `${pct}% complete`,
+    ].filter(Boolean);
+    return { action, pct, level, reasons };
+  }
+
+  function progressMini(r) {
+    const status = workflowStatus(r);
+    return `<div class="dv5-workflow-mini ${status.level}">
+      <div class="dv5-workflow-top"><span>${h(status.action)}</span><strong>${status.pct}%</strong></div>
+      <div class="dv5-workflow-bar"><i style="width:${status.pct}%"></i></div>
+      ${status.reasons.length ? `<div class="dv5-workflow-reasons">${h(status.reasons.join(' · '))}</div>` : ''}
+    </div>`;
+  }
+
   function buildChecklist(r) {
     const s = String(r.stage||'').toUpperCase();
     if (r.type === 'lb') {
@@ -625,6 +667,11 @@ export function injectDepsToD5(deps) {
     ];
     const flowSteps = isPro ? proFlowSteps : lbFlowSteps;
     const tasks = buildTasks().slice(0,5);
+    const actionRows = normRows
+      .map(r => ({...r, workflow: workflowStatus(r)}))
+      .filter(r => r.workflow.level !== 'ok')
+      .sort((a,b) => (a.workflow.level === 'risk' ? -1 : 1) - (b.workflow.level === 'risk' ? -1 : 1) || a.workflow.pct - b.workflow.pct)
+      .slice(0,4);
 
     el.innerHTML = `
       <div class="dv5-page">
@@ -654,6 +701,25 @@ export function injectDepsToD5(deps) {
             ${priority('ti-passport',         lbFiltered.filter(r=>r.stage==='PASSPORT APPLIED').length, 'Passport Applied', 'Awaiting passport', '#F1EFFF', "switchTab('pipeline')")}
             ${priority('ti-alert-circle',     missDocs,        'Missing Documents',  'Compliance gap',       '#FEECEF', "switchTab('documents')")}
           `}
+        </div>
+
+        <div class="dv5-card dv5-action-queue">
+          <div class="dv5-card-head">
+            <div>
+              <span class="dv5-card-title">Next Actions</span>
+              <div class="dv5-card-sub">Candidates needing follow-up, documents, or finance attention</div>
+            </div>
+            <button class="dv5-link" onclick="switchTab('candidates')">Open candidates</button>
+          </div>
+          <div class="dv5-action-grid">
+            ${actionRows.length ? actionRows.map(r => `
+              <button class="dv5-action-card ${r.workflow.level}" onclick="openCandidateProfile('${r.type}',${r.id})">
+                ${avatar(r.name)}
+                <span><strong>${h(r.name)}</strong><em>${h(r.workflow.action)}</em></span>
+                <b>${r.workflow.pct}%</b>
+              </button>
+            `).join('') : '<div class="dv5-empty">No urgent action items for this view.</div>'}
+          </div>
         </div>
 
         <div class="dv5-card dv5-card-pipeline">
@@ -786,6 +852,7 @@ export function injectDepsToD5(deps) {
                   <div class="dv5-pipe-card" onclick="${isPro?`editPro(${r.id})`:`editLB(${r.id})`}">
                     <div class="dv5-pipe-name">${h(r.name)}</div>
                     <div class="dv5-pipe-meta">${h(r.position||r.country||'—')} · ${h(r.company||'—')}</div>
+                    ${progressMini(r)}
                     <div class="dv5-pipe-foot">
                       <span><i class="ti ti-id"></i>${h(r.pp||'No PP')}</span>
                       ${isPro && r.commission ? `<span>${money(r.commission)}</span>` : ''}
@@ -820,7 +887,7 @@ export function injectDepsToD5(deps) {
     let rows = allRows().filter(r => r.type === jobTypeTab);
     const q = candidateSearch.toLowerCase();
     if (candidateStageFilter) rows = rows.filter(r=>r.stage===candidateStageFilter);
-    if (candidateViewFilter==='follow') rows = rows.filter(r=>r.balance>0||!hasDoc(r));
+    if (candidateViewFilter==='follow') rows = rows.filter(r=>workflowStatus(r).level !== 'ok');
     if (candidateViewFilter==='balance') rows = rows.filter(r=>r.balance>0);
     if (q) rows = rows.filter(r=>[r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q));
     return rows;
@@ -893,7 +960,7 @@ export function injectDepsToD5(deps) {
     const q = candidateSearch.toLowerCase();
     let list = all.filter(r => {
       if (candidateStageFilter && r.stage !== candidateStageFilter) return false;
-      if (candidateViewFilter==='follow' && r.balance<=0 && hasDoc(r)) return false;
+      if (candidateViewFilter==='follow' && workflowStatus(r).level === 'ok') return false;
       if (candidateViewFilter==='balance' && r.balance<=0) return false;
       if (q && ![r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q)) return false;
       return true;
@@ -948,7 +1015,7 @@ export function injectDepsToD5(deps) {
               <thead><tr>
                 <th style="width:36px"><input type="checkbox" id="cand-select-all" ${allSel?'checked':''} onchange="toggleSelectAll(this.checked)"></th>
                 <th>Name</th><th>${isPro?'Job Title':'Destination'}</th><th>${isPro?'Company':'Agency'}</th>
-                <th>Stage</th><th>${isPro?'Submitted':'Doc Date'}</th><th></th>
+                <th>Stage</th><th>Next Action</th><th>Readiness</th><th>${isPro?'Submitted':'Doc Date'}</th><th></th>
               </tr></thead>
               <tbody>
                 ${list.length ? list.map(r => {
@@ -969,6 +1036,8 @@ export function injectDepsToD5(deps) {
                     <td>${h(r.position)}</td>
                     <td>${h(r.company)}</td>
                     <td>${badge(r.stage)}</td>
+                    <td><span class="dv5-next-action">${h(nextAction(r))}</span></td>
+                    <td>${progressMini(r)}</td>
                     <td>${h(fmt(r.submitted))}</td>
                     <td onclick="event.stopPropagation()">
                       <button class="dv5-action-btn" onclick="${r.type==='pro'?`editPro(${r.id})`:`editLB(${r.id})`}" title="Edit">
@@ -2111,6 +2180,26 @@ export function injectDepsToD5(deps) {
 .dv5-link { background:none; border:none; color:#5347CE; font-size:12px; font-weight:700; cursor:pointer; padding:0; flex-shrink:0; white-space:nowrap; }
 .dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:700; color:var(--text,#18191B); cursor:pointer; }
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
+.dv5-action-queue { margin-bottom:12px; }
+.dv5-action-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.dv5-action-card { border:1px solid var(--border,#E8E8E8); background:#fff; border-radius:12px; padding:10px 12px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; text-align:left; cursor:pointer; }
+.dv5-action-card:hover { border-color:#D8D3FF; box-shadow:0 6px 18px rgba(83,71,206,.08); }
+.dv5-action-card.risk { background:#FFF7F7; border-color:#FECACA; }
+.dv5-action-card.watch { background:#FFFBEB; border-color:#FDE68A; }
+.dv5-action-card span { min-width:0; }
+.dv5-action-card strong { display:block; font-size:12px; color:#18191B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-action-card em { display:block; font-style:normal; font-size:11px; color:#6B7280; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-action-card b { color:#5347CE; font-size:12px; }
+.dv5-next-action { display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; background:#F1EFFF; color:#5347CE; font-size:10px; font-weight:800; white-space:nowrap; }
+.dv5-workflow-mini { min-width:112px; }
+.dv5-workflow-top { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:4px; }
+.dv5-workflow-top span { color:#4B5563; font-size:10px; font-weight:750; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-workflow-top strong { color:#18191B; font-size:10px; font-weight:850; flex-shrink:0; }
+.dv5-workflow-bar { height:5px; border-radius:999px; background:#EEF2F7; overflow:hidden; }
+.dv5-workflow-bar i { display:block; height:100%; border-radius:inherit; background:#16A34A; }
+.dv5-workflow-mini.watch .dv5-workflow-bar i { background:#F59E0B; }
+.dv5-workflow-mini.risk .dv5-workflow-bar i { background:#EF4444; }
+.dv5-workflow-reasons { margin-top:4px; color:#9A3412; font-size:9.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* Stat card grid (shadcn hotel-style colored cards) */
 .dv5-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
