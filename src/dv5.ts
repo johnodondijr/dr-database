@@ -96,10 +96,10 @@ export function injectDepsToD5(deps) {
   // Shared shadcn-style Pro/General tabs widget
   function jobTypeTabs(suffix='') {
     return `<div class="dv5-job-type-tabs" style="display:flex;align-items:center;gap:0;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;background:#f4f4f5">
-      <button class="dv5-jt-tab${jobTypeTab==='pro'?' active':''}" onclick="window.setJobTypeTab('pro')" style="padding:7px 18px;font-size:13px;font-weight:300;border:0;background:${jobTypeTab==='pro'?'#fff':'transparent'};color:${jobTypeTab==='pro'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='pro'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
+      <button class="dv5-jt-tab${jobTypeTab==='pro'?' active':''}" onclick="window.setJobTypeTab('pro')" style="padding:7px 18px;font-size:13px;font-weight:375;border:0;background:${jobTypeTab==='pro'?'#fff':'transparent'};color:${jobTypeTab==='pro'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='pro'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
         <i class="ti ti-briefcase" style="margin-right:5px;font-size:12px"></i>Professional
       </button>
-      <button class="dv5-jt-tab${jobTypeTab==='lb'?' active':''}" onclick="window.setJobTypeTab('lb')" style="padding:7px 18px;font-size:13px;font-weight:300;border:0;background:${jobTypeTab==='lb'?'#fff':'transparent'};color:${jobTypeTab==='lb'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='lb'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
+      <button class="dv5-jt-tab${jobTypeTab==='lb'?' active':''}" onclick="window.setJobTypeTab('lb')" style="padding:7px 18px;font-size:13px;font-weight:375;border:0;background:${jobTypeTab==='lb'?'#fff':'transparent'};color:${jobTypeTab==='lb'?'#18181b':'#71717a'};cursor:pointer;transition:all .15s;${jobTypeTab==='lb'?'box-shadow:0 1px 3px rgba(0,0,0,.08)':''}">
         <i class="ti ti-globe" style="margin-right:5px;font-size:12px"></i>General Jobs
       </button>
     </div>`;
@@ -110,9 +110,9 @@ export function injectDepsToD5(deps) {
     const countries = [...new Set(rows.map(r=>r.country).filter(Boolean))].sort();
     if (countries.length < 2) return '';
     return `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
-      <span style="font-size:11px;font-weight:300;color:#71717a;letter-spacing:.04em">DESTINATION:</span>
-      <button onclick="window.setLbCountry('')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${!lbCountryFilter?'#5347CE':'#e4e4e7'};background:${!lbCountryFilter?'#5347CE':'transparent'};color:${!lbCountryFilter?'#fff':'#71717a'};cursor:pointer;font-weight:300">All</button>
-      ${countries.map(c=>`<button onclick="window.setLbCountry('${js(c)}')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${lbCountryFilter===c?'#5347CE':'#e4e4e7'};background:${lbCountryFilter===c?'#5347CE':'transparent'};color:${lbCountryFilter===c?'#fff':'#71717a'};cursor:pointer;font-weight:300">${h(c)}</button>`).join('')}
+      <span style="font-size:11px;font-weight:375;color:#71717a;letter-spacing:.04em">DESTINATION:</span>
+      <button onclick="window.setLbCountry('')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${!lbCountryFilter?'#5347CE':'#e4e4e7'};background:${!lbCountryFilter?'#5347CE':'transparent'};color:${!lbCountryFilter?'#fff':'#71717a'};cursor:pointer;font-weight:375">All</button>
+      ${countries.map(c=>`<button onclick="window.setLbCountry('${js(c)}')" style="font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid ${lbCountryFilter===c?'#5347CE':'#e4e4e7'};background:${lbCountryFilter===c?'#5347CE':'transparent'};color:${lbCountryFilter===c?'#fff':'#71717a'};cursor:pointer;font-weight:375">${h(c)}</button>`).join('')}
     </div>`;
   }
 
@@ -377,9 +377,9 @@ export function injectDepsToD5(deps) {
       ${months.map(b => {
         const pct = Math.max(Math.round((b.count/max)*100), b.count>0?6:2);
         return `<div class="dv5-bar-col" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;position:relative">
-          <div class="dv5-bar-tip" style="position:absolute;bottom:calc(${pct}% + 10px);left:50%;transform:translateX(-50%);background:#18191B;color:#fff;font-size:10px;font-weight:400;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${b.count} placed</div>
+          <div class="dv5-bar-tip" style="position:absolute;bottom:calc(${pct}% + 10px);left:50%;transform:translateX(-50%);background:#18191B;color:#fff;font-size:10px;font-weight:500;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${b.count} placed</div>
           <div style="width:100%;border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#5347CE 0%,#9B8CFF 100%);height:${pct}%;min-height:3px;transition:height .4s cubic-bezier(.4,0,.2,1),opacity .12s;cursor:default" onmouseenter="this.previousElementSibling.style.opacity=1;this.style.opacity=.7" onmouseleave="this.previousElementSibling.style.opacity=0;this.style.opacity=1"></div>
-          <span style="font-size:10px;color:var(--text-3,#999);font-weight:350">${h(b.label)}</span>
+          <span style="font-size:10px;color:var(--text-3,#999);font-weight:438">${h(b.label)}</span>
         </div>`;
       }).join('')}
     </div>`;
@@ -392,12 +392,12 @@ export function injectDepsToD5(deps) {
       ${flowSteps.map(([label,val],i) => {
         const pct = Math.max(Math.round((val/max)*100), val>0?4:1);
         return `<div style="display:flex;align-items:center;gap:10px;position:relative" class="dv5-funnel-row">
-          <span style="font-size:10px;font-weight:350;color:var(--text-3,#999);width:56px;flex-shrink:0;text-align:right">${h(label)}</span>
+          <span style="font-size:10px;font-weight:438;color:var(--text-3,#999);width:56px;flex-shrink:0;text-align:right">${h(label)}</span>
           <div style="flex:1;height:18px;background:var(--bg,#F3F3F3);border-radius:4px;overflow:hidden;position:relative" onmouseenter="this.nextElementSibling.style.opacity=1" onmouseleave="this.nextElementSibling.style.opacity=0">
             <div style="width:${pct}%;height:100%;background:${colors[i]||colors[5]};border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
           </div>
-          <span style="font-size:11px;font-weight:400;color:var(--text,#18191B);width:22px;text-align:right;flex-shrink:0">${h(String(val))}</span>
-          <div style="position:absolute;right:30px;top:-26px;background:#18191B;color:#fff;font-size:10px;font-weight:350;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${h(label)}: ${h(String(val))}</div>
+          <span style="font-size:11px;font-weight:500;color:var(--text,#18191B);width:22px;text-align:right;flex-shrink:0">${h(String(val))}</span>
+          <div style="position:absolute;right:30px;top:-26px;background:#18191B;color:#fff;font-size:10px;font-weight:438;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${h(label)}: ${h(String(val))}</div>
         </div>`;
       }).join('')}
     </div>`;
@@ -413,7 +413,7 @@ export function injectDepsToD5(deps) {
       const trendColor = up ? '#059669' : '#E11D48';
       const trendBg = up ? '#ECFDF5' : '#FFF1F2';
       const trendIcon = up ? 'ti-trending-up' : 'ti-trending-down';
-      trendHtml = `<span class="dv5-kpi-trend" style="display:inline-flex;align-items:center;gap:3px;margin-top:6px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:400;background:${trendBg};color:${trendColor}"><i class="ti ${trendIcon}" style="font-size:10px"></i>${h(trend)}</span>`;
+      trendHtml = `<span class="dv5-kpi-trend" style="display:inline-flex;align-items:center;gap:3px;margin-top:6px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:500;background:${trendBg};color:${trendColor}"><i class="ti ${trendIcon}" style="font-size:10px"></i>${h(trend)}</span>`;
     }
     return `<div class="dv5-kpi" ${click} ${clickable}>
       <div class="dv5-kpi-icon ${color||'purple'}"><i class="ti ${h(icon)}"></i></div>
@@ -559,7 +559,7 @@ export function injectDepsToD5(deps) {
     if (!side) return;
     const navItem = t => `<a class="nav-item" id="nav-${t}" onclick="switchTab('${t}')" title="${h(TITLES[t])}">
       <i class="ti ${h(ICONS[t])}" style="font-size:15px;width:16px;flex-shrink:0"></i>
-      <span class="nav-item-label" style="font-size:12.5px;font-weight:500;letter-spacing:0">${h(TITLES[t])}</span>
+      <span class="nav-item-label" style="font-size:12.5px;font-weight:625;letter-spacing:0">${h(TITLES[t])}</span>
     </a>`;
     side.innerHTML = `
       <div class="sidebar-top">
@@ -581,9 +581,9 @@ export function injectDepsToD5(deps) {
       <div class="sidebar-search-bar" role="button" tabindex="0" onclick="document.querySelector('#cmd-modal')&&openCmd()">
         <i class="ti ti-search"></i><span>Search...</span><kbd>⌘K</kbd>
       </div>
-      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:350;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Workspace</div>
+      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:438;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Workspace</div>
       ${['dash','pipeline','candidates'].map(navItem).join('')}
-      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:350;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Operations</div>
+      <div class="nav-section-label" style="font-size:10px;letter-spacing:.08em;font-weight:438;text-transform:uppercase;opacity:.5;margin:12px 0 2px 10px;padding:0">Operations</div>
       ${['finance','documents','reports','clients'].map(navItem).join('')}
       <div class="nav-spacer"></div>
       <button class="sidebar-user-card sidebar-account-trigger dv5-suc" type="button" onclick="toggleProfileDropdown(event)">
@@ -1116,9 +1116,9 @@ export function injectDepsToD5(deps) {
         <div class="dv5-card" style="margin-bottom:12px">
           <div class="dv5-card-head"><span class="dv5-card-title">Add Manual Task</span></div>
           <div style="display:flex;gap:8px;padding:0 16px 14px;flex-wrap:wrap;align-items:flex-end">
-            <div style="flex:1;min-width:180px"><label style="font-size:11px;font-weight:350;color:#6b7280;display:block;margin-bottom:4px">Title</label>
+            <div style="flex:1;min-width:180px"><label style="font-size:11px;font-weight:438;color:#6b7280;display:block;margin-bottom:4px">Title</label>
               <input id="new-task-title" type="text" placeholder="e.g. Call Mr. Smith" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px"></div>
-            <div><label style="font-size:11px;font-weight:350;color:#6b7280;display:block;margin-bottom:4px">Due date</label>
+            <div><label style="font-size:11px;font-weight:438;color:#6b7280;display:block;margin-bottom:4px">Due date</label>
               <input id="new-task-due" type="date" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px"></div>
             <button class="dv5-btn primary" onclick="addManualTask()" style="height:36px;align-self:flex-end"><i class="ti ti-plus"></i>Add Task</button>
           </div>
@@ -1284,9 +1284,9 @@ export function injectDepsToD5(deps) {
                 <thead><tr><th>Month</th><th>Invoiced</th><th>Collected</th><th>Outstanding</th></tr></thead>
                 <tbody>
                   ${monthly.map(m=>`<tr>
-                    <td style="font-weight:350">${m.label}</td>
+                    <td style="font-weight:438">${m.label}</td>
                     <td>${isPro?money(m.invoiced):moneyUSD(m.invoiced)}</td>
-                    <td style="color:#16a34a;font-weight:350">${isPro?money(m.paid):moneyUSD(m.paid)}</td>
+                    <td style="color:#16a34a;font-weight:438">${isPro?money(m.paid):moneyUSD(m.paid)}</td>
                     <td style="color:${m.invoiced-m.paid>0?'#b91c1c':'#6b7280'}">${isPro?money(m.invoiced-m.paid):moneyUSD(m.invoiced-m.paid)}</td>
                   </tr>`).join('')}
                 </tbody>
@@ -1334,7 +1334,7 @@ export function injectDepsToD5(deps) {
           ${financeTab === 'expenses' ? `
           <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 4px;border-bottom:1px solid var(--border,#E8E8E8)">
             <div>
-              <span style="font-size:12px;font-weight:350;color:#374151">${money(expTotal)}</span>
+              <span style="font-size:12px;font-weight:438;color:#374151">${money(expTotal)}</span>
               <span style="font-size:12px;color:#9ca3af;margin-left:8px">total · ${money(expMonthTotal)} this month</span>
             </div>
             <button class="dv5-btn primary" onclick="openExpensePrompt()"><i class="ti ti-plus"></i>Add Expense</button>
@@ -1548,9 +1548,9 @@ export function injectDepsToD5(deps) {
     const chartMax=Math.max(...last12.map(s=>s.count),1);
     const monthlyChart=`<div style="display:flex;align-items:flex-end;gap:4px;height:100px;padding-bottom:4px">
       ${last12.map(s=>{const pct=Math.max(Math.round(s.count/chartMax*100),s.count>0?5:2);return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;position:relative">
-        <span style="font-size:9px;font-weight:400;color:#5347CE;position:absolute;bottom:calc(${pct}% + 2px)">${s.count||''}</span>
+        <span style="font-size:9px;font-weight:500;color:#5347CE;position:absolute;bottom:calc(${pct}% + 2px)">${s.count||''}</span>
         <div style="width:100%;border-radius:4px 4px 2px 2px;background:linear-gradient(180deg,#5347CE,#9B8CFF);height:${pct}%;min-height:2px" title="${s.count} placements"></div>
-        <span style="font-size:9px;color:#999;font-weight:350;writing-mode:vertical-lr;transform:rotate(180deg);height:28px;white-space:nowrap">${s.label}</span>
+        <span style="font-size:9px;color:#999;font-weight:438;writing-mode:vertical-lr;transform:rotate(180deg);height:28px;white-space:nowrap">${s.label}</span>
       </div>`}).join('')}
     </div>`;
 
@@ -1817,22 +1817,22 @@ export function injectDepsToD5(deps) {
 
       <!-- Breadcrumb -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:13px">
-        <button onclick="window.closeCandidateProfile()" style="display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:#5347CE;font-size:13px;font-weight:350;cursor:pointer;padding:0">
+        <button onclick="window.closeCandidateProfile()" style="display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:#5347CE;font-size:13px;font-weight:438;cursor:pointer;padding:0">
           <i class="ti ti-arrow-left"></i>Candidates
         </button>
         <i class="ti ti-chevron-right" style="font-size:12px;color:#9ca3af"></i>
-        <span style="color:#18191B;font-weight:300">${h(r.name)}</span>
+        <span style="color:#18191B;font-weight:375">${h(r.name)}</span>
         <span style="margin-left:auto">${badge(r.stage)}</span>
       </div>
 
       <!-- Hero card -->
       <div class="dv5-card" style="margin-bottom:16px">
         <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
-          <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#5347CE,#9B8CFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:400;flex-shrink:0">${h(ini(r.name))}</div>
+          <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#5347CE,#9B8CFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;flex-shrink:0">${h(ini(r.name))}</div>
           <div style="flex:1;min-width:0">
-            <h2 style="font-size:20px;font-weight:400;color:#18191B;margin:0 0 3px">${h(r.name)}</h2>
+            <h2 style="font-size:20px;font-weight:500;color:#18191B;margin:0 0 3px">${h(r.name)}</h2>
             <div style="font-size:13px;color:#6b7280;margin-bottom:10px">${h(r.position||'—')} · ${h(r.company||r.country||'—')}</div>
-            <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:#374151;font-weight:300">
+            <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:#374151;font-weight:375">
               <span><i class="ti ti-map-pin" style="color:#9ca3af;margin-right:3px"></i>${h(r.country||'—')}</span>
               <span><i class="ti ti-id" style="color:#9ca3af;margin-right:3px"></i>${h(r.pp||'No passport')}</span>
               <span><i class="ti ti-phone" style="color:#9ca3af;margin-right:3px"></i>${h(r.phone||'No phone')}</span>
@@ -1948,10 +1948,10 @@ export function injectDepsToD5(deps) {
               ${defs.length ? defs.map(([key, label]) => {
                 const item = items[key];
                 return `<tr>
-                  <td style="font-weight:300">${h(label)}</td>
+                  <td style="font-weight:375">${h(label)}</td>
                   <td>${item
-                    ? `<span style="display:inline-flex;align-items:center;gap:4px;color:#16a34a;font-size:12px;font-weight:350"><i class="ti ti-circle-check-filled"></i>Uploaded</span>`
-                    : `<span style="display:inline-flex;align-items:center;gap:4px;color:#9ca3af;font-size:12px;font-weight:300"><i class="ti ti-circle"></i>Missing</span>`}
+                    ? `<span style="display:inline-flex;align-items:center;gap:4px;color:#16a34a;font-size:12px;font-weight:438"><i class="ti ti-circle-check-filled"></i>Uploaded</span>`
+                    : `<span style="display:inline-flex;align-items:center;gap:4px;color:#9ca3af;font-size:12px;font-weight:375"><i class="ti ti-circle"></i>Missing</span>`}
                   </td>
                   <td style="color:#6b7280;font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item ? h(item.fileName||'Document') : '—'}</td>
                   <td style="display:flex;gap:6px;flex-wrap:wrap">
@@ -2137,20 +2137,20 @@ export function injectDepsToD5(deps) {
 /* Shadcn-style sidebar user card */
 .dv5-suc { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 12px!important; border-radius:8px!important; background:#fff!important; border:1px solid #E4E4E7!important; width:100%!important; text-align:left!important; cursor:pointer!important; transition:background .12s!important; margin-bottom:8px!important; box-sizing:border-box!important; }
 .dv5-suc:hover { background:#F4F4F5!important; }
-.dv5-suc-av { width:32px!important; height:32px!important; border-radius:6px!important; background:#18181B!important; color:#fff!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:11px!important; font-weight:400!important; flex-shrink:0!important; letter-spacing:.02em!important; }
+.dv5-suc-av { width:32px!important; height:32px!important; border-radius:6px!important; background:#18181B!important; color:#fff!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:11px!important; font-weight:500!important; flex-shrink:0!important; letter-spacing:.02em!important; }
 .dv5-suc-body { min-width:0!important; flex:1!important; }
-.dv5-suc-name { font-size:13px!important; font-weight:300!important; color:#09090B!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.35!important; }
+.dv5-suc-name { font-size:13px!important; font-weight:375!important; color:#09090B!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; line-height:1.35!important; }
 .dv5-suc-email { font-size:11px!important; color:#71717A!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; margin-top:1px!important; }
 
 /* Shadcn-style profile dropdown — slide up from user card */
 .dv5-pd { position:fixed!important; left:16px!important; bottom:70px!important; top:auto!important; right:auto!important; width:268px!important; background:#fff!important; border:1px solid #E4E4E7!important; border-radius:10px!important; box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06)!important; z-index:9000!important; overflow:hidden!important; visibility:hidden!important; opacity:0!important; transform:translateY(8px)!important; transition:opacity .15s ease,transform .15s ease,visibility 0s .15s!important; pointer-events:none!important; }
 .dv5-pd.open { visibility:visible!important; opacity:1!important; transform:translateY(0)!important; transition:opacity .15s ease,transform .15s ease,visibility 0s 0s!important; pointer-events:auto!important; }
 .dv5-pd-head { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #F4F4F5; }
-.dv5-pd-av { width:36px; height:36px; border-radius:7px; background:#18181B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:400; flex-shrink:0; letter-spacing:.02em; }
-.dv5-pd-name { font-size:13px; font-weight:300; color:#09090B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.35; }
+.dv5-pd-av { width:36px; height:36px; border-radius:7px; background:#18181B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:500; flex-shrink:0; letter-spacing:.02em; }
+.dv5-pd-name { font-size:13px; font-weight:375; color:#09090B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.35; }
 .dv5-pd-email { font-size:11px; color:#71717A; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv5-pd-items { padding:4px; }
-.dv5-pd-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:6px; font-size:13px; font-weight:500; color:#09090B; background:none; border:none; width:100%; text-align:left; cursor:pointer; font-family:inherit; transition:background .1s; }
+.dv5-pd-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:6px; font-size:13px; font-weight:625; color:#09090B; background:none; border:none; width:100%; text-align:left; cursor:pointer; font-family:inherit; transition:background .1s; }
 .dv5-pd-item:hover { background:#F4F4F5; }
 .dv5-pd-item i { font-size:15px; color:#71717A; flex-shrink:0; width:18px; }
 .dv5-pd-sep { height:1px; background:#F4F4F5; margin:3px 6px; }
@@ -2160,19 +2160,19 @@ export function injectDepsToD5(deps) {
 
 .dv5-page { padding: 0 0 40px; max-width: none; }
 .dv5-page-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; flex-wrap:wrap; }
-.dv5-page-head h1 { font-size:24px; font-weight:450; color:var(--text,#18191B); margin:0 0 4px; letter-spacing:-.5px; }
+.dv5-page-head h1 { font-size:24px; font-weight:562; color:var(--text,#18191B); margin:0 0 4px; letter-spacing:-.5px; }
 .dv5-page-head p { font-size:13px; color:var(--text-3,#999); margin:0; line-height:1.4; }
 .dv5-head-actions { display:flex; gap:8px; flex-wrap:wrap; }
 
 /* Buttons */
-.dv5-btn { display:inline-flex; align-items:center; gap:6px; padding:0 14px; height:34px; border-radius:8px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:12px; font-weight:350; color:var(--text,#18191B); cursor:pointer; white-space:nowrap; transition:background .15s; }
+.dv5-btn { display:inline-flex; align-items:center; gap:6px; padding:0 14px; height:34px; border-radius:8px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:12px; font-weight:438; color:var(--text,#18191B); cursor:pointer; white-space:nowrap; transition:background .15s; }
 .dv5-btn:hover { background:var(--bg,#F3F3F3); }
 .dv5-btn.primary { background:#5347CE; color:#fff; border-color:#5347CE; }
 .dv5-btn.primary:hover { background:#4338B8; }
 .dv5-btn-icon { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:1px solid var(--border,#E8E8E8); background:#fff; cursor:pointer; color:var(--text-2,#555); }
 .dv5-btn-icon:hover { background:var(--bg,#F3F3F3); }
-.dv5-link { background:none; border:none; color:#5347CE; font-size:12px; font-weight:350; cursor:pointer; padding:0; flex-shrink:0; white-space:nowrap; }
-.dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:350; color:var(--text,#18191B); cursor:pointer; }
+.dv5-link { background:none; border:none; color:#5347CE; font-size:12px; font-weight:438; cursor:pointer; padding:0; flex-shrink:0; white-space:nowrap; }
+.dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:438; color:var(--text,#18191B); cursor:pointer; }
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
 .dv5-action-queue { margin-bottom:12px; }
 .dv5-action-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
@@ -2184,24 +2184,24 @@ export function injectDepsToD5(deps) {
 .dv5-action-card strong { display:block; font-size:12px; color:#18191B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv5-action-card em { display:block; font-style:normal; font-size:11px; color:#6B7280; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv5-action-card b { color:#5347CE; font-size:12px; }
-.dv5-next-action { display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; background:#F1EFFF; color:#5347CE; font-size:10px; font-weight:400; white-space:nowrap; }
+.dv5-next-action { display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; background:#F1EFFF; color:#5347CE; font-size:10px; font-weight:500; white-space:nowrap; }
 .dv5-workflow-mini { min-width:112px; }
 .dv5-workflow-top { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:4px; }
-.dv5-workflow-top span { color:#4B5563; font-size:10px; font-weight:375; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dv5-workflow-top strong { color:#18191B; font-size:10px; font-weight:425; flex-shrink:0; }
+.dv5-workflow-top span { color:#4B5563; font-size:10px; font-weight:469; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-workflow-top strong { color:#18191B; font-size:10px; font-weight:531; flex-shrink:0; }
 .dv5-workflow-bar { height:5px; border-radius:999px; background:#EEF2F7; overflow:hidden; }
 .dv5-workflow-bar i { display:block; height:100%; border-radius:inherit; background:#16A34A; }
 .dv5-workflow-mini.watch .dv5-workflow-bar i { background:#F59E0B; }
 .dv5-workflow-mini.risk .dv5-workflow-bar i { background:#EF4444; }
-.dv5-workflow-reasons { margin-top:4px; color:#9A3412; font-size:9.5px; font-weight:350; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-workflow-reasons { margin-top:4px; color:#9A3412; font-size:9.5px; font-weight:438; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* Stat card grid (shadcn hotel-style colored cards) */
 .dv5-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
 .dv5-stat-card { border-radius:14px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.07); transition:transform .15s,box-shadow .15s; }
 .dv5-stat-card:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,.10); }
 .dv5-stat-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; }
-.dv5-stat-val { font-size:28px; font-weight:450; color:#18191B; line-height:1; margin:14px 0 4px; }
-.dv5-stat-label { font-size:13px; font-weight:350; color:#18191B; }
+.dv5-stat-val { font-size:28px; font-weight:562; color:#18191B; line-height:1; margin:14px 0 4px; }
+.dv5-stat-label { font-size:13px; font-weight:438; color:#18191B; }
 .dv5-stat-sub { font-size:11px; color:rgba(0,0,0,.5); margin-top:3px; }
 
 /* File manager cards */
@@ -2209,34 +2209,34 @@ export function injectDepsToD5(deps) {
 .dv5-file-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:14px; padding:20px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.06); transition:border-color .15s,box-shadow .15s; }
 .dv5-file-card:hover { border-color:#5347CE30; box-shadow:0 4px 12px rgba(83,71,206,.08); }
 .dv5-file-card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.dv5-file-card-label { font-size:13px; font-weight:350; color:var(--text,#18191B); }
-.dv5-file-count { font-size:34px; font-weight:450; color:var(--text,#18191B); line-height:1; margin-bottom:14px; }
+.dv5-file-card-label { font-size:13px; font-weight:438; color:var(--text,#18191B); }
+.dv5-file-count { font-size:34px; font-weight:562; color:var(--text,#18191B); line-height:1; margin-bottom:14px; }
 .dv5-file-bar-wrap { height:6px; background:#F1F1F1; border-radius:999px; overflow:hidden; margin-bottom:8px; }
 .dv5-file-bar { height:100%; border-radius:999px; transition:width .5s cubic-bezier(.4,0,.2,1); }
-.dv5-file-foot { display:flex; justify-content:space-between; font-size:11px; color:var(--text-3,#999); font-weight:350; margin-bottom:14px; }
-.dv5-file-link { font-size:12px; font-weight:350; color:var(--text-3,#999); display:flex; align-items:center; gap:4px; padding-top:10px; border-top:1px solid var(--border,#E8E8E8); }
+.dv5-file-foot { display:flex; justify-content:space-between; font-size:11px; color:var(--text-3,#999); font-weight:438; margin-bottom:14px; }
+.dv5-file-link { font-size:12px; font-weight:438; color:var(--text-3,#999); display:flex; align-items:center; gap:4px; padding-top:10px; border-top:1px solid var(--border,#E8E8E8); }
 .dv5-file-card:hover .dv5-file-link { color:#5347CE; }
 
 /* Transactions */
 .dv5-tx-header { display:flex; justify-content:space-between; align-items:flex-start; padding:16px 20px 0; flex-wrap:wrap; gap:12px; }
 .dv5-tx-tabs { display:flex; gap:2px; padding:12px 20px 0; border-bottom:1px solid var(--border,#E8E8E8); }
-.dv5-tx-tab { background:none; border:none; padding:8px 14px; font-size:13px; font-weight:350; color:var(--text-3,#999); border-radius:8px 8px 0 0; cursor:pointer; transition:color .15s; }
+.dv5-tx-tab { background:none; border:none; padding:8px 14px; font-size:13px; font-weight:438; color:var(--text-3,#999); border-radius:8px 8px 0 0; cursor:pointer; transition:color .15s; }
 .dv5-tx-tab.active { color:var(--text,#18191B); border-bottom:2px solid #18191B; }
 .dv5-tx-tab:hover { color:var(--text,#18191B); }
 .dv5-tx-list { }
 .dv5-tx-row { display:grid; grid-template-columns:130px 1fr auto 36px; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border,#F1F1F1); cursor:pointer; transition:background .1s; }
 .dv5-tx-row:hover { background:#F9F9F9; }
 .dv5-tx-row:last-child { border-bottom:0; }
-.dv5-tx-date { font-size:12px; font-weight:350; color:var(--text-3,#999); white-space:nowrap; }
-.dv5-tx-name { font-size:13px; font-weight:350; color:var(--text,#18191B); }
+.dv5-tx-date { font-size:12px; font-weight:438; color:var(--text-3,#999); white-space:nowrap; }
+.dv5-tx-name { font-size:13px; font-weight:438; color:var(--text,#18191B); }
 .dv5-tx-status { font-size:11px; color:var(--text-3,#999); margin-top:2px; }
-.dv5-tx-amt { font-size:13px; font-weight:400; white-space:nowrap; text-align:right; }
+.dv5-tx-amt { font-size:13px; font-weight:500; white-space:nowrap; text-align:right; }
 .dv5-tx-arrow { width:32px; height:32px; border:1px solid var(--border,#E8E8E8); border-radius:8px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--text-3,#999); transition:background .1s; }
 .dv5-tx-arrow:hover { background:var(--bg,#F5F5F5); }
 
 /* Date presets */
 .dv5-date-presets { display:flex; gap:4px; flex-wrap:wrap; }
-.dv5-preset-btn { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:8px; padding:5px 12px; font-size:12px; font-weight:350; color:var(--text-3,#999); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.dv5-preset-btn { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:8px; padding:5px 12px; font-size:12px; font-weight:438; color:var(--text-3,#999); cursor:pointer; transition:all .15s; white-space:nowrap; }
 .dv5-preset-btn:hover { background:var(--bg,#F5F5F5); color:var(--text,#18191B); }
 .dv5-preset-btn.active { background:#18191B; color:#fff; border-color:#18191B; }
 
@@ -2253,8 +2253,8 @@ export function injectDepsToD5(deps) {
 .dv5-kpi-icon.rose   { background:#FFF1F2; color:#E11D48; }
 .dv5-kpi-icon.teal   { background:#F0FDFA; color:#0D9488; }
 .dv5-kpi-icon.ink    { background:#1E1B4B; color:#EEFA94; }
-.dv5-kpi-val { font-size:22px; font-weight:450; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
-.dv5-kpi-label { font-size:12px; font-weight:350; color:var(--text,#18191B); }
+.dv5-kpi-val { font-size:22px; font-weight:562; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
+.dv5-kpi-label { font-size:12px; font-weight:438; color:var(--text,#18191B); }
 .dv5-kpi-note { font-size:11px; color:var(--text-3,#999); margin-top:2px; }
 
 /* Priority grid */
@@ -2262,8 +2262,8 @@ export function injectDepsToD5(deps) {
 .dv5-priority { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; cursor:pointer; transition:border-color .15s,box-shadow .15s; text-align:left; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 .dv5-priority:hover { border-color:#5347CE50; box-shadow:0 2px 8px rgba(83,71,206,.1); }
 .dv5-priority-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#5347CE; margin-bottom:10px; }
-.dv5-priority strong { display:block; font-size:28px; font-weight:450; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
-.dv5-priority span { display:block; font-size:12px; font-weight:350; color:var(--text,#18191B); }
+.dv5-priority strong { display:block; font-size:28px; font-weight:562; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
+.dv5-priority span { display:block; font-size:12px; font-weight:438; color:var(--text,#18191B); }
 .dv5-priority small { display:block; font-size:11px; color:var(--text-3,#999); margin-top:2px; }
 
 /* Cards */
@@ -2274,7 +2274,7 @@ export function injectDepsToD5(deps) {
 .dv5-card-pipeline .dv5-flow-arrow { color:rgba(255,255,255,.3); }
 .dv5-card-pipeline .dv5-pipeline-flow { padding:4px 0; }
 .dv5-card-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; min-width:0; }
-.dv5-card-title { font-size:13px; font-weight:400; color:var(--text,#18191B); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dv5-card-title { font-size:13px; font-weight:500; color:var(--text,#18191B); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dv5-card-sub { font-size:11px; color:var(--text-3,#999); flex-shrink:0; white-space:nowrap; }
 .dv5-two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; min-width:0; }
 .dv5-table-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; overflow:hidden; margin-bottom:12px; }
@@ -2282,7 +2282,7 @@ export function injectDepsToD5(deps) {
 /* Tables */
 .dv5-table-wrap { overflow-x:auto; }
 .dv5-table { width:100%; border-collapse:collapse; font-size:12px; }
-.dv5-table thead th { padding:10px 12px; text-align:left; font-size:11px; font-weight:400; color:var(--text-3,#999); text-transform:uppercase; letter-spacing:.04em; background:#FAFAFA; border-bottom:1px solid var(--border,#E8E8E8); white-space:nowrap; }
+.dv5-table thead th { padding:10px 12px; text-align:left; font-size:11px; font-weight:500; color:var(--text-3,#999); text-transform:uppercase; letter-spacing:.04em; background:#FAFAFA; border-bottom:1px solid var(--border,#E8E8E8); white-space:nowrap; }
 .dv5-table tbody tr { border-bottom:1px solid var(--border,#E8E8E8); transition:background .12s; cursor:pointer; }
 .dv5-table tbody tr:last-child { border-bottom:0; }
 .dv5-table tbody tr:hover { background:#FAFAFA; }
@@ -2290,15 +2290,15 @@ export function injectDepsToD5(deps) {
 
 /* Name cells */
 .dv5-name-cell { display:flex; align-items:center; gap:10px; }
-.dv5-name { font-size:12px; font-weight:350; color:var(--text,#18191B); }
+.dv5-name { font-size:12px; font-weight:438; color:var(--text,#18191B); }
 .dv5-sub { font-size:11px; color:var(--text-3,#999); margin-top:1px; }
-.dv5-next-action { font-size:11px; font-weight:350; color:#5347CE; }
+.dv5-next-action { font-size:11px; font-weight:438; color:#5347CE; }
 
 /* Avatars */
-.dv5-avatar { width:32px; height:32px; min-width:32px; border-radius:10px; background:#111827; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:450; }
+.dv5-avatar { width:32px; height:32px; min-width:32px; border-radius:10px; background:#111827; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:562; }
 
 /* Badges */
-.dv5-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:400; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+.dv5-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
 .dv5-badge.green { background:#E3F5EE; color:#197A52; }
 .dv5-badge.blue  { background:#E3EEF9; color:#1A6BB5; }
 .dv5-badge.amber { background:#FDF3DC; color:#B07B10; }
@@ -2307,7 +2307,7 @@ export function injectDepsToD5(deps) {
 .dv5-badge.gray  { background:#F3F3F3; color:#888; }
 
 /* Pills */
-.dv5-pill { display:inline-flex; align-items:center; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:400; white-space:nowrap; background:#F3F3F3; color:#888; }
+.dv5-pill { display:inline-flex; align-items:center; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:500; white-space:nowrap; background:#F3F3F3; color:#888; }
 .dv5-pill.red    { background:#FDEAEA; color:#B83232; }
 .dv5-pill.amber  { background:#FDF3DC; color:#B07B10; }
 .dv5-pill.danger { background:#FDEAEA; color:#B83232; }
@@ -2320,11 +2320,11 @@ export function injectDepsToD5(deps) {
 .dv5-select { height:34px; padding:0 10px; border:1px solid var(--border,#E8E8E8); border-radius:8px; font-size:12px; background:#fff; outline:none; cursor:pointer; }
 .dv5-count { font-size:11px; color:var(--text-3,#999); white-space:nowrap; }
 .dv5-view-tabs { display:flex; border:1px solid var(--border,#E8E8E8); border-radius:8px; overflow:hidden; }
-.dv5-view-tab { padding:0 12px; height:32px; font-size:11px; font-weight:350; border:none; background:#fff; cursor:pointer; color:var(--text-3,#999); }
+.dv5-view-tab { padding:0 12px; height:32px; font-size:11px; font-weight:438; border:none; background:#fff; cursor:pointer; color:var(--text-3,#999); }
 .dv5-view-tab.active { background:#5347CE; color:#fff; }
 
 /* Bulk action bar */
-.dv5-bulk-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 12px; background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px; margin-bottom:10px; font-size:12px; font-weight:350; color:#3730A3; }
+.dv5-bulk-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 12px; background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px; margin-bottom:10px; font-size:12px; font-weight:438; color:#3730A3; }
 .dv5-bulk-bar .dv5-select { height:30px; font-size:11px; }
 .dv5-bulk-bar .dv5-btn { height:30px; font-size:11px; }
 .dv5-row-selected td { background:#F5F3FF !important; }
@@ -2335,20 +2335,20 @@ export function injectDepsToD5(deps) {
 .dv5-kanban { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:60vh; }
 .dv5-col { background:#FAFAFA; border:1px solid var(--border,#E8E8E8); border-radius:12px; overflow:hidden; }
 .dv5-col-head { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#fff; border-bottom:1px solid var(--border,#E8E8E8); }
-.dv5-col-head span:first-child { font-size:11px; font-weight:400; text-transform:uppercase; letter-spacing:.06em; color:var(--text,#18191B); }
-.dv5-col-count { background:#5347CE; color:#fff; border-radius:999px; padding:2px 7px; font-size:10px; font-weight:400; }
+.dv5-col-head span:first-child { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.06em; color:var(--text,#18191B); }
+.dv5-col-count { background:#5347CE; color:#fff; border-radius:999px; padding:2px 7px; font-size:10px; font-weight:500; }
 .dv5-col-body { padding:10px; display:flex; flex-direction:column; gap:8px; min-height:100px; }
 .dv5-pipe-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:10px; padding:12px; cursor:pointer; transition:border-color .15s,box-shadow .15s; }
 .dv5-pipe-card:hover { border-color:#5347CE40; box-shadow:0 4px 12px rgba(83,71,206,.08); }
-.dv5-pipe-name { font-size:12px; font-weight:350; color:var(--text,#18191B); margin-bottom:4px; }
+.dv5-pipe-name { font-size:12px; font-weight:438; color:var(--text,#18191B); margin-bottom:4px; }
 .dv5-pipe-meta { font-size:11px; color:var(--text-3,#999); line-height:1.4; margin-bottom:8px; }
-.dv5-pipe-foot { display:flex; justify-content:space-between; font-size:10px; color:var(--text-3,#999); font-weight:350; }
+.dv5-pipe-foot { display:flex; justify-content:space-between; font-size:10px; color:var(--text-3,#999); font-weight:438; }
 
 /* Pipeline flow steps */
 .dv5-pipeline-flow { display:flex; align-items:center; gap:0; padding:0; width:100%; }
 .dv5-flow-step { text-align:center; padding:0 8px; }
-.dv5-flow-step strong { display:block; font-size:28px; font-weight:450; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
-.dv5-flow-step span { font-size:10px; color:var(--text-3,#999); font-weight:350; letter-spacing:.04em; text-transform:uppercase; }
+.dv5-flow-step strong { display:block; font-size:28px; font-weight:562; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
+.dv5-flow-step span { font-size:10px; color:var(--text-3,#999); font-weight:438; letter-spacing:.04em; text-transform:uppercase; }
 .dv5-flow-arrow { color:var(--text-3,#999); font-size:14px; flex-shrink:0; }
 
 /* Tasks */
@@ -2359,21 +2359,21 @@ export function injectDepsToD5(deps) {
 .dv5-task-icon.high { background:#FDEAEA; color:#B83232; }
 .dv5-task-icon.med  { background:#FDF3DC; color:#B07B10; }
 .dv5-task-body { flex:1; min-width:0; }
-.dv5-task-title { font-size:12px; font-weight:350; color:var(--text,#18191B); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-task-title { font-size:12px; font-weight:438; color:var(--text,#18191B); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv5-task-meta { font-size:11px; color:var(--text-3,#999); }
 
 /* Activity */
 .dv5-activity-list { display:flex; flex-direction:column; gap:8px; }
 .dv5-activity-item { display:flex; align-items:flex-start; gap:10px; }
 .dv5-activity-icon { width:28px; height:28px; border-radius:8px; background:#F3F3F3; display:flex; align-items:center; justify-content:center; font-size:12px; color:#888; flex-shrink:0; }
-.dv5-activity-title { font-size:12px; font-weight:350; color:var(--text,#18191B); }
+.dv5-activity-title { font-size:12px; font-weight:438; color:var(--text,#18191B); }
 .dv5-activity-meta { font-size:11px; color:var(--text-3,#999); }
 
 /* Bar chart */
 .dv5-bar-chart { display:flex; align-items:flex-end; gap:10px; height:160px; padding:0 4px 4px; }
 .dv5-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
 .dv5-bar { width:100%; border-radius:6px 6px 3px 3px; background:linear-gradient(180deg,#5347CE,#9B8CFF); min-height:12px; transition:height .3s; }
-.dv5-bar-wrap span { font-size:10px; color:var(--text-3,#999); font-weight:350; }
+.dv5-bar-wrap span { font-size:10px; color:var(--text-3,#999); font-weight:438; }
 
 /* Empty */
 .dv5-empty { padding:24px 12px; text-align:center; font-size:12px; color:var(--text-3,#999); }
@@ -2382,36 +2382,36 @@ export function injectDepsToD5(deps) {
 .dv5-modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.48); z-index:9999; display:none; align-items:flex-start; justify-content:center; padding:28px 16px; overflow-y:auto; }
 .dv5-profile-panel { width:min(1100px,98vw); background:#F8FAFC; border-radius:20px; border:1px solid rgba(255,255,255,.6); box-shadow:0 30px 90px rgba(15,23,42,.25); padding:20px; margin:auto; }
 .dv5-profile-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-.dv5-profile-id { font-size:11px; font-weight:400; text-transform:uppercase; letter-spacing:.06em; color:#7B8496; }
+.dv5-profile-id { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.06em; color:#7B8496; }
 .dv5-profile-actions { display:flex; gap:8px; }
 .dv5-profile-hero { display:grid; grid-template-columns:auto 1fr auto; gap:16px; align-items:center; background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:16px; padding:18px; margin-bottom:12px; }
-.dv5-profile-avatar { width:60px; height:60px; border-radius:18px; background:#111827; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:450; flex-shrink:0; }
-.dv5-profile-info h2 { font-size:20px; font-weight:400; margin:0 0 4px; }
-.dv5-profile-info p { font-size:13px; color:#6B7280; margin:0 0 8px; font-weight:325; }
+.dv5-profile-avatar { width:60px; height:60px; border-radius:18px; background:#111827; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:562; flex-shrink:0; }
+.dv5-profile-info h2 { font-size:20px; font-weight:500; margin:0 0 4px; }
+.dv5-profile-info p { font-size:13px; color:#6B7280; margin:0 0 8px; font-weight:406; }
 .dv5-profile-meta { display:flex; gap:14px; flex-wrap:wrap; }
-.dv5-profile-meta span { display:inline-flex; gap:5px; align-items:center; font-size:12px; color:#6B7280; font-weight:325; }
+.dv5-profile-meta span { display:inline-flex; gap:5px; align-items:center; font-size:12px; color:#6B7280; font-weight:406; }
 .dv5-profile-stage { text-align:right; display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
-.dv5-profile-stage small { font-size:11px; color:#7B8496; font-weight:350; }
+.dv5-profile-stage small { font-size:11px; color:#7B8496; font-weight:438; }
 .dv5-progress-steps { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:12px; }
-.dv5-step { display:flex; flex-direction:column; align-items:center; gap:4px; color:#9CA3AF; font-size:10px; font-weight:400; }
-.dv5-step span { width:26px; height:26px; border-radius:999px; border:2px solid #DBE1EB; background:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:400; }
+.dv5-step { display:flex; flex-direction:column; align-items:center; gap:4px; color:#9CA3AF; font-size:10px; font-weight:500; }
+.dv5-step span { width:26px; height:26px; border-radius:999px; border:2px solid #DBE1EB; background:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:500; }
 .dv5-step.done span { background:#22A06B; color:#fff; border-color:#22A06B; }
 .dv5-step.active span { background:#5347CE; color:#fff; border-color:#5347CE; }
 .dv5-profile-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
-.dv5-breadcrumb { display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:13px; font-weight:350; color:#7B8496; }
-.dv5-breadcrumb a,.dv5-breadcrumb button { color:#5347CE; background:none; border:none; cursor:pointer; font-size:13px; font-weight:350; padding:0; text-decoration:none; }
+.dv5-breadcrumb { display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:13px; font-weight:438; color:#7B8496; }
+.dv5-breadcrumb a,.dv5-breadcrumb button { color:#5347CE; background:none; border:none; cursor:pointer; font-size:13px; font-weight:438; padding:0; text-decoration:none; }
 .dv5-breadcrumb a:hover,.dv5-breadcrumb button:hover { text-decoration:underline; }
 .dv5-breadcrumb span { color:#7B8496; }
 .dv5-profile-vitals { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
 .dv5-vital-card { border:1px solid; border-radius:12px; padding:16px; }
-.dv5-vital-label { font-size:11px; font-weight:350; margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
-.dv5-vital-value { font-size:20px; font-weight:400; }
+.dv5-vital-label { font-size:11px; font-weight:438; margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+.dv5-vital-value { font-size:20px; font-weight:500; }
 .dv5-vital-hint { font-size:11px; margin-top:4px; }
-.dv5-check-row { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid var(--border,#E8E8E8); font-size:13px; font-weight:300; color:#374151; border-radius:6px; margin:1px 0; }
+.dv5-check-row { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid var(--border,#E8E8E8); font-size:13px; font-weight:375; color:#374151; border-radius:6px; margin:1px 0; }
 .dv5-check-row:last-child { border:none; }
 .dv5-check-row.clickable:hover { background:#f5f3ff; color:#5347CE; }
 .dv5-check-row.clickable:hover i { color:#5347CE !important; }
-.dv5-check-hint { margin-left:auto; font-size:11px; font-weight:500; color:#9ca3af; white-space:nowrap; opacity:0; transition:opacity .15s; }
+.dv5-check-hint { margin-left:auto; font-size:11px; font-weight:625; color:#9ca3af; white-space:nowrap; opacity:0; transition:opacity .15s; }
 .dv5-check-row.clickable:hover .dv5-check-hint { opacity:1; color:#5347CE; }
 .dv5-detail-grid { display:grid; grid-template-columns:1fr auto; gap:8px; }
 .dv5-detail-grid span { font-size:12px; color:#7B8496; }

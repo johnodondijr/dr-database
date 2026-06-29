@@ -1649,7 +1649,7 @@ function renderSettingsCountries() {
   if (!isAdmin) return;
   const countries = getGeneralCountries();
   list.innerHTML = countries.map(country => `
-    <span style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;background:#F8FAFC;padding:7px 9px;font-size:12px;font-weight:400;color:var(--ink)">
+    <span style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;background:#F8FAFC;padding:7px 9px;font-size:12px;font-weight:500;color:var(--ink)">
       ${escHTML(country)}
       <button type="button" onclick="removeSettingsCountry('${escJSString(country)}')" title="Remove ${escHTML(country)}" style="border:0;background:transparent;color:var(--text-3);cursor:pointer;padding:0;display:inline-flex;align-items:center">
         <i class="ti ti-x"></i>
@@ -1710,10 +1710,10 @@ function renderCompanyUsers() {
   list.innerHTML = users.map(([username, account]) => `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);border-radius:10px;padding:9px 10px;background:#F8FAFC">
       <div style="min-width:0">
-        <div style="font-size:13px;font-weight:400;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHTML(account.display || username)}</div>
+        <div style="font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHTML(account.display || username)}</div>
         <div style="font-size:11px;color:var(--text-3)">@${escHTML(username)}</div>
       </div>
-      <span style="font-size:10px;font-weight:400;text-transform:uppercase;color:${account.role === 'admin' ? 'var(--nexus-purple)' : 'var(--text-3)'}">${account.role === 'admin' ? 'Admin' : 'Staff'}</span>
+      <span style="font-size:10px;font-weight:500;text-transform:uppercase;color:${account.role === 'admin' ? 'var(--nexus-purple)' : 'var(--text-3)'}">${account.role === 'admin' ? 'Admin' : 'Staff'}</span>
     </div>
   `).join('') || '<div class="empty" style="padding:12px">No users yet</div>';
 }
@@ -3171,8 +3171,8 @@ function openLBRefundPayment(id) {
       <div class="modal-header"><h2>Record Refund Payment — ${h(r.name)}</h2><button class="modal-close" onclick="closeModal('lb-refund-modal')">×</button></div>
       <div class="modal-body">
         <div style="display:flex;gap:12px;margin-bottom:12px">
-          <div style="flex:1;background:#f0fdf4;border-radius:8px;padding:10px 12px;text-align:center"><div style="font-size:11px;color:#16a34a;font-weight:350">Total to Refund</div><div style="font-size:16px;font-weight:400">${moneyUSD(r.toRefund||r.to_refund||0)}</div></div>
-          <div style="flex:1;background:#fffbeb;border-radius:8px;padding:10px 12px;text-align:center"><div style="font-size:11px;color:#d97706;font-weight:350">Remaining</div><div style="font-size:16px;font-weight:400">${moneyUSD(owing)}</div></div>
+          <div style="flex:1;background:#f0fdf4;border-radius:8px;padding:10px 12px;text-align:center"><div style="font-size:11px;color:#16a34a;font-weight:438">Total to Refund</div><div style="font-size:16px;font-weight:500">${moneyUSD(r.toRefund||r.to_refund||0)}</div></div>
+          <div style="flex:1;background:#fffbeb;border-radius:8px;padding:10px 12px;text-align:center"><div style="font-size:11px;color:#d97706;font-weight:438">Remaining</div><div style="font-size:16px;font-weight:500">${moneyUSD(owing)}</div></div>
         </div>
         ${rows?`<table class="dv5-table" style="margin-bottom:10px"><thead><tr><th>Date</th><th>Amount</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:''}
         <div class="form-grid">
