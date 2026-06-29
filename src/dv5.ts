@@ -432,10 +432,10 @@ export function injectDepsToD5(deps) {
   function statCard(icon, value, label, sub, bgColor, iconBg, iconColor, action='') {
     const click = action ? `onclick="${action}"` : '';
     const cursor = action ? 'cursor:pointer' : 'cursor:default';
-    return `<div class="dv5-stat-card" style="background:${bgColor};${cursor}" ${click}>
+    return `<div class="dv5-stat-card" style="${cursor}" ${click}>
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="dv5-stat-icon" style="background:${iconBg};color:${iconColor}"><i class="ti ${h(icon)}"></i></div>
-        <i class="ti ti-dots-vertical" style="font-size:15px;color:${iconColor};opacity:.5"></i>
+        <div class="dv5-stat-icon"><i class="ti ${h(icon)}"></i></div>
+        <i class="ti ti-dots-vertical" style="font-size:15px;opacity:.35"></i>
       </div>
       <div class="dv5-stat-val">${h(String(value))}</div>
       <div class="dv5-stat-label">${h(label)}</div>
@@ -467,8 +467,8 @@ export function injectDepsToD5(deps) {
   // ── Priority card helper ──────────────────────────────────
   function priority(icon, num, label, note, cardBg, iconBg, action='') {
     const click = action ? `onclick="${action}"` : '';
-    return `<div class="dv5-priority" style="background:${cardBg};border-color:transparent" ${click}>
-      <div class="dv5-priority-icon" style="background:${iconBg};color:#fff"><i class="ti ${h(icon)}"></i></div>
+    return `<div class="dv5-priority" ${click}>
+      <div class="dv5-priority-icon"><i class="ti ${h(icon)}"></i></div>
       <strong>${h(String(num))}</strong>
       <span>${h(label)}</span>
       <small>${h(note)}</small>
@@ -706,8 +706,8 @@ export function injectDepsToD5(deps) {
 
         <div class="dv5-card dv5-card-pipeline">
           <div class="dv5-card-head" style="margin-bottom:16px">
-            <span class="dv5-card-title" style="color:#1E1B4B;font-size:14px;font-weight:500">${isPro?'Professional':'General Jobs'} Pipeline</span>
-            <button class="dv5-link" style="color:#5347CE;font-size:11px;opacity:.8" onclick="switchTab('pipeline')">View all →</button>
+            <span class="dv5-card-title dv5-pipeline-title">${isPro?'Candidates':'General Jobs'} Pipeline</span>
+            <button class="dv5-link dv5-pipeline-link" onclick="switchTab('pipeline')">View all →</button>
           </div>
           <div class="dv5-pipeline-flow" style="justify-content:space-between">
             ${flowSteps.map(([label,val], i) => {
@@ -718,8 +718,8 @@ export function injectDepsToD5(deps) {
               <div class="dv5-flow-step" style="flex:1;position:relative;padding:0 8px">
                 <strong style="font-size:28px">${h(String(val))}</strong>
                 <span style="font-size:10px;letter-spacing:.04em;text-transform:uppercase">${h(label)}</span>
-                <div style="margin-top:8px;height:3px;border-radius:2px;background:rgba(99,91,210,.12);overflow:hidden">
-                  <div style="height:100%;width:${pct}%;background:${isLast?'#16A34A':'#5347CE'};border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+                <div class="dv5-flow-track">
+                  <div class="dv5-flow-fill ${isLast?'done':''}" style="width:${pct}%"></div>
                 </div>
               </div>${!isLast ? '<div class="dv5-flow-arrow" style="flex-shrink:0;padding:0 2px;padding-bottom:18px"><i class="ti ti-chevron-right"></i></div>' : ''}`;
             }).join('')}
@@ -730,8 +730,8 @@ export function injectDepsToD5(deps) {
           <div class="dv5-card dv5-action-queue" style="margin-bottom:0">
             <div class="dv5-card-head">
               <div>
-                <span class="dv5-card-title" style="color:#BE123C">Next Actions</span>
-                <div class="dv5-card-sub" style="color:rgba(190,18,60,.55)">Needs attention</div>
+                <span class="dv5-card-title">Next Actions</span>
+                <div class="dv5-card-sub">Needs attention</div>
               </div>
               <button class="dv5-link" style="color:rgba(190,18,60,.7)" onclick="switchTab('candidates')">All →</button>
             </div>
@@ -2403,6 +2403,190 @@ export function injectDepsToD5(deps) {
 .dv5-detail-grid { display:grid; grid-template-columns:1fr auto; gap:8px; }
 .dv5-detail-grid span { font-size:12px; color:#7B8496; }
 .dv5-detail-grid strong { font-size:12px; color:var(--text,#18191B); text-align:right; }
+
+/* Dreco warm-neutral theme */
+.dv5-page,
+.dv5-section {
+  --dreco-bg:#F4F3EC;
+  --dreco-shell:#FBFAF4;
+  --dreco-surface:#FFFFFF;
+  --dreco-soft:#F8F7EF;
+  --dreco-ink:#171715;
+  --dreco-muted:#76746B;
+  --dreco-muted-2:#9A978C;
+  --dreco-line:#E4E1D6;
+  --dreco-line-strong:#D6D1C3;
+  --dreco-accent:#D8D3C5;
+  --dreco-success:#386A52;
+  --dreco-success-bg:#E7F0E9;
+  --dreco-warning:#8A6424;
+  --dreco-warning-bg:#F4ECD9;
+  --dreco-danger:#8F3E3C;
+  --dreco-danger-bg:#F3E5E2;
+  --dreco-info:#46505A;
+  --dreco-info-bg:#E7E9EA;
+}
+.dv5-page { color:var(--dreco-ink); }
+.dv5-page-head h1 { color:var(--dreco-ink); font-weight:500; letter-spacing:-.02em; }
+.dv5-page-head p,
+.dv5-card-sub,
+.dv5-count,
+.dv5-sub,
+.dv5-activity-meta,
+.dv5-task-meta,
+.dv5-kpi-note,
+.dv5-priority small { color:var(--dreco-muted); }
+.dv5-btn,
+.dv5-btn-icon,
+.dv5-action-btn,
+.dv5-input,
+.dv5-select,
+.dv5-view-tabs,
+.dv5-preset-btn {
+  border-color:var(--dreco-line);
+  background:var(--dreco-surface);
+  color:var(--dreco-ink);
+  box-shadow:none;
+}
+.dv5-btn:hover,
+.dv5-btn-icon:hover,
+.dv5-action-btn:hover,
+.dv5-preset-btn:hover,
+.dv5-task-item:hover,
+.dv5-table tbody tr:hover,
+.dv5-check-row.clickable:hover { background:var(--dreco-soft); color:var(--dreco-ink); }
+.dv5-btn.primary,
+.dv5-view-tab.active,
+.dv5-preset-btn.active {
+  background:var(--dreco-ink);
+  color:#fff;
+  border-color:var(--dreco-ink);
+}
+.dv5-btn.primary:hover { background:#2B2A25; }
+.dv5-link,
+.dv5-breadcrumb a,
+.dv5-breadcrumb button,
+.dv5-check-row.clickable:hover i,
+.dv5-check-row.clickable:hover .dv5-check-hint {
+  color:var(--dreco-ink)!important;
+}
+.dv5-card,
+.dv5-table-card,
+.dv5-kpi,
+.dv5-priority,
+.dv5-stat-card,
+.dv5-file-card,
+.dv5-col,
+.dv5-pipe-card,
+.dv5-profile-hero,
+.dv5-vital-card {
+  background:var(--dreco-surface);
+  border-color:var(--dreco-line);
+  box-shadow:0 14px 36px rgba(23,23,21,.045);
+}
+.dv5-card-head { border-color:var(--dreco-line); }
+.dv5-card-title,
+.dv5-kpi-label,
+.dv5-kpi-val,
+.dv5-priority span,
+.dv5-priority strong,
+.dv5-stat-val,
+.dv5-stat-label,
+.dv5-name,
+.dv5-pipe-name,
+.dv5-task-title,
+.dv5-activity-title,
+.dv5-profile-info h2,
+.dv5-detail-grid strong { color:var(--dreco-ink); font-weight:500; }
+.dv5-kpi-icon,
+.dv5-kpi-icon.purple,
+.dv5-kpi-icon.blue,
+.dv5-kpi-icon.teal,
+.dv5-file-card i,
+.dv5-activity-icon,
+.dv5-stat-icon {
+  background:var(--dreco-soft)!important;
+  color:var(--dreco-ink)!important;
+}
+.dv5-kpi-icon.green,
+.dv5-task-icon.med { background:var(--dreco-warning-bg)!important; color:var(--dreco-warning)!important; }
+.dv5-kpi-icon.amber { background:var(--dreco-warning-bg)!important; color:var(--dreco-warning)!important; }
+.dv5-kpi-icon.rose,
+.dv5-task-icon.high { background:var(--dreco-danger-bg)!important; color:var(--dreco-danger)!important; }
+.dv5-priority {
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAF9F2 100%)!important;
+  border-color:var(--dreco-line)!important;
+}
+.dv5-priority:hover,
+.dv5-kpi:hover[onclick],
+.dv5-file-card:hover,
+.dv5-pipe-card:hover {
+  border-color:var(--dreco-line-strong)!important;
+  box-shadow:0 18px 40px rgba(23,23,21,.075)!important;
+}
+.dv5-priority-icon {
+  background:var(--dreco-ink)!important;
+  color:#fff!important;
+}
+.dv5-card-pipeline {
+  background:linear-gradient(135deg,#FFFFFF 0%,#FAF8EF 55%,#F2EFE3 100%)!important;
+  border-color:var(--dreco-line)!important;
+}
+.dv5-pipeline-title { color:var(--dreco-ink)!important; font-size:14px!important; font-weight:500!important; }
+.dv5-pipeline-link { color:var(--dreco-muted)!important; font-size:11px!important; }
+.dv5-card-pipeline .dv5-flow-step strong { color:var(--dreco-ink)!important; font-weight:500; }
+.dv5-card-pipeline .dv5-flow-step span { color:var(--dreco-muted)!important; }
+.dv5-card-pipeline .dv5-flow-arrow { color:var(--dreco-muted-2)!important; }
+.dv5-flow-track { margin-top:8px; height:3px; border-radius:2px; background:#E8E4D7; overflow:hidden; }
+.dv5-flow-fill { height:100%; background:var(--dreco-ink); border-radius:2px; transition:width .6s cubic-bezier(.4,0,.2,1); }
+.dv5-flow-fill.done { background:var(--dreco-success); }
+.dv5-action-queue {
+  background:linear-gradient(180deg,#FFFFFF 0%,#F7F2EC 100%)!important;
+  border-color:#E6D8CC!important;
+}
+.dv5-action-queue .dv5-card-title { color:var(--dreco-danger)!important; }
+.dv5-action-queue .dv5-card-sub,
+.dv5-action-queue .dv5-link { color:#9B7468!important; }
+.dv5-action-card { border-color:rgba(143,62,60,.14)!important; }
+.dv5-action-card:hover { background:rgba(143,62,60,.055)!important; }
+.dv5-action-card .dv5-avatar { background:var(--dreco-danger-bg)!important; color:var(--dreco-danger)!important; }
+.dv5-action-card strong,
+.dv5-action-card b { color:var(--dreco-danger)!important; font-weight:500!important; }
+.dv5-action-card em { color:#9B7468!important; }
+.dv5-next-action { background:var(--dreco-soft)!important; color:var(--dreco-ink)!important; }
+.dv5-workflow-bar { background:#E8E4D7; }
+.dv5-workflow-bar i { background:var(--dreco-success); }
+.dv5-workflow-mini.watch .dv5-workflow-bar i { background:var(--dreco-warning); }
+.dv5-workflow-mini.risk .dv5-workflow-bar i { background:var(--dreco-danger); }
+.dv5-table thead th,
+.dv5-col,
+.dv5-col-head,
+.dv5-bulk-bar { background:var(--dreco-soft)!important; border-color:var(--dreco-line)!important; color:var(--dreco-muted)!important; }
+.dv5-table tbody tr,
+.dv5-table tbody td { border-color:var(--dreco-line); }
+.dv5-col-count,
+.dv5-step.active span { background:var(--dreco-ink)!important; color:#fff!important; border-color:var(--dreco-ink)!important; }
+.dv5-step.done span { background:var(--dreco-success)!important; border-color:var(--dreco-success)!important; }
+.dv5-bar,
+.dv5-file-bar { background:linear-gradient(180deg,#171715,#45433D)!important; }
+.dv5-row-selected td,
+.dv5-client-row.dv5-client-open td { background:#F1EDE2!important; }
+.dv5-badge.green,
+.dv5-pill.green { background:var(--dreco-success-bg)!important; color:var(--dreco-success)!important; }
+.dv5-badge.blue,
+.dv5-badge.purple,
+.dv5-badge.gray,
+.dv5-pill,
+.dv5-pill.gray { background:var(--dreco-info-bg)!important; color:var(--dreco-info)!important; }
+.dv5-badge.amber,
+.dv5-pill.amber { background:var(--dreco-warning-bg)!important; color:var(--dreco-warning)!important; }
+.dv5-badge.red,
+.dv5-pill.red,
+.dv5-pill.danger { background:var(--dreco-danger-bg)!important; color:var(--dreco-danger)!important; }
+.dv5-modal-overlay { background:rgba(23,23,21,.46); }
+.dv5-profile-panel { background:var(--dreco-bg); border-color:rgba(255,255,255,.72); }
+.dv5-profile-avatar,
+.dv5-avatar { background:var(--dreco-ink); color:#fff; }
 
 /* Responsive */
 @media (max-width:1100px) {
