@@ -3696,14 +3696,15 @@ tr:last-child td{border-bottom:none!important}
   background:#EEF1F6!important;
   align-items:center!important;
   justify-content:center!important;
+  min-height:1056px!important;
   overflow:auto!important;
 }
 #login-screen .lp-window{
   width:calc(100vw - 52px)!important;
   max-width:1460px!important;
-  height:calc(100vh - 52px)!important;
-  min-height:0!important;
-  max-height:1004px!important;
+  height:1004px!important;
+  min-height:1004px!important;
+  max-height:none!important;
   display:grid!important;
   grid-template-columns:45.9% 54.1%!important;
   border-radius:14px!important;
@@ -4071,16 +4072,8 @@ tr:last-child td{border-bottom:none!important}
 #login-screen .lp-av-row span:not(.lp-av){font-size:10.5px!important}
 #login-screen .lp-av-row em{font-size:10px!important;top:1px!important}
 @media(max-height:900px) and (min-width:1181px){
-  #login-screen .lp-window{height:calc(100vh - 52px)!important;min-height:0!important}
-  #login-screen .lp-brand-tag{top:92px!important}
-  #login-screen .lp-content-area{margin-top:216px!important}
-  #login-screen .lp-footer-note{bottom:86px!important}
-  #login-screen .lp-media{padding-top:155px!important}
-  #login-screen .lp-product-preview{top:410px!important;height:390px!important}
-  #login-screen .lp-flow-card{height:78px!important;padding-top:15px!important}
-  #login-screen .lp-money-panel,
-  #login-screen .lp-activity-panel{height:212px!important}
-  #login-screen .lp-donut{top:77px!important}
+  #login-screen{align-items:flex-start!important}
+  #login-screen .lp-window{height:1004px!important;min-height:1004px!important}
 }
 @media(max-width:1180px){
   #login-screen{padding:0!important}
