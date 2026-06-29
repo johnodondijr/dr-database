@@ -2238,7 +2238,7 @@ export function injectDepsToD5(deps) {
 .dv5-kpi-icon.blue   { background:#EFF6FF; color:#2563EB; }
 .dv5-kpi-icon.rose   { background:#FFF1F2; color:#E11D48; }
 .dv5-kpi-icon.teal   { background:#F0FDFA; color:#0D9488; }
-.dv5-kpi-icon.ink    { background:#1E1B4B; color:#EEFA94; }
+.dv5-kpi-icon.ink    { background:var(--dreco-ink,#171715); color:#fff; }
 .dv5-kpi-val { font-size:22px; font-weight:562; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
 .dv5-kpi-label { font-size:12px; font-weight:438; color:var(--text,#18191B); }
 .dv5-kpi-note { font-size:11px; color:var(--text-3,#999); margin-top:2px; }
@@ -2367,7 +2367,7 @@ export function injectDepsToD5(deps) {
 
 /* Candidate Profile Modal */
 .dv5-modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.48); z-index:9999; display:none; align-items:flex-start; justify-content:center; padding:28px 16px; overflow-y:auto; }
-.dv5-profile-panel { width:min(1100px,98vw); background:#F8FAFC; border-radius:20px; border:1px solid rgba(255,255,255,.6); box-shadow:0 30px 90px rgba(15,23,42,.25); padding:20px; margin:auto; }
+.dv5-profile-panel { width:min(1100px,98vw); background:var(--dreco-surface,#fff); border-radius:20px; border:1px solid var(--dreco-line,#E4E1D6); box-shadow:0 30px 90px rgba(23,23,21,.16); padding:20px; margin:auto; }
 .dv5-profile-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .dv5-profile-id { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.06em; color:#7B8496; }
 .dv5-profile-actions { display:flex; gap:8px; }
@@ -2503,16 +2503,27 @@ export function injectDepsToD5(deps) {
 .dv5-kpi-icon.blue,
 .dv5-kpi-icon.teal,
 .dv5-file-card i,
-.dv5-activity-icon,
-.dv5-stat-icon {
+.dv5-activity-icon {
   background:var(--dreco-soft)!important;
   color:var(--dreco-ink)!important;
+}
+.dv5-stat-icon {
+  background:var(--dreco-ink)!important;
+  color:#fff!important;
 }
 .dv5-kpi-icon.green,
 .dv5-task-icon.med { background:var(--dreco-warning-bg)!important; color:var(--dreco-warning)!important; }
 .dv5-kpi-icon.amber { background:var(--dreco-warning-bg)!important; color:var(--dreco-warning)!important; }
 .dv5-kpi-icon.rose,
 .dv5-task-icon.high { background:var(--dreco-danger-bg)!important; color:var(--dreco-danger)!important; }
+.dv5-stat-card {
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAF9F2 100%)!important;
+  border:1px solid var(--dreco-line)!important;
+}
+.dv5-kpi-icon.ink {
+  background:var(--dreco-ink)!important;
+  color:#fff!important;
+}
 .dv5-priority {
   background:linear-gradient(180deg,#FFFFFF 0%,#FAF9F2 100%)!important;
   border-color:var(--dreco-line)!important;

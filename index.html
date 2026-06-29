@@ -4760,7 +4760,7 @@ tbody tr:hover td,.dreco-table tr:hover td{background:var(--dreco-surface-soft)!
   background:var(--dreco-ink,#171715)!important;
   color:#fff!important;font-size:16px!important;font-weight:438!important;
   display:flex!important;align-items:center!important;justify-content:center!important;
-  border:2.5px solid rgba(255,255,255,.8)!important;
+  border:none!important;
   box-shadow:0 2px 10px rgba(23,23,21,.18)!important;flex-shrink:0!important;
 }
 #app .suc-name{font-size:12.5px!important;font-weight:500!important;color:var(--dreco-ink,#171715)!important;}
@@ -4769,6 +4769,28 @@ tbody tr:hover td,.dreco-table tr:hover td{background:var(--dreco-surface-soft)!
 #app .sidebar.collapsed .sidebar-user-card{
   background:transparent!important;border-color:transparent!important;box-shadow:none!important;
 }
+/* ── Sidebar logo — pure black ───────────────────────────── */
+#app .sidebar-logo-mark{background:var(--dreco-ink,#171715)!important;box-shadow:0 4px 14px rgba(23,23,21,.22)!important;}
+#app .sidebar-logo-text{color:var(--dreco-ink,#171715)!important;}
+/* ── Command palette — warm neutral ──────────────────────── */
+.cmd-item-icon{background:var(--dreco-soft,#F8F7EF)!important;color:var(--dreco-ink,#171715)!important;}
+.cmd-item-badge{background:var(--dreco-soft,#F8F7EF)!important;color:var(--dreco-muted,#76746B)!important;}
+/* ── Login right side — remove remaining purple ──────────── */
+#login-screen .lp-kicker{color:var(--dreco-ink,#171715)!important;border-color:var(--dreco-line,#E4E1D6)!important;}
+#login-screen .lp-orbit.one{border-color:rgba(23,23,21,.18)!important;}
+#login-screen .lp-preview-kpi i{background:var(--dreco-soft,#F8F7EF)!important;color:var(--dreco-ink,#171715)!important;}
+#login-screen .lp-dashboard-preview{box-shadow:0 26px 70px rgba(23,23,21,.14)!important;border-color:var(--dreco-line,#E4E1D6)!important;}
+#login-screen .lp-report-wave{background:linear-gradient(180deg,var(--dreco-soft,#F8F7EF),#fff)!important;}
+#login-screen .lp-metric{border-color:var(--dreco-line,#E4E1D6)!important;box-shadow:0 8px 20px rgba(23,23,21,.07)!important;}
+#login-screen .lp-hero-card,#login-screen .lp-float-card{border-color:var(--dreco-line,#E4E1D6)!important;box-shadow:0 18px 44px rgba(23,23,21,.12)!important;}
+/* ── Candidate profile popup — warm surface ──────────────── */
+.cp-panel{background:var(--dreco-surface,#fff)!important;border:1px solid var(--dreco-line,#E4E1D6)!important;box-shadow:0 30px 90px rgba(23,23,21,.18)!important;}
+.cp-step.active span{background:var(--dreco-ink,#171715)!important;border-color:var(--dreco-ink,#171715)!important;color:#fff!important;}
+/* ── Nav hover / active ───────────────────────────────────── */
+#app .nav-item.active,#app .sidebar .nav-item.active{background:var(--dreco-ink,#171715)!important;color:#fff!important;box-shadow:none!important;}
+#app .nav-item.active i,#app .sidebar .nav-item.active i{color:#fff!important;}
+#app .nav-item:hover,#app .sidebar .nav-item:hover{background:var(--dreco-surface-soft,#F8F7EF)!important;color:var(--dreco-ink,#171715)!important;}
+#app .nav-item:hover i,#app .sidebar .nav-item:hover i{color:var(--dreco-ink,#171715)!important;}
 </style>
 </head>
 <body>
