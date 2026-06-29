@@ -815,22 +815,26 @@ function setAuthMode(mode = 'login') {
   screen.classList.add(`auth-mode-${mode}`);
 }
 function showForgotPassword() {
+  setAuthMode('recovery');
   document.getElementById('login-main').style.display='none';
   document.getElementById('signup-section').style.display='none';
   document.getElementById('forgot-section').style.display='block';
 }
 function hideForgotPassword() {
+  setAuthMode('login');
   document.getElementById('forgot-section').style.display='none';
   document.getElementById('signup-section').style.display='none';
   document.getElementById('login-main').style.display='block';
 }
 function showSignup() {
+  setAuthMode('signup');
   document.getElementById('login-main').style.display='none';
   document.getElementById('forgot-section').style.display='none';
   document.getElementById('signup-section').style.display='block';
   const err=document.getElementById('signup-error'); if(err) err.style.display='none';
 }
 function hideSignup() {
+  setAuthMode('login');
   document.getElementById('signup-section').style.display='none';
   document.getElementById('forgot-section').style.display='none';
   document.getElementById('login-main').style.display='block';
