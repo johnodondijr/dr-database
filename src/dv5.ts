@@ -380,7 +380,7 @@ export function injectDepsToD5(deps) {
         const pct = Math.max(Math.round((b.count/max)*100), b.count>0?6:2);
         return `<div class="dv5-bar-col" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;position:relative">
           <div class="dv5-bar-tip" style="position:absolute;bottom:calc(${pct}% + 10px);left:50%;transform:translateX(-50%);background:#18191B;color:#fff;font-size:10px;font-weight:500;padding:3px 7px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:10">${b.count} placed</div>
-          <div style="width:100%;border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#5347CE 0%,#9B8CFF 100%);height:${pct}%;min-height:3px;transition:height .4s cubic-bezier(.4,0,.2,1),opacity .12s;cursor:default" onmouseenter="this.previousElementSibling.style.opacity=1;this.style.opacity=.7" onmouseleave="this.previousElementSibling.style.opacity=0;this.style.opacity=1"></div>
+          <div style="width:100%;border-radius:5px 5px 3px 3px;background:#18191B;height:${pct}%;min-height:3px;transition:height .4s cubic-bezier(.4,0,.2,1),opacity .12s;cursor:default" onmouseenter="this.previousElementSibling.style.opacity=1;this.style.opacity=.6" onmouseleave="this.previousElementSibling.style.opacity=0;this.style.opacity=1"></div>
           <span style="font-size:10px;color:var(--text-3,#999);font-weight:438">${h(b.label)}</span>
         </div>`;
       }).join('')}
@@ -2245,15 +2245,15 @@ export function injectDepsToD5(deps) {
 
 /* Priority grid */
 .dv5-priority-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px; }
-.dv5-priority { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; cursor:pointer; transition:border-color .15s,box-shadow .15s; text-align:left; box-shadow:0 1px 3px rgba(0,0,0,.06); }
-.dv5-priority:hover { border-color:#5347CE50; box-shadow:0 2px 8px rgba(83,71,206,.1); }
-.dv5-priority-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#5347CE; margin-bottom:10px; }
-.dv5-priority strong { display:block; font-size:28px; font-weight:562; color:var(--text,#18191B); line-height:1; margin-bottom:4px; }
-.dv5-priority span { display:block; font-size:12px; font-weight:438; color:var(--text,#18191B); }
-.dv5-priority small { display:block; font-size:11px; color:var(--text-3,#999); margin-top:2px; }
+.dv5-priority { background:#fff; border:1px solid #EAEAD6; border-radius:14px; padding:20px; cursor:pointer; transition:border-color .15s,box-shadow .15s; text-align:left; box-shadow:0 1px 4px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04); }
+.dv5-priority:hover { border-color:#5347CE40; box-shadow:0 4px 16px rgba(83,71,206,.1); }
+.dv5-priority-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#5347CE; margin-bottom:12px; }
+.dv5-priority strong { display:block; font-size:34px; font-weight:700; color:var(--text,#18191B); line-height:1; margin-bottom:6px; letter-spacing:-.02em; }
+.dv5-priority span { display:block; font-size:12px; font-weight:500; color:var(--text,#18191B); }
+.dv5-priority small { display:block; font-size:11px; color:var(--text-3,#999); margin-top:3px; }
 
 /* Cards */
-.dv5-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; padding:20px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.dv5-card { background:#fff; border:1px solid #EAEAD6; border-radius:14px; padding:22px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04); }
 .dv5-card-pipeline { background:linear-gradient(135deg,#EEF2FF 0%,#EDE9FE 55%,#F5F3FF 100%); border-color:#DDD9FF; padding:16px 20px; }
 .dv5-card-pipeline .dv5-flow-step strong { color:#1E1B4B; }
 .dv5-card-pipeline .dv5-flow-step span { color:#6B7280; }
