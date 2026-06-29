@@ -465,8 +465,8 @@ export function injectDepsToD5(deps) {
   // ── Priority card helper ──────────────────────────────────
   function priority(icon, num, label, note, cardBg, iconBg, action='') {
     const click = action ? `onclick="${action}"` : '';
-    return `<div class="dv5-priority" style="background:${cardBg}" ${click}>
-      <div class="dv5-priority-icon" style="background:${iconBg}"><i class="ti ${h(icon)}"></i></div>
+    return `<div class="dv5-priority" style="background:${cardBg};border-color:transparent" ${click}>
+      <div class="dv5-priority-icon" style="background:${iconBg};color:#fff"><i class="ti ${h(icon)}"></i></div>
       <strong>${h(String(num))}</strong>
       <span>${h(label)}</span>
       <small>${h(note)}</small>
