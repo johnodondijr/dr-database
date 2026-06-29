@@ -565,13 +565,14 @@ export function injectDepsToD5(deps) {
       <div class="sidebar-top">
         <a class="sidebar-logo" onclick="switchTab('dash')" aria-label="Dreco home">
           <div class="sidebar-logo-mark">
-            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 6C3 4.343 4.343 3 6 3h4c1.657 0 3 1.343 3 3v4c0 1.657-1.343 3-3 3H6c-1.657 0-3-1.343-3-3V6Z"/>
-              <path d="M14 14c0-1.105.895-2 2-2h4c1.105 0 2 .895 2 2v6c0 1.105-.895 2-2 2h-4c-1.105 0-2-.895-2-2v-6Z" opacity=".55"/>
-              <path d="M3 17c0-1.105.895-2 2-2h3c1.105 0 2 .895 2 2v2c0 1.105-.895 2-2 2H5c-1.105 0-2-.895-2-2v-2Z" opacity=".32"/>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 6C3 4.34315 4.34315 3 6 3H10C11.6569 3 13 4.34315 13 6V10C13 11.6569 11.6569 13 10 13H6C4.34315 13 3 11.6569 3 10V6Z" fill="#fff"/>
+              <path d="M14 14C14 12.8954 14.8954 12 16 12H20C21.1046 12 22 12.8954 22 14V20C22 21.1046 21.1046 22 20 22H16C14.8954 22 14 21.1046 14 20V14Z" fill="#fff" opacity=".55"/>
+              <path d="M3 17C3 15.8954 3.89543 15 5 15H8C9.10457 15 10 15.8954 10 17V19C10 20.1046 9.10457 21 8 21H5C3.89543 21 3 20.1046 3 19V17Z" fill="#fff" opacity=".35"/>
+              <path d="M16 3H20C21.1046 3 22 3.89543 22 5V8C22 9.10457 21.1046 10 20 10H16C14.8954 10 14 9.10457 14 8V5C14 3.89543 14.8954 3 16 3Z" fill="#fff" opacity=".4"/>
             </svg>
           </div>
-          <span class="sidebar-logo-text">DRECO</span>
+          <span class="sidebar-logo-text">Dreco</span>
         </a>
         <button class="sidebar-toggle" onclick="toggleSidebar()" type="button" aria-label="Toggle sidebar">
           <i class="ti ti-chevrons-left"></i>
@@ -2153,7 +2154,7 @@ export function injectDepsToD5(deps) {
 .dv5-link { background:none; border:none; color:#5347CE; font-size:12px; font-weight:438; cursor:pointer; padding:0; flex-shrink:0; white-space:nowrap; }
 .dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:438; color:var(--text,#18191B); cursor:pointer; }
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
-.dv5-action-queue { margin-bottom:12px; background:linear-gradient(160deg,#F8F6FF 0%,#EEF2FF 100%); border-color:#DDD9FF; }
+.dv5-action-queue { margin-bottom:12px; background:linear-gradient(160deg,#EDE9FE 0%,#E0E7FF 100%); border-color:#C4B5FD; }
 .dv5-action-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
 .dv5-action-card { border:1px solid #DDD9FF; background:linear-gradient(135deg,#F5F3FF 0%,#EEF2FF 100%); border-radius:12px; padding:10px 12px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; text-align:left; cursor:pointer; transition:box-shadow .15s,border-color .15s; }
 .dv5-action-card:hover { border-color:#C4B5FD; box-shadow:0 6px 18px rgba(83,71,206,.10); }
