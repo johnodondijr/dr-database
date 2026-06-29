@@ -1,8 +1,6 @@
 // @ts-nocheck
 import '@tabler/icons-webfont/dist/tabler-icons.min.css';
-import '@fontsource-variable/inter';
 import '@fontsource-variable/geist';
-import '@fontsource-variable/manrope';
 import { createClient } from '@supabase/supabase-js';
 import { PRO_SEED, LB_SEED } from './data';
 import {
