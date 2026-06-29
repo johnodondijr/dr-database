@@ -702,10 +702,10 @@ export function injectDepsToD5(deps) {
         <div class="dv5-card dv5-action-queue">
           <div class="dv5-card-head">
             <div>
-              <span class="dv5-card-title" style="color:#9F1239">Next Actions</span>
-              <div class="dv5-card-sub" style="color:#FDA4AF">Candidates needing follow-up, documents, or finance attention</div>
+              <span class="dv5-card-title" style="color:#BE123C">Next Actions</span>
+              <div class="dv5-card-sub" style="color:rgba(190,18,60,.55)">Candidates needing follow-up, documents, or finance attention</div>
             </div>
-            <button class="dv5-link" style="color:#DC2626" onclick="switchTab('candidates')">Open candidates</button>
+            <button class="dv5-link" style="color:rgba(190,18,60,.7)" onclick="switchTab('candidates')">Open candidates</button>
           </div>
           <div class="dv5-action-grid">
             ${actionRows.length ? actionRows.map(r => `
@@ -2156,14 +2156,14 @@ export function injectDepsToD5(deps) {
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
 .dv5-action-queue { margin-bottom:12px; background:linear-gradient(160deg,#FFF1F2 0%,#FFE4E6 100%)!important; border-color:#FECACA!important; }
 .dv5-action-grid { display:flex; flex-direction:column; gap:0; }
-.dv5-action-card { border:none; border-bottom:1px solid rgba(254,202,202,.6); background:transparent; border-radius:0; padding:10px 2px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; text-align:left; cursor:pointer; transition:background .12s; width:100%; }
+.dv5-action-card { border:none; border-bottom:1px solid rgba(190,18,60,.12); background:transparent; border-radius:0; padding:10px 2px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; text-align:left; cursor:pointer; transition:background .12s; width:100%; }
 .dv5-action-card:last-child { border-bottom:none; }
-.dv5-action-card:hover { background:rgba(254,202,202,.3); border-radius:8px; }
-.dv5-action-card .dv5-avatar { background:rgba(220,38,38,.12); color:#DC2626; border-radius:10px; }
+.dv5-action-card:hover { background:rgba(190,18,60,.07); border-radius:8px; }
+.dv5-action-card .dv5-avatar { background:rgba(190,18,60,.1); color:#BE123C; border-radius:10px; }
 .dv5-action-card span { min-width:0; }
-.dv5-action-card strong { display:block; font-size:12.5px; font-weight:500; color:#881337; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dv5-action-card em { display:block; font-style:normal; font-size:11px; color:#FB7185; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dv5-action-card b { color:#DC2626; font-size:12px; font-weight:562; }
+.dv5-action-card strong { display:block; font-size:12.5px; font-weight:500; color:#BE123C; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-action-card em { display:block; font-style:normal; font-size:11px; color:rgba(190,18,60,.6); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-action-card b { color:#BE123C; font-size:12px; font-weight:562; }
 .dv5-next-action { display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; background:#F1EFFF; color:#5347CE; font-size:10px; font-weight:500; white-space:nowrap; }
 .dv5-workflow-mini { min-width:112px; }
 .dv5-workflow-top { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:4px; }
