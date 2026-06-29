@@ -3490,8 +3490,55 @@ async function saveProfileChanges() {
   setUserDisplay(currentUser.display, currentUser.role);
 }
 
+const AVATAR_KEY = 'dreco_avatar_v1';
+
+function applyUserAvatar(initials) {
+  const saved = localStorage.getItem(AVATAR_KEY);
+  const imgHtml = saved ? `<img src="${saved}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : '';
+  ['suc-avatar', 'pd-avatar-large'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (saved) { el.innerHTML = imgHtml; el.textContent = ''; }
+    else { el.innerHTML = ''; el.textContent = initials; }
+  });
+  ['topbar-avatar', 'sidebar-avatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (saved) { el.innerHTML = imgHtml; el.textContent = ''; }
+    else { el.innerHTML = ''; el.textContent = initials; }
+  });
+  const removeBtn = document.getElementById('pd-avatar-remove');
+  if (removeBtn) removeBtn.style.display = saved ? 'block' : 'none';
+}
+
+function handleAvatarUpload(event) {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    localStorage.setItem(AVATAR_KEY, e.target.result as string);
+    const d = currentUser?.display || '';
+    const parts = d.replace(/[^a-zA-Z ]/g, '').trim().split(' ');
+    const initials = parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : d.substring(0,2).toUpperCase() || 'U';
+    applyUserAvatar(initials);
+    showToast('Profile photo updated', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeUserAvatar() {
+  localStorage.removeItem(AVATAR_KEY);
+  const d = currentUser?.display || '';
+  const parts = d.replace(/[^a-zA-Z ]/g, '').trim().split(' ');
+  const initials = parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : d.substring(0,2).toUpperCase() || 'U';
+  applyUserAvatar(initials);
+  const inp = document.getElementById('pd-avatar-upload') as HTMLInputElement;
+  if (inp) inp.value = '';
+  showToast('Profile photo removed', 'success');
+}
+
 function setUserDisplay(display, role) {
-  // original fields
   const parts = display.replace(/[^a-zA-Z ]/g, '').trim().split(' ');
   const initials = parts.length >= 2
     ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
@@ -3500,28 +3547,19 @@ function setUserDisplay(display, role) {
   ['user-chip','sidebar-user-name'].forEach(id => {
     const el = document.getElementById(id); if (el) el.textContent = display;
   });
-  ['topbar-avatar','sidebar-avatar','pd-avatar','suc-avatar'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.textContent = initials;
-  });
-  // suc-name = first name only for card
   const sucName = document.getElementById('suc-name');
   if (sucName) sucName.textContent = display;
-  // sidebar role
   const rEl = document.getElementById('sidebar-user-role');
   if (rEl) rEl.textContent = role === 'admin' ? 'Administrator' : 'Staff';
-  // pd name + email (shadcn style)
   const pdName = document.getElementById('pd-name');
   if (pdName) pdName.textContent = display;
-  const pdRoleText = document.getElementById('pd-role-text');
-  if (pdRoleText) pdRoleText.textContent = (currentUser?.username||'user') + '@dreco.app';
-  // suc email
-  const sucEmail = document.getElementById('suc-email');
-  if (sucEmail) sucEmail.textContent = (currentUser?.username||'user') + '@dreco.app';
-  // pd avatar (shadcn dropdown)
   const pdAv = document.getElementById('pd-avatar');
   if (pdAv) { pdAv.textContent = initials; pdAv.className = 'dv5-pd-av'; }
   const sucOrg = document.querySelector('.suc-org');
-  if (sucOrg) sucOrg.textContent = (currentUser?.username||'user') + '@dreco.app';
+  if (sucOrg) sucOrg.textContent = role === 'admin' ? 'Admin' : 'Staff';
+  const pdRoleEl = document.getElementById('pd-role-text');
+  if (pdRoleEl) pdRoleEl.textContent = role === 'admin' ? 'Admin' : 'Staff';
+  applyUserAvatar(initials);
   updateWorkspaceLabels();
 }
 
@@ -3576,7 +3614,7 @@ Object.assign(window, {
   hideForgotPassword, showForgotPassword, hideSignup, showSignup,
   goPage,
   // Account / profile
-  saveProfileChanges,
+  saveProfileChanges, applyUserAvatar, handleAvatarUpload, removeUserAvatar,
   // Workspace
   getCompanyName, getCompanyId, getGeneralCountries, getActiveGeneralCountry,
 });
