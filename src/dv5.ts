@@ -2155,13 +2155,13 @@ export function injectDepsToD5(deps) {
 .dv5-action-btn { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:28px; border-radius:6px; border:1px solid var(--border,#E8E8E8); background:#fff; font-size:11px; font-weight:438; color:var(--text,#18191B); cursor:pointer; }
 .dv5-action-btn:hover { background:var(--bg,#F3F3F3); }
 .dv5-action-queue { margin-bottom:12px; background:linear-gradient(160deg,#FFF1F2 0%,#FFE4E6 100%)!important; border-color:#FECACA!important; }
-.dv5-action-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0; }
-.dv5-action-card { border:none; border-bottom:1px solid rgba(254,202,202,.5); background:transparent; border-radius:0; padding:10px 4px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; text-align:left; cursor:pointer; transition:background .12s; }
-.dv5-action-card:first-child { border-radius:6px 6px 0 0; }
-.dv5-action-card:last-child { border-bottom:none; border-radius:0 0 6px 6px; }
-.dv5-action-card:hover { background:rgba(254,202,202,.25); }
+.dv5-action-grid { display:flex; flex-direction:column; gap:0; }
+.dv5-action-card { border:none; border-bottom:1px solid rgba(254,202,202,.6); background:transparent; border-radius:0; padding:10px 2px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; text-align:left; cursor:pointer; transition:background .12s; width:100%; }
+.dv5-action-card:last-child { border-bottom:none; }
+.dv5-action-card:hover { background:rgba(254,202,202,.3); border-radius:8px; }
+.dv5-action-card .dv5-avatar { background:rgba(220,38,38,.12); color:#DC2626; border-radius:10px; }
 .dv5-action-card span { min-width:0; }
-.dv5-action-card strong { display:block; font-size:12px; color:#9F1239; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv5-action-card strong { display:block; font-size:12.5px; font-weight:500; color:#881337; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv5-action-card em { display:block; font-style:normal; font-size:11px; color:#FB7185; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv5-action-card b { color:#DC2626; font-size:12px; font-weight:562; }
 .dv5-next-action { display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; background:#F1EFFF; color:#5347CE; font-size:10px; font-weight:500; white-space:nowrap; }
