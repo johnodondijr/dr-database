@@ -4791,6 +4791,24 @@ tbody tr:hover td,.dreco-table tr:hover td{background:var(--dreco-surface-soft)!
 #app .nav-item.active i,#app .sidebar .nav-item.active i{color:#fff!important;}
 #app .nav-item:hover,#app .sidebar .nav-item:hover{background:var(--dreco-surface-soft,#F8F7EF)!important;color:var(--dreco-ink,#171715)!important;}
 #app .nav-item:hover i,#app .sidebar .nav-item:hover i{color:var(--dreco-ink,#171715)!important;}
+/* ── Login logo — black mark ─────────────────────────────── */
+#login-screen .lp-logo-mark{background:var(--dreco-ink,#171715)!important;box-shadow:0 4px 14px rgba(23,23,21,.22)!important;}
+#login-screen .lp-brand-name{color:var(--dreco-ink,#171715)!important;}
+/* ── Login form — remove all remaining purple ────────────── */
+#login-screen .lp-auth-tab.active{color:var(--dreco-ink,#171715)!important;border-bottom-color:var(--dreco-ink,#171715)!important;}
+#login-screen .lp-input-wrap input:focus{border-color:var(--dreco-ink,#171715)!important;box-shadow:0 0 0 3px rgba(23,23,21,.1)!important;}
+#login-screen .lp-forgot{color:var(--dreco-muted,#76746B)!important;}
+#login-screen .lp-submit{background:var(--dreco-ink,#171715)!important;box-shadow:0 10px 22px rgba(23,23,21,.22)!important;}
+#login-screen .lp-signup-cta strong{color:var(--dreco-ink,#171715)!important;}
+/* ── Smart alert default icon — warm neutral ─────────────── */
+.smart-alert i{background:var(--dreco-soft,#F8F7EF)!important;color:var(--dreco-ink,#171715)!important;}
+/* ── Quick-choice selector — warm neutral ────────────────── */
+.quick-choice i{background:var(--dreco-soft,#F8F7EF)!important;color:var(--dreco-ink,#171715)!important;}
+.quick-choice input:checked+span{border-color:var(--dreco-ink,#171715)!important;box-shadow:0 0 0 3px rgba(23,23,21,.09)!important;background:var(--dreco-soft,#F8F7EF)!important;}
+/* ── Document checklist icons ────────────────────────────── */
+.dreco-doc-status i{width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:18px;background:var(--dreco-soft,#F8F7EF)!important;color:var(--dreco-muted,#76746B)!important;}
+.dreco-doc-item.uploaded .dreco-doc-status i{background:#E7F0E9!important;color:#386A52!important;}
+.dreco-doc-item.missing .dreco-doc-status i{background:#FAF9F2!important;color:var(--dreco-muted,#76746B)!important;}
 </style>
 </head>
 <body>
@@ -5151,7 +5169,7 @@ tbody tr:hover td,.dreco-table tr:hover td{background:var(--dreco-surface-soft)!
               <div class="pd-field" style="flex-direction:row;align-items:center;gap:14px">
                 <div style="position:relative;cursor:pointer;flex-shrink:0" onclick="document.getElementById('pd-avatar-upload').click()">
                   <div id="pd-avatar-large" style="width:56px;height:56px;border-radius:50%;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:438;overflow:hidden;font-family:inherit">-</div>
-                  <div style="position:absolute;bottom:0;right:0;width:20px;height:20px;border-radius:50%;background:#5347CE;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid #fff"><i class="ti ti-camera" style="font-size:10px"></i></div>
+                  <div style="position:absolute;bottom:0;right:0;width:20px;height:20px;border-radius:50%;background:#171715;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid #fff"><i class="ti ti-camera" style="font-size:10px"></i></div>
                 </div>
                 <div>
                   <div style="font-size:12px;font-weight:438;color:#111827">Upload photo</div>
