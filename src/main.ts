@@ -520,12 +520,11 @@ function proPipelineStageValue(row = {}) {
 function lbPipelineStageValue(row = {}) {
   const raw = row.raw || row;
   const stage = cleanStage(raw.stage || raw.travelStatus || raw.travel_status || row.stage);
-  const map = {
-    'DOCS SUBMITTED': 'SUBMITTED',
-    'DOCUMENTS SUBMITTED': 'SUBMITTED',
-    'NOT YET': 'SUBMITTED',
-  };
-  return LB_PIPELINE_STAGES.includes(map[stage] || stage) ? (map[stage] || stage) : 'SUBMITTED';
+  const SELECTED_STAGES = new Set(['SELECTED','PASSPORT APPLIED','VISA PROCESSING']);
+  const TRAVELLED_STAGES = new Set(['TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
+  if (TRAVELLED_STAGES.has(stage)) return 'TRAVELLED';
+  if (SELECTED_STAGES.has(stage)) return 'SELECTED';
+  return 'UNSELECTED';
 }
 function stageListWithData(configured = [], rows = [], getter = row => row.stage, normalizer = cleanStage) {
   const seen = new Set();
@@ -2142,13 +2141,13 @@ function renderDash(){
     {label:'Travel', value:proDB.filter(r=>r.stage==='PENDING TRAVEL').length, icon:'ti-plane', color:stageColors[6]},
     {label:'Travelled', value:proTravelled, icon:'ti-plane-departure', color:stageColors[7]}
   ];
+  const LB_SEL_STAGES = new Set(['SELECTED','PASSPORT APPLIED','VISA PROCESSING']);
+  const LB_TRAV_STAGES = new Set(['TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
   const lbStageData=[
-    {label:'Docs In', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='DOCS SUBMITTED').length, icon:'ti-folder', color:stageColors[0]},
-    {label:'Sent', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='PROFILE SENT').length, icon:'ti-send', color:stageColors[1]},
-    {label:'Selected', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='SELECTED').length, icon:'ti-star', color:stageColors[2]},
-    {label:'Passport', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='PASSPORT APPLIED').length, icon:'ti-passport', color:stageColors[3]},
-    {label:'Visa', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='VISA PROCESSING').length, icon:'ti-id-badge-2', color:stageColors[4]},
-    {label:'Travelled', value:lbDB.filter(r=>(r.stage||r.travelStatus||r.travel_status)==='TRAVELLED').length, icon:'ti-plane-departure', color:stageColors[5]},
+    {label:'Unselected', value:lbDB.filter(r=>{const s=cleanStage(r.stage||r.travelStatus||r.travel_status);return !LB_SEL_STAGES.has(s)&&!LB_TRAV_STAGES.has(s);}).length, icon:'ti-users', color:stageColors[0]},
+    {label:'Selected', value:lbDB.filter(r=>LB_SEL_STAGES.has(cleanStage(r.stage||r.travelStatus||r.travel_status))).length, icon:'ti-star', color:stageColors[2]},
+    {label:'Passport', value:lbDB.filter(r=>['APPLIED','PUSHED'].includes(cleanStage(r.ppStatus||r.pp_status))&&!r.own_passport).length, icon:'ti-passport', color:stageColors[3]},
+    {label:'Travelled', value:lbDB.filter(r=>LB_TRAV_STAGES.has(cleanStage(r.stage||r.travelStatus||r.travel_status))).length, icon:'ti-plane-departure', color:stageColors[5]},
   ];
   const stageTotal=Math.max(stageData.reduce((sum,item)=>sum+item.value,0),1);
 

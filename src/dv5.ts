@@ -6,7 +6,7 @@ import {
 
 // Constants mirrored from main.ts (never change at runtime)
 const PRO_PIPELINE_STAGES = ['PENDING OFFER LETTER','OFFER LETTER','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-const LB_PIPELINE_STAGES  = ['SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
+const LB_PIPELINE_STAGES  = ['UNSELECTED','SELECTED','TRAVELLED'];
 // Fallback only — overridden by injectDepsToD5 in practice
 let DEFAULT_COMPANY = { name: 'Dreco', id: 'dreco-default', generalJobsCountries: ['UAE'] };
 
@@ -191,6 +191,7 @@ export function injectDepsToD5(deps) {
         position: r.country || 'General Job',
         company:r.company||r.country||'—',
         country:r.country||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'—')||'—',
+        ppStatus:r.ppStatus||r.pp_status||'NOT APPLIED',
         stage:lbStageValue(r),
         submitted:r.submitted_date||r.submitted||null,
         travelDate:r.travelDate||r.travel_date||null,
@@ -635,11 +636,11 @@ export function injectDepsToD5(deps) {
     const tickets   = proNorm.filter(r=>r.stage==='PENDING TRAVEL').length;
     const unpaidPro = proNorm.filter(r=>r.balance>0).length;
     // LB-specific
-    const lbRefundPending = lbNorm.filter(r=>r.stage==='REFUND PENDING').length;
-    // Selected = everyone from SELECTED stage onwards (cumulative)
+    const lbRefundPending = lbNorm.filter(r=>['REFUND PENDING','REFUND COMPLETE'].includes(r.stage)).length;
     const LB_SELECTED_AND_BEYOND = ['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
     const lbSelected      = lbNorm.filter(r=>LB_SELECTED_AND_BEYOND.includes(r.stage)).length;
-    const lbPassportApplied = lbNorm.filter(r=>r.stage==='PASSPORT APPLIED').length;
+    // Count by ppStatus field — stage is often left at SELECTED even after passport is applied
+    const lbPassportApplied = lbNorm.filter(r=>['APPLIED','PUSHED'].includes(r.ppStatus||'')&&!r.own_passport).length;
     const unpaidLB        = lbNorm.filter(r=>r.balance>0&&!r.own_passport).length;
 
     const travelled = normRows.filter(r=>String(r.stage).toUpperCase()==='TRAVELLED').length;
@@ -656,15 +657,11 @@ export function injectDepsToD5(deps) {
       ['Travel',     proNorm.filter(r=>r.stage==='PENDING TRAVEL').length],
       ['Travelled',  proNorm.filter(r=>r.stage==='TRAVELLED').length],
     ];
+    const LB_UNSELECTED_STAGES = ['DOCS SUBMITTED','DOCUMENTS SUBMITTED','SUBMITTED','PROFILE SENT','NOT YET'];
     const lbFlowSteps = [
-      ['Docs In',    lbNorm.filter(r=>r.stage==='DOCS SUBMITTED').length],
-      ['Profile Sent',lbNorm.filter(r=>r.stage==='PROFILE SENT').length],
-      ['Selected',   lbNorm.filter(r=>r.stage==='SELECTED').length],
-      ['Passport',   lbNorm.filter(r=>r.stage==='PASSPORT APPLIED').length],
-      ['Visa',       lbNorm.filter(r=>r.stage==='VISA PROCESSING').length],
-      ['Travelled',  lbNorm.filter(r=>r.stage==='TRAVELLED').length],
-      ['Refund',     lbNorm.filter(r=>r.stage==='REFUND PENDING').length],
-      ['Done',       lbNorm.filter(r=>r.stage==='REFUND COMPLETE').length],
+      ['Unselected', lbNorm.filter(r=>LB_UNSELECTED_STAGES.includes(r.stage)||!LB_SELECTED_AND_BEYOND.includes(r.stage)).length],
+      ['Selected',   lbNorm.filter(r=>LB_SELECTED_AND_BEYOND.includes(r.stage)&&!['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(r.stage)).length],
+      ['Travelled',  lbNorm.filter(r=>['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(r.stage)).length],
     ];
     const flowSteps = isPro ? proFlowSteps : lbFlowSteps;
     const tasks = buildTasks().slice(0,5);
@@ -697,9 +694,9 @@ export function injectDepsToD5(deps) {
             ${priority('ti-users',            normRows.length, 'Total Candidates', 'In pipeline',      '#F4F4EC','#372514', "switchTab('candidates')")}
           ` : `
             ${priority('ti-users',            lbSelected,       'Selected',          'Cumulative selected',  '#E0F2FE','#0369A1', "switchTab('pipeline')")}
+            ${priority('ti-passport',         lbPassportApplied,'Passport Applied',  'Applied by ppStatus',  '#DCFCE7','#16A34A', "switchTab('candidates')")}
             ${priority('ti-credit-card',      lbRefundPending,  'Refund Pending',    'Refunds to process',   '#FEF9C3','#A16207', "switchTab('finance')")}
             ${priority('ti-coin',             unpaidLB,         'Outstanding USD',   'Refunds not started',  '#FCE7F3','#9D174D', "switchTab('finance')")}
-            ${priority('ti-passport',         lbPassportApplied,'Passport Applied',  'Awaiting passport',    '#DCFCE7','#16A34A', "switchTab('pipeline')")}
             ${priority('ti-users',            normRows.length,  'Total Candidates',  'In pipeline',          '#F4F4EC','#372514', "switchTab('candidates')")}
           `}
         </div>
@@ -1004,12 +1001,17 @@ export function injectDepsToD5(deps) {
               <thead><tr>
                 <th style="width:36px"><input type="checkbox" id="cand-select-all" ${allSel?'checked':''} onchange="toggleSelectAll(this.checked)"></th>
                 <th>Name</th><th>${isPro?'Job Title':'Destination'}</th><th>${isPro?'Company':'Agency'}</th>
-                <th>Stage</th><th>Next Action</th><th>Readiness</th><th>${isPro?'Submitted':'Doc Date'}</th><th></th>
+                <th>Stage</th>${!isPro?'<th>Passport</th>':''}<th>Next Action</th><th>Readiness</th><th>${isPro?'Submitted':'Doc Date'}</th><th></th>
               </tr></thead>
               <tbody>
                 ${list.length ? list.map(r => {
                   const key = r.type+'_'+r.id;
                   const sel = selectedCandidates.has(key);
+                  const ppStatus = r.ppStatus||'NOT APPLIED';
+                  const ppLabel = r.own_passport ? '<span class="dv5-badge" style="background:#E7F0E9;color:#386A52">Has PP</span>'
+                    : ['APPLIED','PUSHED'].includes(ppStatus) ? '<span class="dv5-badge" style="background:#FEF9C3;color:#A16207">Applied</span>'
+                    : r.stage==='SELECTED'||['SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(r.stage) ? '<span class="dv5-badge" style="background:#FEE2E2;color:#B91C1C">No PP</span>'
+                    : '<span class="dv5-badge" style="background:#F3F4F6;color:#6B7280">—</span>';
                   return `
                   <tr class="${sel?'dv5-row-selected':''}" onclick="openCandidateProfile('${r.type}',${r.id})">
                     <td onclick="event.stopPropagation()">
@@ -1025,6 +1027,7 @@ export function injectDepsToD5(deps) {
                     <td>${h(r.position)}</td>
                     <td>${h(r.company)}</td>
                     <td>${badge(r.stage)}</td>
+                    ${r.type==='lb'?`<td>${ppLabel}</td>`:''}
                     <td><span class="dv5-next-action">${h(nextAction(r))}</span></td>
                     <td>${progressMini(r)}</td>
                     <td>${h(fmt(r.submitted))}</td>
@@ -1040,7 +1043,7 @@ export function injectDepsToD5(deps) {
                       </button>
                     </td>
                   </tr>`;
-                }).join('') : '<tr><td colspan="9"><div class="dv5-empty">No candidates found.</div></td></tr>'}
+                }).join('') : `<tr><td colspan="${isPro?9:10}"><div class="dv5-empty">No candidates found.</div></td></tr>`}
               </tbody>
             </table>
           </div>
@@ -1710,7 +1713,7 @@ export function injectDepsToD5(deps) {
         <div class="dv5-table-card">
           <div class="dv5-table-wrap">
             <table class="dv5-table">
-              <thead><tr><th></th><th>Client Name</th><th>Country</th><th>Active</th><th>Total</th><th>Outstanding</th><th>Collected</th><th>Manager</th></tr></thead>
+              <thead><tr><th></th><th>Client Name</th><th>Country</th><th>Active</th><th>Total</th><th>Outstanding</th><th>Collected</th></tr></thead>
               <tbody>
                 ${clients.length ? clients.map(c => {
                   const isOpen = expandedClient === c.name;
@@ -1730,9 +1733,8 @@ export function injectDepsToD5(deps) {
                     <td>${c.total}</td>
                     <td>${c.due>0?`<strong style="color:#b91c1c">${fmt2(c.due)}</strong>`:fmt2(0)}</td>
                     <td>${fmt2(c.paid)}</td>
-                    <td>${h(c.manager||'—')}</td>
                   </tr>
-                  ${isOpen ? `<tr class="dv5-expand-row"><td colspan="8" style="padding:0 0 8px 40px;background:#f8fafc">
+                  ${isOpen ? `<tr class="dv5-expand-row"><td colspan="7" style="padding:0 0 8px 40px;background:#f8fafc">
                     <table class="dv5-table" style="min-width:0;border:0;box-shadow:none">
                       <thead><tr><th>Name</th><th>${isPro?'Job Title':'Country'}</th><th>Stage</th><th>Submitted</th><th>Invoice</th><th>Balance</th><th></th></tr></thead>
                       <tbody>
@@ -1748,7 +1750,7 @@ export function injectDepsToD5(deps) {
                       </tbody>
                     </table>
                   </td></tr>` : ''}`;
-                }).join('') : '<tr><td colspan="8"><div class="dv5-empty">Clients appear automatically when you add candidates with company names.</div></td></tr>'}
+                }).join('') : '<tr><td colspan="7"><div class="dv5-empty">Clients appear automatically when you add candidates with company names.</div></td></tr>'}
               </tbody>
             </table>
           </div>
