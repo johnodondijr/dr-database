@@ -173,7 +173,7 @@ export function injectDepsToD5(deps) {
       return {
         type:'pro', id:r.id, name:r.name||'—', pp:r.pp||'', phone:r.phone||'',
         position:r.position||'—', company:r.company||'—', country:r.country||'—',
-        stage:proStageValue(r), submitted:r.submitted, interview:r.interview,
+        stage:proStageValue(r), pipelineStage:proPipelineStageValue(r), submitted:r.submitted, interview:r.interview,
         ol:r.ol, medical:r.medical||null, mol:r.mol, visa:r.visa, travel:r.travel,
         owner:r.owner||currentUser?.display||'Team',
         commission:Number(r.commission)||0,
@@ -192,7 +192,7 @@ export function injectDepsToD5(deps) {
         company:r.company||r.country||'—',
         country:r.country||(typeof getActiveGeneralCountry==='function'?getActiveGeneralCountry():'—')||'—',
         ppStatus:r.ppStatus||r.pp_status||'NOT APPLIED',
-        stage:lbStageValue(r),
+        stage:lbStageValue(r), pipelineStage:lbPipelineStageValue(r),
         submitted:r.submitted_date||r.submitted||null,
         travelDate:r.travelDate||r.travel_date||null,
         interview:null, mol:null, visa:null,
@@ -949,10 +949,10 @@ export function injectDepsToD5(deps) {
     all = isPro
       ? allCandidateRows.filter(r=>r.type==='pro')
       : allCandidateRows.filter(r=>r.type==='lb' && (!lbCountryFilter || (r.country||'')===lbCountryFilter));
-    const stageOptions = [...new Set(all.map(r=>r.stage).filter(Boolean))];
+    const stageOptions = isPro ? PRO_PIPELINE_STAGES : LB_PIPELINE_STAGES;
     const q = candidateSearch.toLowerCase();
     let list = all.filter(r => {
-      if (candidateStageFilter && r.stage !== candidateStageFilter) return false;
+      if (candidateStageFilter && r.pipelineStage !== candidateStageFilter) return false;
       if (candidateViewFilter==='follow' && workflowStatus(r).level === 'ok') return false;
       if (candidateViewFilter==='balance' && r.balance<=0) return false;
       if (q && ![r.name,r.pp,r.phone,r.position,r.company,r.country,r.stage].join(' ').toLowerCase().includes(q)) return false;
@@ -960,9 +960,7 @@ export function injectDepsToD5(deps) {
     });
     const allSel = list.length > 0 && list.every(r => selectedCandidates.has(r.type+'_'+r.id));
     const someSel = selectedCandidates.size > 0;
-    const proStageList2 = proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStageList2  = lbStages  && lbStages.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
-    const allStages = isPro ? proStageList2 : lbStageList2;
+    const allStages = isPro ? PRO_PIPELINE_STAGES : LB_PIPELINE_STAGES;
     el.innerHTML = `
       <div class="dv5-page">
         <div class="dv5-page-head">
@@ -1033,7 +1031,7 @@ export function injectDepsToD5(deps) {
                     </div></td>
                     <td>${h(r.position)}</td>
                     <td>${h(r.company)}</td>
-                    <td>${badge(r.stage)}</td>
+                    <td>${badge(r.pipelineStage)}</td>
                     ${r.type==='lb'?`<td>${ppLabel}</td>`:''}
                     <td><span class="dv5-next-action">${h(nextAction(r))}</span></td>
                     <td>${progressMini(r)}</td>
@@ -1060,63 +1058,51 @@ export function injectDepsToD5(deps) {
   window.renderCandidatesPage = renderCandidates;
   window.renderCandidates = renderCandidates;
 
-  window.advanceStage = async function(type, id) {
-    const stages = type === 'pro'
-      ? ((proStages && proStages.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED']))
-      : (lbStages && lbStages.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
+  const PRO_PIPELINE_TO_DB = {
+    'PENDING OFFER LETTER':'SUBMITTED','OFFER LETTER':'OFFER LETTER',
+    'MOL':'MOL','VISA':'VISA','PENDING TRAVEL':'PENDING TRAVEL','TRAVELLED':'TRAVELLED',
+  };
+
+  async function _applyStageChange(type, id, targetPipelineStage) {
     const db = type === 'pro' ? proDB : lbDB;
     const rec = db.find(r => r.id == id);
     if (!rec) return;
-    const cur = (type === 'pro' ? rec.stage : (rec.travelStatus || rec.travel_status) || stages[0]).toUpperCase();
-    const idx = stages.findIndex(s => s.toUpperCase() === cur);
-    if (idx === -1 || idx >= stages.length - 1) { showToast('Already at final stage','info'); return; }
-    const nextStage = stages[idx + 1].toUpperCase();
-
-    // Guard: require travel date before entering travel stages
-    if (type === 'pro' && ['PENDING TRAVEL','TRAVELLED'].includes(nextStage) && !rec.travel) {
-      showToast('Set a travel date before advancing to this stage.','error'); return;
-    }
-    if (type === 'lb' && ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(nextStage) && !rec.travelDate) {
-      showToast('Set a travel date before advancing to Travelled.','error'); return;
-    }
-    const nextStageRaw = stages[idx + 1];
-    if (type === 'pro') rec.stage = nextStageRaw; else { rec.travelStatus = nextStageRaw; rec.stage = nextStageRaw; }
-    showToast(`Moved to ${nextStageRaw}`, 'success');
-    renderCandidates();
-    try {
-      const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
-      const updateField = type === 'pro' ? { stage: nextStageRaw } : { stage: nextStageRaw, travelStatus: nextStageRaw };
-      await dbUpdate(table, id, updateField);
-      addTimeline(type, id, `Stage advanced to ${nextStageRaw}`);
-    } catch(e) { console.warn('advanceStage save error', e); }
-  };
-
-  window.jumpToStage = async function(type, id, targetIdx) {
-    const stages = type === 'pro'
-      ? (proStages?.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'])
-      : (lbStages?.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
-    const db = type === 'pro' ? proDB : lbDB;
-    const rec = db.find(r => r.id == id);
-    if (!rec || !stages[targetIdx]) return;
-    const targetStage = stages[targetIdx];
-    const cur = (type === 'pro' ? rec.stage : rec.travelStatus || rec.travel_status || stages[0]).toUpperCase();
-    if (cur === targetStage.toUpperCase()) return;
-    if (type === 'pro' && ['PENDING TRAVEL','TRAVELLED'].includes(targetStage.toUpperCase()) && !rec.travel) {
+    const targetDbStage = type === 'pro' ? (PRO_PIPELINE_TO_DB[targetPipelineStage] || targetPipelineStage) : targetPipelineStage;
+    if (type === 'pro' && ['PENDING TRAVEL','TRAVELLED'].includes(targetPipelineStage) && !rec.travel) {
       showToast('Set a travel date before moving to this stage.','error'); return;
     }
-    if (type === 'lb' && targetStage.toUpperCase() === 'TRAVELLED' && !rec.travelDate) {
+    if (type === 'lb' && targetPipelineStage === 'TRAVELLED' && !rec.travelDate) {
       showToast('Set a travel date before marking as Travelled.','error'); return;
     }
-    if (type === 'pro') rec.stage = targetStage;
-    else { rec.travelStatus = targetStage; rec.stage = targetStage; }
-    showToast(`Moved to ${targetStage}`, 'success');
+    if (type === 'pro') rec.stage = targetDbStage;
+    else { rec.travelStatus = targetDbStage; rec.stage = targetDbStage; }
+    showToast(`Moved to ${targetPipelineStage}`, 'success');
+    renderCandidates();
     window.openCandidateProfile?.(type, id);
     try {
       const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
-      const updateField = type === 'pro' ? { stage: targetStage } : { stage: targetStage, travelStatus: targetStage };
+      const updateField = type === 'pro' ? { stage: targetDbStage } : { stage: targetDbStage, travelStatus: targetDbStage };
       await dbUpdate(table, id, updateField);
-      addTimeline(type, id, `Stage set to ${targetStage}`);
-    } catch(e) { console.warn('jumpToStage save error', e); }
+      addTimeline(type, id, `Stage set to ${targetPipelineStage}`);
+    } catch(e) { console.warn('stage save error', e); }
+  }
+
+  window.advanceStage = async function(type, id) {
+    const stages = type === 'pro' ? PRO_PIPELINE_STAGES : LB_PIPELINE_STAGES;
+    const curRow  = allRows().find(r => r.type===type && String(r.id)===String(id));
+    const curStage = curRow?.pipelineStage || stages[0];
+    const idx = stages.findIndex(s => s === curStage);
+    if (idx === -1 || idx >= stages.length - 1) { showToast('Already at final stage','info'); return; }
+    await _applyStageChange(type, id, stages[idx + 1]);
+  };
+
+  window.jumpToStage = async function(type, id, targetIdx) {
+    const stages = type === 'pro' ? PRO_PIPELINE_STAGES : LB_PIPELINE_STAGES;
+    const targetPipelineStage = stages[targetIdx];
+    if (!targetPipelineStage) return;
+    const curRow = allRows().find(r => r.type===type && String(r.id)===String(id));
+    if (curRow?.pipelineStage === targetPipelineStage) { showToast('Already at this stage','info'); return; }
+    await _applyStageChange(type, id, targetPipelineStage);
   };
 
   // ── 4. TASKS ──────────────────────────────────────────────
@@ -1824,13 +1810,11 @@ export function injectDepsToD5(deps) {
     const cl    = buildChecklist(r);
     const pct   = checklistPct(r);
     const timeline = (allTimelines?.[`${type}_${id}`]||[]).slice(0,6).reverse();
-    const proStageList = proStages?.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
-    const lbStageList  = lbStages?.length  ? lbStages  : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
     const stageLabels  = type==='pro'
-      ? ['Submitted','Interview','Offer Letter','Medical','MOL','Visa','Travel','Travelled']
-      : ['Docs In','Profile Sent','Selected','Passport','Visa','Travelled','Refund','Done'];
-    const stageListRef = type==='pro' ? proStageList : lbStageList;
-    const stageIdx     = stageListRef.findIndex(s => s.toUpperCase() === (r.stage||'').toUpperCase());
+      ? ['Pending OL','Offer Letter','MOL','Visa','Travel','Travelled']
+      : ['Unselected','Selected','Travelled'];
+    const stageListRef = type==='pro' ? PRO_PIPELINE_STAGES : LB_PIPELINE_STAGES;
+    const stageIdx     = stageListRef.findIndex(s => s === r.pipelineStage);
 
     // Docs — from Document Upload IIFE (exposed on window)
     const defs  = (window.drecoDocDefs?.(type)) || [];
@@ -1877,7 +1861,7 @@ export function injectDepsToD5(deps) {
       <div class="dv5-profile-vitals">
         <div class="dv5-vital-card" style="background:#F8F7EF;border-color:#E4E1D6">
           <div class="dv5-vital-label" style="color:#76746B">Stage</div>
-          ${badge(r.stage)}
+          ${badge(r.pipelineStage)}
           <div class="dv5-vital-hint" style="color:#9A978C">${h(nextAction(r))}</div>
         </div>
         <div class="dv5-vital-card" style="background:#F5ECCC;border-color:#E2D49A">
