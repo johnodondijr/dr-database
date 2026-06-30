@@ -294,7 +294,7 @@ export function injectDepsToD5(deps) {
       if (s === 'VISA PROCESSING') return 'Follow visa';
       if (s === 'REFUND PENDING') return 'Complete refund';
     }
-    if (s === 'TRAVELLED')    return 'Post-arrival follow up';
+    if (s === 'TRAVELLED')    return 'Arrived';
     if (s === 'REFUND COMPLETE') return 'Closed';
     return '—';
   }
