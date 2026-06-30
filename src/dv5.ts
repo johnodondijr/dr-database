@@ -142,16 +142,25 @@ export function injectDepsToD5(deps) {
 
   function stageColor(stage) {
     const s = String(stage||'').toUpperCase();
-    if (s==='TRAVELLED') return 'green';
-    if (s==='REFUND COMPLETE') return 'green';
-    if (s.includes('VISA')) return 'blue';
-    if (s.includes('MOL')||s.includes('OFFER')) return 'amber';
-    if (s.includes('TRAVEL')||s==='PASSPORT APPLIED') return 'purple';
+    // LB pipeline stages
+    if (s==='UNSELECTED') return 'gray';
     if (s==='SELECTED') return 'blue';
+    // Pro pipeline stages
+    if (s==='PENDING OFFER LETTER') return 'gray';
+    if (s==='OFFER LETTER') return 'amber';
+    if (s==='MOL') return 'teal';
+    if (s==='VISA') return 'blue';
+    if (s==='PENDING TRAVEL') return 'orange';
+    // Terminal
+    if (s==='TRAVELLED'||s==='REFUND COMPLETE') return 'green';
+    // Legacy internal stages (fallback)
+    if (s.includes('VISA')) return 'blue';
+    if (s.includes('MOL')) return 'teal';
+    if (s.includes('OFFER')) return 'amber';
+    if (s.includes('TRAVEL')||s==='PASSPORT APPLIED') return 'orange';
     if (s==='PROFILE SENT') return 'amber';
     if (s==='REFUND PENDING') return 'red';
     if (s==='DOCS SUBMITTED'||s==='SUBMITTED') return 'gray';
-    if (s==='NOT YET') return 'red';
     return 'gray';
   }
   function badge(stage) {
@@ -1739,7 +1748,7 @@ export function injectDepsToD5(deps) {
                   <tr class="dv5-client-row${isOpen?' dv5-client-open':''}" onclick="window._toggleClient('${js(c.name)}')" style="cursor:pointer">
                     <td style="width:28px"><i class="ti ${isOpen?'ti-chevron-down':'ti-chevron-right'}" style="font-size:12px;color:#9ca3af"></i></td>
                     <td><div class="dv5-name-cell">
-                      <div class="dv5-avatar" style="background:#EEF2FF;color:#4338CA"><i class="ti ti-building" style="font-size:13px"></i></div>
+                      <div class="dv5-avatar" style="background:#E4E1D6;color:#76746B"><i class="ti ti-building" style="font-size:13px"></i></div>
                       <div>
                         <div class="dv5-name">${h(c.name)}</div>
                         <div class="dv5-sub">${h(c.country||'—')}</div>
@@ -2299,16 +2308,18 @@ export function injectDepsToD5(deps) {
 .dv5-next-action { font-size:11px; font-weight:438; color:var(--dreco-ink,#171715); }
 
 /* Avatars */
-.dv5-avatar { width:32px; height:32px; min-width:32px; border-radius:10px; background:#111827; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:562; }
+.dv5-avatar { width:32px; height:32px; min-width:32px; border-radius:10px; background:#E4E1D6; color:#171715; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:562; }
 
 /* Badges */
 .dv5-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
-.dv5-badge.green { background:#E3F5EE; color:#197A52; }
-.dv5-badge.blue  { background:#E3EEF9; color:#1A6BB5; }
-.dv5-badge.amber { background:#FDF3DC; color:#B07B10; }
-.dv5-badge.purple{ background:var(--dreco-soft,#F8F7EF); color:var(--dreco-ink,#171715); }
-.dv5-badge.red   { background:#FDEAEA; color:#B83232; }
-.dv5-badge.gray  { background:#F3F3F3; color:#888; }
+.dv5-badge.green  { background:#D1FAE5; color:#065F46; }
+.dv5-badge.blue   { background:#DBEAFE; color:#1D4ED8; }
+.dv5-badge.teal   { background:#CCFBF1; color:#0F766E; }
+.dv5-badge.amber  { background:#FEF3C7; color:#92400E; }
+.dv5-badge.orange { background:#FFEDD5; color:#C2410C; }
+.dv5-badge.red    { background:#FEE2E2; color:#B91C1C; }
+.dv5-badge.gray   { background:#F3F4F6; color:#6B7280; }
+.dv5-badge.purple { background:#F8F7EF; color:#76746B; }
 
 /* Pills */
 .dv5-pill { display:inline-flex; align-items:center; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:500; white-space:nowrap; background:#F3F3F3; color:#888; }
@@ -2602,21 +2613,23 @@ export function injectDepsToD5(deps) {
 .dv5-row-selected td,
 .dv5-client-row.dv5-client-open td { background:#F1EDE2!important; }
 .dv5-badge.green,
-.dv5-pill.green { background:var(--dreco-success-bg)!important; color:var(--dreco-success)!important; }
-.dv5-badge.blue,
-.dv5-badge.purple,
-.dv5-badge.gray,
-.dv5-pill,
-.dv5-pill.gray { background:var(--dreco-info-bg)!important; color:var(--dreco-info)!important; }
+.dv5-pill.green   { background:#D1FAE5!important; color:#065F46!important; }
+.dv5-badge.blue   { background:#DBEAFE!important; color:#1D4ED8!important; }
+.dv5-badge.teal   { background:#CCFBF1!important; color:#0F766E!important; }
 .dv5-badge.amber,
-.dv5-pill.amber { background:var(--dreco-warning-bg)!important; color:var(--dreco-warning)!important; }
+.dv5-pill.amber   { background:#FEF3C7!important; color:#92400E!important; }
+.dv5-badge.orange { background:#FFEDD5!important; color:#C2410C!important; }
 .dv5-badge.red,
 .dv5-pill.red,
-.dv5-pill.danger { background:var(--dreco-danger-bg)!important; color:var(--dreco-danger)!important; }
+.dv5-pill.danger  { background:#FEE2E2!important; color:#B91C1C!important; }
+.dv5-badge.gray,
+.dv5-badge.purple,
+.dv5-pill,
+.dv5-pill.gray    { background:#F3F4F6!important; color:#6B7280!important; }
 .dv5-modal-overlay { background:rgba(23,23,21,.46); }
 .dv5-profile-panel { background:var(--dreco-bg); border-color:rgba(255,255,255,.72); }
 .dv5-profile-avatar,
-.dv5-avatar { background:var(--dreco-ink); color:#fff; }
+.dv5-avatar { background:#E4E1D6!important; color:#171715!important; }
 
 /* Rounded corner pass */
 .dv5-card,
