@@ -2690,15 +2690,11 @@ async function submitBalancePayment(){
   } else {
     const r=proDB.find(x=>x.id===id||String(x.id)===String(id));
     if(!r) return fail('Candidate not found.');
-    if(!r.paid1){ updates.paid1=amount; r.paid1=amount; }
-    else if(!r.paid2){ updates.paid2=amount; r.paid2=amount; }
-    else{
-      // Both slots used — accumulate into paid2
-      updates.paid2=(Number(r.paid2)||0)+amount; r.paid2=updates.paid2;
-    }
-    updates.paid=(Number(r.paid1)||0)+(Number(r.paid2)||0); r.paid=updates.paid;
-    try{ if(useCloud()) await dbUpdate('pro_candidates',id,updates); else saveLocalStore(); addTimeline('pro',id,`Commission payment: ${moneyKES(amount)}`); auditAction('Finance','Commission payment recorded',`${r.name} - ${moneyKES(amount)}`); }
-    catch(e){ return fail(e.message||'Save failed.'); }
+    const prevPaid=proPaidAmount(r);
+    const newTotal=prevPaid+amount;
+    r.paid=newTotal;
+    try{ if(useCloud()) await dbUpdate('pro_candidates',id,{paid:newTotal}); else saveLocalStore(); addTimeline('pro',id,`Commission payment: ${moneyKES(amount)}`); auditAction('Finance','Commission payment recorded',`${r.name} - ${moneyKES(amount)}`); }
+    catch(e){ r.paid=prevPaid; return fail(e.message||'Save failed.'); }
   }
   closeModal('balance-pay-modal');
   window.openCandidateProfile?.(type, id);
