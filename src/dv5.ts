@@ -1052,9 +1052,6 @@ export function injectDepsToD5(deps) {
                       <button class="dv5-action-btn" onclick="openDocs('${r.type}',${JSON.stringify(r.id)},'${js(r.name)}')" title="Documents">
                         <i class="ti ti-paperclip"></i>
                       </button>
-                      <button class="dv5-action-btn primary" onclick="window.advanceStage('${r.type}',${r.id})" title="Advance to next stage" style="background:var(--dreco-ink,#171715);color:#fff;border-color:var(--dreco-ink,#171715)"
-                        <i class="ti ti-arrow-right"></i>
-                      </button>
                     </td>
                   </tr>`;
                 }).join('') : `<tr><td colspan="${isPro?9:10}"><div class="dv5-empty">No candidates found.</div></td></tr>`}
@@ -2289,7 +2286,11 @@ export function injectDepsToD5(deps) {
 .dv5-card-title { font-size:13px; font-weight:500; color:var(--text,#18191B); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dv5-card-sub { font-size:11px; color:var(--text-3,#999); flex-shrink:0; white-space:nowrap; }
 .dv5-two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; min-width:0; }
-.dv5-three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; min-width:0; align-items:start; }
+.dv5-three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; min-width:0; align-items:stretch; }
+.dv5-three-col > .dv5-card { display:flex; flex-direction:column; }
+.dv5-three-col > .dv5-card .dv5-action-grid,
+.dv5-three-col > .dv5-card .dv5-task-list,
+.dv5-three-col > .dv5-card .dv5-activity-list { flex:1; }
 .dv5-table-card { background:#fff; border:1px solid var(--border,#E8E8E8); border-radius:12px; overflow:hidden; margin-bottom:12px; }
 
 /* Tables */
