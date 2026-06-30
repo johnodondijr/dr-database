@@ -294,7 +294,7 @@ export function injectDepsToD5(deps) {
       if (s === 'VISA PROCESSING') return 'Follow visa';
       if (s === 'REFUND PENDING') return 'Complete refund';
     }
-    if (s === 'TRAVELLED')    return 'Arrived';
+    if (s === 'TRAVELLED')    return 'Working Abroad';
     if (s === 'REFUND COMPLETE') return 'Closed';
     return '—';
   }
@@ -357,6 +357,11 @@ export function injectDepsToD5(deps) {
     ];
   }
   function checklistPct(r) {
+    const s = String(r.stage||'').toUpperCase();
+    const travelled = r.type === 'lb'
+      ? ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s)
+      : s === 'TRAVELLED';
+    if (travelled && r.balance === 0) return 100;
     const cl = buildChecklist(r);
     return Math.round(cl.filter(x=>x.done).length / cl.length * 100);
   }
