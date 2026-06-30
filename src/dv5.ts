@@ -2603,6 +2603,35 @@ export function injectDepsToD5(deps) {
 .dv5-profile-avatar,
 .dv5-avatar { background:var(--dreco-ink); color:#fff; }
 
+/* Rounded corner pass */
+.dv5-card,
+.dv5-table-card,
+.dv5-kpi,
+.dv5-priority,
+.dv5-stat-card,
+.dv5-file-card,
+.dv5-col,
+.dv5-profile-hero,
+.dv5-profile-panel {
+  border-radius:22px!important;
+}
+.dv5-pipe-card,
+.dv5-action-card:hover,
+.dv5-task-item,
+.dv5-activity-item,
+.dv5-check-row,
+.dv5-vital-card,
+.dv5-input,
+.dv5-select,
+.dv5-btn,
+.dv5-btn-icon,
+.dv5-action-btn,
+.dv5-bulk-bar,
+.dv5-view-tabs,
+.dv5-pd {
+  border-radius:18px!important;
+}
+
 /* Responsive */
 @media (max-width:1100px) {
   .dv5-kanban { grid-template-columns:repeat(3,1fr); }

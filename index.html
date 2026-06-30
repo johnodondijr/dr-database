@@ -5091,6 +5091,90 @@ tbody tr:hover td,.dreco-table tr:hover td{background:var(--dreco-surface-soft)!
 #login-screen .lp-media-copy h2 span{
   color:#EDE0A3!important;
 }
+/* Rounded corner pass */
+:root{
+  --dreco-radius-soft:18px;
+  --dreco-radius-panel:22px;
+  --dreco-radius-shell:28px;
+}
+#app .app-layout{
+  border-radius:var(--dreco-radius-shell)!important;
+  overflow:hidden!important;
+}
+#app .sidebar,
+#app #sidebar{
+  border-radius:var(--dreco-radius-shell) 0 0 var(--dreco-radius-shell)!important;
+  overflow:hidden!important;
+}
+#app .main-area{
+  border-radius:0 var(--dreco-radius-shell) var(--dreco-radius-shell) 0!important;
+  overflow:hidden!important;
+}
+#app .sidebar-user-card,
+#app .sidebar-user-card.sidebar-account-trigger,
+#app .dv5-suc{
+  border-radius:var(--dreco-radius-panel)!important;
+}
+.dreco-card,
+.table-card,
+.panel,
+.dash-card,
+.report-card,
+.kanban-col,
+.pipe-col,
+.flow-step,
+.priority-card,
+.metric-card,
+.p-card,
+.activity-item,
+.task-item,
+.doc-row,
+.client-row,
+.modal,
+.cp-panel,
+.command-box{
+  border-radius:var(--dreco-radius-panel)!important;
+}
+.pipe-card,
+.dreco-kpi,
+.quick-action,
+.travel-item,
+.action-card,
+.candidate-summary,
+.security-note,
+.settings-card,
+.lp-flow-card,
+.lp-money-panel,
+.lp-activity-panel,
+.lp-dash-priority-card,
+.lp-dash-panel,
+.lp-preview-kpi,
+.lp-preview-panel{
+  border-radius:var(--dreco-radius-soft)!important;
+}
+#login-screen .lp-window{
+  border-radius:var(--dreco-radius-shell)!important;
+}
+#login-screen .lp-preview-card,
+#login-screen .lp-product-preview,
+#login-screen .lp-dashboard-preview,
+#login-screen .lp-dash-preview,
+#login-screen .lp-dash-board{
+  border-radius:var(--dreco-radius-shell)!important;
+  overflow:hidden!important;
+}
+#login-screen .lp-preview-sidebar{
+  border-radius:var(--dreco-radius-shell) 0 0 var(--dreco-radius-shell)!important;
+}
+@media(max-width:760px){
+  #app .app-layout,
+  #app .sidebar,
+  #app #sidebar,
+  #app .main-area,
+  #login-screen .lp-window{
+    border-radius:0!important;
+  }
+}
 </style>
 </head>
 <body>
