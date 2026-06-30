@@ -1924,7 +1924,6 @@ function validateLBRecord(rec) {
   if(!lbOwnPassport(rec) && (rec.r1Amt+rec.r2Amt) > rec.toRefund) return 'Refunded amount cannot exceed amount to refund.';
   const TRAVELLED_STAGES = ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'];
   if(TRAVELLED_STAGES.includes(String(rec.travelStatus||'').toUpperCase()) && !rec.travelDate) return 'Travel date is required when marking a candidate as Travelled.';
-  if(String(rec.travelStatus||'').toUpperCase()==='TRAVELLED' && !lbOwnPassport(rec) && !rec.toRefund) return 'Please enter the refund amount before marking as Travelled.';
   return '';
 }
 function recordChanges(before={},after={},fields=[]) {

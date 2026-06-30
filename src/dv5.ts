@@ -305,8 +305,11 @@ export function injectDepsToD5(deps) {
     const action = nextAction(r);
     const pct = checklistPct(r);
     let level = 'ok';
+    const terminalStages = r.type === 'lb'
+      ? ['TRAVELLED','REFUND PENDING','REFUND COMPLETE']
+      : ['TRAVELLED'];
     if (openBalance || action.includes('today')) level = 'risk';
-    else if (pct < 65 || !['TRAVELLED','REFUND COMPLETE'].includes(String(r.stage||'').toUpperCase())) level = 'watch';
+    else if (pct < 65 || !terminalStages.includes(String(r.stage||'').toUpperCase())) level = 'watch';
     const reasons = [
       openBalance && (r.type === 'pro' ? 'unpaid commission' : 'refund balance'),
       pct < 65 && `${pct}% complete`,
@@ -338,7 +341,6 @@ export function injectDepsToD5(deps) {
         {label:'Passport Applied',  done: ['PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
         {label:'Visa Processing',   done: ['VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
         {label:'Travelled',         done: ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(s), action:'stage'},
-        {label:'Refund processed',  done: s==='REFUND COMPLETE' || r.own_passport, action: r.own_passport ? null : 'edit'},
       ];
     }
     const proStageOrder = ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'];
@@ -1072,11 +1074,6 @@ export function injectDepsToD5(deps) {
     if (type === 'lb' && ['TRAVELLED','REFUND PENDING','REFUND COMPLETE'].includes(nextStage) && !rec.travelDate) {
       showToast('Set a travel date before advancing to Travelled.','error'); return;
     }
-    // Guard: require refund amount for LB before marking travelled
-    if (type === 'lb' && nextStage === 'TRAVELLED' && !lbOwnPassport(rec) && !rec.toRefund) {
-      showToast('Enter the refund amount before marking as Travelled.','error'); return;
-    }
-
     const nextStageRaw = stages[idx + 1];
     if (type === 'pro') rec.stage = nextStageRaw; else { rec.travelStatus = nextStageRaw; rec.stage = nextStageRaw; }
     showToast(`Moved to ${nextStageRaw}`, 'success');
@@ -1085,7 +1082,36 @@ export function injectDepsToD5(deps) {
       const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
       const updateField = type === 'pro' ? { stage: nextStageRaw } : { stage: nextStageRaw, travelStatus: nextStageRaw };
       await dbUpdate(table, id, updateField);
+      addTimeline(type, id, `Stage advanced to ${nextStageRaw}`);
     } catch(e) { console.warn('advanceStage save error', e); }
+  };
+
+  window.jumpToStage = async function(type, id, targetIdx) {
+    const stages = type === 'pro'
+      ? (proStages?.length ? proStages : ['SUBMITTED','INTERVIEW','OFFER LETTER','MEDICAL & ATTESTATION','MOL','VISA','PENDING TRAVEL','TRAVELLED'])
+      : (lbStages?.length ? lbStages : ['DOCS SUBMITTED','PROFILE SENT','SELECTED','PASSPORT APPLIED','VISA PROCESSING','TRAVELLED','REFUND PENDING','REFUND COMPLETE']);
+    const db = type === 'pro' ? proDB : lbDB;
+    const rec = db.find(r => r.id == id);
+    if (!rec || !stages[targetIdx]) return;
+    const targetStage = stages[targetIdx];
+    const cur = (type === 'pro' ? rec.stage : rec.travelStatus || rec.travel_status || stages[0]).toUpperCase();
+    if (cur === targetStage.toUpperCase()) return;
+    if (type === 'pro' && ['PENDING TRAVEL','TRAVELLED'].includes(targetStage.toUpperCase()) && !rec.travel) {
+      showToast('Set a travel date before moving to this stage.','error'); return;
+    }
+    if (type === 'lb' && targetStage.toUpperCase() === 'TRAVELLED' && !rec.travelDate) {
+      showToast('Set a travel date before marking as Travelled.','error'); return;
+    }
+    if (type === 'pro') rec.stage = targetStage;
+    else { rec.travelStatus = targetStage; rec.stage = targetStage; }
+    showToast(`Moved to ${targetStage}`, 'success');
+    window.openCandidateProfile?.(type, id);
+    try {
+      const table = type === 'pro' ? 'pro_candidates' : 'lb_candidates';
+      const updateField = type === 'pro' ? { stage: targetStage } : { stage: targetStage, travelStatus: targetStage };
+      await dbUpdate(table, id, updateField);
+      addTimeline(type, id, `Stage set to ${targetStage}`);
+    } catch(e) { console.warn('jumpToStage save error', e); }
   };
 
   // ── 4. TASKS ──────────────────────────────────────────────
@@ -1874,7 +1900,7 @@ export function injectDepsToD5(deps) {
         </div>
         <div class="dv5-progress-steps">
           ${stageLabels.map((s,i) => `
-            <div class="dv5-step ${i<stageIdx?'done':i===stageIdx?'active':''}">
+            <div class="dv5-step ${i<stageIdx?'done':i===stageIdx?'active':''}" onclick="window.jumpToStage('${type}',${id},${i})" style="cursor:pointer" title="${i===stageIdx?'Current stage':'Jump to '+h(s)}">
               <span>${i+1}</span><small>${h(s)}</small>
             </div>`).join('')}
         </div>
