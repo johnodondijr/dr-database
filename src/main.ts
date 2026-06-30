@@ -508,14 +508,22 @@ function lbStageValue(row = {}) {
 function proPipelineStageValue(row = {}) {
   const raw = row.raw || row;
   const stage = canonicalProStage(raw.stage || row.stage);
-  if (stage === 'TRAVELLED') return 'TRAVELLED';
-  if (toInput(raw.travel || row.travel)) return 'PENDING TRAVEL';
-  if (toInput(raw.visa || row.visa)) return 'VISA';
-  if (toInput(raw.mol || row.mol)) return 'MOL';
-  if (toInput(raw.ol || row.ol)) return 'OFFER LETTER';
-  if (PRO_PIPELINE_STAGES.includes(stage)) return stage;
-  if (['SUBMITTED','INTERVIEW','PENDING INTERVIEW','NOT YET',''].includes(stage)) return 'PENDING OFFER LETTER';
-  return 'PENDING OFFER LETTER';
+  const ORDER = {'PENDING OFFER LETTER':0,'OFFER LETTER':1,'MOL':2,'VISA':3,'PENDING TRAVEL':4,'TRAVELLED':5};
+
+  // Stage derived from the DB stage field
+  let dbStage = 'PENDING OFFER LETTER';
+  if (stage === 'TRAVELLED') dbStage = 'TRAVELLED';
+  else if (PRO_PIPELINE_STAGES.includes(stage)) dbStage = stage;
+
+  // Minimum stage inferred from milestone date fields
+  let dateStage = 'PENDING OFFER LETTER';
+  if (toInput(raw.ol || row.ol)) dateStage = 'OFFER LETTER';
+  if (toInput(raw.mol || row.mol)) dateStage = 'MOL';
+  if (toInput(raw.visa || row.visa)) dateStage = 'VISA';
+  if (toInput(raw.travel || row.travel)) dateStage = stage === 'TRAVELLED' ? 'TRAVELLED' : 'PENDING TRAVEL';
+
+  // Return whichever is further along the pipeline
+  return ORDER[dbStage] >= ORDER[dateStage] ? dbStage : dateStage;
 }
 function lbPipelineStageValue(row = {}) {
   const raw = row.raw || row;
