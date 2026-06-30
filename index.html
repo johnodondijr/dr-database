@@ -5909,6 +5909,39 @@ tbody tr:hover td,.dreco-table tr:hover td{background:var(--dreco-surface-soft)!
   </div>
 </div>
 
+<!-- BALANCE PAYMENT MODAL -->
+<div class="modal-bg" id="balance-pay-modal">
+  <div class="modal quick-modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3 id="bpm-title">Record Payment</h3>
+      <button class="modal-close" onclick="closeModal('balance-pay-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="bpm-summary" style="background:#F8F7EF;border:1px solid #E4E1D6;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.7"></div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="bpm-amount">Amount</label>
+          <input id="bpm-amount" type="number" min="0" step="any" placeholder="e.g. 5000">
+        </div>
+        <div class="field">
+          <label for="bpm-date">Date</label>
+          <input id="bpm-date" type="date">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="dv5-btn" style="width:100%;justify-content:center;background:#E7F0E9;color:#386A52;border-color:#BDD8C5;font-size:13px" onclick="fillFullBalance()">
+          <i class="ti ti-check"></i> Mark as Cleared (fill full balance)
+        </button>
+      </div>
+      <div class="login-error" id="bpm-error" role="alert" style="display:none;margin-top:10px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('balance-pay-modal')">Cancel</button>
+      <button class="btn primary" onclick="submitBalancePayment()">Save Transaction</button>
+    </div>
+  </div>
+</div>
+
 <!-- TRAVEL MODAL -->
 <div class="modal-bg" id="quick-travel-modal">
   <div class="modal quick-modal">

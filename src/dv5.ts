@@ -1859,8 +1859,8 @@ export function injectDepsToD5(deps) {
           <div class="dv5-vital-value" style="color:#2A5240">${fmt2(r.paid)}</div>
           <div class="dv5-vital-hint" style="color:#528C6A">${r.commission?Math.round(r.paid/r.commission*100)+'% collected':'No commission set'}</div>
         </div>
-        <div class="dv5-vital-card" style="background:${r.balance>0?'#F3E5E2':'#E7F0E9'};border-color:${r.balance>0?'#DFBAB6':'#BDD8C5'}">
-          <div class="dv5-vital-label" style="color:${r.balance>0?'#8F3E3C':'#386A52'}">Balance</div>
+        <div class="dv5-vital-card${r.balance>0?' dv5-vital-card--clickable':''}" style="background:${r.balance>0?'#F3E5E2':'#E7F0E9'};border-color:${r.balance>0?'#DFBAB6':'#BDD8C5'}${r.balance>0?';cursor:pointer':''}" ${r.balance>0?`onclick="openBalancePayment('${type}',${r.id})"`:''} title="${r.balance>0?'Click to record a payment':''}">
+          <div class="dv5-vital-label" style="color:${r.balance>0?'#8F3E3C':'#386A52'}">Balance${r.balance>0?' <span style="font-size:10px;opacity:.7">· tap to pay</span>':''}</div>
           <div class="dv5-vital-value" style="color:${r.balance>0?'#6E2C2A':'#2A5240'}">${fmt2(r.balance)}</div>
           <div class="dv5-vital-hint" style="color:${r.balance>0?'#B05250':'#528C6A'}">${r.balance>0?'Outstanding':'Fully settled'}</div>
         </div>

@@ -2641,6 +2641,70 @@ async function submitRecordPayment(){
   window.renderDash?.();
   showToast('Payment recorded','success');
 }
+// ── Balance card quick payment ──────────────────────────────────────────────
+let _bpmType='', _bpmId=0, _bpmBalance=0;
+function openBalancePayment(type, id){
+  const r = type==='lb' ? lbDB.find(x=>x.id===id||String(x.id)===String(id)) : proDB.find(x=>x.id===id||String(x.id)===String(id));
+  if(!r){ showToast('Candidate not found','error'); return; }
+  const balance = type==='lb' ? lbRefundOutstanding(r) : proBalance(r);
+  if(balance<=0){ showToast('Balance is already cleared','info'); return; }
+  _bpmType=type; _bpmId=Number(id)||id; _bpmBalance=balance;
+  const currency = type==='lb' ? 'USD' : 'KES';
+  const fmt = type==='lb' ? moneyUSD : moneyKES;
+  const paid = type==='lb' ? lbRefundPaidAmount(r) : proPaidAmount(r);
+  const commission = type==='lb' ? lbRefundPrincipal(r) : (Number(r.commission)||0);
+  document.getElementById('bpm-title').textContent = `Record Payment — ${escHTML(r.name)}`;
+  document.getElementById('bpm-summary').innerHTML =
+    `<strong>${escHTML(r.name)}</strong><br>`+
+    `${type==='lb'?'To refund':'Commission'}: <b>${fmt(commission)}</b> &nbsp;|&nbsp; `+
+    `Paid so far: <b>${fmt(paid)}</b><br>`+
+    `<span style="color:#8F3E3C;font-weight:600">Outstanding: ${fmt(balance)}</span>`;
+  const amtEl=document.getElementById('bpm-amount'); if(amtEl){ amtEl.value=''; amtEl.placeholder=`e.g. ${Math.round(balance/2)}`; }
+  const dateEl=document.getElementById('bpm-date'); if(dateEl) dateEl.value=new Date().toISOString().slice(0,10);
+  const errEl=document.getElementById('bpm-error'); if(errEl){ errEl.textContent=''; errEl.style.display='none'; }
+  document.getElementById('balance-pay-modal')?.classList.add('open');
+}
+function fillFullBalance(){
+  const el=document.getElementById('bpm-amount'); if(el) el.value=String(_bpmBalance);
+}
+async function submitBalancePayment(){
+  const amount=Number(document.getElementById('bpm-amount')?.value||0);
+  const date=document.getElementById('bpm-date')?.value||new Date().toISOString().slice(0,10);
+  const errEl=document.getElementById('bpm-error');
+  const fail=msg=>{ if(errEl){ errEl.textContent=msg; errEl.style.display='block'; } };
+  if(!amount||amount<=0) return fail('Enter a valid amount greater than 0.');
+  if(amount>_bpmBalance) return fail(`Amount exceeds outstanding balance of ${_bpmType==='lb'?moneyUSD(_bpmBalance):moneyKES(_bpmBalance)}.`);
+  const id=_bpmId, type=_bpmType;
+  const updates={};
+  if(type==='lb'){
+    const r=lbDB.find(x=>x.id===id||String(x.id)===String(id));
+    if(!r) return fail('Candidate not found.');
+    if(!r.r1Amt){ updates.r1Amt=amount; updates.r1Date=date; r.r1Amt=amount; r.r1Date=date; }
+    else if(!r.r2Amt){ updates.r2Amt=amount; updates.r2Date=date; r.r2Amt=amount; r.r2Date=date; }
+    else{
+      // Both slots used — accumulate into r2Amt
+      updates.r2Amt=(Number(r.r2Amt)||0)+amount; updates.r2Date=date; r.r2Amt=updates.r2Amt; r.r2Date=date;
+    }
+    try{ if(useCloud()) await dbUpdate('lb_candidates',id,updates); else saveLocalStore(); addTimeline('lb',id,`Payment recorded: ${moneyUSD(amount)}`); auditAction('Finance','Repayment recorded',`${r.name} - ${moneyUSD(amount)}`); }
+    catch(e){ return fail(e.message||'Save failed.'); }
+  } else {
+    const r=proDB.find(x=>x.id===id||String(x.id)===String(id));
+    if(!r) return fail('Candidate not found.');
+    if(!r.paid1){ updates.paid1=amount; r.paid1=amount; }
+    else if(!r.paid2){ updates.paid2=amount; r.paid2=amount; }
+    else{
+      // Both slots used — accumulate into paid2
+      updates.paid2=(Number(r.paid2)||0)+amount; r.paid2=updates.paid2;
+    }
+    updates.paid=(Number(r.paid1)||0)+(Number(r.paid2)||0); r.paid=updates.paid;
+    try{ if(useCloud()) await dbUpdate('pro_candidates',id,updates); else saveLocalStore(); addTimeline('pro',id,`Commission payment: ${moneyKES(amount)}`); auditAction('Finance','Commission payment recorded',`${r.name} - ${moneyKES(amount)}`); }
+    catch(e){ return fail(e.message||'Save failed.'); }
+  }
+  closeModal('balance-pay-modal');
+  window.openCandidateProfile?.(type, id);
+  window.renderDash?.();
+  showToast('Payment recorded','success');
+}
 function openExpensePrompt(){
   if(!requireFinanceAction('Adding expenses')) return;
   populateExpenseCandidateOptions();
@@ -3580,6 +3644,7 @@ Object.assign(window, {
   // Finance
   exportCSV, exportReportPDF,
   deleteExpense, openExpensePrompt, submitQuickExpense,
+  openBalancePayment, fillFullBalance, submitBalancePayment,
   openRecordPaymentPrompt, submitRecordPayment, openAddPayment, submitAddPayment,
   submitLBRefundPayment, removeLBRefundPayment, openLBRefundPayment,
   setFinancePeriod, setTrendPeriod, updateTrendTooltip, resetTrendTooltip,
