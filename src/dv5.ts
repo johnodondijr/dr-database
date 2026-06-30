@@ -1842,25 +1842,25 @@ export function injectDepsToD5(deps) {
 
       <!-- Vitals row -->
       <div class="dv5-profile-vitals">
-        <div class="dv5-vital-card" style="background:#fff;border-color:#E8E8E8">
-          <div class="dv5-vital-label">Stage</div>
+        <div class="dv5-vital-card" style="background:#F8F7EF;border-color:#E4E1D6">
+          <div class="dv5-vital-label" style="color:#76746B">Stage</div>
           ${badge(r.stage)}
-          <div class="dv5-vital-hint">${h(nextAction(r))}</div>
+          <div class="dv5-vital-hint" style="color:#9A978C">${h(nextAction(r))}</div>
         </div>
-        <div class="dv5-vital-card" style="background:#EFF6FF;border-color:#DBEAFE">
-          <div class="dv5-vital-label" style="color:#2563EB">${type==='pro'?'Commission':'To Refund'}</div>
-          <div class="dv5-vital-value" style="color:#1e40af">${fmt2(r.commission)}</div>
-          <div class="dv5-vital-hint" style="color:#3b82f6">Total agreed</div>
+        <div class="dv5-vital-card" style="background:#F5ECCC;border-color:#E2D49A">
+          <div class="dv5-vital-label" style="color:#7A5C1E">${type==='pro'?'Commission':'To Refund'}</div>
+          <div class="dv5-vital-value" style="color:#5C420E">${fmt2(r.commission)}</div>
+          <div class="dv5-vital-hint" style="color:#9A7A30">Total agreed</div>
         </div>
-        <div class="dv5-vital-card" style="background:#F0FDF4;border-color:#BBF7D0">
-          <div class="dv5-vital-label" style="color:#16a34a">Paid</div>
-          <div class="dv5-vital-value" style="color:#15803d">${fmt2(r.paid)}</div>
-          <div class="dv5-vital-hint" style="color:#22c55e">${r.commission?Math.round(r.paid/r.commission*100)+'% collected':'No commission set'}</div>
+        <div class="dv5-vital-card" style="background:#E7F0E9;border-color:#BDD8C5">
+          <div class="dv5-vital-label" style="color:#386A52">Paid</div>
+          <div class="dv5-vital-value" style="color:#2A5240">${fmt2(r.paid)}</div>
+          <div class="dv5-vital-hint" style="color:#528C6A">${r.commission?Math.round(r.paid/r.commission*100)+'% collected':'No commission set'}</div>
         </div>
-        <div class="dv5-vital-card" style="background:${r.balance>0?'#FEF2F2':'#F0FDF4'};border-color:${r.balance>0?'#FECACA':'#BBF7D0'}">
-          <div class="dv5-vital-label" style="color:${r.balance>0?'#DC2626':'#16a34a'}">Balance</div>
-          <div class="dv5-vital-value" style="color:${r.balance>0?'#b91c1c':'#15803d'}">${fmt2(r.balance)}</div>
-          <div class="dv5-vital-hint" style="color:${r.balance>0?'#ef4444':'#22c55e'}">${r.balance>0?'Outstanding':'Fully settled'}</div>
+        <div class="dv5-vital-card" style="background:${r.balance>0?'#F3E5E2':'#E7F0E9'};border-color:${r.balance>0?'#DFBAB6':'#BDD8C5'}">
+          <div class="dv5-vital-label" style="color:${r.balance>0?'#8F3E3C':'#386A52'}">Balance</div>
+          <div class="dv5-vital-value" style="color:${r.balance>0?'#6E2C2A':'#2A5240'}">${fmt2(r.balance)}</div>
+          <div class="dv5-vital-hint" style="color:${r.balance>0?'#B05250':'#528C6A'}">${r.balance>0?'Outstanding':'Fully settled'}</div>
         </div>
       </div>
 
@@ -2478,11 +2478,13 @@ export function injectDepsToD5(deps) {
 .dv5-file-card,
 .dv5-col,
 .dv5-pipe-card,
-.dv5-profile-hero,
-.dv5-vital-card {
+.dv5-profile-hero {
   background:var(--dreco-surface);
   border-color:var(--dreco-line);
   box-shadow:0 14px 36px rgba(23,23,21,.045);
+}
+.dv5-vital-card {
+  box-shadow:0 8px 24px rgba(23,23,21,.06);
 }
 .dv5-card-head { border-color:var(--dreco-line); }
 .dv5-card-title,
