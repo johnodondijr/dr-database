@@ -694,13 +694,13 @@ export function injectDepsToD5(deps) {
             ${priority('ti-id-badge-2',       visaReady, 'Visas Ready',        'Ready to travel',      '#DCFCE7','#16A34A', "switchTab('pipeline')")}
             ${priority('ti-coin',             unpaidPro, 'Unpaid Commissions', 'Requires follow up',   '#FCE7F3','#9D174D', "switchTab('finance')")}
             ${priority('ti-plane-departure',  tickets,   'Tickets Pending',    'Awaiting issue',       '#E0F2FE','#0369A1', "switchTab('pipeline')")}
-            ${priority('ti-users',            normRows.length, 'Total Candidates', 'In pipeline',      '#F5F3FF','#7C3AED', "switchTab('candidates')")}
+            ${priority('ti-users',            normRows.length, 'Total Candidates', 'In pipeline',      '#F4F4EC','#372514', "switchTab('candidates')")}
           ` : `
             ${priority('ti-users',            lbSelected,       'Selected',          'Cumulative selected',  '#E0F2FE','#0369A1', "switchTab('pipeline')")}
             ${priority('ti-credit-card',      lbRefundPending,  'Refund Pending',    'Refunds to process',   '#FEF9C3','#A16207', "switchTab('finance')")}
             ${priority('ti-coin',             unpaidLB,         'Outstanding USD',   'Refunds not started',  '#FCE7F3','#9D174D', "switchTab('finance')")}
             ${priority('ti-passport',         lbPassportApplied,'Passport Applied',  'Awaiting passport',    '#DCFCE7','#16A34A', "switchTab('pipeline')")}
-            ${priority('ti-users',            normRows.length,  'Total Candidates',  'In pipeline',          '#F5F3FF','#7C3AED', "switchTab('candidates')")}
+            ${priority('ti-users',            normRows.length,  'Total Candidates',  'In pipeline',          '#F4F4EC','#372514', "switchTab('candidates')")}
           `}
         </div>
 
@@ -1102,7 +1102,7 @@ export function injectDepsToD5(deps) {
           </div>
         </div>
         <div class="dv5-stat-grid">
-          ${statCard('ti-checkbox',      tasks.length,  'Open Tasks',      `Need attention`,                              '#F5F3FF','#7C3AED','#fff')}
+          ${statCard('ti-checkbox',      tasks.length,  'Open Tasks',      `Need attention`,                              '#F4F4EC','#372514','#fff')}
           ${statCard('ti-alert-triangle',high.length,   'High Priority',   `Urgent blockers`,                             '#FEF2F2','#DC2626','#fff')}
           ${statCard('ti-clock',         med.length,    'Medium',          `Stage follow ups`,                            '#FFFBEB','#D97706','#fff')}
           ${statCard('ti-coin',          allRows().filter(r=>r.balance>0).length,'Unpaid',    `Finance follow up`,        '#F0FDF4','#16A34A','#fff')}
@@ -1587,7 +1587,7 @@ export function injectDepsToD5(deps) {
         <div class="dv5-stat-grid" style="margin-top:12px">
           ${statCard('ti-users',     rows.length,       isPro?'Professional':'General Jobs',`Total candidates`,                             '#EFF6FF','#2563EB','#fff')}
           ${statCard('ti-plane',     travelled.length,  'Travelled',        `Successful placements`,                                       '#F0FDF4','#16A34A','#fff')}
-          ${statCard('ti-target',    rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%','Success Rate','Travelled / total', '#F5F3FF','#7C3AED','#fff')}
+          ${statCard('ti-target',    rows.length?Math.round(travelled.length/rows.length*100)+'%':'0%','Success Rate','Travelled / total', '#F4F4EC','#372514','#fff')}
           ${statCard('ti-chart-line',total?Math.round(paid/total*100)+'%':'0%',isPro?'Collection Rate':'Refund Rate',isPro?'Finance health':'Refunds collected','#FFFBEB','#D97706','#fff')}
           ${statCard('ti-clock',     avgProcessing,     'Avg Processing',   'Submission → travel',                                        '#F0FDFA','#0D9488','#fff')}
         </div>
@@ -1702,7 +1702,7 @@ export function injectDepsToD5(deps) {
         ${!isPro ? lbCountryBar(lbDB||[]) : ''}
         <div class="dv5-stat-grid" style="margin-top:12px">
           ${statCard('ti-building',  clients.length,                              'Total Clients', `Employer companies`,    '#EFF6FF','#2563EB','#fff')}
-          ${statCard('ti-briefcase', clients.reduce((s,c)=>s+c.active,0),        'Active Jobs',   `In-progress`,           '#F5F3FF','#7C3AED','#fff')}
+          ${statCard('ti-briefcase', clients.reduce((s,c)=>s+c.active,0),        'Active Jobs',   `In-progress`,           '#F4F4EC','#372514','#fff')}
           ${statCard('ti-users',     clients.reduce((s,c)=>s+c.total,0),         'Total Hired',   `All-time candidates`,   '#F0FDF4','#16A34A','#fff')}
           ${statCard('ti-coin',      fmt2(clients.reduce((s,c)=>s+c.due,0)),     'Outstanding',   `Total due`,             '#FEF2F2','#DC2626','#fff')}
           ${statCard('ti-wallet',    fmt2(clients.reduce((s,c)=>s+c.paid,0)),    'Collected',     `Total paid`,            '#FEF9C3','#A16207','#fff')}
@@ -2254,10 +2254,10 @@ export function injectDepsToD5(deps) {
 
 /* Cards */
 .dv5-card { background:#fff; border:1px solid #EAEAD6; border-radius:14px; padding:22px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04); }
-.dv5-card-pipeline { background:linear-gradient(135deg,#EEF2FF 0%,#EDE9FE 55%,#F5F3FF 100%); border-color:#DDD9FF; padding:16px 20px; }
+.dv5-card-pipeline { background:linear-gradient(135deg,#FFFFFF 0%,#FAF8EF 55%,#F4F4EC 100%); border-color:#E4E1D6; padding:16px 20px; }
 .dv5-card-pipeline .dv5-flow-step strong { color:#1E1B4B; }
 .dv5-card-pipeline .dv5-flow-step span { color:#6B7280; }
-.dv5-card-pipeline .dv5-flow-arrow { color:#C4B5FD; }
+.dv5-card-pipeline .dv5-flow-arrow { color:#9A978C; }
 .dv5-card-pipeline .dv5-pipeline-flow { padding:4px 0; }
 .dv5-card-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; min-width:0; }
 .dv5-card-title { font-size:13px; font-weight:500; color:var(--text,#18191B); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

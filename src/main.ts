@@ -1531,7 +1531,7 @@ function renderReports(){
     const v=String(s||'-').replace(/^PENDING\s+/,'').trim();
     return v.length>11?v.slice(0,10)+'...':v;
   };
-  const palette=['#5347CE','#887CFD','#4896FE','#16C8C7','#DDEBFF','#EFEEFF','#E8FAF7','#F8FAFC'];
+  const palette=['#372514','#171715','#386A52','#A16207','#8F3E3C','#5C4A38','#D8D3C5','#F4F4EC'];
   const chartBars=(items,max,colorFn)=>items.map((item,i)=>{
     const pct=max?Math.max(8,Math.round((item.value/max)*100)):8;
     const color=colorFn?colorFn(item,i):palette[i%palette.length];
@@ -2131,7 +2131,7 @@ function renderDash(){
   const workspaceEl=document.getElementById('topbar-workspace-name');
   if(workspaceEl) workspaceEl.textContent=companyName;
 
-  const stageColors=['#5A49F8','#3B82F6','#10B981','#F59E0B','#5DD6C4','#FB9A65','#8B5CF6','#DDE2EC'];
+  const stageColors=['#372514','#171715','#386A52','#A16207','#5C4A38','#8F3E3C','#6F6A5E','#D8D3C5'];
   const stageData=[
     {label:'Submitted', value:proDB.filter(r=>r.stage==='SUBMITTED').length, icon:'ti-clipboard-list', color:stageColors[0]},
     {label:'Interview', value:proDB.filter(r=>r.stage==='INTERVIEW').length, icon:'ti-users', color:stageColors[1]},
@@ -2358,7 +2358,7 @@ function getSmartAlerts(){
   const travel=proDB.filter(r=>r.stage==='PENDING TRAVEL');
   return [
     {label:'MOL overdue',value:oldMol.length,icon:'ti-clock-exclamation',tone:'warn',target:"switchTab('pro')"},
-    {label:'Visa pending too long',value:oldVisa.length,icon:'ti-id-badge-2',tone:'violet',target:"switchTab('pro')"},
+    {label:'Visa pending too long',value:oldVisa.length,icon:'ti-id-badge-2',tone:'coffee',target:"switchTab('pro')"},
     {label:'Unpaid commissions',value:unpaid.length,icon:'ti-cash-banknote',tone:'money',target:"switchTab('commissions')"},
     {label:'Pending travel',value:travel.length,icon:'ti-plane',tone:'blue',target:'openPendingTravelView()'}
   ].filter(a=>a.value>0);
