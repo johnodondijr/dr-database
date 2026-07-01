@@ -323,6 +323,9 @@ function safeSessionSet(key, value) {
 function safeSessionRemove(key) {
   try { sessionStorage.removeItem(key); } catch { /* ignore */ }
 }
+function safeLocalRemove(key) {
+  try { localStorage.removeItem(key); } catch { /* ignore */ }
+}
 
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // STATE
@@ -457,7 +460,7 @@ async function persistWorkspaceCountries(countries) {
   });
   setCurrentUser({...currentUser, generalJobsCountries: clean});
   setCurrentWorkspace(currentUser);
-  safeSessionSet('dr_user', JSON.stringify(currentUser));
+  safeLocalSet('dr_user', JSON.stringify(currentUser));
   await saveStaffAccounts();
 }
 
@@ -846,7 +849,7 @@ function hideSignup() {
 function enterApp(user) {
   setCurrentUser(user);
   setCurrentWorkspace(currentUser);
-  safeSessionSet('dr_user', JSON.stringify(currentUser));
+  safeLocalSet('dr_user', JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('bottom-nav')?.classList.add('visible');
@@ -1037,7 +1040,8 @@ async function doLogin() {
 function doLogout() {
   closeProfileDropdown();
   if (db?.auth) db.auth.signOut().catch(err => console.warn('Supabase sign out failed:', err));
-  safeSessionRemove('dr_user'); setCurrentUser(null);
+  safeLocalRemove('dr_user'); setCurrentUser(null);
+  history.replaceState(null, '', location.pathname);
   document.getElementById('app').style.display='none';
   document.getElementById('bottom-nav')?.classList.remove('visible');
   document.getElementById('login-screen').style.display='flex';
@@ -1052,7 +1056,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadRuntimeConfig();
   await loadStaffAccounts();
   initLoginInteractions();
-  const saved=safeSessionGet('dr_user');
+  const saved=safeLocalGet('dr_user');
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
@@ -1066,7 +1070,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         companyName: account.companyName,
         generalJobsCountries: account.generalJobsCountries,
       });
-    } catch { safeSessionRemove('dr_user'); }
+    } catch { safeLocalRemove('dr_user'); }
   }
   rebuildStageSelects();
   // Delegated listener for docs buttons – avoids interpolating candidate names
@@ -1102,7 +1106,7 @@ async function loadAllData() {
     restoreUserFilters();
     hideLoading();
     if (typeof window.dv5Init === 'function') window.dv5Init();
-    switchTab('dash');
+    switchTab(location.hash ? location.hash.slice(1) : 'dash', false);
     return;
   }
   showLoading('Loading candidates...');
@@ -1160,7 +1164,7 @@ async function loadAllData() {
   hideLoading();
   // Signal DV5 that data is ready - ensure sidebar and sections exist before render
   if (typeof window.dv5Init === 'function') window.dv5Init();
-  switchTab('dash');
+  switchTab(location.hash ? location.hash.slice(1) : 'dash', false);
 }
 
 function normalizeDateField(v) {
@@ -1398,7 +1402,8 @@ function ppBadge(s){
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 // TABS + MODALS
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
-function switchTab(tab){
+let _currentTab = 'dash';
+function switchTab(tab, _pushHistory = true){
   if (window.innerWidth <= 640) closeMobileSidebar();
   // DV5 unified tab router — handles both legacy and new tabs
   const DV5_TABS = ['dash','pipeline','candidates','finance','documents','reports','clients','settings'];
@@ -1463,7 +1468,15 @@ function switchTab(tab){
     help: ()=> (typeof renderHelpPage === 'function') && renderHelpPage(),
   };
   if (renderers[t]) renderers[t]();
+  if (_pushHistory && t !== _currentTab) {
+    history.pushState({ tab: t }, '', '#' + t);
+  }
+  _currentTab = t;
 }
+window.addEventListener('popstate', e => {
+  const tab = e.state?.tab || (location.hash ? location.hash.slice(1) : 'dash');
+  switchTab(tab, false);
+});
 function setBottomNav(t){
   document.querySelectorAll('.bottom-nav-item').forEach(btn=>btn.classList.remove('active'));
   const active=document.getElementById('bnav-'+t);
@@ -1792,7 +1805,7 @@ async function saveWorkspaceSettings(){
   });
   setCurrentUser({...currentUser,companyName});
   setCurrentWorkspace(currentUser);
-  safeSessionSet('dr_user',JSON.stringify(currentUser));
+  safeLocalSet('dr_user',JSON.stringify(currentUser));
   await saveStaffAccounts();
   setUserDisplay(currentUser.display,currentUser.role);
   window.renderDash?.(); renderLB(); renderReports();
@@ -3537,7 +3550,7 @@ async function saveProfileChanges() {
   }
 
   if (!changed) { showMsg('No changes to save.', 'err'); return; }
-  safeSessionSet('dr_user', JSON.stringify(currentUser));
+  safeLocalSet('dr_user', JSON.stringify(currentUser));
   await saveStaffAccounts();
   showMsg('Changes saved successfully.', 'ok');
   // clear sensitive fields
