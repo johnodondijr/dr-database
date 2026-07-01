@@ -673,7 +673,7 @@ function hideLoading() { document.getElementById('loading-overlay').classList.re
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
-  if (window.innerWidth <= 640) {
+  if (window.innerWidth <= 860) {
     sb.classList.contains('mobile-open') ? closeMobileSidebar() : openMobileSidebar();
   } else {
     sb.classList.toggle('collapsed');
@@ -731,7 +731,7 @@ function closeMobileSidebar() {
     if (!dragging) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
-    if (dx > MIN_SWIPE && dy < 80 && window.innerWidth <= 640) openMobileSidebar();
+    if (dx > MIN_SWIPE && dy < 80 && window.innerWidth <= 860) openMobileSidebar();
     dragging = false;
   }, { passive: true });
 })();
@@ -1404,7 +1404,7 @@ function ppBadge(s){
 // *Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â*Â
 let _currentTab = 'dash';
 function switchTab(tab, _pushHistory = true){
-  if (window.innerWidth <= 640) closeMobileSidebar();
+  if (window.innerWidth <= 860) closeMobileSidebar();
   // DV5 unified tab router — handles both legacy and new tabs
   const DV5_TABS = ['dash','pipeline','candidates','finance','documents','reports','clients','settings'];
   const DV5_ALIASES = {

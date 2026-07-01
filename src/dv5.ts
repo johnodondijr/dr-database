@@ -2661,58 +2661,96 @@ export function injectDepsToD5(deps) {
   border-radius:18px!important;
 }
 
-/* Responsive */
+/* ── Responsive ─────────────────────────────────────────────────────────────
+   Breakpoints (match index.html):
+     ≥ 1100px  full desktop  — sidebar 224px, 3-col grids, 6-step progress
+     860–1100  compact       — sidebar icon-only (64px), 3-col still fits
+     640–860   tablet        — sidebar hidden/hamburger, 2-col grids
+     < 640     mobile        — bottom-nav, 1-col grids
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Tables always scroll horizontally — applies at every width */
+.dv5-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.dv5-table { min-width:560px; }
+
+/* ── compact desktop (sidebar shrinks to icons, content stays wide) ──────── */
 @media (max-width:1100px) {
+  /* kanban: 5-col → 3-col */
   .dv5-kanban { grid-template-columns:repeat(3,1fr); }
-  .dv5-profile-grid,.dv5-two-col,.dv5-three-col { grid-template-columns:1fr!important; }
+  /* progress steps: 6 → 3 per row */
   .dv5-progress-steps { grid-template-columns:repeat(3,1fr); }
+  /* profile grid 3-col → 2-col */
+  .dv5-profile-grid { grid-template-columns:1fr 1fr!important; }
+  /* vitals 4-col → 2-col */
+  .dv5-profile-vitals { grid-template-columns:repeat(2,1fr); }
+  /* three-col → 2-col */
+  .dv5-three-col { grid-template-columns:1fr 1fr!important; }
+  /* two-col stays 2 — wide enough */
 }
-@media (max-width:760px) {
+
+/* ── tablet (no sidebar) ─────────────────────────────────────────────────── */
+@media (max-width:860px) {
+  .dv5-section,.dv5-page { min-width:0; overflow-x:hidden; }
+  .dv5-page { padding:16px 16px 30px!important; }
+  .dv5-page-head h1 { font-size:20px; }
+  /* grids stay 2-col at tablet */
+  .dv5-two-col { grid-template-columns:1fr 1fr; }
+  .dv5-three-col { grid-template-columns:1fr 1fr!important; }
+  .dv5-kanban { grid-template-columns:1fr 1fr; }
+  .dv5-kpi-grid,.dv5-stat-grid,.dv5-file-grid { grid-template-columns:repeat(2,1fr); }
+  .dv5-priority-grid { grid-template-columns:repeat(2,1fr); }
+  /* Pipeline flow: horizontal scroll */
+  .dv5-pipeline-flow { overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; }
+  .dv5-flow-step { min-width:80px; flex-shrink:0; }
+}
+
+/* ── mobile (< 640px) ────────────────────────────────────────────────────── */
+@media (max-width:640px) {
   #app { padding:0!important; }
   .app-layout { border-radius:0; }
-  .content-area>div { padding-left:0!important; padding-right:0!important; }
+  .content-area { padding:12px 12px 88px!important; }
   .dv5-section,.dv5-page { min-width:0; overflow-x:hidden; }
-  .dv5-page { padding:14px 14px 90px!important; }
-  .dv5-page-head { margin-bottom:14px; gap:10px; }
-  .dv5-page-head h1 { font-size:20px; }
-  .dv5-kanban { grid-template-columns:1fr 1fr; }
-  .dv5-priority-grid,.dv5-kpi-grid,.dv5-stat-grid,.dv5-file-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
-  .dv5-tx-row { grid-template-columns:90px 1fr auto 32px; gap:8px; padding:12px 14px; }
-  .dv5-date-presets { gap:3px; }
-  /* Last odd card spans full width */
+  .dv5-page { padding:12px 12px 88px!important; }
+  .dv5-page-head { margin-bottom:12px; gap:8px; }
+  .dv5-page-head h1 { font-size:18px; }
+  /* everything collapses to 1-col */
+  .dv5-two-col,.dv5-three-col { grid-template-columns:1fr!important; }
+  .dv5-profile-grid { grid-template-columns:1fr!important; }
+  .dv5-profile-vitals { grid-template-columns:1fr 1fr; }
+  .dv5-kpi-grid,.dv5-stat-grid,.dv5-file-grid { grid-template-columns:1fr 1fr; gap:8px; }
+  .dv5-priority-grid { grid-template-columns:1fr 1fr; gap:8px; }
+  /* last odd card spans full width */
   .dv5-priority-grid > *:last-child:nth-child(odd),
-  .dv5-kpi-grid > *:last-child:nth-child(odd) { grid-column: 1 / -1; flex-direction:row; align-items:center; gap:14px; }
+  .dv5-kpi-grid > *:last-child:nth-child(odd) { grid-column:1/-1; flex-direction:row; align-items:center; gap:12px; }
   .dv5-priority-grid > *:last-child:nth-child(odd) .dv5-priority-icon,
   .dv5-kpi-grid > *:last-child:nth-child(odd) .dv5-kpi-icon { margin-bottom:0; }
   .dv5-priority-grid > *:last-child:nth-child(odd) strong { margin-bottom:0; }
+  .dv5-tx-row { grid-template-columns:80px 1fr auto 28px; gap:6px; padding:10px 12px; }
+  .dv5-date-presets { gap:3px; }
   .dv5-profile-hero { grid-template-columns:1fr; }
   .dv5-profile-stage { align-items:flex-start; text-align:left; }
-  .dv5-profile-vitals { grid-template-columns:repeat(2,1fr); }
-  .dv5-toolbar { flex-direction:column; align-items:stretch; }
+  .dv5-progress-steps { grid-template-columns:repeat(3,1fr); gap:6px; }
+  .dv5-toolbar { flex-direction:column; align-items:stretch; gap:8px; }
   .dv5-toolbar-left,.dv5-toolbar-right { flex-wrap:wrap; }
   .dv5-input,.dv5-select { width:100%; }
-  .dv5-two-col,.dv5-three-col { grid-template-columns:1fr!important; }
   .dv5-head-actions { flex-wrap:wrap; width:100%; }
-  .dv5-head-actions .dv5-btn { flex:1; justify-content:center; min-width:120px; }
-  /* Cards: tighter on mobile, no horizontal overflow */
-  .dv5-card { padding:14px; margin-bottom:10px; }
-  .dv5-kpi { padding:14px; }
-  .dv5-priority { padding:14px; }
-  /* Table: horizontal scroll */
-  .dv5-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .dv5-table { min-width:480px; }
-  /* Pipeline flow: horizontal scroll on mobile */
+  .dv5-head-actions .dv5-btn { flex:1; justify-content:center; min-width:100px; }
+  .dv5-card { padding:12px; margin-bottom:8px; }
+  .dv5-kpi { padding:12px; }
+  .dv5-priority { padding:12px; }
+  .dv5-kanban { grid-template-columns:1fr; }
   .dv5-pipeline-flow { overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; }
   .dv5-flow-step { min-width:64px; flex-shrink:0; }
-  /* Kanban: single column on small */
-  .dv5-kanban { grid-template-columns:1fr; }
+  .dv5-card-pipeline { padding:12px; }
+  .dv5-table { min-width:440px; }
+  .dv5-modal-overlay { padding:10px 8px; }
 }
-@media (max-width:480px) {
-  #app { padding:0!important; }
-  .content-area>div { padding-left:0!important; padding-right:0!important; }
-  .dv5-page { padding:10px 10px 90px!important; }
-  .dv5-priority-grid,.dv5-kpi-grid { gap:8px; }
-  .dv5-card-pipeline { padding:14px 12px; }
+
+/* ── small phone (< 420px) ───────────────────────────────────────────────── */
+@media (max-width:420px) {
+  .dv5-page { padding:10px 10px 88px!important; }
+  .dv5-kpi-grid,.dv5-priority-grid { gap:6px; }
+  .dv5-table { min-width:380px; }
 }
   `;
 
