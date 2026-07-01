@@ -2599,7 +2599,55 @@ export function injectDepsToD5(deps) {
 .dv5-profile-avatar,
 .dv5-avatar { background:var(--dreco-ink); color:#fff; }
 
-/* Responsive */
+/* Rounded corner pass */
+.dv5-card,
+.dv5-table-card,
+.dv5-kpi,
+.dv5-priority,
+.dv5-stat-card,
+.dv5-file-card,
+.dv5-col,
+.dv5-profile-hero,
+.dv5-profile-panel {
+  border-radius:22px!important;
+}
+.dv5-pipe-card,
+.dv5-action-card:hover,
+.dv5-task-item,
+.dv5-activity-item,
+.dv5-check-row,
+.dv5-vital-card,
+.dv5-input,
+.dv5-select,
+.dv5-btn,
+.dv5-btn-icon,
+.dv5-action-btn,
+.dv5-bulk-bar,
+.dv5-view-tabs,
+.dv5-pd {
+  border-radius:18px!important;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────
+   Breakpoints (match index.html):
+     ≥ 1100px  full desktop  — sidebar 224px, 3-col grids, 6-step progress
+     860–1100  compact       — sidebar icon-only (64px), 3-col still fits
+     640–860   tablet        — sidebar hidden/hamburger, 2-col grids
+     < 640     mobile        — bottom-nav, 1-col grids
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Tables always scroll horizontally — applies at every width.
+   display:table!important overrides the index.html mobile rule that sets
+   table{display:block} for legacy card-style tables — dv5 tables must stay
+   as real tables so their column layout is preserved inside the scroll wrapper. */
+.dv5-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; }
+.dv5-table { min-width:560px; display:table!important; }
+.dv5-table thead { display:table-header-group!important; }
+.dv5-table tbody { display:table-row-group!important; }
+.dv5-table tr { display:table-row!important; background:transparent!important; border-radius:0!important; margin:0!important; padding:0!important; }
+.dv5-table td,.dv5-table th { display:table-cell!important; width:auto!important; }
+
+/* ── compact desktop (sidebar shrinks to icons, content stays wide) ──────── */
 @media (max-width:1100px) {
   .dv5-kanban { grid-template-columns:repeat(3,1fr); }
   .dv5-profile-grid,.dv5-two-col,.dv5-three-col { grid-template-columns:1fr!important; }
