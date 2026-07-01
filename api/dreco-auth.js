@@ -100,11 +100,41 @@ async function createAuthUser({ username, password, display, role, companyId, co
   return accountFromUser(user);
 }
 
+// ── Rate limiter ──────────────────────────────────────────────────────────────
+// Per-IP: max 10 auth requests per minute to slow credential stuffing.
+// Module-level state (per serverless instance); good enough for low-volume API.
+const _authHits = new Map();
+function isAuthRateLimited(ip) {
+  const now = Date.now();
+  const window = 60_000;
+  const limit = 10;
+  const entry = _authHits.get(ip) || { count: 0, start: now };
+  if (now - entry.start > window) { entry.count = 0; entry.start = now; }
+  entry.count += 1;
+  _authHits.set(ip, entry);
+  return entry.count > limit;
+}
+
+function getAllowedOrigin(req) {
+  const configured = process.env.DRECO_ALLOWED_ORIGIN;
+  if (configured) return configured;
+  const origin = req.headers.origin || '';
+  if (/^https:\/\/([a-z0-9-]+\.)?vercel\.app$/.test(origin)) return origin;
+  return 'null';
+}
+
 module.exports = async function handler(req, res) {
-  res.setHeader('access-control-allow-methods', 'POST, OPTIONS');
-  res.setHeader('access-control-allow-headers', 'content-type, authorization');
+  const origin = getAllowedOrigin(req);
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type, authorization');
+  res.setHeader('Vary', 'Origin');
+
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (isAuthRateLimited(ip)) return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
@@ -126,9 +156,14 @@ module.exports = async function handler(req, res) {
 
     if (!/^[a-z0-9._-]{3,32}$/.test(username)) throw new Error('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
     if (!display) throw new Error('Display name is required.');
-    if (password.length < 6) throw new Error('Password must be at least 6 characters.');
+    if (password.length < 8) throw new Error('Password must be at least 8 characters.');
 
     if (action === 'create_workspace') {
+      // Require a signup secret if one is configured — prevents open registration
+      const signupSecret = process.env.DRECO_SIGNUP_SECRET;
+      if (signupSecret && String(body.signupSecret || '').trim() !== signupSecret) {
+        throw new Error('Invalid signup token. Contact the administrator.');
+      }
       let companyName = String(body.companyName || '').trim();
       if (!companyName) throw new Error('Company name is required.');
       const companyId = slugify(companyName);

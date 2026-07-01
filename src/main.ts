@@ -460,7 +460,7 @@ async function persistWorkspaceCountries(countries) {
   });
   setCurrentUser({...currentUser, generalJobsCountries: clean});
   setCurrentWorkspace(currentUser);
-  safeLocalSet('dr_user', JSON.stringify(currentUser));
+  _saveSession(currentUser);
   await saveStaffAccounts();
 }
 
@@ -846,16 +846,30 @@ function hideSignup() {
 // ── Centralised post-login entry point ───────────────────────────────────────
 // Replaces three near-identical blocks that previously existed in doLogin,
 // doSignup, and the DOMContentLoaded session-restore handler.
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+function _saveSession(user) {
+  safeLocalSet('dr_user', JSON.stringify({ ...user, _exp: Date.now() + SESSION_TTL_MS }));
+}
+
 function enterApp(user) {
   setCurrentUser(user);
   setCurrentWorkspace(currentUser);
-  safeLocalSet('dr_user', JSON.stringify(currentUser));
+  _saveSession(currentUser);
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('bottom-nav')?.classList.add('visible');
   setUserDisplay(currentUser.display, currentUser.role);
   appStorageMode = db ? 'cloud' : 'local';
   loadAllData();
+}
+
+// Refresh expiry on user activity (throttled to once per minute)
+let _sessionTouchTimer = 0;
+function _touchSession() {
+  if (!currentUser) return;
+  clearTimeout(_sessionTouchTimer);
+  _sessionTouchTimer = setTimeout(() => _saveSession(currentUser), 60_000) as unknown as number;
 }
 
 
@@ -873,7 +887,7 @@ async function doSignup() {
   const companyId=slugify(companyName);
   const generalJobsCountries=[...DEFAULT_COMPANY.generalJobsCountries];
   if(STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
-  if(password.length<6) return fail('Password must be at least 6 characters.');
+  if(password.length<8) return fail('Password must be at least 8 characters.');
   let authBacked = false;
   if (db?.auth) {
     try {
@@ -917,31 +931,36 @@ async function doSignup() {
 }
 
 // ── Login rate limiter ────────────────────────────────────────────────────────
-// Tracks failed attempts in memory per username. After MAX_FAILURES attempts
-// the account is locked for LOCKOUT_MS. State lives only in this session so a
-// hard refresh resets it – sufficient to block automated scripts without
-// requiring server-side state.
-const _loginAttempts = {};
-const MAX_FAILURES   = 5;
-const LOCKOUT_MS     = 30 * 1000; // 30 seconds
+// Persists failed attempts in localStorage so a page refresh does not reset
+// the lockout. Lockout grows with successive violations (30s → 5m → 15m).
+const MAX_FAILURES = 5;
+const LOCKOUT_TIERS = [30_000, 5 * 60_000, 15 * 60_000]; // ms per violation tier
 
+function _laKey(username) { return '_la_' + username; }
+function _getAttempts(username) {
+  try { return JSON.parse(safeLocalGet(_laKey(username)) || '{}'); } catch { return {}; }
+}
+function _saveAttempts(username, entry) {
+  safeLocalSet(_laKey(username), JSON.stringify(entry));
+}
 function _recordLoginFailure(username) {
-  const entry = _loginAttempts[username] || { count: 0, lockedUntil: 0 };
-  entry.count += 1;
-  if (entry.count >= MAX_FAILURES) entry.lockedUntil = Date.now() + LOCKOUT_MS;
-  _loginAttempts[username] = entry;
+  const entry = _getAttempts(username);
+  entry.count = (entry.count || 0) + 1;
+  const tier = Math.min(entry.count - MAX_FAILURES, LOCKOUT_TIERS.length - 1);
+  if (entry.count >= MAX_FAILURES) entry.lockedUntil = Date.now() + LOCKOUT_TIERS[Math.max(0, tier)];
+  _saveAttempts(username, entry);
 }
 function _checkLoginLockout(username) {
-  const entry = _loginAttempts[username];
-  if (!entry) return null;
-  if (entry.lockedUntil && Date.now() < entry.lockedUntil) {
-    const secsLeft = Math.ceil((entry.lockedUntil - Date.now()) / 1000);
-    return `Too many failed attempts. Try again in ${secsLeft} seconds.`;
-  }
-  return null;
+  const entry = _getAttempts(username);
+  if (!entry.lockedUntil || Date.now() >= entry.lockedUntil) return null;
+  const secsLeft = Math.ceil((entry.lockedUntil - Date.now()) / 1000);
+  const minsLeft = Math.ceil(secsLeft / 60);
+  return secsLeft > 90
+    ? `Too many failed attempts. Try again in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}.`
+    : `Too many failed attempts. Try again in ${secsLeft} seconds.`;
 }
 function _clearLoginFailures(username) {
-  delete _loginAttempts[username];
+  safeLocalRemove(_laKey(username));
 }
 
 async function doLogin() {
@@ -1060,6 +1079,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
+      if (parsed._exp && Date.now() > parsed._exp) throw new Error('Session expired');
       const account = STAFF_ACCOUNTS[parsed.username];
       if (!account) throw new Error('Unknown saved user');
       enterApp({
@@ -1072,6 +1092,17 @@ window.addEventListener('DOMContentLoaded', async () => {
       });
     } catch { safeLocalRemove('dr_user'); }
   }
+  // Extend session on activity; check expiry when tab becomes visible again
+  ['click','keydown','touchstart'].forEach(ev =>
+    document.addEventListener(ev, _touchSession, { passive: true })
+  );
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || !currentUser) return;
+    try {
+      const p = JSON.parse(safeLocalGet('dr_user') || '{}');
+      if (p._exp && Date.now() > p._exp) doLogout();
+    } catch { doLogout(); }
+  });
   rebuildStageSelects();
   // Delegated listener for docs buttons – avoids interpolating candidate names
   // into onclick attribute strings (XSS risk).
@@ -1750,7 +1781,7 @@ async function createCompanyUser() {
   if (!display) return fail('Display name is required.');
   if (!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
   if (STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
-  if (password.length < 6) return fail('Temporary password must be at least 6 characters.');
+  if (password.length < 6) return fail('Temporary password must be at least 8 characters.');
   if (db?.auth) {
     try {
       const { data: sessionData } = await db.auth.getSession();
@@ -1805,7 +1836,7 @@ async function saveWorkspaceSettings(){
   });
   setCurrentUser({...currentUser,companyName});
   setCurrentWorkspace(currentUser);
-  safeLocalSet('dr_user',JSON.stringify(currentUser));
+  _saveSession(currentUser);
   await saveStaffAccounts();
   setUserDisplay(currentUser.display,currentUser.role);
   window.renderDash?.(); renderLB(); renderReports();
@@ -2575,7 +2606,7 @@ async function submitQuickUser(){
   if(!display) return fail('Display name is required.');
   if(!/^[a-z0-9._-]{3,32}$/.test(username)) return fail('Username must be 3-32 letters, numbers, dots, underscores, or hyphens.');
   if(STAFF_ACCOUNTS[username]) return fail('That username is already taken.');
-  if(password.length<6) return fail('Temporary password must be at least 6 characters.');
+  if(password.length<8) return fail('Temporary password must be at least 8 characters.');
   STAFF_ACCOUNTS[username]=normalizeAccount(username,{role,display,companyId:getCompanyId(),companyName:getCompanyName(),generalJobsCountries:getGeneralCountries()});
   try{ await setAccountPassword(STAFF_ACCOUNTS[username],password); await saveStaffAccounts(); }
   catch(e){ delete STAFF_ACCOUNTS[username]; return fail(e.message||'User could not be created.'); }
@@ -3539,7 +3570,7 @@ async function saveProfileChanges() {
     }
     if (!passwordCheck.ok) { showMsg('Current password is incorrect.', 'err'); return; }
     if (!newPw) { showMsg('Enter a new password.', 'err'); return; }
-    if (newPw.length < 6) { showMsg('New password must be at least 6 characters.', 'err'); return; }
+    if (newPw.length < 6) { showMsg('New password must be at least 8 characters.', 'err'); return; }
     if (newPw !== confirmPw) { showMsg('New passwords do not match.', 'err'); return; }
     try {
       await setAccountPassword(STAFF_ACCOUNTS[currentUser.username], newPw);
@@ -3550,7 +3581,7 @@ async function saveProfileChanges() {
   }
 
   if (!changed) { showMsg('No changes to save.', 'err'); return; }
-  safeLocalSet('dr_user', JSON.stringify(currentUser));
+  _saveSession(currentUser);
   await saveStaffAccounts();
   showMsg('Changes saved successfully.', 'ok');
   // clear sensitive fields
